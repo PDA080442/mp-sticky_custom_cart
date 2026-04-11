@@ -7,12 +7,13 @@
 
 namespace MpStickyCustomCart\Admin;
 
+use MpStickyCustomCart\Core\Config\FeatureFlagsDefaults;
 use MpStickyCustomCart\Core\Constants;
 
 defined( 'ABSPATH' ) || exit;
 
 /**
- * Registers `admin_init` settings sections/fields (UI built in admin phase).
+ * Registers options, sanitizers, and defaults for the Settings API.
  */
 final class SettingsApiHooks {
 
@@ -25,17 +26,15 @@ final class SettingsApiHooks {
 		do_action( 'mp_sticky_custom_cart_settings_api_hooks_registered' );
 	}
 
-	/**
-	 * Register option groups (sanitizers added with fields later).
-	 */
 	public static function register_settings() {
 		register_setting(
 			Constants::SLUG . '_settings',
 			Constants::OPTION_SETTINGS,
 			array(
 				'type'              => 'array',
-				'sanitize_callback' => array( self::class, 'sanitize_settings_stub' ),
+				'sanitize_callback' => array( SettingsSanitizer::class, 'sanitize_settings' ),
 				'default'           => array(),
+				'show_in_rest'      => false,
 			)
 		);
 
@@ -44,8 +43,9 @@ final class SettingsApiHooks {
 			Constants::OPTION_FEATURE_FLAGS,
 			array(
 				'type'              => 'array',
-				'sanitize_callback' => array( self::class, 'sanitize_flags_stub' ),
-				'default'           => array(),
+				'sanitize_callback' => array( SettingsSanitizer::class, 'sanitize_feature_flags' ),
+				'default'           => FeatureFlagsDefaults::get(),
+				'show_in_rest'      => false,
 			)
 		);
 
@@ -53,22 +53,6 @@ final class SettingsApiHooks {
 		 * Fires after base settings are registered.
 		 */
 		do_action( 'mp_sticky_custom_cart_register_settings' );
-	}
-
-	/**
-	 * @param mixed $value Raw value.
-	 * @return array<string, mixed>
-	 */
-	public static function sanitize_settings_stub( $value ) {
-		return is_array( $value ) ? $value : array();
-	}
-
-	/**
-	 * @param mixed $value Raw value.
-	 * @return array<string, bool>
-	 */
-	public static function sanitize_flags_stub( $value ) {
-		return is_array( $value ) ? $value : array();
 	}
 
 	/**
