@@ -8,16 +8,17 @@
 namespace MpStickyCustomCart\Frontend;
 
 use MpStickyCustomCart\Core\FeatureFlagProvider;
+use MpStickyCustomCart\Core\OptionResolver;
 
 defined( 'ABSPATH' ) || exit;
 
 /**
- * Localizes `mpSccData.flags` for {@see assets/js/frontend.js}.
+ * Localizes `mpSccData` (flags + labels) for {@see assets/js/frontend.js}.
  */
 final class FrontendFlagResolver {
 
 	/**
-	 * Attach localized flag map to an enqueued script handle.
+	 * Attach runtime data for storefront scripts.
 	 *
 	 * @param string $handle Registered script handle (e.g. {@see FrontendAssetsHooks::HANDLE_SCRIPT}).
 	 */
@@ -27,7 +28,8 @@ final class FrontendFlagResolver {
 			$handle,
 			'mpSccData',
 			array(
-				'flags' => $provider->for_js(),
+				'flags'  => $provider->for_js(),
+				'labels' => OptionResolver::get_labels(),
 			)
 		);
 	}

@@ -119,12 +119,16 @@ final class OptionResolver {
 			$merged[ $k ] = is_string( $v ) ? $v : '';
 		}
 
+		$merged = LabelResolver::fill_empty_with_defaults( $merged );
+
 		/**
-		 * Filters merged UI labels.
+		 * Filters the full labels map (bulk overrides, e.g. switch locale bundle).
 		 *
-		 * @param array<string, string> $merged
+		 * @param array<string, string> $merged Labels after empty-string fallbacks.
 		 */
-		self::$labels_cache = apply_filters( 'mp_sticky_custom_cart_labels', $merged );
+		$merged = apply_filters( 'mp_sticky_custom_cart_labels', $merged );
+
+		self::$labels_cache = LabelResolver::apply_per_key_filters( $merged );
 
 		return self::$labels_cache;
 	}
@@ -162,7 +166,7 @@ final class OptionResolver {
 	 */
 	public static function get_label( $key, $default = '' ) {
 		$labels = self::get_labels();
-		if ( ! array_key_exists( $key, $labels ) || '' === $labels[ $key ] ) {
+		if ( ! array_key_exists( $key, $labels ) ) {
 			return (string) $default;
 		}
 		return $labels[ $key ];

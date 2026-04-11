@@ -14,4 +14,14 @@
 		var f = window.mpSccData && window.mpSccData.flags;
 		return !!(f && Object.prototype.hasOwnProperty.call(f, key) && f[key]);
 	};
+
+	/**
+	 * Resolved UI label (same as PHP {@see OptionResolver::get_label}).
+	 * @param {string} key
+	 * @returns {string}
+	 */
+	window.mpScc.label = function (key) {
+		var l = window.mpSccData && window.mpSccData.labels;
+		return l && Object.prototype.hasOwnProperty.call(l, key) ? String(l[key]) : '';
+	};
 })(window);
