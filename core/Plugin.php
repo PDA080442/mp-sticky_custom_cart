@@ -21,6 +21,8 @@ final class Plugin {
 		register_activation_hook( MP_STICKY_CUSTOM_CART_FILE, array( Activator::class, 'activate' ) );
 		register_deactivation_hook( MP_STICKY_CUSTOM_CART_FILE, array( Deactivator::class, 'deactivate' ) );
 
+		OptionMigrationHandler::register();
+
 		add_action( 'plugins_loaded', array( self::class, 'init' ), 10 );
 	}
 

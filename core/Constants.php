@@ -36,6 +36,11 @@ final class Constants {
 	public const STORAGE_PREFIX = 'mp_scc_';
 
 	/**
+	 * Stored schema / migration marker (semver string, aligned with plugin releases).
+	 */
+	public const OPTION_DB_VERSION = self::STORAGE_PREFIX . 'db_version';
+
+	/**
 	 * Main plugin settings stored in wp_options (typically a single array).
 	 */
 	public const OPTION_SETTINGS = self::STORAGE_PREFIX . 'settings';
