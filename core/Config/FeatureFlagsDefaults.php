@@ -11,6 +11,13 @@ defined( 'ABSPATH' ) || exit;
 
 /**
  * All keys must stay stable for migrations and JS localization.
+ *
+ * Registry (dp.md / feature rollout):
+ * - ProductImageAddToCart — клик по изображению добавляет в корзину
+ * - StickyCartEnabled — sticky-панель
+ * - StickyDrawerEnabled — drawer корзины
+ * - HoverMoreInfoEnabled — hover «подробнее»
+ * - WishlistIconIntegrationEnabled — интеграция heart-иконки
  */
 final class FeatureFlagsDefaults {
 

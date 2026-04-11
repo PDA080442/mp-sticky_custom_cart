@@ -7,7 +7,7 @@
 
 namespace MpStickyCustomCart\Admin;
 
-use MpStickyCustomCart\Core\Config\FeatureFlagsDefaults;
+use MpStickyCustomCart\Core\Config\FeatureFlagDefinitions;
 use MpStickyCustomCart\Core\Constants;
 use MpStickyCustomCart\Core\OptionResolver;
 
@@ -265,16 +265,12 @@ final class SettingsPage {
 		echo '<h3>' . esc_html__( 'Feature flags', 'mp-sticky-custom-cart' ) . '</h3>';
 		echo '<table class="form-table" role="presentation"><tbody>';
 
-		$map = array(
-			FeatureFlagsDefaults::KEY_PRODUCT_IMAGE_ADD_TO_CART         => __( 'Клик по изображению → в корзину', 'mp-sticky-custom-cart' ),
-			FeatureFlagsDefaults::KEY_STICKY_CART_ENABLED               => __( 'Sticky-панель', 'mp-sticky-custom-cart' ),
-			FeatureFlagsDefaults::KEY_STICKY_DRAWER_ENABLED             => __( 'Drawer корзины', 'mp-sticky-custom-cart' ),
-			FeatureFlagsDefaults::KEY_HOVER_MORE_INFO_ENABLED           => __( 'Кнопка «Подробнее» (hover)', 'mp-sticky-custom-cart' ),
-			FeatureFlagsDefaults::KEY_WISHLIST_ICON_INTEGRATION_ENABLED => __( 'Интеграция сердечка', 'mp-sticky-custom-cart' ),
-		);
-
-		foreach ( $map as $key => $label ) {
-			self::field_flag_checkbox( $fg, $key, $label, ! empty( $f[ $key ] ) );
+		$labels = FeatureFlagDefinitions::labels();
+		$hints  = FeatureFlagDefinitions::descriptions();
+		foreach ( FeatureFlagDefinitions::ordered_keys() as $key ) {
+			$label = isset( $labels[ $key ] ) ? $labels[ $key ] : $key;
+			$hint  = isset( $hints[ $key ] ) ? $hints[ $key ] : '';
+			self::field_flag_checkbox( $fg, $key, $label, ! empty( $f[ $key ] ), $hint );
 		}
 
 		echo '</tbody></table>';
@@ -313,9 +309,10 @@ final class SettingsPage {
 	}
 
 	/**
-	 * @param string $fg Feature flags option name.
+	 * @param string $fg          Feature flags option name.
+	 * @param string $description Help text under the control.
 	 */
-	private static function field_flag_checkbox( $fg, $key, $label, $checked ) {
+	private static function field_flag_checkbox( $fg, $key, $label, $checked, $description = '' ) {
 		$name = sprintf( '%s[%s]', $fg, $key );
 		echo '<tr><th scope="row">' . esc_html( $label ) . '</th><td>';
 		printf( '<input type="hidden" name="%s" value="0" />', esc_attr( $name ) );
@@ -325,6 +322,9 @@ final class SettingsPage {
 			checked( $checked, true, false ),
 			esc_html__( 'Включено', 'mp-sticky-custom-cart' )
 		);
+		if ( '' !== $description ) {
+			echo '<p class="description">' . esc_html( $description ) . '</p>';
+		}
 		echo '</td></tr>';
 	}
 
