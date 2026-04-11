@@ -7,6 +7,8 @@
 
 namespace MpStickyCustomCart\Frontend;
 
+use MpStickyCustomCart\Core\PluginPaths;
+
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -30,6 +32,16 @@ final class FrontendAssetsHooks {
 	 * Enqueue or register storefront assets.
 	 */
 	public static function enqueue() {
+		wp_enqueue_script(
+			self::HANDLE_SCRIPT,
+			PluginPaths::url( 'assets/js/frontend.js' ),
+			array(),
+			MP_STICKY_CUSTOM_CART_ASSET_VERSION,
+			true
+		);
+
+		FrontendFlagResolver::localize( self::HANDLE_SCRIPT );
+
 		/**
 		 * Fires before frontend assets are enqueued.
 		 */

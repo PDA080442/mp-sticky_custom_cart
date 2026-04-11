@@ -32,6 +32,11 @@ final class AdminAssetsHooks {
 	 * @param string $hook_suffix Current admin page hook.
 	 */
 	public static function enqueue( $hook_suffix ) {
+		$page_hook = SettingsPage::get_hook_suffix();
+		if ( '' === $page_hook || $hook_suffix !== $page_hook ) {
+			return;
+		}
+
 		/**
 		 * Fires before admin assets are enqueued.
 		 *

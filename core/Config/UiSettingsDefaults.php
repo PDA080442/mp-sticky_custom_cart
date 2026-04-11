@@ -36,15 +36,27 @@ final class UiSettingsDefaults {
 				'padding_y_mobile_px'        => 12,
 				'drawer_max_height_vh'       => 55,
 				'drawer_toggle_duration_ms'  => 260,
+				'drawer_toggle_easing'       => 'cubic-bezier(0.4, 0, 0.2, 1)',
 				'quantity_debounce_ms'       => 320,
 				'summary_font_size_px'       => 15,
 				'summary_font_weight'        => 600,
 				'button_font_size_px'        => 14,
+				'button_font_weight'         => 600,
 			),
 			'wishlist_ui' => array(
-				'heart_reserve_top_px'    => 10,
-				'heart_reserve_right_px'  => 10,
+				'heart_reserve_top_px'       => 10,
+				'heart_reserve_right_px'     => 10,
 				'overlay_clearance_heart_px' => 8,
+			),
+			'styles'      => array(
+				'color_text_primary'        => '#1a1a1a',
+				'color_surface_tint'        => '#ffffff',
+				'color_button_primary'      => '#111111',
+				'color_button_primary_text' => '#ffffff',
+			),
+			'diagnostics' => array(
+				'client_error_logging' => true,
+				'log_retention_days'   => 14,
 			),
 		);
 	}
