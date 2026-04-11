@@ -15,3 +15,18 @@
  */
 
 defined( 'ABSPATH' ) || exit;
+
+// Keep in sync with the Version header above.
+define( 'MP_STICKY_CUSTOM_CART_VERSION', '0.1.0' );
+define( 'MP_STICKY_CUSTOM_CART_ASSET_VERSION', MP_STICKY_CUSTOM_CART_VERSION );
+
+define( 'MP_STICKY_CUSTOM_CART_FILE', __FILE__ );
+define( 'MP_STICKY_CUSTOM_CART_PATH', __DIR__ );
+define( 'MP_STICKY_CUSTOM_CART_URL', plugin_dir_url( __FILE__ ) );
+define( 'MP_STICKY_CUSTOM_CART_BASENAME', plugin_basename( __FILE__ ) );
+
+require_once __DIR__ . '/core/Autoloader.php';
+
+\MpStickyCustomCart\Core\Autoloader::register( __DIR__ );
+
+\MpStickyCustomCart\Core\Plugin::register();
