@@ -78,9 +78,21 @@ final class OptionMigrationHandler {
 			$bundle['labels'] = UiLabelsDefaults::get_raw();
 			update_option( Constants::OPTION_SETTINGS, $bundle, false );
 		} else {
-			// Ensure labels key exists for older partial saves.
+			$defaults = UiSettingsDefaults::get();
+			$dirty    = false;
 			if ( ! isset( $settings['labels'] ) || ! is_array( $settings['labels'] ) ) {
 				$settings['labels'] = UiLabelsDefaults::get_raw();
+				$dirty              = true;
+			}
+			foreach ( array( 'styles', 'diagnostics' ) as $block ) {
+				if ( ! isset( $settings[ $block ] ) || ! is_array( $settings[ $block ] ) ) {
+					if ( isset( $defaults[ $block ] ) && is_array( $defaults[ $block ] ) ) {
+						$settings[ $block ] = $defaults[ $block ];
+						$dirty              = true;
+					}
+				}
+			}
+			if ( $dirty ) {
 				update_option( Constants::OPTION_SETTINGS, $settings, false );
 			}
 		}

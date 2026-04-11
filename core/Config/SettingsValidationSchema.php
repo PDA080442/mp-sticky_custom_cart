@@ -1,0 +1,104 @@
+<?php
+/**
+ * Declarative validation rules for OPTION_SETTINGS and OPTION_FEATURE_FLAGS.
+ *
+ * @package MpStickyCustomCart
+ */
+
+namespace MpStickyCustomCart\Core\Config;
+
+defined( 'ABSPATH' ) || exit;
+
+/**
+ * Each field: type + optional bounds; used by {@see \MpStickyCustomCart\Admin\SettingsSanitizer}.
+ */
+final class SettingsValidationSchema {
+
+	/**
+	 * Nested schema for {@see Constants::OPTION_SETTINGS}.
+	 *
+	 * @return array<string, array<string, array<string, mixed>>>
+	 */
+	public static function get_settings_schema() {
+		return array(
+			'catalog'     => array(
+				'hover_overlay_mobile_always' => array(
+					'type' => 'boolean',
+				),
+				'hover_animation_duration_ms' => array(
+					'type' => 'integer',
+					'min'  => 0,
+					'max'  => 10000,
+				),
+				'hover_animation_easing'      => array(
+					'type'        => 'text',
+					'max_length'  => 120,
+				),
+				'hover_motion_preset'       => array(
+					'type' => 'text',
+					'oneof' => array( 'fade_slide', 'fade', 'slide' ),
+				),
+			),
+			'sticky_cart' => array(
+				'z_index'                   => array( 'type' => 'integer', 'min' => 1, 'max' => 9999999 ),
+				'surface_backdrop_blur_px'  => array( 'type' => 'integer', 'min' => 0, 'max' => 100 ),
+				'surface_background_alpha'  => array( 'type' => 'float', 'min' => 0, 'max' => 1 ),
+				'border_radius_px'          => array( 'type' => 'integer', 'min' => 0, 'max' => 100 ),
+				'padding_x_desktop_px'      => array( 'type' => 'integer', 'min' => 0, 'max' => 200 ),
+				'padding_y_desktop_px'      => array( 'type' => 'integer', 'min' => 0, 'max' => 200 ),
+				'padding_x_mobile_px'       => array( 'type' => 'integer', 'min' => 0, 'max' => 200 ),
+				'padding_y_mobile_px'       => array( 'type' => 'integer', 'min' => 0, 'max' => 200 ),
+				'drawer_max_height_vh'      => array( 'type' => 'integer', 'min' => 10, 'max' => 100 ),
+				'drawer_toggle_duration_ms' => array( 'type' => 'integer', 'min' => 0, 'max' => 5000 ),
+				'quantity_debounce_ms'      => array( 'type' => 'integer', 'min' => 0, 'max' => 5000 ),
+				'summary_font_size_px'      => array( 'type' => 'integer', 'min' => 8, 'max' => 48 ),
+				'summary_font_weight'       => array( 'type' => 'integer', 'min' => 100, 'max' => 900 ),
+				'button_font_size_px'       => array( 'type' => 'integer', 'min' => 8, 'max' => 48 ),
+			),
+			'wishlist_ui' => array(
+				'heart_reserve_top_px'       => array( 'type' => 'integer', 'min' => 0, 'max' => 200 ),
+				'heart_reserve_right_px'     => array( 'type' => 'integer', 'min' => 0, 'max' => 200 ),
+				'overlay_clearance_heart_px'   => array( 'type' => 'integer', 'min' => 0, 'max' => 200 ),
+			),
+			'styles'      => array(
+				'color_text_primary'        => array( 'type' => 'color' ),
+				'color_surface_tint'        => array( 'type' => 'color' ),
+				'color_button_primary'      => array( 'type' => 'color' ),
+				'color_button_primary_text' => array( 'type' => 'color' ),
+			),
+			'diagnostics' => array(
+				'client_error_logging' => array( 'type' => 'boolean' ),
+				'log_retention_days'   => array( 'type' => 'integer', 'min' => 1, 'max' => 365 ),
+			),
+			'labels'      => array(
+				'more_info'          => array( 'type' => 'text', 'max_length' => 500 ),
+				'out_of_stock'       => array( 'type' => 'text', 'max_length' => 500 ),
+				'clear_cart'         => array( 'type' => 'text', 'max_length' => 500 ),
+				'checkout'           => array( 'type' => 'text', 'max_length' => 500 ),
+				'variation_required' => array( 'type' => 'text', 'max_length' => 500 ),
+				'drawer_empty'       => array( 'type' => 'text', 'max_length' => 500 ),
+			),
+		);
+	}
+
+	/**
+	 * Feature flag keys and types (all boolean).
+	 *
+	 * @return array<string, array{type:string}>
+	 */
+	public static function get_flags_schema() {
+		return array(
+			FeatureFlagsDefaults::KEY_PRODUCT_IMAGE_ADD_TO_CART         => array( 'type' => 'boolean' ),
+			FeatureFlagsDefaults::KEY_STICKY_CART_ENABLED               => array( 'type' => 'boolean' ),
+			FeatureFlagsDefaults::KEY_STICKY_DRAWER_ENABLED             => array( 'type' => 'boolean' ),
+			FeatureFlagsDefaults::KEY_HOVER_MORE_INFO_ENABLED           => array( 'type' => 'boolean' ),
+			FeatureFlagsDefaults::KEY_WISHLIST_ICON_INTEGRATION_ENABLED => array( 'type' => 'boolean' ),
+		);
+	}
+
+	/**
+	 * Not instantiable.
+	 */
+	private function __construct() {
+	}
+}

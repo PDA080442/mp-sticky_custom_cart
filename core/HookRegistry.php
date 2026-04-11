@@ -9,6 +9,7 @@ namespace MpStickyCustomCart\Core;
 
 use MpStickyCustomCart\Admin\AdminAssetsHooks;
 use MpStickyCustomCart\Admin\SettingsApiHooks;
+use MpStickyCustomCart\Admin\SettingsPage;
 use MpStickyCustomCart\Frontend\AddedToCartHooks;
 use MpStickyCustomCart\Frontend\AjaxEndpointsHooks;
 use MpStickyCustomCart\Frontend\FrontendAssetsHooks;
@@ -30,6 +31,7 @@ final class HookRegistry {
 		StickyCartRenderHooks::register();
 		AjaxEndpointsHooks::register();
 		SettingsApiHooks::register();
+		SettingsPage::register();
 		ErrorLoggingHooks::register();
 		AddedToCartHooks::register();
 
