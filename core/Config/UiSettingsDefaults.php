@@ -36,10 +36,12 @@ final class UiSettingsDefaults {
 				'padding_y_mobile_px'        => 12,
 				'drawer_max_height_vh'       => 55,
 				'drawer_toggle_duration_ms'  => 260,
+				'drawer_toggle_easing'       => 'cubic-bezier(0.4, 0, 0.2, 1)',
 				'quantity_debounce_ms'       => 320,
 				'summary_font_size_px'       => 15,
 				'summary_font_weight'        => 600,
 				'button_font_size_px'        => 14,
+				'button_font_weight'         => 600,
 			),
 			'wishlist_ui' => array(
 				'heart_reserve_top_px'       => 10,

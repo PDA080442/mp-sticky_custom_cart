@@ -50,10 +50,15 @@ final class SettingsValidationSchema {
 				'padding_y_mobile_px'       => array( 'type' => 'integer', 'min' => 0, 'max' => 200 ),
 				'drawer_max_height_vh'      => array( 'type' => 'integer', 'min' => 10, 'max' => 100 ),
 				'drawer_toggle_duration_ms' => array( 'type' => 'integer', 'min' => 0, 'max' => 5000 ),
+				'drawer_toggle_easing'      => array(
+					'type'       => 'text',
+					'max_length' => 120,
+				),
 				'quantity_debounce_ms'      => array( 'type' => 'integer', 'min' => 0, 'max' => 5000 ),
 				'summary_font_size_px'      => array( 'type' => 'integer', 'min' => 8, 'max' => 48 ),
 				'summary_font_weight'       => array( 'type' => 'integer', 'min' => 100, 'max' => 900 ),
 				'button_font_size_px'       => array( 'type' => 'integer', 'min' => 8, 'max' => 48 ),
+				'button_font_weight'        => array( 'type' => 'integer', 'min' => 100, 'max' => 900 ),
 			),
 			'wishlist_ui' => array(
 				'heart_reserve_top_px'       => array( 'type' => 'integer', 'min' => 0, 'max' => 200 ),

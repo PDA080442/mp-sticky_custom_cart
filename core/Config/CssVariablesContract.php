@@ -104,6 +104,12 @@ final class CssVariablesContract {
 				'format' => 'unit',
 			),
 			array(
+				'name'   => self::PREFIX . 'sticky-drawer-toggle-easing',
+				'path'   => 'sticky_cart.drawer_toggle_easing',
+				'suffix' => '',
+				'format' => 'raw',
+			),
+			array(
 				'name'   => self::PREFIX . 'sticky-quantity-debounce-ms',
 				'path'   => 'sticky_cart.quantity_debounce_ms',
 				'suffix' => 'ms',
@@ -126,6 +132,36 @@ final class CssVariablesContract {
 				'path'   => 'sticky_cart.button_font_size_px',
 				'suffix' => 'px',
 				'format' => 'unit',
+			),
+			array(
+				'name'   => self::PREFIX . 'sticky-button-font-weight',
+				'path'   => 'sticky_cart.button_font_weight',
+				'suffix' => '',
+				'format' => 'integer',
+			),
+			array(
+				'name'   => self::PREFIX . 'color-text-primary',
+				'path'   => 'styles.color_text_primary',
+				'suffix' => '',
+				'format' => 'color',
+			),
+			array(
+				'name'   => self::PREFIX . 'color-surface-tint',
+				'path'   => 'styles.color_surface_tint',
+				'suffix' => '',
+				'format' => 'color',
+			),
+			array(
+				'name'   => self::PREFIX . 'color-button-primary',
+				'path'   => 'styles.color_button_primary',
+				'suffix' => '',
+				'format' => 'color',
+			),
+			array(
+				'name'   => self::PREFIX . 'color-button-primary-text',
+				'path'   => 'styles.color_button_primary_text',
+				'suffix' => '',
+				'format' => 'color',
 			),
 			array(
 				'name'   => self::PREFIX . 'wishlist-heart-reserve-top',
@@ -183,6 +219,11 @@ final class CssVariablesContract {
 
 			case 'float':
 				return is_numeric( $raw ) ? (string) (float) $raw : '0';
+
+			case 'color':
+				$c = is_string( $raw ) ? trim( $raw ) : '';
+				$hex = sanitize_hex_color( $c );
+				return $hex ? $hex : '#000000';
 
 			case 'unit':
 			default:

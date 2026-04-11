@@ -92,6 +92,14 @@ final class OptionMigrationHandler {
 					}
 				}
 			}
+			if ( isset( $settings['sticky_cart'], $defaults['sticky_cart'] ) && is_array( $settings['sticky_cart'] ) && is_array( $defaults['sticky_cart'] ) ) {
+				foreach ( $defaults['sticky_cart'] as $sk => $sv ) {
+					if ( ! array_key_exists( $sk, $settings['sticky_cart'] ) ) {
+						$settings['sticky_cart'][ $sk ] = $sv;
+						$dirty                          = true;
+					}
+				}
+			}
 			if ( $dirty ) {
 				update_option( Constants::OPTION_SETTINGS, $settings, false );
 			}
