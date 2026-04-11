@@ -23,6 +23,8 @@ final class Plugin {
 
 		OptionMigrationHandler::register();
 
+		WooCommerceGate::register();
+
 		add_action( 'plugins_loaded', array( self::class, 'init' ), 10 );
 	}
 
