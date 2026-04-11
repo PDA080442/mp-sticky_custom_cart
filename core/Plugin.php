@@ -21,6 +21,8 @@ final class Plugin {
 		register_activation_hook( MP_STICKY_CUSTOM_CART_FILE, array( Activator::class, 'activate' ) );
 		register_deactivation_hook( MP_STICKY_CUSTOM_CART_FILE, array( Deactivator::class, 'deactivate' ) );
 
+		OptionMigrationHandler::register();
+
 		add_action( 'plugins_loaded', array( self::class, 'init' ), 10 );
 	}
 
@@ -29,7 +31,7 @@ final class Plugin {
 	 */
 	public static function init() {
 		load_plugin_textdomain(
-			'mp-sticky-custom-cart',
+			Constants::TEXT_DOMAIN,
 			false,
 			dirname( MP_STICKY_CUSTOM_CART_BASENAME ) . '/languages'
 		);
