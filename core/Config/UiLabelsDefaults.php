@@ -1,0 +1,59 @@
+<?php
+/**
+ * Default user-visible strings (overridable from admin; translate via text domain).
+ *
+ * @package MpStickyCustomCart
+ */
+
+namespace MpStickyCustomCart\Core\Config;
+
+defined( 'ABSPATH' ) || exit;
+
+/**
+ * Keys are stable identifiers for Settings API + JS dictionary.
+ */
+final class UiLabelsDefaults {
+
+	public const KEY_MORE_INFO           = 'more_info';
+	public const KEY_OUT_OF_STOCK        = 'out_of_stock';
+	public const KEY_CLEAR_CART          = 'clear_cart';
+	public const KEY_CHECKOUT            = 'checkout';
+	public const KEY_VARIATION_REQUIRED  = 'variation_required';
+	public const KEY_DRAWER_EMPTY        = 'drawer_empty';
+
+	/**
+	 * @return array<string, string>
+	 */
+	public static function get() {
+		return array(
+			self::KEY_MORE_INFO          => __( 'Подробнее о товаре', 'mp-sticky-custom-cart' ),
+			self::KEY_OUT_OF_STOCK       => __( 'Товара нет в наличии', 'mp-sticky-custom-cart' ),
+			self::KEY_CLEAR_CART         => __( 'Очистить корзину', 'mp-sticky-custom-cart' ),
+			self::KEY_CHECKOUT            => __( 'Оформить заказ', 'mp-sticky-custom-cart' ),
+			self::KEY_VARIATION_REQUIRED => __( 'Выберите вариацию товара', 'mp-sticky-custom-cart' ),
+			self::KEY_DRAWER_EMPTY       => __( 'Корзина пуста', 'mp-sticky-custom-cart' ),
+		);
+	}
+
+	/**
+	 * Raw defaults without translation API (for option merge before i18n runs).
+	 *
+	 * @return array<string, string>
+	 */
+	public static function get_raw() {
+		return array(
+			self::KEY_MORE_INFO          => 'Подробнее о товаре',
+			self::KEY_OUT_OF_STOCK       => 'Товара нет в наличии',
+			self::KEY_CLEAR_CART         => 'Очистить корзину',
+			self::KEY_CHECKOUT            => 'Оформить заказ',
+			self::KEY_VARIATION_REQUIRED => 'Выберите вариацию товара',
+			self::KEY_DRAWER_EMPTY       => 'Корзина пуста',
+		);
+	}
+
+	/**
+	 * Not instantiable.
+	 */
+	private function __construct() {
+	}
+}
