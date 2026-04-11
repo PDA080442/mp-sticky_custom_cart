@@ -186,35 +186,45 @@ final class SettingsPage {
 	private static function render_cart_tab( array $s, $opt ) {
 		$c = isset( $s['sticky_cart'] ) && is_array( $s['sticky_cart'] ) ? $s['sticky_cart'] : array();
 		echo '<h2>' . esc_html__( 'Нижняя корзина (sticky)', 'mp-sticky-custom-cart' ) . '</h2>';
+		echo '<p class="description">' . esc_html__( 'Значения ниже попадают в CSS-переменные (--mp-scc-*) на сайте.', 'mp-sticky-custom-cart' ) . '</p>';
+
+		echo '<h3>' . esc_html__( 'Панель: прозрачность, blur, скругление', 'mp-sticky-custom-cart' ) . '</h3>';
 		echo '<table class="form-table" role="presentation"><tbody>';
-
-		$fields = array(
-			'z_index'                   => __( 'z-index панели', 'mp-sticky-custom-cart' ),
-			'surface_backdrop_blur_px'  => __( 'Blur фона (px)', 'mp-sticky-custom-cart' ),
-			'surface_background_alpha'  => __( 'Прозрачность фона (0–1)', 'mp-sticky-custom-cart' ),
-			'border_radius_px'          => __( 'Скругление (px)', 'mp-sticky-custom-cart' ),
-			'padding_x_desktop_px'      => __( 'Отступ X desktop (px)', 'mp-sticky-custom-cart' ),
-			'padding_y_desktop_px'      => __( 'Отступ Y desktop (px)', 'mp-sticky-custom-cart' ),
-			'padding_x_mobile_px'       => __( 'Отступ X mobile (px)', 'mp-sticky-custom-cart' ),
-			'padding_y_mobile_px'       => __( 'Отступ Y mobile (px)', 'mp-sticky-custom-cart' ),
-			'drawer_max_height_vh'      => __( 'Макс. высота drawer (vh)', 'mp-sticky-custom-cart' ),
-			'drawer_toggle_duration_ms' => __( 'Анимация открытия (мс)', 'mp-sticky-custom-cart' ),
-			'quantity_debounce_ms'      => __( 'Debounce количества (мс)', 'mp-sticky-custom-cart' ),
-			'summary_font_size_px'      => __( 'Размер шрифта summary (px)', 'mp-sticky-custom-cart' ),
-			'summary_font_weight'       => __( 'Начертание summary', 'mp-sticky-custom-cart' ),
-			'button_font_size_px'       => __( 'Размер шрифта кнопок (px)', 'mp-sticky-custom-cart' ),
-		);
-
-		foreach ( $fields as $key => $label ) {
-			$val = isset( $c[ $key ] ) ? $c[ $key ] : '';
-			if ( 'surface_background_alpha' === $key ) {
-				self::field_text( $opt, 'sticky_cart', $key, $label, (string) $val );
-			} else {
-				self::field_number( $opt, 'sticky_cart', $key, $label, is_numeric( $val ) ? 0 + $val : 0 );
-			}
-		}
-
+		self::field_number( $opt, 'sticky_cart', 'z_index', __( 'z-index панели', 'mp-sticky-custom-cart' ), isset( $c['z_index'] ) ? (int) $c['z_index'] : 100050 );
+		self::field_number( $opt, 'sticky_cart', 'surface_backdrop_blur_px', __( 'Blur подложки (px)', 'mp-sticky-custom-cart' ), isset( $c['surface_backdrop_blur_px'] ) ? (int) $c['surface_backdrop_blur_px'] : 14 );
+		self::field_text( $opt, 'sticky_cart', 'surface_background_alpha', __( 'Прозрачность фона (0–1)', 'mp-sticky-custom-cart' ), isset( $c['surface_background_alpha'] ) ? (string) $c['surface_background_alpha'] : '0.78' );
+		self::field_number( $opt, 'sticky_cart', 'border_radius_px', __( 'Радиус скругления углов (px)', 'mp-sticky-custom-cart' ), isset( $c['border_radius_px'] ) ? (int) $c['border_radius_px'] : 14 );
 		echo '</tbody></table>';
+
+		echo '<h3>' . esc_html__( 'Отступы панели: desktop', 'mp-sticky-custom-cart' ) . '</h3>';
+		echo '<table class="form-table" role="presentation"><tbody>';
+		self::field_number( $opt, 'sticky_cart', 'padding_x_desktop_px', __( 'Горизонтальный отступ (px)', 'mp-sticky-custom-cart' ), isset( $c['padding_x_desktop_px'] ) ? (int) $c['padding_x_desktop_px'] : 20 );
+		self::field_number( $opt, 'sticky_cart', 'padding_y_desktop_px', __( 'Вертикальный отступ (px)', 'mp-sticky-custom-cart' ), isset( $c['padding_y_desktop_px'] ) ? (int) $c['padding_y_desktop_px'] : 14 );
+		echo '</tbody></table>';
+
+		echo '<h3>' . esc_html__( 'Отступы панели: mobile', 'mp-sticky-custom-cart' ) . '</h3>';
+		echo '<table class="form-table" role="presentation"><tbody>';
+		self::field_number( $opt, 'sticky_cart', 'padding_x_mobile_px', __( 'Горизонтальный отступ (px)', 'mp-sticky-custom-cart' ), isset( $c['padding_x_mobile_px'] ) ? (int) $c['padding_x_mobile_px'] : 14 );
+		self::field_number( $opt, 'sticky_cart', 'padding_y_mobile_px', __( 'Вертикальный отступ (px)', 'mp-sticky-custom-cart' ), isset( $c['padding_y_mobile_px'] ) ? (int) $c['padding_y_mobile_px'] : 12 );
+		echo '</tbody></table>';
+
+		echo '<h3>' . esc_html__( 'Drawer и анимация', 'mp-sticky-custom-cart' ) . '</h3>';
+		echo '<table class="form-table" role="presentation"><tbody>';
+		self::field_number( $opt, 'sticky_cart', 'drawer_max_height_vh', __( 'Макс. высота drawer (vh)', 'mp-sticky-custom-cart' ), isset( $c['drawer_max_height_vh'] ) ? (int) $c['drawer_max_height_vh'] : 55 );
+		self::field_number( $opt, 'sticky_cart', 'drawer_toggle_duration_ms', __( 'Длительность анимации drawer (мс)', 'mp-sticky-custom-cart' ), isset( $c['drawer_toggle_duration_ms'] ) ? (int) $c['drawer_toggle_duration_ms'] : 260 );
+		self::field_text( $opt, 'sticky_cart', 'drawer_toggle_easing', __( 'Кривая easing (CSS, например cubic-bezier)', 'mp-sticky-custom-cart' ), isset( $c['drawer_toggle_easing'] ) ? (string) $c['drawer_toggle_easing'] : 'cubic-bezier(0.4, 0, 0.2, 1)' );
+		self::field_number( $opt, 'sticky_cart', 'quantity_debounce_ms', __( 'Debounce изменения количества (мс)', 'mp-sticky-custom-cart' ), isset( $c['quantity_debounce_ms'] ) ? (int) $c['quantity_debounce_ms'] : 320 );
+		echo '</tbody></table>';
+
+		echo '<h3>' . esc_html__( 'Типографика (счётчики и кнопки)', 'mp-sticky-custom-cart' ) . '</h3>';
+		echo '<table class="form-table" role="presentation"><tbody>';
+		self::field_number( $opt, 'sticky_cart', 'summary_font_size_px', __( 'Размер шрифта summary (px)', 'mp-sticky-custom-cart' ), isset( $c['summary_font_size_px'] ) ? (int) $c['summary_font_size_px'] : 15 );
+		self::field_number( $opt, 'sticky_cart', 'summary_font_weight', __( 'Начертание summary (100–900)', 'mp-sticky-custom-cart' ), isset( $c['summary_font_weight'] ) ? (int) $c['summary_font_weight'] : 600 );
+		self::field_number( $opt, 'sticky_cart', 'button_font_size_px', __( 'Размер шрифта кнопок (px)', 'mp-sticky-custom-cart' ), isset( $c['button_font_size_px'] ) ? (int) $c['button_font_size_px'] : 14 );
+		self::field_number( $opt, 'sticky_cart', 'button_font_weight', __( 'Начертание кнопок (100–900)', 'mp-sticky-custom-cart' ), isset( $c['button_font_weight'] ) ? (int) $c['button_font_weight'] : 600 );
+		echo '</tbody></table>';
+
+		echo '<p class="description">' . esc_html__( 'Анимация карточки каталога (hover) настраивается на вкладке «Каталог».', 'mp-sticky-custom-cart' ) . '</p>';
 	}
 
 	/**
