@@ -11,6 +11,9 @@ defined( 'ABSPATH' ) || exit;
 
 /**
  * Keys are stable identifiers for Settings API + JS dictionary.
+ *
+ * Resolved strings: {@see \MpStickyCustomCart\Core\OptionResolver::get_labels()} applies
+ * empty fallbacks and filters {@see 'mp_sticky_custom_cart_labels'} and {@see 'mp_sticky_custom_cart_label'}.
  */
 final class UiLabelsDefaults {
 

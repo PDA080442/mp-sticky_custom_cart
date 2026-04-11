@@ -8,6 +8,7 @@
 namespace MpStickyCustomCart\Admin;
 
 use MpStickyCustomCart\Core\Config\FeatureFlagDefinitions;
+use MpStickyCustomCart\Core\Config\UiLabelsDefaults;
 use MpStickyCustomCart\Core\Constants;
 use MpStickyCustomCart\Core\OptionResolver;
 
@@ -165,14 +166,17 @@ final class SettingsPage {
 		echo '</tbody></table>';
 
 		echo '<h3>' . esc_html__( 'Тексты интерфейса', 'mp-sticky-custom-cart' ) . '</h3>';
+		echo '<p class="description">' . esc_html__( 'Пустое поле на сайте заменяется стандартной фразой из плагина.', 'mp-sticky-custom-cart' ) . '</p>';
 		echo '<table class="form-table" role="presentation"><tbody>';
-		self::field_text( $opt, 'labels', 'more_info', __( 'Кнопка «Подробнее о товаре»', 'mp-sticky-custom-cart' ), isset( $l['more_info'] ) ? (string) $l['more_info'] : '' );
-		self::field_text( $opt, 'labels', 'out_of_stock', __( 'Нет в наличии', 'mp-sticky-custom-cart' ), isset( $l['out_of_stock'] ) ? (string) $l['out_of_stock'] : '' );
-		self::field_text( $opt, 'labels', 'clear_cart', __( 'Очистить корзину', 'mp-sticky-custom-cart' ), isset( $l['clear_cart'] ) ? (string) $l['clear_cart'] : '' );
-		self::field_text( $opt, 'labels', 'checkout', __( 'Оформить заказ', 'mp-sticky-custom-cart' ), isset( $l['checkout'] ) ? (string) $l['checkout'] : '' );
-		self::field_text( $opt, 'labels', 'variation_required', __( 'Нужна вариация', 'mp-sticky-custom-cart' ), isset( $l['variation_required'] ) ? (string) $l['variation_required'] : '' );
+		self::field_text( $opt, 'labels', 'more_info', __( 'Текст кнопки «Подробнее о товаре»', 'mp-sticky-custom-cart' ), isset( $l['more_info'] ) ? (string) $l['more_info'] : '' );
+		self::field_text( $opt, 'labels', 'out_of_stock', __( 'Сообщение «Товара нет в наличии»', 'mp-sticky-custom-cart' ), isset( $l['out_of_stock'] ) ? (string) $l['out_of_stock'] : '' );
+		self::field_text( $opt, 'labels', 'clear_cart', __( 'Текст кнопки «Очистить корзину»', 'mp-sticky-custom-cart' ), isset( $l['clear_cart'] ) ? (string) $l['clear_cart'] : '' );
+		self::field_text( $opt, 'labels', 'checkout', __( 'Текст кнопки «Оформить заказ»', 'mp-sticky-custom-cart' ), isset( $l['checkout'] ) ? (string) $l['checkout'] : '' );
+		self::field_text( $opt, 'labels', 'variation_required', __( 'Сообщение «Выберите вариацию товара»', 'mp-sticky-custom-cart' ), isset( $l['variation_required'] ) ? (string) $l['variation_required'] : '' );
 		self::field_text( $opt, 'labels', 'drawer_empty', __( 'Пустая корзина (drawer)', 'mp-sticky-custom-cart' ), isset( $l['drawer_empty'] ) ? (string) $l['drawer_empty'] : '' );
 		echo '</tbody></table>';
+
+		self::render_labels_preview_panel();
 	}
 
 	/**
@@ -395,6 +399,34 @@ final class SettingsPage {
 			);
 		}
 		echo '</select></td></tr>';
+	}
+
+	/**
+	 * Effective UI strings (fallbacks + translation filters), same as storefront / {@see mpSccData.labels}.
+	 */
+	private static function render_labels_preview_panel() {
+		echo '<h3>' . esc_html__( 'Предпросмотр текстов', 'mp-sticky-custom-cart' ) . '</h3>';
+		echo '<p class="description">' . esc_html__( 'Как сейчас отдаётся на сайте (после сохранения настроек обновите страницу).', 'mp-sticky-custom-cart' ) . '</p>';
+
+		$labels = OptionResolver::get_labels();
+		$rows   = array(
+			UiLabelsDefaults::KEY_MORE_INFO          => __( 'Текст кнопки «Подробнее о товаре»', 'mp-sticky-custom-cart' ),
+			UiLabelsDefaults::KEY_OUT_OF_STOCK       => __( 'Сообщение «Товара нет в наличии»', 'mp-sticky-custom-cart' ),
+			UiLabelsDefaults::KEY_CLEAR_CART         => __( 'Текст кнопки «Очистить корзину»', 'mp-sticky-custom-cart' ),
+			UiLabelsDefaults::KEY_CHECKOUT            => __( 'Текст кнопки «Оформить заказ»', 'mp-sticky-custom-cart' ),
+			UiLabelsDefaults::KEY_VARIATION_REQUIRED => __( 'Сообщение «Выберите вариацию товара»', 'mp-sticky-custom-cart' ),
+			UiLabelsDefaults::KEY_DRAWER_EMPTY       => __( 'Пустая корзина (drawer)', 'mp-sticky-custom-cart' ),
+		);
+
+		echo '<table class="widefat striped mp-scc-label-preview"><thead><tr>';
+		echo '<th scope="col">' . esc_html__( 'Назначение', 'mp-sticky-custom-cart' ) . '</th>';
+		echo '<th scope="col">' . esc_html__( 'Итоговый текст', 'mp-sticky-custom-cart' ) . '</th>';
+		echo '</tr></thead><tbody>';
+		foreach ( $rows as $key => $title ) {
+			$text = isset( $labels[ $key ] ) ? $labels[ $key ] : '';
+			echo '<tr><td>' . esc_html( $title ) . '</td><td><code>' . esc_html( $text ) . '</code></td></tr>';
+		}
+		echo '</tbody></table>';
 	}
 
 	/**
