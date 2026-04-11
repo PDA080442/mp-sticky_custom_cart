@@ -29,7 +29,7 @@ final class Plugin {
 	 */
 	public static function init() {
 		load_plugin_textdomain(
-			'mp-sticky-custom-cart',
+			Constants::TEXT_DOMAIN,
 			false,
 			dirname( MP_STICKY_CUSTOM_CART_BASENAME ) . '/languages'
 		);
