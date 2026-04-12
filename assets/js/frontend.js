@@ -80,6 +80,21 @@
 		});
 	};
 
+	/**
+	 * Fire-and-forget client diagnostics (respects `diagnostics.client_error_logging` on the server).
+	 * @param {string} event Sanitized key, e.g. `catalog_image_out_of_stock`.
+	 * @param {Record<string, *>} [payload]
+	 */
+	window.mpScc.logClientEvent = function (event, payload) {
+		var cfg = window.mpScc.ajaxConfig();
+		if (!cfg.ajaxUrl || !cfg.actions.logClientEvent) {
+			return;
+		}
+		window.mpScc
+			.postAjax('logClientEvent', $.extend({ event: event }, payload || {}))
+			.fail(function () {});
+	};
+
 	function parseDebounceMs() {
 		var raw = window.mpScc.cssVar('--mp-scc-sticky-quantity-debounce-ms') || '';
 		var n = parseInt(String(raw).replace(/[^\d]/g, ''), 10);
@@ -115,6 +130,40 @@
 		return 0;
 	}
 
+	var CATALOG_STOCK_TOAST_COOLDOWN_MS = 3600;
+
+	/**
+	 * Best-effort DOM signal that the catalog card is not purchasable due to stock (before AJAX).
+	 * @param {JQuery} $card
+	 * @returns {boolean}
+	 */
+	function isCatalogCardOutOfStock($card) {
+		if ($card.hasClass('outofstock') || $card.hasClass('out-of-stock')) {
+			return true;
+		}
+		if ($card.find('.stock.out-of-stock').length) {
+			return true;
+		}
+		if ($card.find('.woocommerce-LoopProduct-link .out-of-stock').length) {
+			return true;
+		}
+		return false;
+	}
+
+	/**
+	 * @param {JQuery} $card
+	 * @returns {boolean} False when the last stock toast was shown recently (anti-spam).
+	 */
+	function allowCatalogStockToast($card) {
+		var last = $card.data('mpSccStockToastAt');
+		var now = Date.now();
+		if (last && now - last < CATALOG_STOCK_TOAST_COOLDOWN_MS) {
+			return false;
+		}
+		$card.data('mpSccStockToastAt', now);
+		return true;
+	}
+
 	function setCatalogCardLoading($card, on) {
 		if (on) {
 			$card.addClass('mp-scc-card--loading');
@@ -144,17 +193,46 @@
 		}, 900);
 	}
 
-	function showCatalogToast($card, text) {
+	/**
+	 * @param {JQuery} $card
+	 * @param {string} text
+	 * @param {{ variant?: string, durationMs?: number, assertive?: boolean }} [options]
+	 */
+	function showCatalogToast($card, text, options) {
+		options = options || {};
 		var msg = text ? String(text) : '';
 		if (!msg) {
 			return;
 		}
+		var variant = options.variant || 'default';
+		var durationMs =
+			typeof options.durationMs === 'number' && options.durationMs >= 0 ? options.durationMs : 4000;
+		var assertive = !!options.assertive;
+		var prev = $card.data('mpSccToastTimer');
+		if (prev) {
+			clearTimeout(prev);
+		}
 		$card.find('.mp-scc-card__toast').remove();
-		var $t = $('<span class="mp-scc-card__toast" role="status" />').text(msg);
+		var role = assertive ? 'alert' : 'status';
+		var live = assertive ? 'assertive' : 'polite';
+		var cls = 'mp-scc-card__toast';
+		if (variant === 'stock') {
+			cls += ' mp-scc-card__toast--stock';
+		} else if (variant === 'error') {
+			cls += ' mp-scc-card__toast--error';
+		}
+		var $t = $('<span />')
+			.addClass(cls)
+			.attr('role', role)
+			.attr('aria-live', live)
+			.attr('aria-atomic', 'true')
+			.text(msg);
 		$card.append($t);
-		window.setTimeout(function () {
+		var t = window.setTimeout(function () {
 			$t.remove();
-		}, 4000);
+			$card.removeData('mpSccToastTimer');
+		}, durationMs);
+		$card.data('mpSccToastTimer', t);
 	}
 
 	function initCatalogImageAddToCart() {
@@ -194,7 +272,23 @@
 			var productId = resolveCatalogProductId($card);
 			if (!productId) {
 				var resolveMsg = catalog.resolveErrorMessage ? String(catalog.resolveErrorMessage) : '';
-				showCatalogToast($card, resolveMsg);
+				showCatalogToast($card, resolveMsg, { variant: 'error', assertive: true });
+				return;
+			}
+
+			if (isCatalogCardOutOfStock($card)) {
+				if (allowCatalogStockToast($card)) {
+					var stockLabel = window.mpScc.label('out_of_stock');
+					showCatalogToast($card, stockLabel, {
+						variant: 'stock',
+						assertive: true,
+						durationMs: 4500
+					});
+					window.mpScc.logClientEvent('catalog_image_out_of_stock', {
+						product_id: productId,
+						context: 'dom'
+					});
+				}
 				return;
 			}
 
@@ -215,11 +309,15 @@
 					window.setTimeout(function () {
 						$card.removeClass('mp-scc-card--error');
 					}, 500);
-					var errMsg =
-						resp && resp.data && resp.data.message
-							? String(resp.data.message)
-							: window.mpScc.label('out_of_stock');
-					showCatalogToast($card, errMsg);
+					var d = resp && resp.data ? resp.data : {};
+					var code = d.code ? String(d.code) : '';
+					var errMsg = d.message ? String(d.message) : window.mpScc.label('out_of_stock');
+					var toastOpts = { variant: 'error', assertive: true };
+					if (code === 'out_of_stock') {
+						errMsg = window.mpScc.label('out_of_stock') || errMsg;
+						toastOpts = { variant: 'stock', assertive: true, durationMs: 4500 };
+					}
+					showCatalogToast($card, errMsg, toastOpts);
 				})
 				.fail(function (xhr) {
 					setCatalogCardLoading($card, false);
@@ -231,7 +329,7 @@
 					if (xhr && xhr.responseJSON && xhr.responseJSON.data && xhr.responseJSON.data.message) {
 						msg = String(xhr.responseJSON.data.message);
 					}
-					showCatalogToast($card, msg);
+					showCatalogToast($card, msg, { variant: 'error', assertive: true });
 				});
 		});
 	}
