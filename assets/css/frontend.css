@@ -266,8 +266,30 @@
 	font-weight: var(--mp-scc-sticky-summary-font-weight, 600);
 }
 
+.mp-scc-cart-count,
 .mp-scc-cart-total {
 	font-variant-numeric: tabular-nums;
+	transition: opacity 0.2s ease;
+}
+
+.mp-scc-sticky-summary--loading .mp-scc-cart-count,
+.mp-scc-sticky-summary--loading .mp-scc-cart-total {
+	opacity: 0.45;
+}
+
+@keyframes mp-scc-summary-pulse {
+	0%,
+	100% {
+		transform: scale(1);
+	}
+	45% {
+		transform: scale(1.06);
+	}
+}
+
+.mp-scc-summary-value--pulse {
+	display: inline-block;
+	animation: mp-scc-summary-pulse 0.38s ease;
 }
 
 .mp-scc-btn {
@@ -706,6 +728,10 @@ body.mp-scc-wishlist-integration-on .woocommerce .products li.product a.mp-scc-c
 @media (prefers-reduced-motion: reduce) {
 	.mp-scc-root {
 		--mp-scc-motion-duration: 0.01ms;
+	}
+
+	.mp-scc-summary-value--pulse {
+		animation: none !important;
 	}
 
 	.mp-scc-drawer-toggle-icon {

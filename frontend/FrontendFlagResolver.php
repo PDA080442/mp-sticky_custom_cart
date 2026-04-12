@@ -120,6 +120,7 @@ final class FrontendFlagResolver {
 
 		$data = array(
 			'version'  => MP_STICKY_CUSTOM_CART_VERSION,
+			'cartQtyTotalLabel'   => __( 'Total quantity in cart: %d', 'mp-sticky-custom-cart' ),
 			'networkErrorMessage' => __( 'Не удалось отправить запрос. Проверьте подключение к сети.', 'mp-sticky-custom-cart' ),
 			'ajaxUrl'  => admin_url( 'admin-ajax.php' ),
 			'nonce'    => wp_create_nonce( Constants::AJAX_NONCE_ACTION ),
