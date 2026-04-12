@@ -112,6 +112,9 @@ final class SettingsValidationSchema {
 				'client_error_logging' => array( 'type' => 'boolean' ),
 				'log_retention_days'   => array( 'type' => 'integer', 'min' => 1, 'max' => 365 ),
 			),
+			'notices'     => array(
+				'remove_view_cart_link' => array( 'type' => 'boolean' ),
+			),
 			'labels'      => array(
 				'more_info'          => array( 'type' => 'text', 'max_length' => 500 ),
 				'out_of_stock'       => array( 'type' => 'text', 'max_length' => 500 ),

@@ -84,6 +84,10 @@ final class UiSettingsDefaults {
 				'client_error_logging' => true,
 				'log_retention_days'   => 14,
 			),
+			'notices'     => array(
+				/** Strip the "View cart" anchor from WooCommerce add-to-cart success HTML (sticky replaces cart UX). */
+				'remove_view_cart_link' => true,
+			),
 		);
 	}
 
