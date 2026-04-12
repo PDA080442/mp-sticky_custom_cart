@@ -57,19 +57,26 @@ final class DynamicStylesProvider implements DynamicStylesProviderInterface {
 	}
 
 	public function register_hooks() {
+		add_action( 'wp_enqueue_scripts', array( $this, 'register_runtime_style_handle' ), 5 );
 		add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_runtime_variables' ), 25 );
 	}
 
 	/**
-	 * Register a handleless style and attach inline :root variables.
+	 * Register handle early so other styles can list it as a dependency before priority 25.
 	 */
-	public function enqueue_runtime_variables() {
+	public function register_runtime_style_handle() {
 		wp_register_style(
 			self::STYLE_HANDLE,
 			false,
 			array(),
 			MP_STICKY_CUSTOM_CART_ASSET_VERSION
 		);
+	}
+
+	/**
+	 * Enqueue runtime vars and attach inline :root block.
+	 */
+	public function enqueue_runtime_variables() {
 		wp_enqueue_style( self::STYLE_HANDLE );
 		wp_add_inline_style( self::STYLE_HANDLE, $this->get_inline_css_block( CssVariablesContract::DEFAULT_ROOT_SELECTOR ) );
 	}

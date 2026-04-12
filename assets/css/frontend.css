@@ -1,0 +1,31 @@
+/**
+ * MP Sticky Custom Cart — storefront style entry.
+ * Runtime tokens come from `mp-scc-runtime-vars` (--mp-scc-*); rules here consume them.
+ */
+
+.mp-scc-root {
+	box-sizing: border-box;
+}
+
+.mp-scc-sticky-bar {
+	position: fixed;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	z-index: var(--mp-scc-sticky-z-index, 99999);
+	padding: var(--mp-scc-sticky-padding-y-mobile, 12px) var(--mp-scc-sticky-padding-x-mobile, 16px);
+	padding-bottom: calc(var(--mp-scc-sticky-padding-y-mobile, 12px) + env(safe-area-inset-bottom, 0px));
+	border-radius: var(--mp-scc-sticky-border-radius, 12px) var(--mp-scc-sticky-border-radius, 12px) 0 0;
+	backdrop-filter: blur(var(--mp-scc-sticky-backdrop-blur, 12px));
+	-webkit-backdrop-filter: blur(var(--mp-scc-sticky-backdrop-blur, 12px));
+	background-color: rgba(255, 255, 255, var(--mp-scc-sticky-surface-alpha, 0.72));
+	color: var(--mp-scc-color-text-primary, #1a1a1a);
+	transition: transform var(--mp-scc-sticky-drawer-toggle-duration-ms, 220ms) var(--mp-scc-sticky-drawer-toggle-easing, ease);
+}
+
+@media (min-width: 783px) {
+	.mp-scc-sticky-bar {
+		padding: var(--mp-scc-sticky-padding-y-desktop, 14px) var(--mp-scc-sticky-padding-x-desktop, 24px);
+		padding-bottom: calc(var(--mp-scc-sticky-padding-y-desktop, 14px) + env(safe-area-inset-bottom, 0px));
+	}
+}
