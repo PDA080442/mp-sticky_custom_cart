@@ -703,6 +703,7 @@
 		this._skipLoadingOnce = true;
 		this._fallbackSubtotalHtml = this.$total.length ? this.$total.html() : '';
 		this.debounceMs = parseDebounceMs();
+		this.clearCartLocked = false;
 	}
 
 	StickyCartController.prototype.isDrawerOpen = function () {
@@ -922,7 +923,29 @@
 	 * @returns {boolean} True while cart snapshot or quantity mutation AJAX is in flight.
 	 */
 	StickyCartController.prototype.isLoading = function () {
-		return this.snapshotLocked || this.mutationInFlight;
+		return this.snapshotLocked || this.mutationInFlight || this.clearCartLocked;
+	};
+
+	/**
+	 * @param {string} message
+	 * @param {'success'|'error'} variant
+	 */
+	StickyCartController.prototype.showStickyInlineFeedback = function (message, variant) {
+		var text = message ? String(message) : '';
+		if (!text) {
+			return;
+		}
+		this.$root.find('.mp-scc-sticky-inline-feedback').remove();
+		var cls =
+			variant === 'error'
+				? 'mp-scc-sticky-inline-feedback mp-scc-sticky-inline-feedback--error'
+				: 'mp-scc-sticky-inline-feedback mp-scc-sticky-inline-feedback--success';
+		var role = variant === 'error' ? 'alert' : 'status';
+		var $p = $('<p />').addClass(cls).attr('role', role).text(text);
+		this.$root.find('.mp-scc-sticky-inner').prepend($p);
+		window.setTimeout(function () {
+			$p.remove();
+		}, variant === 'error' ? 6000 : 4000);
 	};
 
 	StickyCartController.prototype.refresh = function () {
@@ -989,6 +1012,44 @@
 			q = Math.max(0, q - 1);
 			$disp.text(String(q));
 			self.scheduleQuantityCommit(key, q);
+		});
+
+		this.$root.on('click', '[data-mp-scc-clear-cart]', function (e) {
+			e.preventDefault();
+			var cfg = window.mpScc.ajaxConfig();
+			if (!cfg.ajaxUrl || !cfg.actions.clearCart) {
+				return;
+			}
+			if (self.clearCartLocked || self.snapshotLocked || self.mutationInFlight) {
+				return;
+			}
+			self.clearCartLocked = true;
+			var $btn = $(e.currentTarget);
+			$btn.prop('disabled', true).attr('aria-busy', 'true').addClass('mp-scc-clear-cart--loading');
+			window.mpScc
+				.postAjax('clearCart', {})
+				.done(function (resp) {
+					if (resp && resp.success && resp.data) {
+						self.applyPayload(resp.data);
+						$(document.body).trigger('removed_from_cart');
+						var okMsg = window.mpScc.label('cart_cleared') || 'Корзина очищена';
+						self.showStickyInlineFeedback(okMsg, 'success');
+					} else {
+						self.scheduleReconcile();
+					}
+				})
+				.fail(function (xhr) {
+					var msg = data().networkErrorMessage ? String(data().networkErrorMessage) : '';
+					if (xhr && xhr.responseJSON && xhr.responseJSON.data && xhr.responseJSON.data.message) {
+						msg = String(xhr.responseJSON.data.message);
+					}
+					self.showStickyInlineFeedback(msg, 'error');
+					self.scheduleReconcile();
+				})
+				.always(function () {
+					self.clearCartLocked = false;
+					$btn.prop('disabled', false).removeAttr('aria-busy').removeClass('mp-scc-clear-cart--loading');
+				});
 		});
 
 		var wooRefresh = function () {
