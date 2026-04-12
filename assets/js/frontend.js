@@ -254,7 +254,40 @@
 	}
 
 	/**
+	 * target="_blank" + rel when opening in a new tab (admin: catalog.more_info_new_tab).
+	 * @param {JQuery} $a
+	 * @param {boolean} newTab
+	 */
+	function applyMoreInfoLinkAttrs($a, newTab) {
+		if (newTab) {
+			$a.attr({ target: '_blank', rel: 'noopener noreferrer' });
+		} else {
+			$a.removeAttr('target');
+			$a.removeAttr('rel');
+		}
+	}
+
+	/**
+	 * Space activates the link like a button (Enter is native for {@see HTMLAnchorElement}).
+	 */
+	function initCatalogOverlayKeyboard() {
+		$(document.body).on('keydown.mpSccOverlayKb', 'a.mp-scc-catalog-overlay', function (e) {
+			var code = e.keyCode || 0;
+			var key = e.key || '';
+			if (key !== ' ' && key !== 'Spacebar' && code !== 32) {
+				return;
+			}
+			e.preventDefault();
+			e.stopPropagation();
+			if (e.currentTarget && typeof e.currentTarget.click === 'function') {
+				e.currentTarget.click();
+			}
+		});
+	}
+
+	/**
 	 * Injects the «Подробнее» band + wires layout when {@see FeatureFlagsDefaults::KEY_HOVER_MORE_INFO_ENABLED} is on.
+	 * Refreshes {@see href} when the loop is replaced by layered nav / AJAX filters.
 	 */
 	function initCatalogMoreInfoOverlay() {
 		if (!window.mpScc.flagEnabled('hover_more_info_enabled')) {
@@ -271,12 +304,10 @@
 		if (motion !== 'fade' && motion !== 'slide' && motion !== 'fade_slide') {
 			motion = 'fade_slide';
 		}
+		var newTab = !!catalog.moreInfoNewTab;
 
 		$(cardSel).each(function () {
 			var $card = $(this);
-			if ($card.find('.mp-scc-catalog-overlay').length) {
-				return;
-			}
 			if (!$card.find('img').length) {
 				return;
 			}
@@ -286,6 +317,15 @@
 			}
 			var productHref = $perm.attr('href');
 			if (!productHref || productHref === '#') {
+				return;
+			}
+
+			var $existing = $card.find('.mp-scc-catalog-overlay').first();
+			if ($existing.length) {
+				if ($existing.attr('href') !== productHref) {
+					$existing.attr('href', productHref);
+				}
+				applyMoreInfoLinkAttrs($existing, newTab);
 				return;
 			}
 
@@ -304,6 +344,7 @@
 				href: productHref,
 				'data-mp-scc-overlay': ''
 			});
+			applyMoreInfoLinkAttrs($ov, newTab);
 			if (label) {
 				$ov.attr('aria-label', label);
 			}
@@ -850,6 +891,7 @@
 
 		initCatalogOverlayPropagation();
 		initCatalogTitleClickHook();
+		initCatalogOverlayKeyboard();
 		initCatalogMoreInfoOverlay();
 		initCatalogImageAddToCart();
 		runCatalogTitleLinkSanity();

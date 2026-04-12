@@ -164,6 +164,7 @@ final class SettingsPage {
 		);
 		self::field_number( $opt, 'catalog', 'hover_slide_offset_px', __( 'Смещение slide (px)', 'mp-sticky-custom-cart' ), isset( $c['hover_slide_offset_px'] ) ? (int) $c['hover_slide_offset_px'] : 8 );
 		self::field_number( $opt, 'catalog', 'hover_hide_delay_ms', __( 'Задержка перед скрытием overlay (мс)', 'mp-sticky-custom-cart' ), isset( $c['hover_hide_delay_ms'] ) ? (int) $c['hover_hide_delay_ms'] : 50 );
+		self::field_checkbox( $opt, 'catalog', 'more_info_new_tab', __( 'Открывать «Подробнее» в новой вкладке', 'mp-sticky-custom-cart' ), ! empty( $c['more_info_new_tab'] ) );
 		echo '<tr><td colspan="2"><p class="description">' . esc_html__( 'Клик по изображению в каталоге: если пусто, используется стандартный селектор WooCommerce (см. документацию плагина).', 'mp-sticky-custom-cart' ) . '</p></td></tr>';
 		self::field_text( $opt, 'catalog', 'image_click_selector', __( 'Селектор изображения карточки (CSS)', 'mp-sticky-custom-cart' ), isset( $c['image_click_selector'] ) ? (string) $c['image_click_selector'] : '' );
 		self::field_text( $opt, 'catalog', 'card_root_selector', __( 'Корень карточки для состояний (closest, CSS)', 'mp-sticky-custom-cart' ), isset( $c['card_root_selector'] ) ? (string) $c['card_root_selector'] : 'li.product' );

@@ -56,6 +56,9 @@ final class SettingsValidationSchema {
 					'type'        => 'text',
 					'max_length'  => 200,
 				),
+				'more_info_new_tab'         => array(
+					'type' => 'boolean',
+				),
 			),
 			'sticky_cart' => array(
 				'z_index'                   => array( 'type' => 'integer', 'min' => 1, 'max' => 9999999 ),

@@ -32,6 +32,8 @@ final class UiSettingsDefaults {
 				'image_click_selector'         => '',
 				/** Closest ancestor for loading/added/error states (jQuery selector). */
 				'card_root_selector'           => 'li.product',
+				/** Open «Подробнее» product URL in a new browser tab (adds target + rel). */
+				'more_info_new_tab'            => false,
 			),
 			'sticky_cart' => array(
 				'z_index'                    => 100050,
