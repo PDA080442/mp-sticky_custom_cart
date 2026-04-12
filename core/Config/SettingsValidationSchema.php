@@ -38,6 +38,14 @@ final class SettingsValidationSchema {
 					'type' => 'text',
 					'oneof' => array( 'fade_slide', 'fade', 'slide' ),
 				),
+				'image_click_selector'      => array(
+					'type'        => 'text',
+					'max_length'  => 500,
+				),
+				'card_root_selector'        => array(
+					'type'        => 'text',
+					'max_length'  => 200,
+				),
 			),
 			'sticky_cart' => array(
 				'z_index'                   => array( 'type' => 'integer', 'min' => 1, 'max' => 9999999 ),

@@ -24,6 +24,10 @@ final class UiSettingsDefaults {
 				'hover_animation_duration_ms'  => 220,
 				'hover_animation_easing'       => 'cubic-bezier(0.4, 0, 0.2, 1)',
 				'hover_motion_preset'          => 'fade_slide',
+				/** CSS selector for delegated image clicks (shop loop); empty = built-in default. */
+				'image_click_selector'         => '',
+				/** Closest ancestor for loading/added/error states (jQuery selector). */
+				'card_root_selector'           => 'li.product',
 			),
 			'sticky_cart' => array(
 				'z_index'                    => 100050,

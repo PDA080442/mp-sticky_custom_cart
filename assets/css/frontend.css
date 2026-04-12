@@ -442,6 +442,111 @@
 	font-variant-numeric: tabular-nums;
 }
 
+/* Catalog: image add-to-cart — toast positioning */
+ul.products li.product {
+	position: relative;
+}
+
+/* Catalog: image add-to-cart card states */
+li.product.mp-scc-card--loading {
+	position: relative;
+	opacity: 0.72;
+	pointer-events: none;
+}
+
+li.product.mp-scc-card--loading::after {
+	content: '';
+	position: absolute;
+	left: 50%;
+	top: 50%;
+	width: 28px;
+	height: 28px;
+	margin: -14px 0 0 -14px;
+	border: 2px solid rgba(0, 0, 0, 0.12);
+	border-top-color: var(--mp-scc-color-button-primary, #111);
+	border-radius: 50%;
+	animation: mp-scc-spin 0.7s linear infinite;
+}
+
+@keyframes mp-scc-spin {
+	to {
+		transform: rotate(360deg);
+	}
+}
+
+li.product.mp-scc-card--added {
+	animation: mp-scc-card-added var(--mp-scc-catalog-hover-duration-ms, 220ms)
+		var(--mp-scc-catalog-hover-easing, cubic-bezier(0.4, 0, 0.2, 1));
+}
+
+@keyframes mp-scc-card-added {
+	0% {
+		box-shadow: 0 0 0 0 rgba(34, 160, 90, 0.35);
+		transform: scale(1);
+	}
+	45% {
+		box-shadow: 0 0 0 10px rgba(34, 160, 90, 0.1);
+		transform: scale(1.02);
+	}
+	100% {
+		box-shadow: 0 0 0 0 rgba(34, 160, 90, 0);
+		transform: scale(1);
+	}
+}
+
+li.product.mp-scc-card--error {
+	animation: mp-scc-card-shake 0.42s ease;
+}
+
+@keyframes mp-scc-card-shake {
+	0%,
+	100% {
+		transform: translateX(0);
+	}
+	20% {
+		transform: translateX(-6px);
+	}
+	40% {
+		transform: translateX(6px);
+	}
+	60% {
+		transform: translateX(-4px);
+	}
+	80% {
+		transform: translateX(4px);
+	}
+}
+
+.mp-scc-card__toast {
+	position: absolute;
+	left: 50%;
+	bottom: 10px;
+	transform: translateX(-50%);
+	z-index: 3;
+	max-width: 92%;
+	padding: 8px 12px;
+	border-radius: 8px;
+	background: rgba(20, 20, 20, 0.92);
+	color: #fff;
+	font-size: 13px;
+	line-height: 1.35;
+	text-align: center;
+	box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+	pointer-events: none;
+}
+
+.mp-scc-card__toast--stock {
+	background: rgba(120, 40, 40, 0.94);
+	color: #fff;
+	border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.mp-scc-card__toast--error {
+	background: rgba(35, 35, 40, 0.94);
+	color: #fff;
+	border: 1px solid rgba(255, 80, 80, 0.35);
+}
+
 /* 8) Reduced motion: keep layout, shorten transitions */
 @media (prefers-reduced-motion: reduce) {
 	.mp-scc-root {
@@ -450,5 +555,15 @@
 
 	.mp-scc-drawer-toggle-icon {
 		transition-duration: 0.01ms;
+	}
+
+	li.product.mp-scc-card--added,
+	li.product.mp-scc-card--error {
+		animation: none;
+	}
+
+	li.product.mp-scc-card--loading::after {
+		animation: none;
+		border-top-color: rgba(0, 0, 0, 0.25);
 	}
 }

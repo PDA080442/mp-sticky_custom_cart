@@ -80,10 +80,397 @@
 		});
 	};
 
+	/**
+	 * Fire-and-forget client diagnostics (respects `diagnostics.client_error_logging` on the server).
+	 * @param {string} event Sanitized key, e.g. `catalog_image_out_of_stock`.
+	 * @param {Record<string, *>} [payload]
+	 */
+	window.mpScc.logClientEvent = function (event, payload) {
+		var cfg = window.mpScc.ajaxConfig();
+		if (!cfg.ajaxUrl || !cfg.actions.logClientEvent) {
+			return;
+		}
+		window.mpScc
+			.postAjax('logClientEvent', $.extend({ event: event }, payload || {}))
+			.fail(function () {});
+	};
+
 	function parseDebounceMs() {
 		var raw = window.mpScc.cssVar('--mp-scc-sticky-quantity-debounce-ms') || '';
 		var n = parseInt(String(raw).replace(/[^\d]/g, ''), 10);
 		return isNaN(n) || n < 0 ? 320 : n;
+	}
+
+	function resolveCatalogProductId($card) {
+		var $btn = $card.find('.add_to_cart_button[data-product_id]').first();
+		if ($btn.length) {
+			var id = parseInt($btn.attr('data-product_id'), 10);
+			if (!isNaN(id) && id > 0) {
+				return id;
+			}
+		}
+		var $hrefBtn = $card.find('a[href*="add-to-cart="]').first();
+		var href = $hrefBtn.attr('href') || '';
+		var m = href.match(/[?&]add-to-cart=(\d+)/);
+		if (m) {
+			return parseInt(m[1], 10);
+		}
+		var cls = $card.attr('class') || '';
+		var m2 = cls.match(/\bpost-(\d+)\b/);
+		if (m2) {
+			return parseInt(m2[1], 10);
+		}
+		var $anyId = $card.find('[data-product_id]').first();
+		if ($anyId.length) {
+			var id0 = parseInt($anyId.attr('data-product_id'), 10);
+			if (!isNaN(id0) && id0 > 0) {
+				return id0;
+			}
+		}
+		return 0;
+	}
+
+	var CATALOG_ATC_POST_SUCCESS_COOLDOWN_MS = 480;
+
+	var CATALOG_STOCK_TOAST_COOLDOWN_MS = 3600;
+
+	/**
+	 * Heuristic: href points to a normal product/single page (plain, pretty, or ?p=ID permalinks).
+	 * @param {string} href
+	 * @param {number} productId Resolved Woo product ID (0 if unknown).
+	 * @returns {boolean}
+	 */
+	function hrefLooksLikeProductPage(href, productId) {
+		if (!href || typeof href !== 'string') {
+			return false;
+		}
+		var trimmed = href.trim();
+		if (
+			!trimmed ||
+			trimmed.indexOf('javascript:') === 0 ||
+			trimmed.indexOf('data:') === 0 ||
+			trimmed === '#'
+		) {
+			return false;
+		}
+		try {
+			var u = new URL(trimmed, window.location.href);
+			if (u.protocol !== 'http:' && u.protocol !== 'https:') {
+				return false;
+			}
+			var qp = u.searchParams.get('p');
+			if (qp && productId > 0 && parseInt(qp, 10) === productId) {
+				return true;
+			}
+			if (/\/product\//i.test(u.pathname) || /\/shop\//i.test(u.pathname)) {
+				return true;
+			}
+			if (u.pathname && u.pathname !== '/' && u.pathname.toLowerCase().indexOf('add-to-cart') === -1) {
+				return true;
+			}
+			return false;
+		} catch (err) {
+			return false;
+		}
+	}
+
+	/**
+	 * First anchor in the card that looks like the product permalink (title link or LoopProduct link).
+	 * @param {JQuery} $card
+	 * @param {Record<string, *>} catalog mpSccData.catalog
+	 * @returns {JQuery}
+	 */
+	function findCatalogPermalinkAnchor($card, catalog) {
+		var list = catalog.titleLinkSelectors || [];
+		for (var i = 0; i < list.length; i++) {
+			var $a = $card.find(list[i]).first();
+			if ($a.length && $a.attr('href')) {
+				return $a;
+			}
+		}
+		return $();
+	}
+
+	/**
+	 * Optional dev aid: append ?mp_scc_catalog_debug=1 to the shop URL to log suspicious title links.
+	 */
+	function runCatalogTitleLinkSanity() {
+		if (window.location.search.indexOf('mp_scc_catalog_debug=1') === -1) {
+			return;
+		}
+		var catalog = data().catalog || {};
+		var cardSel = catalog.cardRootSelector || 'li.product';
+		$('ul.products')
+			.find(cardSel)
+			.each(function () {
+				var $card = $(this);
+				var id = resolveCatalogProductId($card);
+				var $a = findCatalogPermalinkAnchor($card, catalog);
+				if (!$a.length) {
+					return;
+				}
+				var href = $a.attr('href');
+				if (id && href && !hrefLooksLikeProductPage(href, id)) {
+					window.console.warn('[mp-scc] Catalog title/permalink link may not look like a product URL', {
+						productId: id,
+						href: href
+					});
+				}
+			});
+	}
+
+	/**
+	 * Lets theme/analytics listen without blocking default navigation: $(document.body).on('mpScc:catalogTitleClick', fn).
+	 */
+	function initCatalogTitleClickHook() {
+		var catalog = data().catalog || {};
+		var list = catalog.titleAnalyticsSelectors || [];
+		if (!list.length) {
+			return;
+		}
+		var delegateSel = list.join(', ');
+		$(document.body).on('click.mpSccCatalogTitle', delegateSel, function (e) {
+			if (e.button !== 0) {
+				return;
+			}
+			if ($(e.target).closest('img').length) {
+				return;
+			}
+			$(document.body).trigger('mpScc:catalogTitleClick', [e.currentTarget, e]);
+		});
+	}
+
+	/**
+	 * Future overlay / "more info" layer: stop bubbling so delegated handlers on ancestors do not run.
+	 */
+	function initCatalogOverlayPropagation() {
+		$(document.body).on(
+			'click.mpSccCatalogOverlay',
+			'[data-mp-scc-overlay], .mp-scc-catalog-overlay',
+			function (e) {
+				e.stopPropagation();
+			}
+		);
+	}
+
+	/**
+	 * Best-effort DOM signal that the catalog card is not purchasable due to stock (before AJAX).
+	 * @param {JQuery} $card
+	 * @returns {boolean}
+	 */
+	function isCatalogCardOutOfStock($card) {
+		if ($card.hasClass('outofstock') || $card.hasClass('out-of-stock')) {
+			return true;
+		}
+		if ($card.find('.stock.out-of-stock').length) {
+			return true;
+		}
+		if ($card.find('.woocommerce-LoopProduct-link .out-of-stock').length) {
+			return true;
+		}
+		return false;
+	}
+
+	/**
+	 * @param {JQuery} $card
+	 * @returns {boolean} False when the last stock toast was shown recently (anti-spam).
+	 */
+	function allowCatalogStockToast($card) {
+		var last = $card.data('mpSccStockToastAt');
+		var now = Date.now();
+		if (last && now - last < CATALOG_STOCK_TOAST_COOLDOWN_MS) {
+			return false;
+		}
+		$card.data('mpSccStockToastAt', now);
+		return true;
+	}
+
+	function setCatalogCardLoading($card, on) {
+		if (on) {
+			$card.addClass('mp-scc-card--loading');
+			$card.attr('data-mp-scc-atc-busy', '1');
+		} else {
+			$card.removeClass('mp-scc-card--loading');
+			$card.removeAttr('data-mp-scc-atc-busy');
+		}
+	}
+
+	function triggerCatalogAddedAnimation($card) {
+		var reduce =
+			window.matchMedia &&
+			window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+		if (reduce) {
+			return;
+		}
+		$card.addClass('mp-scc-card--added');
+		var done = function () {
+			$card.removeClass('mp-scc-card--added');
+			$card.off('animationend.mpSccAdded', done);
+		};
+		$card.on('animationend.mpSccAdded', done);
+		window.setTimeout(function () {
+			$card.removeClass('mp-scc-card--added');
+			$card.off('animationend.mpSccAdded', done);
+		}, 900);
+	}
+
+	/**
+	 * @param {JQuery} $card
+	 * @param {string} text
+	 * @param {{ variant?: string, durationMs?: number, assertive?: boolean }} [options]
+	 */
+	function showCatalogToast($card, text, options) {
+		options = options || {};
+		var msg = text ? String(text) : '';
+		if (!msg) {
+			return;
+		}
+		var variant = options.variant || 'default';
+		var durationMs =
+			typeof options.durationMs === 'number' && options.durationMs >= 0 ? options.durationMs : 4000;
+		var assertive = !!options.assertive;
+		var prev = $card.data('mpSccToastTimer');
+		if (prev) {
+			clearTimeout(prev);
+		}
+		$card.find('.mp-scc-card__toast').remove();
+		var role = assertive ? 'alert' : 'status';
+		var live = assertive ? 'assertive' : 'polite';
+		var cls = 'mp-scc-card__toast';
+		if (variant === 'stock') {
+			cls += ' mp-scc-card__toast--stock';
+		} else if (variant === 'error') {
+			cls += ' mp-scc-card__toast--error';
+		}
+		var $t = $('<span />')
+			.addClass(cls)
+			.attr('role', role)
+			.attr('aria-live', live)
+			.attr('aria-atomic', 'true')
+			.text(msg);
+		$card.append($t);
+		var t = window.setTimeout(function () {
+			$t.remove();
+			$card.removeData('mpSccToastTimer');
+		}, durationMs);
+		$card.data('mpSccToastTimer', t);
+	}
+
+	function initCatalogImageAddToCart() {
+		if (!window.mpScc.flagEnabled('product_image_add_to_cart')) {
+			return;
+		}
+		var catalog = data().catalog || {};
+		var sel = catalog.imageClickSelector || '';
+		var cardClosest = catalog.cardRootSelector || 'li.product';
+		if (!sel) {
+			return;
+		}
+		var cfg = window.mpScc.ajaxConfig();
+		if (!cfg.ajaxUrl || !cfg.actions.addSimpleProduct) {
+			return;
+		}
+
+		$(document.body).on('click.mpSccCatalog', sel, function (e) {
+			var $img = $(this);
+			if (!$img.is('img')) {
+				return;
+			}
+			if (e.button !== 0) {
+				return;
+			}
+			e.preventDefault();
+			e.stopPropagation();
+
+			var $card = $img.closest(cardClosest);
+			if (!$card.length) {
+				return;
+			}
+			if ($card.attr('data-mp-scc-atc-busy') === '1') {
+				return;
+			}
+
+			var imgTitleSels = catalog.imageTitleBlockSelectors || [];
+			for (var ib = 0; ib < imgTitleSels.length; ib++) {
+				if ($img.closest(imgTitleSels[ib]).length) {
+					return;
+				}
+			}
+			if ($(e.target).closest('[data-mp-scc-overlay], .mp-scc-catalog-overlay').length) {
+				return;
+			}
+			var coolUntil = $card.data('mpSccAtcCooldownUntil');
+			if (typeof coolUntil === 'number' && Date.now() < coolUntil) {
+				return;
+			}
+
+			var productId = resolveCatalogProductId($card);
+			if (!productId) {
+				var resolveMsg = catalog.resolveErrorMessage ? String(catalog.resolveErrorMessage) : '';
+				showCatalogToast($card, resolveMsg, { variant: 'error', assertive: true });
+				return;
+			}
+
+			if (isCatalogCardOutOfStock($card)) {
+				if (allowCatalogStockToast($card)) {
+					var stockLabel = window.mpScc.label('out_of_stock');
+					showCatalogToast($card, stockLabel, {
+						variant: 'stock',
+						assertive: true,
+						durationMs: 4500
+					});
+					window.mpScc.logClientEvent('catalog_image_out_of_stock', {
+						product_id: productId,
+						context: 'dom'
+					});
+				}
+				return;
+			}
+
+			setCatalogCardLoading($card, true);
+			$card.removeClass('mp-scc-card--error');
+
+			window.mpScc
+				.postAjax('addSimpleProduct', { product_id: productId, quantity: 1 })
+				.done(function (resp) {
+					if (resp && resp.success && resp.data) {
+						setCatalogCardLoading($card, false);
+						$card.data(
+							'mpSccAtcCooldownUntil',
+							Date.now() + CATALOG_ATC_POST_SUCCESS_COOLDOWN_MS
+						);
+						triggerCatalogAddedAnimation($card);
+						$(document.body).trigger('added_to_cart', [{}, '', $img]);
+						return;
+					}
+					setCatalogCardLoading($card, false);
+					$card.addClass('mp-scc-card--error');
+					window.setTimeout(function () {
+						$card.removeClass('mp-scc-card--error');
+					}, 500);
+					var d = resp && resp.data ? resp.data : {};
+					var code = d.code ? String(d.code) : '';
+					var errMsg = d.message ? String(d.message) : window.mpScc.label('out_of_stock');
+					var toastOpts = { variant: 'error', assertive: true };
+					if (code === 'out_of_stock') {
+						errMsg = window.mpScc.label('out_of_stock') || errMsg;
+						toastOpts = { variant: 'stock', assertive: true, durationMs: 4500 };
+					}
+					showCatalogToast($card, errMsg, toastOpts);
+				})
+				.fail(function (xhr) {
+					setCatalogCardLoading($card, false);
+					$card.addClass('mp-scc-card--error');
+					window.setTimeout(function () {
+						$card.removeClass('mp-scc-card--error');
+					}, 500);
+					var msg = data().networkErrorMessage ? String(data().networkErrorMessage) : '';
+					if (xhr && xhr.responseJSON && xhr.responseJSON.data && xhr.responseJSON.data.message) {
+						msg = String(xhr.responseJSON.data.message);
+					}
+					showCatalogToast($card, msg, { variant: 'error', assertive: true });
+				});
+		});
 	}
 
 	/**
@@ -327,6 +714,11 @@
 			sticky.init();
 			window.mpScc.sticky = sticky;
 		}
+
+		initCatalogOverlayPropagation();
+		initCatalogTitleClickHook();
+		initCatalogImageAddToCart();
+		runCatalogTitleLinkSanity();
 
 		$(window.document).trigger('mpScc:ready');
 	});

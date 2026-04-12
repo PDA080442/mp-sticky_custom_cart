@@ -28,18 +28,95 @@ final class FrontendFlagResolver {
 		$styles         = new DynamicStylesProvider();
 		$cart_fragments = wp_script_is( 'wc-cart-fragments', 'registered' );
 
+		$catalog_settings = OptionResolver::get_by_path( OptionResolver::get_settings(), 'catalog', array() );
+		$img_sel          = isset( $catalog_settings['image_click_selector'] ) ? trim( (string) $catalog_settings['image_click_selector'] ) : '';
+		$card_sel         = isset( $catalog_settings['card_root_selector'] ) ? trim( (string) $catalog_settings['card_root_selector'] ) : '';
+		if ( '' === $img_sel ) {
+			$img_sel = '.woocommerce ul.products li.product img';
+		}
+		if ( '' === $card_sel ) {
+			$card_sel = 'li.product';
+		}
+
+		/**
+		 * Filters the delegated CSS selector for catalog product image clicks.
+		 *
+		 * @param string $selector Resolved selector (from settings or default).
+		 */
+		$img_sel = (string) apply_filters( 'mp_sticky_custom_cart_catalog_image_click_selector', $img_sel );
+
+		/**
+		 * Filters the closest() selector from the image to the product card root.
+		 *
+		 * @param string $selector Resolved selector (from settings or default).
+		 */
+		$card_sel = (string) apply_filters( 'mp_sticky_custom_cart_catalog_card_root_selector', $card_sel );
+
+		$title_link_selectors = array(
+			'h2.woocommerce-loop-product__title a',
+			'.woocommerce-loop-product__title a',
+			'.product-title a',
+			'a.woocommerce-LoopProduct-link',
+		);
+
+		/**
+		 * Filters CSS selectors for product title / permalink links inside a loop card (navigation + sanity checks).
+		 *
+		 * @param string[] $selectors Relative selectors searched with {@see jQuery#find} on the card root.
+		 */
+		$title_link_selectors = apply_filters( 'mp_sticky_custom_cart_catalog_title_link_selectors', $title_link_selectors );
+
+		$title_analytics_selectors = array(
+			'h2.woocommerce-loop-product__title a',
+			'.woocommerce-loop-product__title a',
+			'.product-title a',
+		);
+
+		/**
+		 * Filters selectors for {@see mpScc:catalogTitleClick} — exclude image-only wrapper links (e.g. LoopProduct-link around the thumbnail).
+		 *
+		 * @param string[] $selectors Delegated click filter (comma-joined for jQuery).
+		 */
+		$title_analytics_selectors = apply_filters( 'mp_sticky_custom_cart_catalog_title_analytics_selectors', $title_analytics_selectors );
+
+		$image_title_block_selectors = array(
+			'.woocommerce-loop-product__title',
+			'h2.woocommerce-loop-product__title',
+			'.product-title',
+		);
+
+		/**
+		 * Filters selectors for headings/blocks where an {@see img} should not trigger image add-to-cart (let the link navigate).
+		 *
+		 * @param string[] $selectors Relative selectors for {@see jQuery#closest} from the image.
+		 */
+		$image_title_block_selectors = apply_filters( 'mp_sticky_custom_cart_catalog_image_title_block_selectors', $image_title_block_selectors );
+
+		$catalog_js = array(
+			'imageClickSelector'       => $img_sel,
+			'cardRootSelector'         => $card_sel,
+			'resolveErrorMessage'      => __( 'Не удалось определить товар для добавления в корзину.', 'mp-sticky-custom-cart' ),
+			'titleLinkSelectors'         => array_values( $title_link_selectors ),
+			'titleAnalyticsSelectors'    => array_values( $title_analytics_selectors ),
+			'imageTitleBlockSelectors'   => array_values( $image_title_block_selectors ),
+		);
+
 		$data = array(
 			'version'  => MP_STICKY_CUSTOM_CART_VERSION,
+			'networkErrorMessage' => __( 'Не удалось отправить запрос. Проверьте подключение к сети.', 'mp-sticky-custom-cart' ),
 			'ajaxUrl'  => admin_url( 'admin-ajax.php' ),
 			'nonce'    => wp_create_nonce( Constants::AJAX_NONCE_ACTION ),
 			'actions'  => array(
-				'cartSnapshot'     => Constants::AJAX_ACTION_CART_SNAPSHOT,
-				'setLineQuantity' => Constants::AJAX_ACTION_SET_LINE_QUANTITY,
+				'cartSnapshot'      => Constants::AJAX_ACTION_CART_SNAPSHOT,
+				'setLineQuantity'   => Constants::AJAX_ACTION_SET_LINE_QUANTITY,
+				'addSimpleProduct'  => Constants::AJAX_ACTION_ADD_SIMPLE_PRODUCT,
+				'logClientEvent'    => Constants::AJAX_ACTION_LOG_CLIENT_EVENT,
 			),
 			'flags'    => $provider->for_js(),
 			'labels'   => OptionResolver::get_labels(),
 			'cssVars'  => $styles->get_css_custom_properties(),
 			'wcCartFragments' => $cart_fragments,
+			'catalog'  => $catalog_js,
 		);
 
 		/**
