@@ -192,6 +192,139 @@
 	}
 
 	/**
+	 * @param {JQuery} $card
+	 * @param {Record<string, *>} catalog
+	 * @returns {JQuery} Host that wraps the thumbnail (used to detect non-standard loops).
+	 */
+	function findCatalogOverlayThumbnailHost($card, catalog) {
+		var list = catalog.overlayHostSelectors || [];
+		var i;
+		for (i = 0; i < list.length; i++) {
+			var $h = $card.find(list[i]).first();
+			if ($h.length && $h.find('img').length) {
+				return $h;
+			}
+		}
+		return $();
+	}
+
+	/**
+	 * Place the overlay as a bottom band over the first product image (sibling inside the card, no nested anchors).
+	 * @param {JQuery} $card
+	 * @param {JQuery} $overlay
+	 */
+	function layoutCatalogMoreInfoOverlayBand($card, $overlay) {
+		var $img = $card.find('img').first();
+		if (!$img.length) {
+			return;
+		}
+		var imgEl = $img.get(0);
+		var cardEl = $card.get(0);
+		function sync() {
+			if (!imgEl || !cardEl || !$overlay.parent().length) {
+				return;
+			}
+			var io = $img.offset();
+			var co = $card.offset();
+			if (!io || !co) {
+				return;
+			}
+			var ih = $img.outerHeight();
+			var band = Math.max(40, Math.min(56, Math.round(ih * 0.26)));
+			var topRel = io.top - co.top + ih - band;
+			var leftRel = io.left - co.left;
+			$overlay.css({
+				top: topRel,
+				left: leftRel,
+				width: $img.outerWidth(),
+				height: band
+			});
+		}
+		sync();
+		var ro = $card.data('mpSccOverlayRo');
+		if (ro && typeof ro.disconnect === 'function') {
+			ro.disconnect();
+		}
+		if (window.ResizeObserver && cardEl && imgEl) {
+			ro = new ResizeObserver(sync);
+			ro.observe(cardEl);
+			ro.observe(imgEl);
+			$card.data('mpSccOverlayRo', ro);
+		}
+	}
+
+	/**
+	 * Injects the «Подробнее» band + wires layout when {@see FeatureFlagsDefaults::KEY_HOVER_MORE_INFO_ENABLED} is on.
+	 */
+	function initCatalogMoreInfoOverlay() {
+		if (!window.mpScc.flagEnabled('hover_more_info_enabled')) {
+			return;
+		}
+		var catalog = data().catalog || {};
+		var cardSel = catalog.cardRootSelector || 'li.product';
+		var label = window.mpScc.label('more_info');
+		if (!String(label || '').trim()) {
+			label = 'Подробнее о товаре';
+		}
+		var mobileAlways = !!catalog.hoverOverlayMobileAlways;
+		var motion = catalog.hoverMotionPreset || 'fade_slide';
+		if (motion !== 'fade' && motion !== 'slide' && motion !== 'fade_slide') {
+			motion = 'fade_slide';
+		}
+
+		$(cardSel).each(function () {
+			var $card = $(this);
+			if ($card.find('.mp-scc-catalog-overlay').length) {
+				return;
+			}
+			if (!$card.find('img').length) {
+				return;
+			}
+			var $perm = findCatalogPermalinkAnchor($card, catalog);
+			if (!$perm.length) {
+				return;
+			}
+			var productHref = $perm.attr('href');
+			if (!productHref || productHref === '#') {
+				return;
+			}
+
+			if (!findCatalogOverlayThumbnailHost($card, catalog).length) {
+				$card.addClass('mp-scc-catalog-card--overlay-fallback');
+			}
+
+			var cls =
+				'mp-scc-catalog-overlay mp-scc-catalog-overlay--floating mp-scc-catalog-overlay--motion-' + motion;
+			if (mobileAlways) {
+				cls += ' mp-scc-catalog-overlay--mobile-always';
+			}
+
+			var $ov = $('<a />', {
+				class: cls,
+				href: productHref,
+				'data-mp-scc-overlay': ''
+			});
+			if (label) {
+				$ov.attr('aria-label', label);
+			}
+			$ov.append($('<span class="mp-scc-catalog-overlay__label" />').text(label));
+			$card.append($ov);
+			layoutCatalogMoreInfoOverlayBand($card, $ov);
+		});
+	}
+
+	var catalogOverlayInitTimer = null;
+	function scheduleCatalogMoreInfoOverlay() {
+		if (catalogOverlayInitTimer) {
+			clearTimeout(catalogOverlayInitTimer);
+		}
+		catalogOverlayInitTimer = window.setTimeout(function () {
+			catalogOverlayInitTimer = null;
+			initCatalogMoreInfoOverlay();
+		}, 80);
+	}
+
+	/**
 	 * Optional dev aid: append ?mp_scc_catalog_debug=1 to the shop URL to log suspicious title links.
 	 */
 	function runCatalogTitleLinkSanity() {
@@ -717,8 +850,16 @@
 
 		initCatalogOverlayPropagation();
 		initCatalogTitleClickHook();
+		initCatalogMoreInfoOverlay();
 		initCatalogImageAddToCart();
 		runCatalogTitleLinkSanity();
+
+		$(document.body).on(
+			'wc_fragments_refreshed updated_wc_div etheme_ajax_loaded post-load',
+			scheduleCatalogMoreInfoOverlay
+		);
+
+		window.mpScc.refreshCatalogOverlay = initCatalogMoreInfoOverlay;
 
 		$(window.document).trigger('mpScc:ready');
 	});
