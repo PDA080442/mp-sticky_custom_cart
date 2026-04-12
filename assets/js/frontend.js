@@ -86,6 +86,189 @@
 		return isNaN(n) || n < 0 ? 320 : n;
 	}
 
+	function resolveCatalogProductId($card) {
+		var $btn = $card.find('.add_to_cart_button[data-product_id]').first();
+		if ($btn.length) {
+			var id = parseInt($btn.attr('data-product_id'), 10);
+			if (!isNaN(id) && id > 0) {
+				return id;
+			}
+		}
+		var $hrefBtn = $card.find('a[href*="add-to-cart="]').first();
+		var href = $hrefBtn.attr('href') || '';
+		var m = href.match(/[?&]add-to-cart=(\d+)/);
+		if (m) {
+			return parseInt(m[1], 10);
+		}
+		var cls = $card.attr('class') || '';
+		var m2 = cls.match(/\bpost-(\d+)\b/);
+		if (m2) {
+			return parseInt(m2[1], 10);
+		}
+		var $anyId = $card.find('[data-product_id]').first();
+		if ($anyId.length) {
+			var id0 = parseInt($anyId.attr('data-product_id'), 10);
+			if (!isNaN(id0) && id0 > 0) {
+				return id0;
+			}
+		}
+		return 0;
+	}
+
+	function getWcAddToCartUrl(catalog) {
+		if (catalog && catalog.wcAjaxAddToCartUrl) {
+			return String(catalog.wcAjaxAddToCartUrl);
+		}
+		if (typeof wc_add_to_cart_params !== 'undefined' && wc_add_to_cart_params.wc_ajax_url) {
+			return wc_add_to_cart_params.wc_ajax_url.toString().replace('%%endpoint%%', 'add_to_cart');
+		}
+		return '';
+	}
+
+	function getWcAddToCartNonce(catalog) {
+		if (catalog && catalog.wcAddToCartNonce) {
+			return String(catalog.wcAddToCartNonce);
+		}
+		if (typeof wc_add_to_cart_params !== 'undefined' && wc_add_to_cart_params.wc_ajax_nonce) {
+			return String(wc_add_to_cart_params.wc_ajax_nonce);
+		}
+		return '';
+	}
+
+	function setCatalogCardLoading($card, on) {
+		if (on) {
+			$card.addClass('mp-scc-card--loading');
+			$card.attr('data-mp-scc-atc-busy', '1');
+		} else {
+			$card.removeClass('mp-scc-card--loading');
+			$card.removeAttr('data-mp-scc-atc-busy');
+		}
+	}
+
+	function triggerCatalogAddedAnimation($card) {
+		var reduce =
+			window.matchMedia &&
+			window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+		if (reduce) {
+			return;
+		}
+		$card.addClass('mp-scc-card--added');
+		var done = function () {
+			$card.removeClass('mp-scc-card--added');
+			$card.off('animationend.mpSccAdded', done);
+		};
+		$card.on('animationend.mpSccAdded', done);
+		window.setTimeout(function () {
+			$card.removeClass('mp-scc-card--added');
+			$card.off('animationend.mpSccAdded', done);
+		}, 900);
+	}
+
+	function showCatalogToast($card, text) {
+		var msg = text ? String(text) : '';
+		if (!msg) {
+			return;
+		}
+		$card.find('.mp-scc-card__toast').remove();
+		var $t = $('<span class="mp-scc-card__toast" role="status" />').text(msg);
+		$card.append($t);
+		window.setTimeout(function () {
+			$t.remove();
+		}, 4000);
+	}
+
+	function initCatalogImageAddToCart() {
+		if (!window.mpScc.flagEnabled('product_image_add_to_cart')) {
+			return;
+		}
+		var catalog = data().catalog || {};
+		var sel = catalog.imageClickSelector || '';
+		var cardClosest = catalog.cardRootSelector || 'li.product';
+		if (!sel) {
+			return;
+		}
+		var url = getWcAddToCartUrl(catalog);
+		var nonce = getWcAddToCartNonce(catalog);
+		if (!url || !nonce) {
+			return;
+		}
+
+		$(document.body).on('click.mpSccCatalog', sel, function (e) {
+			var $img = $(this);
+			if (!$img.is('img')) {
+				return;
+			}
+			if (e.button !== 0) {
+				return;
+			}
+			e.preventDefault();
+			e.stopPropagation();
+
+			var $card = $img.closest(cardClosest);
+			if (!$card.length) {
+				return;
+			}
+			if ($card.attr('data-mp-scc-atc-busy') === '1') {
+				return;
+			}
+
+			var productId = resolveCatalogProductId($card);
+			if (!productId) {
+				var resolveMsg = catalog.resolveErrorMessage ? String(catalog.resolveErrorMessage) : '';
+				showCatalogToast($card, resolveMsg);
+				return;
+			}
+
+			setCatalogCardLoading($card, true);
+			$card.removeClass('mp-scc-card--error');
+
+			$.ajax({
+				url: url,
+				type: 'POST',
+				data: {
+					product_id: productId,
+					product_sku: '',
+					quantity: 1,
+					security: nonce
+				},
+				dataType: 'json'
+			})
+				.done(function (resp) {
+					if (!resp) {
+						setCatalogCardLoading($card, false);
+						$card.addClass('mp-scc-card--error');
+						showCatalogToast($card, window.mpScc.label('out_of_stock'));
+						return;
+					}
+					if (resp.error) {
+						setCatalogCardLoading($card, false);
+						$card.addClass('mp-scc-card--error');
+						window.setTimeout(function () {
+							$card.removeClass('mp-scc-card--error');
+						}, 500);
+						showCatalogToast($card, window.mpScc.label('out_of_stock'));
+						return;
+					}
+					setCatalogCardLoading($card, false);
+					triggerCatalogAddedAnimation($card);
+					$(document.body).trigger('added_to_cart', [
+						resp.fragments || {},
+						resp.cart_hash || '',
+						$img
+					]);
+				})
+				.fail(function () {
+					setCatalogCardLoading($card, false);
+					$card.addClass('mp-scc-card--error');
+					window.setTimeout(function () {
+						$card.removeClass('mp-scc-card--error');
+					}, 500);
+					var netMsg = data().networkErrorMessage ? String(data().networkErrorMessage) : '';
+					showCatalogToast($card, netMsg);
+				});
+		});
+	}
+
 	/**
 	 * Sticky bar + drawer: lifecycle, drawer toggle, cart snapshot UI, debounced qty, request lock.
 	 */
@@ -327,6 +510,8 @@
 			sticky.init();
 			window.mpScc.sticky = sticky;
 		}
+
+		initCatalogImageAddToCart();
 
 		$(window.document).trigger('mpScc:ready');
 	});

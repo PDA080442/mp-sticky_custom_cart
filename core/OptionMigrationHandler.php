@@ -100,6 +100,14 @@ final class OptionMigrationHandler {
 					}
 				}
 			}
+			if ( isset( $settings['catalog'], $defaults['catalog'] ) && is_array( $settings['catalog'] ) && is_array( $defaults['catalog'] ) ) {
+				foreach ( $defaults['catalog'] as $ck => $cv ) {
+					if ( ! array_key_exists( $ck, $settings['catalog'] ) ) {
+						$settings['catalog'][ $ck ] = $cv;
+						$dirty                      = true;
+					}
+				}
+			}
 			if ( $dirty ) {
 				update_option( Constants::OPTION_SETTINGS, $settings, false );
 			}
