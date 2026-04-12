@@ -110,6 +110,7 @@ final class SettingsValidationSchema {
 				'checkout'           => array( 'type' => 'text', 'max_length' => 500 ),
 				'variation_required' => array( 'type' => 'text', 'max_length' => 500 ),
 				'drawer_empty'       => array( 'type' => 'text', 'max_length' => 500 ),
+				'drawer_remove_line' => array( 'type' => 'text', 'max_length' => 500 ),
 			),
 		);
 	}
