@@ -28,8 +28,45 @@ final class FrontendFlagResolver {
 		$styles         = new DynamicStylesProvider();
 		$cart_fragments = wp_script_is( 'wc-cart-fragments', 'registered' );
 
+		$catalog_settings = OptionResolver::get_by_path( OptionResolver::get_settings(), 'catalog', array() );
+		$img_sel          = isset( $catalog_settings['image_click_selector'] ) ? trim( (string) $catalog_settings['image_click_selector'] ) : '';
+		$card_sel         = isset( $catalog_settings['card_root_selector'] ) ? trim( (string) $catalog_settings['card_root_selector'] ) : '';
+		if ( '' === $img_sel ) {
+			$img_sel = '.woocommerce ul.products li.product img';
+		}
+		if ( '' === $card_sel ) {
+			$card_sel = 'li.product';
+		}
+
+		/**
+		 * Filters the delegated CSS selector for catalog product image clicks.
+		 *
+		 * @param string $selector Resolved selector (from settings or default).
+		 */
+		$img_sel = (string) apply_filters( 'mp_sticky_custom_cart_catalog_image_click_selector', $img_sel );
+
+		/**
+		 * Filters the closest() selector from the image to the product card root.
+		 *
+		 * @param string $selector Resolved selector (from settings or default).
+		 */
+		$card_sel = (string) apply_filters( 'mp_sticky_custom_cart_catalog_card_root_selector', $card_sel );
+
+		$catalog_js = array(
+			'imageClickSelector'   => $img_sel,
+			'cardRootSelector'     => $card_sel,
+			'wcAddToCartNonce'     => wp_create_nonce( 'woocommerce-add-to-cart' ),
+			'resolveErrorMessage'  => __( 'Не удалось определить товар для добавления в корзину.', 'mp-sticky-custom-cart' ),
+		);
+		if ( class_exists( '\WC_AJAX', false ) ) {
+			$catalog_js['wcAjaxAddToCartUrl'] = \WC_AJAX::get_endpoint( 'add_to_cart' );
+		} else {
+			$catalog_js['wcAjaxAddToCartUrl'] = '';
+		}
+
 		$data = array(
 			'version'  => MP_STICKY_CUSTOM_CART_VERSION,
+			'networkErrorMessage' => __( 'Не удалось отправить запрос. Проверьте подключение к сети.', 'mp-sticky-custom-cart' ),
 			'ajaxUrl'  => admin_url( 'admin-ajax.php' ),
 			'nonce'    => wp_create_nonce( Constants::AJAX_NONCE_ACTION ),
 			'actions'  => array(
@@ -40,6 +77,7 @@ final class FrontendFlagResolver {
 			'labels'   => OptionResolver::get_labels(),
 			'cssVars'  => $styles->get_css_custom_properties(),
 			'wcCartFragments' => $cart_fragments,
+			'catalog'  => $catalog_js,
 		);
 
 		/**

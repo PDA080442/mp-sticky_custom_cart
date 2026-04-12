@@ -162,6 +162,9 @@ final class SettingsPage {
 				'slide'      => 'slide',
 			)
 		);
+		echo '<tr><td colspan="2"><p class="description">' . esc_html__( 'Клик по изображению в каталоге: если пусто, используется стандартный селектор WooCommerce (см. документацию плагина).', 'mp-sticky-custom-cart' ) . '</p></td></tr>';
+		self::field_text( $opt, 'catalog', 'image_click_selector', __( 'Селектор изображения карточки (CSS)', 'mp-sticky-custom-cart' ), isset( $c['image_click_selector'] ) ? (string) $c['image_click_selector'] : '' );
+		self::field_text( $opt, 'catalog', 'card_root_selector', __( 'Корень карточки для состояний (closest, CSS)', 'mp-sticky-custom-cart' ), isset( $c['card_root_selector'] ) ? (string) $c['card_root_selector'] : 'li.product' );
 
 		echo '</tbody></table>';
 
