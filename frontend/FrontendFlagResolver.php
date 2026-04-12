@@ -52,10 +52,53 @@ final class FrontendFlagResolver {
 		 */
 		$card_sel = (string) apply_filters( 'mp_sticky_custom_cart_catalog_card_root_selector', $card_sel );
 
+		$title_link_selectors = array(
+			'h2.woocommerce-loop-product__title a',
+			'.woocommerce-loop-product__title a',
+			'.product-title a',
+			'a.woocommerce-LoopProduct-link',
+		);
+
+		/**
+		 * Filters CSS selectors for product title / permalink links inside a loop card (navigation + sanity checks).
+		 *
+		 * @param string[] $selectors Relative selectors searched with {@see jQuery#find} on the card root.
+		 */
+		$title_link_selectors = apply_filters( 'mp_sticky_custom_cart_catalog_title_link_selectors', $title_link_selectors );
+
+		$title_analytics_selectors = array(
+			'h2.woocommerce-loop-product__title a',
+			'.woocommerce-loop-product__title a',
+			'.product-title a',
+		);
+
+		/**
+		 * Filters selectors for {@see mpScc:catalogTitleClick} — exclude image-only wrapper links (e.g. LoopProduct-link around the thumbnail).
+		 *
+		 * @param string[] $selectors Delegated click filter (comma-joined for jQuery).
+		 */
+		$title_analytics_selectors = apply_filters( 'mp_sticky_custom_cart_catalog_title_analytics_selectors', $title_analytics_selectors );
+
+		$image_title_block_selectors = array(
+			'.woocommerce-loop-product__title',
+			'h2.woocommerce-loop-product__title',
+			'.product-title',
+		);
+
+		/**
+		 * Filters selectors for headings/blocks where an {@see img} should not trigger image add-to-cart (let the link navigate).
+		 *
+		 * @param string[] $selectors Relative selectors for {@see jQuery#closest} from the image.
+		 */
+		$image_title_block_selectors = apply_filters( 'mp_sticky_custom_cart_catalog_image_title_block_selectors', $image_title_block_selectors );
+
 		$catalog_js = array(
-			'imageClickSelector'  => $img_sel,
-			'cardRootSelector'    => $card_sel,
-			'resolveErrorMessage' => __( 'Не удалось определить товар для добавления в корзину.', 'mp-sticky-custom-cart' ),
+			'imageClickSelector'       => $img_sel,
+			'cardRootSelector'         => $card_sel,
+			'resolveErrorMessage'      => __( 'Не удалось определить товар для добавления в корзину.', 'mp-sticky-custom-cart' ),
+			'titleLinkSelectors'         => array_values( $title_link_selectors ),
+			'titleAnalyticsSelectors'    => array_values( $title_analytics_selectors ),
+			'imageTitleBlockSelectors'   => array_values( $image_title_block_selectors ),
 		);
 
 		$data = array(
