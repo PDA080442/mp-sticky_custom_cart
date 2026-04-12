@@ -226,7 +226,27 @@ final class CssVariablesContract {
 			$out[ $row['name'] ] = self::format_value( $raw, $row );
 		}
 
+		$out[ self::PREFIX . 'sticky-layout-reserve' ] = self::format_sticky_layout_reserve_px( $merged_settings );
+
 		return $out;
+	}
+
+	/**
+	 * Approximate height of the fixed bar (padding + one/two rows) for body scroll padding — reduces CLS.
+	 *
+	 * @param array<string, mixed> $merged_settings Merged settings tree.
+	 */
+	private static function format_sticky_layout_reserve_px( array $merged_settings ) {
+		$py_m = (int) OptionResolver::get_by_path( $merged_settings, 'sticky_cart.padding_y_mobile_px', 12 );
+		$py_d = (int) OptionResolver::get_by_path( $merged_settings, 'sticky_cart.padding_y_desktop_px', 14 );
+		$btn  = (int) OptionResolver::get_by_path( $merged_settings, 'sticky_cart.button_font_size_px', 14 );
+		$sum  = (int) OptionResolver::get_by_path( $merged_settings, 'sticky_cart.summary_font_size_px', 15 );
+		$drawer_toggle = 44;
+		$mobile_stack  = (int) round( ( 2 * $py_m ) + ( 1.25 * $sum ) + 10 + max( 38.0, 1.45 * $btn ) + $drawer_toggle );
+		$desktop_row   = (int) round( ( 2 * $py_d ) + max( 1.25 * $sum, 1.45 * $btn, 40.0 ) + 12 );
+		$n             = max( $mobile_stack, $desktop_row, 92 );
+
+		return (string) $n . 'px';
 	}
 
 	/**
