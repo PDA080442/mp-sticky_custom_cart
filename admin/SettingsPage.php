@@ -199,6 +199,7 @@ final class SettingsPage {
 	private static function render_cart_tab( array $s, $opt ) {
 		$c  = isset( $s['sticky_cart'] ) && is_array( $s['sticky_cart'] ) ? $s['sticky_cart'] : array();
 		$cr = isset( $s['cart_route'] ) && is_array( $s['cart_route'] ) ? $s['cart_route'] : array();
+		$n  = isset( $s['notices'] ) && is_array( $s['notices'] ) ? $s['notices'] : array();
 		echo '<h2>' . esc_html__( 'Нижняя корзина (sticky)', 'mp-sticky-custom-cart' ) . '</h2>';
 		echo '<p class="description">' . esc_html__( 'Значения ниже попадают в CSS-переменные (--mp-scc-*) на сайте.', 'mp-sticky-custom-cart' ) . '</p>';
 
@@ -288,6 +289,18 @@ final class SettingsPage {
 		echo '<p class="description">' . esc_html( (string) $hits ) . '</p>';
 		echo '<p class="description">' . esc_html__( 'Увеличивается при включённом редиректе и учёте, если в запросе был параметр add-to-cart (типичные внешние ссылки).', 'mp-sticky-custom-cart' ) . '</p>';
 		echo '</td></tr>';
+		echo '</tbody></table>';
+
+		echo '<h3>' . esc_html__( 'Уведомления после добавления в корзину', 'mp-sticky-custom-cart' ) . '</h3>';
+		echo '<p class="description">' . esc_html__( 'WooCommerce показывает ссылку «View cart» в тексте успеха. Для нижней корзины её обычно скрывают.', 'mp-sticky-custom-cart' ) . '</p>';
+		echo '<table class="form-table" role="presentation"><tbody>';
+		self::field_checkbox(
+			$opt,
+			'notices',
+			'remove_view_cart_link',
+			__( 'Убрать ссылку «View cart» из уведомления', 'mp-sticky-custom-cart' ),
+			! isset( $n['remove_view_cart_link'] ) || ! empty( $n['remove_view_cart_link'] )
+		);
 		echo '</tbody></table>';
 
 		echo '<p class="description">' . esc_html__( 'Анимация карточки каталога (hover) настраивается на вкладке «Каталог».', 'mp-sticky-custom-cart' ) . '</p>';

@@ -10,6 +10,7 @@ namespace MpStickyCustomCart\Core;
 use MpStickyCustomCart\Admin\AdminAssetsHooks;
 use MpStickyCustomCart\Admin\SettingsApiHooks;
 use MpStickyCustomCart\Admin\SettingsPage;
+use MpStickyCustomCart\Frontend\AddToCartMessageHooks;
 use MpStickyCustomCart\Frontend\AddedToCartHooks;
 use MpStickyCustomCart\Frontend\AjaxEndpointsHooks;
 use MpStickyCustomCart\Frontend\CartRouteRedirectHooks;
@@ -40,6 +41,7 @@ final class HookRegistry {
 		SettingsPage::register();
 		ErrorLoggingHooks::register();
 		AddedToCartHooks::register();
+		AddToCartMessageHooks::register();
 
 		/**
 		 * Fires after hook groups are registered (WooCommerce active).
