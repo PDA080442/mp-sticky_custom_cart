@@ -170,6 +170,15 @@ body.popup-overlay-open .mp-scc-sticky-bar {
 	color: color-mix(in srgb, var(--mp-scc-color-text-primary, #1a1a1a) 88%, #b42318);
 }
 
+/* Variable product: no variation selected — visual cue on attribute block (see frontend.js) */
+.woocommerce form.variations_form .variations.mp-scc-variation--error,
+.woocommerce form.variations_form.mp-scc-variation--error {
+	outline: 2px solid color-mix(in srgb, #b42318 70%, var(--mp-scc-color-text-primary, #1a1a1a));
+	outline-offset: 3px;
+	border-radius: 8px;
+	transition: outline-color 0.2s ease;
+}
+
 @media (min-width: 783px) {
 	.mp-scc-sticky-bar {
 		padding-top: var(--mp-scc-sticky-padding-y-desktop, 14px);

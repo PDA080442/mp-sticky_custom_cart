@@ -722,6 +722,183 @@
 		});
 	}
 
+	var SINGLE_ADD_SUCCESS_COOLDOWN_MS = 800;
+	var lastSingleAddFeedbackAt = 0;
+
+	/**
+	 * Single product page / quick-view: success copy after Woo `added_to_cart`; optional YITH sync event.
+	 * Sticky count/subtotal update via scheduleRefreshFromWooEvent on `added_to_cart` (same file).
+	 * @param {JQuery|HTMLElement} [$button] Third argument from jQuery `added_to_cart` (triggering button).
+	 * @returns {boolean}
+	 */
+	function shouldShowSingleProductAddFeedback($button) {
+		if ($('body').hasClass('single-product')) {
+			return true;
+		}
+		var $b = $button ? $($button) : $();
+		if (!$b.length) {
+			return false;
+		}
+		var quickSelectors = [
+			'.yith-quick-view-content',
+			'#yith-quick-view-modal',
+			'.yith-wcqv-wrapper',
+			'.quick-view-modal',
+			'.woocommerce-quick-view-modal',
+			'.etheme-quick-view',
+			'.fancybox-inner',
+			'.featherlight-inner',
+			'[data-product-quick-view-modal]'
+		];
+		var i;
+		for (i = 0; i < quickSelectors.length; i++) {
+			if ($b.closest(quickSelectors[i]).length) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	function getVariationIdFromForm($form) {
+		if (!$form || !$form.length) {
+			return 0;
+		}
+		var $vid = $form.find('input.variation_id, input[name="variation_id"]').first();
+		if (!$vid.length) {
+			return 0;
+		}
+		var n = parseInt($vid.val(), 10);
+		return isNaN(n) || n <= 0 ? 0 : n;
+	}
+
+	function $variationHighlightTarget($form) {
+		var $t = $form.find('.variations').first();
+		if ($t.length) {
+			return $t;
+		}
+		return $form;
+	}
+
+	function clearVariationErrorHighlight($form) {
+		if (!$form || !$form.length) {
+			return;
+		}
+		$form.find('.mp-scc-variation--error').removeClass('mp-scc-variation--error');
+	}
+
+	function showVariationRequiredFromGuard($form) {
+		var msg = window.mpScc.label('variation_required');
+		if (!msg) {
+			msg = 'Выберите вариацию товара';
+		}
+		var sticky = window.mpScc.sticky;
+		if (sticky && typeof sticky.showStickyInlineFeedback === 'function') {
+			sticky.showStickyInlineFeedback(msg, 'error');
+		}
+		var $target = $variationHighlightTarget($form);
+		$target.addClass('mp-scc-variation--error');
+		var el = $target.get(0);
+		if (el && el.scrollIntoView) {
+			try {
+				el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+			} catch (err) {
+				el.scrollIntoView(true);
+			}
+		}
+	}
+
+	/**
+	 * Block add-to-cart when no variation is selected (capture phase — before Woo handlers).
+	 * Message: mpScc.label('variation_required') from admin / translations.
+	 */
+	function initVariableProductVariationGuard() {
+		document.body.addEventListener(
+			'click',
+			function (e) {
+				var t = e.target;
+				if (!t || typeof t.closest !== 'function') {
+					return;
+				}
+				if (e.button !== 0) {
+					return;
+				}
+				var btn = t.closest(
+					'form.variations_form button.single_add_to_cart_button, form.variations_form input.single_add_to_cart_button'
+				);
+				if (!btn) {
+					return;
+				}
+				var form = btn.closest('form.variations_form');
+				if (!form) {
+					return;
+				}
+				var $form = $(form);
+				if (getVariationIdFromForm($form) > 0) {
+					return;
+				}
+				e.preventDefault();
+				e.stopPropagation();
+				e.stopImmediatePropagation();
+				showVariationRequiredFromGuard($form);
+			},
+			true
+		);
+
+		$(document.body).on(
+			'change',
+			'form.variations_form .variations input, form.variations_form .variations select',
+			function () {
+				clearVariationErrorHighlight($(this).closest('form.variations_form'));
+			}
+		);
+		$(document.body).on('found_variation reset_data', 'form.variations_form', function () {
+			clearVariationErrorHighlight($(this));
+		});
+	}
+
+	function initSingleProductAddToCart() {
+		$(document.body).on('added_to_cart.mpSccSingle', function (ev, fragments, cart_hash, $button) {
+			if (!shouldShowSingleProductAddFeedback($button)) {
+				return;
+			}
+			var now = Date.now();
+			if (now - lastSingleAddFeedbackAt < SINGLE_ADD_SUCCESS_COOLDOWN_MS) {
+				return;
+			}
+			lastSingleAddFeedbackAt = now;
+			var msg = window.mpScc.label('single_add_success');
+			if (!msg) {
+				msg = 'Товар добавлен в корзину';
+			}
+			var sticky = window.mpScc.sticky;
+			if (sticky && typeof sticky.showStickyInlineFeedback === 'function') {
+				sticky.showStickyInlineFeedback(msg, 'success');
+			}
+		});
+
+		$(document.body).on('submit.mpSccSingleCart', 'form.cart', function () {
+			if (!$('body').hasClass('single-product')) {
+				return;
+			}
+			// WooCommerce AJAX add-to-cart prevents default when enabled; `added_to_cart` then refreshes sticky.
+			// Non-AJAX POST reloads the page and the sticky markup is re-rendered server-side.
+		});
+
+		$(document.body).on('yith_added_to_cart.mpSccYith', function (e) {
+			var sticky = window.mpScc.sticky;
+			if (sticky && typeof sticky.scheduleRefreshFromWooEvent === 'function') {
+				sticky.scheduleRefreshFromWooEvent(e.type || 'yith_added_to_cart');
+			}
+		});
+	}
+
+	/** Coalesce rapid WooCommerce body events (added_to_cart + fragments + totals) into one snapshot. */
+	var WOO_CART_EVENT_DEBOUNCE_MS = 100;
+	/** Second snapshot if the first Woo-driven refresh did not apply payload (network/lock race). */
+	var WOO_CART_SYNC_FALLBACK_MS = 2600;
+	var SNAPSHOT_FAIL_BURST_WINDOW_MS = 8000;
+	var SNAPSHOT_FAIL_BURST_THRESHOLD = 4;
+
 	/**
 	 * Sticky bar + drawer: lifecycle, drawer toggle, cart snapshot UI, debounced qty, request lock.
 	 */
@@ -743,6 +920,11 @@
 		this.qtyTimers = {};
 		this.pendingQty = {};
 		this.reconcileTimer = null;
+		this.wooEventDebounceTimer = null;
+		this.wooFallbackTimer = null;
+		this._lastSnapshotAppliedAt = 0;
+		this._syncFailCount = 0;
+		this._syncFailWindowStart = 0;
 		this.lastSnapshotTs = 0;
 		this._skipLoadingOnce = true;
 		this._fallbackSubtotalHtml = this.$total.length ? this.$total.html() : '';
@@ -850,11 +1032,83 @@
 		}, 380);
 	};
 
+	StickyCartController.prototype._resetSnapshotSyncFailures = function () {
+		this._syncFailCount = 0;
+		this._syncFailWindowStart = 0;
+	};
+
+	/**
+	 * @param {string} [reason]
+	 */
+	StickyCartController.prototype._recordSnapshotSyncFailure = function (reason) {
+		var now = Date.now();
+		var w = SNAPSHOT_FAIL_BURST_WINDOW_MS;
+		if (!this._syncFailWindowStart || now - this._syncFailWindowStart > w) {
+			this._syncFailWindowStart = now;
+			this._syncFailCount = 0;
+		}
+		this._syncFailCount++;
+		if (this._syncFailCount < SNAPSHOT_FAIL_BURST_THRESHOLD) {
+			return;
+		}
+		var ctx = String(reason || '').slice(0, 120);
+		if (window.mpScc && typeof window.mpScc.logClientEvent === 'function') {
+			window.mpScc.logClientEvent('woo_cart_snapshot_sync_fail_burst', { context: ctx });
+		}
+		this._syncFailCount = 0;
+		this._syncFailWindowStart = now;
+	};
+
+	/**
+	 * Debounced snapshot refresh after Woo cart-related DOM events (deduplicates cascades).
+	 * @param {string} [eventType] Woo event name (for future diagnostics).
+	 */
+	StickyCartController.prototype.scheduleRefreshFromWooEvent = function (eventType) {
+		var self = this;
+		if (this.wooEventDebounceTimer) {
+			clearTimeout(this.wooEventDebounceTimer);
+		}
+		this.wooEventDebounceTimer = window.setTimeout(function () {
+			self.wooEventDebounceTimer = null;
+			self._onWooCartEventRefresh(eventType);
+		}, WOO_CART_EVENT_DEBOUNCE_MS);
+	};
+
+	/**
+	 * @param {string} [eventType]
+	 */
+	StickyCartController.prototype._onWooCartEventRefresh = function (eventType) {
+		var scheduledAt = Date.now();
+		this.refresh();
+		this._armWooSyncFallback(scheduledAt);
+	};
+
+	/**
+	 * If applyPayload did not run after this Woo-driven refresh, request snapshot again.
+	 * @param {number} scheduledAt Value of Date.now() when the Woo debounced handler ran.
+	 */
+	StickyCartController.prototype._armWooSyncFallback = function (scheduledAt) {
+		var self = this;
+		if (this.wooFallbackTimer) {
+			clearTimeout(this.wooFallbackTimer);
+		}
+		this.wooFallbackTimer = window.setTimeout(function () {
+			self.wooFallbackTimer = null;
+			if (self._lastSnapshotAppliedAt >= scheduledAt) {
+				return;
+			}
+			self.refresh();
+		}, WOO_CART_SYNC_FALLBACK_MS);
+	};
+
 	StickyCartController.prototype.applyPayload = function (p) {
 		if (!p || typeof p !== 'object') {
 			this.scheduleReconcile();
 			return;
 		}
+
+		this._lastSnapshotAppliedAt = Date.now();
+		this._resetSnapshotSyncFailures();
 
 		var items = Array.isArray(p.items) ? p.items : [];
 		var lineCount = typeof p.line_count === 'number' ? p.line_count : items.length;
@@ -1341,10 +1595,12 @@
 				if (resp && resp.success && resp.data) {
 					self.applyPayload(resp.data);
 				} else {
+					self._recordSnapshotSyncFailure('bad_response');
 					self.scheduleReconcile();
 				}
 			})
 			.fail(function () {
+				self._recordSnapshotSyncFailure('ajax_fail');
 				self.scheduleReconcile();
 			})
 			.always(function () {
@@ -1483,12 +1739,11 @@
 			}
 		});
 
-		var wooRefresh = function () {
-			self.refresh();
-		};
 		$(document.body).on(
-			'added_to_cart removed_from_cart wc_fragments_refreshed updated_cart_totals wc_fragments_loaded',
-			wooRefresh
+			'added_to_cart removed_from_cart wc_fragments_refreshed updated_cart_totals wc_fragments_loaded updated_wc_div',
+			function (e) {
+				self.scheduleRefreshFromWooEvent(e && e.type ? e.type : 'woo');
+			}
 		);
 	};
 
@@ -1506,6 +1761,9 @@
 			sticky.init();
 			window.mpScc.sticky = sticky;
 		}
+
+		initVariableProductVariationGuard();
+		initSingleProductAddToCart();
 
 		initCatalogOverlayPropagation();
 		initCatalogTitleClickHook();
