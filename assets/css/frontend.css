@@ -61,6 +61,47 @@
 }
 
 /* -------------------------------------------------------------------------
+   Body reserve + CLS: keep page content clear of the fixed bar (footer, long scroll).
+   --mp-scc-sticky-layout-reserve is emitted from settings (see CssVariablesContract).
+   ------------------------------------------------------------------------- */
+body.mp-scc-sticky-active {
+	padding-bottom: calc(var(--mp-scc-sticky-layout-reserve, 96px) + env(safe-area-inset-bottom, 0px));
+}
+
+/* iPhone landscape / short viewports: notch insets often move to left/right */
+@media (orientation: landscape) and (max-height: 500px) {
+	body.mp-scc-sticky-active {
+		padding-bottom: calc(
+			var(--mp-scc-sticky-layout-reserve, 96px) + env(safe-area-inset-bottom, 0px) +
+				min(12px, max(env(safe-area-inset-left, 0px), env(safe-area-inset-right, 0px)))
+		);
+	}
+
+	.mp-scc-sticky-bar {
+		padding-left: max(
+			var(--mp-scc-sticky-padding-x-mobile, 16px),
+			env(safe-area-inset-left, 0px)
+		);
+		padding-right: max(
+			var(--mp-scc-sticky-padding-x-mobile, 16px),
+			env(safe-area-inset-right, 0px)
+		);
+	}
+}
+
+/* Explicit opt-out when a theme modal opens (toggle via theme JS if the bar covers dialogs). */
+body.mp-scc-sticky-suppress .mp-scc-sticky-bar {
+	visibility: hidden;
+	pointer-events: none;
+}
+
+/* Typical Bootstrap/modal stacks use ~1050+; drop the bar below so dialogs stay on top (adjust per theme). */
+body.modal-open .mp-scc-sticky-bar,
+body.popup-overlay-open .mp-scc-sticky-bar {
+	z-index: 1030;
+}
+
+/* -------------------------------------------------------------------------
    5–6) Mobile-first row group: column + full-width actions; desktop = one row
    ------------------------------------------------------------------------- */
 .mp-scc-sticky-inner {

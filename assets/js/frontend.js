@@ -868,6 +868,9 @@
 			this.renderLineItems(items);
 		}
 
+		this.$root.attr('data-mp-scc-cart-empty', empty ? '1' : '0');
+		this.$root.toggleClass('mp-scc-sticky--empty', !!empty);
+
 		this.syncCheckoutState(empty);
 	};
 
