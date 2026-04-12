@@ -181,6 +181,7 @@ final class SettingsPage {
 		self::field_text( $opt, 'labels', 'cart_cleared', __( 'Сообщение после очистки корзины', 'mp-sticky-custom-cart' ), isset( $l['cart_cleared'] ) ? (string) $l['cart_cleared'] : '' );
 		self::field_text( $opt, 'labels', 'checkout', __( 'Текст кнопки «Оформить заказ»', 'mp-sticky-custom-cart' ), isset( $l['checkout'] ) ? (string) $l['checkout'] : '' );
 		self::field_text( $opt, 'labels', 'variation_required', __( 'Сообщение «Выберите вариацию товара»', 'mp-sticky-custom-cart' ), isset( $l['variation_required'] ) ? (string) $l['variation_required'] : '' );
+		self::field_text( $opt, 'labels', 'single_add_success', __( 'Сообщение после добавления со страницы товара', 'mp-sticky-custom-cart' ), isset( $l['single_add_success'] ) ? (string) $l['single_add_success'] : '' );
 		self::field_text( $opt, 'labels', 'drawer_empty', __( 'Пустая корзина (drawer)', 'mp-sticky-custom-cart' ), isset( $l['drawer_empty'] ) ? (string) $l['drawer_empty'] : '' );
 		self::field_text( $opt, 'labels', 'drawer_empty_hint', __( 'Подсказка под пустой корзиной (drawer)', 'mp-sticky-custom-cart' ), isset( $l['drawer_empty_hint'] ) ? (string) $l['drawer_empty_hint'] : '' );
 		self::field_text( $opt, 'labels', 'drawer_remove_line', __( 'Кнопка удаления позиции (aria)', 'mp-sticky-custom-cart' ), isset( $l['drawer_remove_line'] ) ? (string) $l['drawer_remove_line'] : '' );
@@ -440,6 +441,7 @@ final class SettingsPage {
 			UiLabelsDefaults::KEY_CART_CLEARED       => __( 'Сообщение после очистки корзины', 'mp-sticky-custom-cart' ),
 			UiLabelsDefaults::KEY_CHECKOUT            => __( 'Текст кнопки «Оформить заказ»', 'mp-sticky-custom-cart' ),
 			UiLabelsDefaults::KEY_VARIATION_REQUIRED => __( 'Сообщение «Выберите вариацию товара»', 'mp-sticky-custom-cart' ),
+			UiLabelsDefaults::KEY_SINGLE_ADD_SUCCESS   => __( 'Сообщение после добавления со страницы товара', 'mp-sticky-custom-cart' ),
 			UiLabelsDefaults::KEY_DRAWER_EMPTY       => __( 'Пустая корзина (drawer)', 'mp-sticky-custom-cart' ),
 			UiLabelsDefaults::KEY_DRAWER_EMPTY_HINT  => __( 'Подсказка под пустой корзиной (drawer)', 'mp-sticky-custom-cart' ),
 			UiLabelsDefaults::KEY_DRAWER_REMOVE_LINE => __( 'Кнопка удаления позиции (aria)', 'mp-sticky-custom-cart' ),
