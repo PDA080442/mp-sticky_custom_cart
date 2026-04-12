@@ -748,6 +748,8 @@
 		this._fallbackSubtotalHtml = this.$total.length ? this.$total.html() : '';
 		this.debounceMs = parseDebounceMs();
 		this.clearCartLocked = false;
+		/** Last successful snapshot quantities per cart line key (for optimistic +/- rollback). */
+		this.serverQty = {};
 	}
 
 	StickyCartController.prototype.isDrawerOpen = function () {
@@ -787,6 +789,56 @@
 		}, 420);
 	};
 
+	/**
+	 * @param {Array<{ key?: string, quantity?: number }>} items
+	 */
+	StickyCartController.prototype.syncServerQtyFromItems = function (items) {
+		var next = {};
+		if (items && items.length) {
+			items.forEach(function (it) {
+				var k = it.key ? String(it.key) : '';
+				if (!k) {
+					return;
+				}
+				var q = typeof it.quantity === 'number' ? it.quantity : parseInt(it.quantity, 10) || 0;
+				next[k] = q;
+			});
+		}
+		this.serverQty = next;
+	};
+
+	/**
+	 * Restore quantity display after failed mutation (matches last successful snapshot).
+	 *
+	 * @param {string} cartItemKey
+	 */
+	StickyCartController.prototype.rollbackLineQuantityDisplay = function (cartItemKey) {
+		var key = cartItemKey ? String(cartItemKey) : '';
+		if (!key || this.serverQty[key] === undefined) {
+			return;
+		}
+		var q = this.serverQty[key];
+		var $line = this.$root.find('.mp-scc-line').filter(function () {
+			return $(this).attr('data-cart-item-key') === key;
+		});
+		if (!$line.length) {
+			return;
+		}
+		$line.find('[data-mp-scc-qty-display]').text(String(q));
+		var maxAttr = $line.attr('data-mp-scc-max-qty');
+		var $inc = $line.find('[data-mp-scc-qty-inc]');
+		if (maxAttr) {
+			var maxN = parseInt(maxAttr, 10);
+			if (!isNaN(maxN) && maxN > 0 && q >= maxN) {
+				$inc.prop('disabled', true).attr('aria-disabled', 'true');
+			} else {
+				$inc.prop('disabled', false).removeAttr('aria-disabled');
+			}
+		} else {
+			$inc.prop('disabled', false).removeAttr('aria-disabled');
+		}
+	};
+
 	StickyCartController.prototype.scheduleReconcile = function () {
 		var self = this;
 		if (this.reconcileTimer) {
@@ -822,6 +874,8 @@
 			lineCount = 0;
 			qty = 0;
 		}
+
+		this.syncServerQtyFromItems(items);
 
 		var prevLineText = this.$count.text();
 		var prevSubHtml = this.$total.html();
@@ -941,6 +995,13 @@
 				$li.addClass('mp-scc-line--warn');
 			}
 
+			if (item.max_quantity !== null && item.max_quantity !== undefined) {
+				var maxQN = parseInt(item.max_quantity, 10);
+				if (!isNaN(maxQN) && maxQN > 0) {
+					$li.attr('data-mp-scc-max-qty', String(maxQN));
+				}
+			}
+
 			var $thumb = $('<div class="mp-scc-line__thumb" />');
 			if (item.thumbnail_html && String(item.thumbnail_html).trim()) {
 				$thumb.html(item.thumbnail_html);
@@ -1036,6 +1097,18 @@
 			return;
 		}
 		this.mutationInFlight = true;
+		var keyStr = cartItemKey ? String(cartItemKey) : '';
+
+		function extractErrorMessage(xhr, resp) {
+			if (resp && resp.data && resp.data.message) {
+				return String(resp.data.message);
+			}
+			if (xhr && xhr.responseJSON && xhr.responseJSON.data && xhr.responseJSON.data.message) {
+				return String(xhr.responseJSON.data.message);
+			}
+			return data().networkErrorMessage ? String(data().networkErrorMessage) : '';
+		}
+
 		$.ajax({
 			url: cfg.ajaxUrl,
 			type: 'POST',
@@ -1050,11 +1123,21 @@
 			.done(function (resp) {
 				if (resp && resp.success && resp.data) {
 					self.applyPayload(resp.data);
-				} else {
-					self.scheduleReconcile();
+					return;
 				}
+				self.rollbackLineQuantityDisplay(keyStr);
+				var msg = extractErrorMessage(null, resp);
+				if (msg) {
+					self.showStickyInlineFeedback(msg, 'error');
+				}
+				self.scheduleReconcile();
 			})
-			.fail(function () {
+			.fail(function (xhr) {
+				self.rollbackLineQuantityDisplay(keyStr);
+				var msg = extractErrorMessage(xhr, null);
+				if (msg) {
+					self.showStickyInlineFeedback(msg, 'error');
+				}
 				self.scheduleReconcile();
 			})
 			.always(function () {
@@ -1143,8 +1226,21 @@
 			}
 			var $disp = $line.find('[data-mp-scc-qty-display]');
 			var q = parseInt($disp.text(), 10) || 0;
+			var maxAttr = $line.attr('data-mp-scc-max-qty');
+			if (maxAttr) {
+				var maxN = parseInt(maxAttr, 10);
+				if (!isNaN(maxN) && maxN > 0 && q >= maxN) {
+					return;
+				}
+			}
 			q += 1;
 			$disp.text(String(q));
+			if (maxAttr) {
+				var maxN2 = parseInt(maxAttr, 10);
+				if (!isNaN(maxN2) && maxN2 > 0 && q >= maxN2) {
+					$(e.currentTarget).prop('disabled', true).attr('aria-disabled', 'true');
+				}
+			}
 			self.scheduleQuantityCommit(key, q);
 		});
 
@@ -1156,8 +1252,12 @@
 			}
 			var $disp = $line.find('[data-mp-scc-qty-display]');
 			var q = parseInt($disp.text(), 10) || 0;
-			q = Math.max(0, q - 1);
+			if (q <= 1) {
+				return;
+			}
+			q -= 1;
 			$disp.text(String(q));
+			$line.find('[data-mp-scc-qty-inc]').prop('disabled', false).removeAttr('aria-disabled');
 			self.scheduleQuantityCommit(key, q);
 		});
 
