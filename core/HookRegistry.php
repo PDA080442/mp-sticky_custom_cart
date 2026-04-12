@@ -14,6 +14,7 @@ use MpStickyCustomCart\Frontend\AddedToCartHooks;
 use MpStickyCustomCart\Frontend\AjaxEndpointsHooks;
 use MpStickyCustomCart\Frontend\DynamicStylesProvider;
 use MpStickyCustomCart\Frontend\FrontendAssetsHooks;
+use MpStickyCustomCart\Frontend\StickyCartRenderer;
 use MpStickyCustomCart\Frontend\StickyCartRenderHooks;
 
 defined( 'ABSPATH' ) || exit;
@@ -31,6 +32,7 @@ final class HookRegistry {
 		( new DynamicStylesProvider() )->register_hooks();
 		AdminAssetsHooks::register();
 		StickyCartRenderHooks::register();
+		( new StickyCartRenderer() )->register_hooks();
 		AjaxEndpointsHooks::register();
 		SettingsApiHooks::register();
 		SettingsPage::register();

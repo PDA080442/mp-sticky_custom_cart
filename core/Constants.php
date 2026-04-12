@@ -56,6 +56,21 @@ final class Constants {
 	public const OPTION_ERROR_LOG = self::STORAGE_PREFIX . 'error_log';
 
 	/**
+	 * Nonce action for storefront AJAX ({@see check_ajax_referer} / {@see wp_verify_nonce}).
+	 */
+	public const AJAX_NONCE_ACTION = 'mp_scc_frontend';
+
+	/**
+	 * Registered {@see wp_ajax_*} action: cart snapshot for sticky UI.
+	 */
+	public const AJAX_ACTION_CART_SNAPSHOT = 'mp_scc_cart_snapshot';
+
+	/**
+	 * Registered {@see wp_ajax_*} action: set line quantity (debounced from storefront JS).
+	 */
+	public const AJAX_ACTION_SET_LINE_QUANTITY = 'mp_scc_set_line_quantity';
+
+	/**
 	 * Not instantiable.
 	 */
 	private function __construct() {

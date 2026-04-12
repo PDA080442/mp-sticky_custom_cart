@@ -1,0 +1,454 @@
+/**
+ * MP Sticky Custom Cart — storefront style entry.
+ * Runtime tokens come from `mp-scc-runtime-vars` (--mp-scc-*); rules here consume them.
+ */
+
+/* -------------------------------------------------------------------------
+   Motion tokens (drawer duration/easing from settings)
+   ------------------------------------------------------------------------- */
+.mp-scc-root {
+	--mp-scc-motion-duration: var(--mp-scc-sticky-drawer-toggle-duration-ms, 220ms);
+	--mp-scc-motion-easing: var(--mp-scc-sticky-drawer-toggle-easing, cubic-bezier(0.4, 0, 0.2, 1));
+	box-sizing: border-box;
+}
+
+.mp-scc-root *,
+.mp-scc-root *::before,
+.mp-scc-root *::after {
+	box-sizing: inherit;
+}
+
+/* -------------------------------------------------------------------------
+   1) Fixed bottom shell + 2) safe-area (iOS notch / home indicator)
+   ------------------------------------------------------------------------- */
+.mp-scc-sticky-bar {
+	position: fixed;
+	z-index: var(--mp-scc-sticky-z-index, 99999);
+	inset: auto 0 0 0;
+	width: 100%;
+	max-width: 100%;
+	margin: 0;
+	isolation: isolate;
+
+	/* Horizontal + vertical padding; bottom adds home-indicator inset */
+	padding-top: var(--mp-scc-sticky-padding-y-mobile, 12px);
+	padding-right: calc(var(--mp-scc-sticky-padding-x-mobile, 16px) + env(safe-area-inset-right, 0px));
+	padding-bottom: calc(var(--mp-scc-sticky-padding-y-mobile, 12px) + env(safe-area-inset-bottom, 0px));
+	padding-left: calc(var(--mp-scc-sticky-padding-x-mobile, 16px) + env(safe-area-inset-left, 0px));
+
+	border-radius: var(--mp-scc-sticky-border-radius, 12px) var(--mp-scc-sticky-border-radius, 12px) 0 0;
+	color: var(--mp-scc-color-text-primary, #1a1a1a);
+
+	/* 3) Glassmorphism: blur + tinted translucent surface */
+	backdrop-filter: blur(var(--mp-scc-sticky-backdrop-blur, 12px));
+	-webkit-backdrop-filter: blur(var(--mp-scc-sticky-backdrop-blur, 12px));
+	background-color: rgba(255, 255, 255, var(--mp-scc-sticky-surface-alpha, 0.72));
+	box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.08);
+	transform: translateZ(0);
+	transition:
+		box-shadow var(--mp-scc-motion-duration) var(--mp-scc-motion-easing),
+		background-color var(--mp-scc-motion-duration) var(--mp-scc-motion-easing);
+}
+
+@supports (background: color-mix(in srgb, red, blue)) {
+	.mp-scc-sticky-bar {
+		background-color: color-mix(
+			in srgb,
+			var(--mp-scc-color-surface-tint, #ffffff) calc(var(--mp-scc-sticky-surface-alpha, 0.72) * 100%),
+			transparent
+		);
+	}
+}
+
+/* -------------------------------------------------------------------------
+   5–6) Mobile-first row group: column + full-width actions; desktop = one row
+   ------------------------------------------------------------------------- */
+.mp-scc-sticky-inner {
+	display: flex;
+	flex-direction: column;
+	align-items: stretch;
+	gap: 10px;
+	width: 100%;
+}
+
+.mp-scc-sticky-summary {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	flex: 1 1 auto;
+	min-width: 0;
+	width: 100%;
+	justify-content: flex-start;
+}
+
+.mp-scc-sticky-actions {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	justify-content: stretch;
+	gap: 10px;
+	width: 100%;
+}
+
+.mp-scc-sticky-actions .mp-scc-btn {
+	flex: 1 1 0;
+	min-width: 0;
+}
+
+@media (min-width: 783px) {
+	.mp-scc-sticky-bar {
+		padding-top: var(--mp-scc-sticky-padding-y-desktop, 14px);
+		padding-right: calc(var(--mp-scc-sticky-padding-x-desktop, 24px) + env(safe-area-inset-right, 0px));
+		padding-bottom: calc(var(--mp-scc-sticky-padding-y-desktop, 14px) + env(safe-area-inset-bottom, 0px));
+		padding-left: calc(var(--mp-scc-sticky-padding-x-desktop, 24px) + env(safe-area-inset-left, 0px));
+	}
+
+	.mp-scc-sticky-inner {
+		flex-direction: row;
+		flex-wrap: nowrap;
+		align-items: center;
+		justify-content: space-between;
+		gap: 16px 24px;
+	}
+
+	.mp-scc-sticky-summary {
+		width: auto;
+		flex: 1 1 auto;
+	}
+
+	.mp-scc-sticky-actions {
+		width: auto;
+		flex: 0 0 auto;
+		flex-wrap: nowrap;
+		gap: 10px;
+		justify-content: flex-end;
+	}
+
+	.mp-scc-sticky-actions .mp-scc-btn {
+		flex: 0 0 auto;
+		min-width: auto;
+	}
+
+	.mp-scc-sticky-summary-text {
+		gap: 12px 20px;
+	}
+}
+
+.mp-scc-sr-only {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	padding: 0;
+	margin: -1px;
+	overflow: hidden;
+	clip: rect(0, 0, 0, 0);
+	white-space: nowrap;
+	border: 0;
+}
+
+.mp-scc-sticky-stack {
+	position: relative;
+	display: flex;
+	flex-direction: column;
+	width: 100%;
+}
+
+.mp-scc-drawer {
+	position: absolute;
+	bottom: 100%;
+	left: 0;
+	right: 0;
+	box-sizing: border-box;
+	max-height: var(--mp-scc-sticky-drawer-max-height, 55vh);
+	overflow-x: hidden;
+	overflow-y: auto;
+	-webkit-overflow-scrolling: touch;
+	padding: 12px 16px 14px;
+	padding-left: calc(16px + env(safe-area-inset-left, 0px));
+	padding-right: calc(16px + env(safe-area-inset-right, 0px));
+	border-radius: var(--mp-scc-sticky-border-radius, 12px) var(--mp-scc-sticky-border-radius, 12px) 0 0;
+	backdrop-filter: blur(var(--mp-scc-sticky-backdrop-blur, 12px));
+	-webkit-backdrop-filter: blur(var(--mp-scc-sticky-backdrop-blur, 12px));
+	color: var(--mp-scc-color-text-primary, #1a1a1a);
+	border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+	background-color: rgba(255, 255, 255, 0.94);
+	transition:
+		opacity var(--mp-scc-motion-duration) var(--mp-scc-motion-easing),
+		transform var(--mp-scc-motion-duration) var(--mp-scc-motion-easing);
+}
+
+@supports (background: color-mix(in srgb, red, blue)) {
+	.mp-scc-drawer {
+		background-color: color-mix(
+			in srgb,
+			var(--mp-scc-color-surface-tint, #ffffff) 94%,
+			transparent
+		);
+	}
+}
+
+.mp-scc-drawer-inner {
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
+	min-height: 0;
+}
+
+.mp-scc-drawer-items {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+}
+
+.mp-scc-drawer-empty-text {
+	margin: 0;
+	font-size: var(--mp-scc-sticky-summary-font-size, 15px);
+	font-weight: var(--mp-scc-sticky-summary-font-weight, 600);
+	text-align: center;
+}
+
+.mp-scc-drawer-toggle {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	flex: 0 0 auto;
+	width: 40px;
+	height: 40px;
+	margin: 0;
+	padding: 0;
+	border: 0;
+	border-radius: 8px;
+	background: transparent;
+	color: inherit;
+	cursor: pointer;
+	touch-action: manipulation;
+	transition:
+		background-color var(--mp-scc-motion-duration) var(--mp-scc-motion-easing),
+		color var(--mp-scc-motion-duration) var(--mp-scc-motion-easing),
+		box-shadow var(--mp-scc-motion-duration) var(--mp-scc-motion-easing);
+}
+
+.mp-scc-drawer-toggle:hover {
+	background: rgba(0, 0, 0, 0.06);
+}
+
+.mp-scc-drawer-toggle:focus {
+	outline: none;
+}
+
+.mp-scc-drawer-toggle:focus-visible {
+	outline: 2px solid var(--mp-scc-color-button-primary, #111);
+	outline-offset: 2px;
+}
+
+.mp-scc-drawer-toggle-icon {
+	display: block;
+	width: 0;
+	height: 0;
+	border-left: 6px solid transparent;
+	border-right: 6px solid transparent;
+	border-bottom: 7px solid currentColor;
+	transform: rotate(0deg);
+	transition: transform var(--mp-scc-sticky-drawer-toggle-duration-ms, 220ms) var(--mp-scc-sticky-drawer-toggle-easing, ease);
+}
+
+.mp-scc-drawer-toggle[aria-expanded="true"] .mp-scc-drawer-toggle-icon {
+	transform: rotate(180deg);
+}
+
+.mp-scc-sticky-summary-text {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: baseline;
+	gap: 10px 14px;
+	min-width: 0;
+	font-size: var(--mp-scc-sticky-summary-font-size, 15px);
+	font-weight: var(--mp-scc-sticky-summary-font-weight, 600);
+}
+
+.mp-scc-cart-total {
+	font-variant-numeric: tabular-nums;
+}
+
+.mp-scc-btn {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	box-sizing: border-box;
+	min-height: 44px;
+	padding: 0 16px;
+	border-radius: 8px;
+	font-size: var(--mp-scc-sticky-button-font-size, 14px);
+	font-weight: var(--mp-scc-sticky-button-font-weight, 600);
+	line-height: 1.2;
+	text-decoration: none;
+	cursor: pointer;
+	border: 1px solid transparent;
+	touch-action: manipulation;
+	transition:
+		background-color var(--mp-scc-motion-duration) var(--mp-scc-motion-easing),
+		color var(--mp-scc-motion-duration) var(--mp-scc-motion-easing),
+		border-color var(--mp-scc-motion-duration) var(--mp-scc-motion-easing),
+		box-shadow var(--mp-scc-motion-duration) var(--mp-scc-motion-easing),
+		opacity var(--mp-scc-motion-duration) var(--mp-scc-motion-easing),
+		transform var(--mp-scc-motion-duration) var(--mp-scc-motion-easing),
+		filter var(--mp-scc-motion-duration) var(--mp-scc-motion-easing);
+}
+
+.mp-scc-btn:focus {
+	outline: none;
+}
+
+.mp-scc-btn:focus-visible {
+	outline: 2px solid var(--mp-scc-color-button-primary, #111);
+	outline-offset: 2px;
+}
+
+.mp-scc-btn--primary {
+	background-color: var(--mp-scc-color-button-primary, #111111);
+	color: var(--mp-scc-color-button-primary-text, #ffffff);
+}
+
+.mp-scc-btn--primary:hover {
+	filter: brightness(1.08);
+	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+}
+
+@supports (background: color-mix(in srgb, red, blue)) {
+	.mp-scc-btn--primary:hover {
+		filter: none;
+		background-color: color-mix(in srgb, var(--mp-scc-color-button-primary, #111111) 88%, #ffffff);
+	}
+}
+
+.mp-scc-btn--primary:active {
+	transform: translateY(1px);
+	box-shadow: none;
+}
+
+.mp-scc-btn--primary:focus-visible {
+	outline: 2px solid var(--mp-scc-color-button-primary-text, #ffffff);
+	outline-offset: 2px;
+}
+
+.mp-scc-btn--ghost {
+	background: transparent;
+	color: inherit;
+	border-color: rgba(0, 0, 0, 0.2);
+}
+
+.mp-scc-btn--ghost:hover {
+	background: rgba(0, 0, 0, 0.06);
+	border-color: rgba(0, 0, 0, 0.28);
+}
+
+.mp-scc-btn--ghost:active {
+	transform: translateY(1px);
+}
+
+.mp-scc-btn--ghost:focus-visible {
+	background: rgba(0, 0, 0, 0.05);
+}
+
+/* Drawer line items (filled from cart snapshot in JS) */
+.mp-scc-line {
+	list-style: none;
+	margin: 0;
+	padding: 10px 0;
+	border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.mp-scc-line:last-child {
+	border-bottom: 0;
+}
+
+.mp-scc-line__row {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: flex-start;
+	justify-content: space-between;
+	gap: 10px 12px;
+}
+
+.mp-scc-line__main {
+	flex: 1 1 auto;
+	min-width: 0;
+}
+
+.mp-scc-line__name {
+	font-size: var(--mp-scc-sticky-summary-font-size, 15px);
+	font-weight: 500;
+	color: inherit;
+	text-decoration: none;
+}
+
+.mp-scc-line__name:hover,
+.mp-scc-line__name:focus-visible {
+	text-decoration: underline;
+}
+
+.mp-scc-line__qty {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	margin-top: 6px;
+}
+
+.mp-scc-qty-btn {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	min-width: 36px;
+	min-height: 36px;
+	margin: 0;
+	padding: 0;
+	border: 1px solid rgba(0, 0, 0, 0.2);
+	border-radius: 6px;
+	background: rgba(255, 255, 255, 0.6);
+	color: inherit;
+	font-size: 18px;
+	line-height: 1;
+	cursor: pointer;
+	touch-action: manipulation;
+	transition:
+		background-color var(--mp-scc-motion-duration) var(--mp-scc-motion-easing),
+		border-color var(--mp-scc-motion-duration) var(--mp-scc-motion-easing);
+}
+
+.mp-scc-qty-btn:hover {
+	background: rgba(0, 0, 0, 0.06);
+}
+
+.mp-scc-qty-btn:focus {
+	outline: none;
+}
+
+.mp-scc-qty-btn:focus-visible {
+	outline: 2px solid var(--mp-scc-color-button-primary, #111);
+	outline-offset: 2px;
+}
+
+.mp-scc-line__qty-val {
+	min-width: 1.5em;
+	text-align: center;
+	font-variant-numeric: tabular-nums;
+	font-weight: var(--mp-scc-sticky-summary-font-weight, 600);
+}
+
+.mp-scc-line__subtotal {
+	flex: 0 0 auto;
+	font-size: var(--mp-scc-sticky-summary-font-size, 15px);
+	font-weight: var(--mp-scc-sticky-summary-font-weight, 600);
+	font-variant-numeric: tabular-nums;
+}
+
+/* 8) Reduced motion: keep layout, shorten transitions */
+@media (prefers-reduced-motion: reduce) {
+	.mp-scc-root {
+		--mp-scc-motion-duration: 0.01ms;
+	}
+
+	.mp-scc-drawer-toggle-icon {
+		transition-duration: 0.01ms;
+	}
+}
