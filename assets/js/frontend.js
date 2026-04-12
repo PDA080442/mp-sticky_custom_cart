@@ -722,6 +722,79 @@
 		});
 	}
 
+	var SINGLE_ADD_SUCCESS_COOLDOWN_MS = 800;
+	var lastSingleAddFeedbackAt = 0;
+
+	/**
+	 * Single product page / quick-view: success copy after Woo `added_to_cart`; optional YITH sync event.
+	 * Sticky count/subtotal update via scheduleRefreshFromWooEvent on `added_to_cart` (same file).
+	 * @param {JQuery|HTMLElement} [$button] Third argument from jQuery `added_to_cart` (triggering button).
+	 * @returns {boolean}
+	 */
+	function shouldShowSingleProductAddFeedback($button) {
+		if ($('body').hasClass('single-product')) {
+			return true;
+		}
+		var $b = $button ? $($button) : $();
+		if (!$b.length) {
+			return false;
+		}
+		var quickSelectors = [
+			'.yith-quick-view-content',
+			'#yith-quick-view-modal',
+			'.yith-wcqv-wrapper',
+			'.quick-view-modal',
+			'.woocommerce-quick-view-modal',
+			'.etheme-quick-view',
+			'.fancybox-inner',
+			'.featherlight-inner',
+			'[data-product-quick-view-modal]'
+		];
+		var i;
+		for (i = 0; i < quickSelectors.length; i++) {
+			if ($b.closest(quickSelectors[i]).length) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	function initSingleProductAddToCart() {
+		$(document.body).on('added_to_cart.mpSccSingle', function (ev, fragments, cart_hash, $button) {
+			if (!shouldShowSingleProductAddFeedback($button)) {
+				return;
+			}
+			var now = Date.now();
+			if (now - lastSingleAddFeedbackAt < SINGLE_ADD_SUCCESS_COOLDOWN_MS) {
+				return;
+			}
+			lastSingleAddFeedbackAt = now;
+			var msg = window.mpScc.label('single_add_success');
+			if (!msg) {
+				msg = 'Товар добавлен в корзину';
+			}
+			var sticky = window.mpScc.sticky;
+			if (sticky && typeof sticky.showStickyInlineFeedback === 'function') {
+				sticky.showStickyInlineFeedback(msg, 'success');
+			}
+		});
+
+		$(document.body).on('submit.mpSccSingleCart', 'form.cart', function () {
+			if (!$('body').hasClass('single-product')) {
+				return;
+			}
+			// WooCommerce AJAX add-to-cart prevents default when enabled; `added_to_cart` then refreshes sticky.
+			// Non-AJAX POST reloads the page and the sticky markup is re-rendered server-side.
+		});
+
+		$(document.body).on('yith_added_to_cart.mpSccYith', function (e) {
+			var sticky = window.mpScc.sticky;
+			if (sticky && typeof sticky.scheduleRefreshFromWooEvent === 'function') {
+				sticky.scheduleRefreshFromWooEvent(e.type || 'yith_added_to_cart');
+			}
+		});
+	}
+
 	/** Coalesce rapid WooCommerce body events (added_to_cart + fragments + totals) into one snapshot. */
 	var WOO_CART_EVENT_DEBOUNCE_MS = 100;
 	/** Second snapshot if the first Woo-driven refresh did not apply payload (network/lock race). */
@@ -1591,6 +1664,8 @@
 			sticky.init();
 			window.mpScc.sticky = sticky;
 		}
+
+		initSingleProductAddToCart();
 
 		initCatalogOverlayPropagation();
 		initCatalogTitleClickHook();

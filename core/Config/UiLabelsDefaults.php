@@ -23,6 +23,7 @@ final class UiLabelsDefaults {
 	public const KEY_CART_CLEARED        = 'cart_cleared';
 	public const KEY_CHECKOUT            = 'checkout';
 	public const KEY_VARIATION_REQUIRED  = 'variation_required';
+	public const KEY_SINGLE_ADD_SUCCESS  = 'single_add_success';
 	public const KEY_DRAWER_EMPTY        = 'drawer_empty';
 	public const KEY_DRAWER_EMPTY_HINT   = 'drawer_empty_hint';
 	public const KEY_DRAWER_REMOVE_LINE  = 'drawer_remove_line';
@@ -39,6 +40,7 @@ final class UiLabelsDefaults {
 			self::KEY_CART_CLEARED       => __( 'Корзина очищена', 'mp-sticky-custom-cart' ),
 			self::KEY_CHECKOUT            => __( 'Оформить заказ', 'mp-sticky-custom-cart' ),
 			self::KEY_VARIATION_REQUIRED => __( 'Выберите вариацию товара', 'mp-sticky-custom-cart' ),
+			self::KEY_SINGLE_ADD_SUCCESS => __( 'Товар добавлен в корзину', 'mp-sticky-custom-cart' ),
 			self::KEY_DRAWER_EMPTY       => __( 'Корзина пуста', 'mp-sticky-custom-cart' ),
 			self::KEY_DRAWER_EMPTY_HINT  => __( 'Добавьте товары из каталога', 'mp-sticky-custom-cart' ),
 			self::KEY_DRAWER_REMOVE_LINE => __( 'Удалить позицию', 'mp-sticky-custom-cart' ),
@@ -59,6 +61,7 @@ final class UiLabelsDefaults {
 			self::KEY_CART_CLEARED       => 'Корзина очищена',
 			self::KEY_CHECKOUT            => 'Оформить заказ',
 			self::KEY_VARIATION_REQUIRED => 'Выберите вариацию товара',
+			self::KEY_SINGLE_ADD_SUCCESS => 'Товар добавлен в корзину',
 			self::KEY_DRAWER_EMPTY       => 'Корзина пуста',
 			self::KEY_DRAWER_EMPTY_HINT  => 'Добавьте товары из каталога',
 			self::KEY_DRAWER_REMOVE_LINE => 'Удалить позицию',
