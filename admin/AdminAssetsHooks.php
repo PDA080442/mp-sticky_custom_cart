@@ -7,6 +7,8 @@
 
 namespace MpStickyCustomCart\Admin;
 
+use MpStickyCustomCart\Core\PluginPaths;
+
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -36,6 +38,13 @@ final class AdminAssetsHooks {
 		if ( '' === $page_hook || $hook_suffix !== $page_hook ) {
 			return;
 		}
+
+		wp_enqueue_style(
+			self::HANDLE_STYLE,
+			PluginPaths::url( 'admin/css/settings-preview.css' ),
+			array(),
+			MP_STICKY_CUSTOM_CART_ASSET_VERSION
+		);
 
 		/**
 		 * Fires before admin assets are enqueued.

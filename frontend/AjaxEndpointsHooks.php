@@ -26,6 +26,8 @@ final class AjaxEndpointsHooks {
 		add_action( 'wp_ajax_nopriv_' . Constants::AJAX_ACTION_ADD_SIMPLE_PRODUCT, array( self::class, 'handle_add_simple_product' ) );
 		add_action( 'wp_ajax_' . Constants::AJAX_ACTION_CLEAR_CART, array( self::class, 'handle_clear_cart' ) );
 		add_action( 'wp_ajax_nopriv_' . Constants::AJAX_ACTION_CLEAR_CART, array( self::class, 'handle_clear_cart' ) );
+		add_action( 'wp_ajax_' . Constants::AJAX_ACTION_REMOVE_CART_LINE, array( self::class, 'handle_remove_cart_line' ) );
+		add_action( 'wp_ajax_nopriv_' . Constants::AJAX_ACTION_REMOVE_CART_LINE, array( self::class, 'handle_remove_cart_line' ) );
 
 		/**
 		 * Fires when AJAX endpoint hooks are registered — attach real handlers here.
@@ -87,6 +89,74 @@ final class AjaxEndpointsHooks {
 			wp_send_json_error(
 				array(
 					'message' => __( 'Корзина очищена, но не удалось обновить данные.', 'mp-sticky-custom-cart' ),
+					'code'    => 'snapshot_failed',
+				)
+			);
+		}
+
+		wp_send_json_success( $payload );
+	}
+
+	/**
+	 * Remove a single cart line (sticky drawer); returns unified snapshot.
+	 */
+	public static function handle_remove_cart_line() {
+		self::verify_nonce();
+		if ( ! function_exists( 'WC' ) || ! WC()->cart ) {
+			self::log_remove_line_failure( 'no_cart', 'Cart unavailable.', array() );
+			wp_send_json_error(
+				array(
+					'message' => __( 'Корзина недоступна.', 'mp-sticky-custom-cart' ),
+					'code'    => 'cart_unavailable',
+				)
+			);
+		}
+
+		$key = isset( $_POST['cart_item_key'] ) ? sanitize_text_field( wp_unslash( $_POST['cart_item_key'] ) ) : '';
+		if ( '' === $key ) {
+			self::log_remove_line_failure( 'missing_key', 'cart_item_key missing.', array() );
+			wp_send_json_error(
+				array(
+					'message' => __( 'Не указана позиция корзины.', 'mp-sticky-custom-cart' ),
+					'code'    => 'missing_cart_line',
+				)
+			);
+		}
+
+		$cart     = WC()->cart;
+		$contents = $cart->get_cart();
+		if ( ! isset( $contents[ $key ] ) ) {
+			self::log_remove_line_failure( 'cart_line_not_found', 'Line not in cart.', array( 'cart_item_key' => $key ) );
+			wp_send_json_error(
+				array(
+					'message' => __( 'Позиция в корзине не найдена.', 'mp-sticky-custom-cart' ),
+					'code'    => 'cart_line_not_found',
+				)
+			);
+		}
+
+		$removed = $cart->remove_cart_item( $key );
+		if ( ! $removed ) {
+			self::log_remove_line_failure( 'remove_failed', 'remove_cart_item returned false.', array( 'cart_item_key' => $key ) );
+			wp_send_json_error(
+				array(
+					'message' => __( 'Не удалось удалить позицию.', 'mp-sticky-custom-cart' ),
+					'code'    => 'remove_failed',
+				)
+			);
+		}
+
+		$cart->calculate_totals();
+		if ( function_exists( 'wc_clear_notices' ) ) {
+			wc_clear_notices();
+		}
+
+		$payload = self::build_cart_snapshot_payload();
+		if ( is_wp_error( $payload ) ) {
+			self::log_remove_line_failure( 'snapshot_failed', $payload->get_error_message(), array( 'cart_item_key' => $key ) );
+			wp_send_json_error(
+				array(
+					'message' => __( 'Позиция удалена, но не удалось обновить данные корзины.', 'mp-sticky-custom-cart' ),
 					'code'    => 'snapshot_failed',
 				)
 			);
@@ -158,9 +228,55 @@ final class AjaxEndpointsHooks {
 			);
 		}
 
+		$cart_item = $contents[ $key ];
+		$product   = isset( $cart_item['data'] ) ? $cart_item['data'] : null;
+
 		if ( 0 === $qty ) {
 			$cart->remove_cart_item( $key );
 		} else {
+			if ( ! is_a( $product, 'WC_Product' ) ) {
+				wp_send_json_error(
+					array(
+						'message' => __( 'Товар для позиции недоступен.', 'mp-sticky-custom-cart' ),
+						'code'    => 'invalid_product',
+					)
+				);
+			}
+
+			$min_req = 1;
+			if ( is_callable( array( $product, 'get_min_purchase_quantity' ) ) ) {
+				$mp = (int) $product->get_min_purchase_quantity();
+				if ( $mp > 1 ) {
+					$min_req = $mp;
+				}
+			}
+			if ( $qty < $min_req ) {
+				wp_send_json_error(
+					array(
+						'message' => sprintf(
+							/* translators: %d: minimum quantity for the line */
+							__( 'Минимальное количество для этой позиции: %d.', 'mp-sticky-custom-cart' ),
+							$min_req
+						),
+						'code'    => 'below_min_quantity',
+					)
+				);
+			}
+
+			$max_q = $product->get_max_purchase_quantity();
+			if ( is_numeric( $max_q ) && (int) $max_q > 0 && $qty > (int) $max_q ) {
+				wp_send_json_error(
+					array(
+						'message' => sprintf(
+							/* translators: %d: maximum quantity that can be purchased */
+							__( 'Доступно не более %d шт.', 'mp-sticky-custom-cart' ),
+							(int) $max_q
+						),
+						'code'    => 'above_max_quantity',
+					)
+				);
+			}
+
 			$ok = $cart->set_quantity( $key, $qty, true );
 			if ( ! $ok ) {
 				wp_send_json_error(
@@ -465,14 +581,63 @@ final class AjaxEndpointsHooks {
 				$cart_item_key
 			);
 
-			$items[] = array(
+			$thumb_html = $product->get_image(
+				'woocommerce_thumbnail',
+				array(
+					'class'   => 'mp-scc-line__img',
+					'alt'     => '',
+					'loading' => 'lazy',
+				),
+				true
+			);
+			$thumb_html = is_string( $thumb_html ) ? $thumb_html : '';
+			if ( '' === trim( $thumb_html ) && function_exists( 'wc_placeholder_img' ) ) {
+				$thumb_html = wc_placeholder_img(
+					'woocommerce_thumbnail',
+					array(
+						'class' => 'mp-scc-line__img mp-scc-line__img--placeholder',
+						'alt'   => '',
+					)
+				);
+			}
+			$thumb_html = wp_kses_post( is_string( $thumb_html ) ? $thumb_html : '' );
+
+			$price_raw       = $cart->get_product_price( $product );
+			$line_price_html = apply_filters( 'woocommerce_cart_item_price', $price_raw, $cart_item, $cart_item_key );
+			$line_price_html = is_string( $line_price_html ) ? wp_kses_post( $line_price_html ) : '';
+
+			$max_qty   = $product->get_max_purchase_quantity();
+			$max_q_out = null;
+			if ( is_numeric( $max_qty ) && (int) $max_qty > 0 ) {
+				$max_q_out = (int) $max_qty;
+			}
+
+			$stock_notice = self::build_cart_line_stock_notice( $product, $cart_item );
+
+			$line_data = array(
 				'key'                => (string) $cart_item_key,
+				'snapshot_line_id'   => (string) $cart_item_key,
 				'product_id'         => (int) $cart_item['product_id'],
+				'variation_id'       => isset( $cart_item['variation_id'] ) ? (int) $cart_item['variation_id'] : 0,
 				'name'               => wp_strip_all_tags( (string) $name ),
 				'quantity'           => (int) $cart_item['quantity'],
 				'line_subtotal_html' => is_string( $line_subtotal_html ) ? $line_subtotal_html : '',
+				'line_price_html'    => $line_price_html,
+				'thumbnail_html'     => $thumb_html,
 				'permalink'          => is_string( $permalink ) ? $permalink : '',
+				'stock_status'       => (string) $product->get_stock_status(),
+				'stock_notice'       => $stock_notice,
+				'max_quantity'       => $max_q_out,
 			);
+
+			/**
+			 * Filters one cart line in the sticky drawer snapshot (add fields for custom templates).
+			 *
+			 * @param array<string, mixed> $line_data    Line payload for JS.
+			 * @param array<string, mixed> $cart_item    WooCommerce cart row.
+			 * @param string               $cart_item_key Line key.
+			 */
+			$items[] = apply_filters( 'mp_sticky_custom_cart_cart_line_snapshot', $line_data, $cart_item, $cart_item_key );
 		}
 
 		$empty          = $cart->is_empty();
@@ -487,6 +652,37 @@ final class AjaxEndpointsHooks {
 			'items'               => $items,
 			'snapshot_ts'         => time(),
 		);
+	}
+
+	/**
+	 * Short availability hint when stock or purchasability changes (drawer line).
+	 *
+	 * @param \WC_Product          $product   Cart line product.
+	 * @param array<string, mixed> $cart_item Cart row.
+	 */
+	private static function build_cart_line_stock_notice( $product, array $cart_item ) {
+		if ( ! is_a( $product, 'WC_Product' ) ) {
+			return '';
+		}
+		if ( ! $product->is_purchasable() ) {
+			return __( 'Недоступно к покупке', 'mp-sticky-custom-cart' );
+		}
+		$status = $product->get_stock_status();
+		if ( 'outofstock' === $status && ! $product->backorders_allowed() ) {
+			return __( 'Нет в наличии', 'mp-sticky-custom-cart' );
+		}
+		$max = $product->get_max_purchase_quantity();
+		if ( is_numeric( $max ) && (int) $max > 0 && isset( $cart_item['quantity'] ) && (int) $cart_item['quantity'] > (int) $max ) {
+			return sprintf(
+				/* translators: %d: maximum quantity that can be purchased */
+				__( 'Доступно не более %d шт.', 'mp-sticky-custom-cart' ),
+				(int) $max
+			);
+		}
+		if ( 'onbackorder' === $status && $product->backorders_require_notification() ) {
+			return __( 'Под заказ', 'mp-sticky-custom-cart' );
+		}
+		return '';
 	}
 
 	private static function verify_nonce() {
@@ -590,6 +786,42 @@ final class AjaxEndpointsHooks {
 		 * @param array<string, mixed> $entry Log entry.
 		 */
 		$entry = apply_filters( 'mp_sticky_custom_cart_clear_cart_log_entry', $entry );
+
+		$log = get_option( Constants::OPTION_ERROR_LOG, array() );
+		if ( ! is_array( $log ) ) {
+			$log = array();
+		}
+		$log[] = $entry;
+		if ( count( $log ) > 100 ) {
+			$log = array_slice( $log, -100 );
+		}
+		update_option( Constants::OPTION_ERROR_LOG, $log, false );
+	}
+
+	/**
+	 * @param string               $code    Stable error code.
+	 * @param string               $message Technical message.
+	 * @param array<string, mixed> $context Extra context.
+	 */
+	private static function log_remove_line_failure( $code, $message, array $context ) {
+		if ( ! OptionResolver::get_setting( 'diagnostics.client_error_logging', true ) ) {
+			return;
+		}
+
+		$entry = array(
+			't'       => time(),
+			'type'    => 'remove_cart_line',
+			'code'    => sanitize_key( (string) $code ),
+			'message' => (string) $message,
+			'context' => $context,
+		);
+
+		/**
+		 * Filters a remove-line failure log entry before it is stored.
+		 *
+		 * @param array<string, mixed> $entry Log entry.
+		 */
+		$entry = apply_filters( 'mp_sticky_custom_cart_remove_cart_line_log_entry', $entry );
 
 		$log = get_option( Constants::OPTION_ERROR_LOG, array() );
 		if ( ! is_array( $log ) ) {

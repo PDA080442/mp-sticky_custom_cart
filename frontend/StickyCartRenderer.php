@@ -62,17 +62,29 @@ final class StickyCartRenderer implements StickyCartRendererInterface {
 			__( '%s — недоступно: корзина пуста', 'mp-sticky-custom-cart' ),
 			$checkout_label
 		);
+		$clear_label               = OptionResolver::get_label( UiLabelsDefaults::KEY_CLEAR_CART );
+		$clear_aria_unavailable    = sprintf(
+			/* translators: %s: visible clear-cart button label */
+			__( '%s — недоступно: корзина пуста', 'mp-sticky-custom-cart' ),
+			$clear_label
+		);
+		$drawer_empty_hint         = OptionResolver::get_label( UiLabelsDefaults::KEY_DRAWER_EMPTY_HINT );
+		$drawer_empty_hint_trim    = trim( $drawer_empty_hint );
 
 		ob_start();
 		?>
 <div id="mp-scc-sticky-root" class="mp-scc-root mp-scc-sticky-bar<?php echo $empty ? ' mp-scc-sticky--empty' : ''; ?>" role="region" aria-label="<?php esc_attr_e( 'Shopping cart', 'mp-sticky-custom-cart' ); ?>" data-mp-scc-sticky-root data-mp-scc-cart-empty="<?php echo $empty ? '1' : '0'; ?>">
 	<div class="mp-scc-sticky-stack">
 		<?php if ( $drawer ) : ?>
-		<div id="mp-scc-drawer" class="mp-scc-drawer" role="region" aria-labelledby="mp-scc-drawer-toggle" hidden data-mp-scc-drawer>
-			<div class="mp-scc-drawer-inner">
-				<ul id="mp-scc-drawer-items" class="mp-scc-drawer-items" aria-label="<?php esc_attr_e( 'Products in cart', 'mp-sticky-custom-cart' ); ?>" data-mp-scc-drawer-items></ul>
+		<div id="mp-scc-drawer" class="mp-scc-drawer<?php echo $empty ? ' mp-scc-drawer--empty' : ''; ?>" role="region" aria-labelledby="mp-scc-drawer-toggle" hidden data-mp-scc-drawer>
+			<div class="mp-scc-drawer-inner<?php echo $empty ? ' mp-scc-drawer-inner--empty' : ''; ?>">
+				<ul id="mp-scc-drawer-items" class="mp-scc-drawer-items" aria-label="<?php esc_attr_e( 'Products in cart', 'mp-sticky-custom-cart' ); ?>" data-mp-scc-drawer-items<?php echo $empty ? ' hidden aria-hidden="true"' : ''; ?>></ul>
 				<div id="mp-scc-drawer-empty" class="mp-scc-drawer-empty" role="status"<?php echo $empty ? '' : ' hidden'; ?> data-mp-scc-drawer-empty>
-					<p class="mp-scc-drawer-empty-text"><?php echo esc_html( OptionResolver::get_label( UiLabelsDefaults::KEY_DRAWER_EMPTY ) ); ?></p>
+					<div class="mp-scc-drawer-empty-visual" aria-hidden="true">
+						<span class="mp-scc-drawer-empty-icon"></span>
+					</div>
+					<p class="mp-scc-drawer-empty-title"><?php echo esc_html( OptionResolver::get_label( UiLabelsDefaults::KEY_DRAWER_EMPTY ) ); ?></p>
+					<p class="mp-scc-drawer-empty-hint"<?php echo '' === $drawer_empty_hint_trim ? ' hidden' : ''; ?>><?php echo esc_html( $drawer_empty_hint ); ?></p>
 				</div>
 			</div>
 		</div>
@@ -92,7 +104,15 @@ final class StickyCartRenderer implements StickyCartRendererInterface {
 				</div>
 			</section>
 			<div class="mp-scc-sticky-actions" role="toolbar" aria-orientation="horizontal" aria-label="<?php esc_attr_e( 'Cart actions', 'mp-sticky-custom-cart' ); ?>" data-mp-scc-actions>
-				<button type="button" class="mp-scc-btn mp-scc-btn--ghost mp-scc-clear-cart" data-mp-scc-clear-cart><?php echo esc_html( OptionResolver::get_label( UiLabelsDefaults::KEY_CLEAR_CART ) ); ?></button>
+				<button type="button" class="mp-scc-btn mp-scc-btn--ghost mp-scc-clear-cart<?php echo $empty ? ' mp-scc-clear-cart--disabled' : ''; ?>"
+					data-mp-scc-clear-cart
+					data-mp-scc-clear-aria-disabled="<?php echo esc_attr( $clear_aria_unavailable ); ?>"
+					<?php if ( $empty ) : ?>
+					disabled
+					aria-disabled="true"
+					aria-label="<?php echo esc_attr( $clear_aria_unavailable ); ?>"
+					<?php endif; ?>
+				><?php echo esc_html( $clear_label ); ?></button>
 				<a class="mp-scc-btn mp-scc-btn--primary mp-scc-checkout<?php echo $empty ? ' mp-scc-checkout--disabled' : ''; ?>"
 					href="<?php echo $empty ? '#' : esc_url( $checkout_url ); ?>"
 					data-mp-scc-checkout
