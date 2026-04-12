@@ -7,6 +7,7 @@
 
 namespace MpStickyCustomCart\Frontend;
 
+use MpStickyCustomCart\Core\CheckoutQueryPreserve;
 use MpStickyCustomCart\Core\Config\FeatureFlagsDefaults;
 use MpStickyCustomCart\Core\Config\UiLabelsDefaults;
 use MpStickyCustomCart\Core\Contracts\StickyCartRendererInterface;
@@ -73,8 +74,15 @@ final class StickyCartRenderer implements StickyCartRendererInterface {
 		$total       = is_string( $total ) ? $total : wc_price( 0 );
 		$drawer = OptionResolver::get_flag( FeatureFlagsDefaults::KEY_STICKY_DRAWER_ENABLED, true );
 
-		$checkout_url = function_exists( 'wc_get_checkout_url' ) ? wc_get_checkout_url() : '';
-		$checkout_url = is_string( $checkout_url ) ? $checkout_url : '';
+		$checkout_base = function_exists( 'wc_get_checkout_url' ) ? (string) wc_get_checkout_url() : '';
+		$checkout_url  = CheckoutQueryPreserve::merge_request_into_url( $checkout_base );
+
+		$checkout_label            = OptionResolver::get_label( UiLabelsDefaults::KEY_CHECKOUT );
+		$checkout_aria_unavailable = sprintf(
+			/* translators: %s: visible checkout button label */
+			__( '%s — недоступно: корзина пуста', 'mp-sticky-custom-cart' ),
+			$checkout_label
+		);
 
 		ob_start();
 		?>
@@ -106,7 +114,17 @@ final class StickyCartRenderer implements StickyCartRendererInterface {
 			</section>
 			<div class="mp-scc-sticky-actions" role="toolbar" aria-orientation="horizontal" aria-label="<?php esc_attr_e( 'Cart actions', 'mp-sticky-custom-cart' ); ?>" data-mp-scc-actions>
 				<button type="button" class="mp-scc-btn mp-scc-btn--ghost mp-scc-clear-cart" data-mp-scc-clear-cart><?php echo esc_html( OptionResolver::get_label( UiLabelsDefaults::KEY_CLEAR_CART ) ); ?></button>
-				<a class="mp-scc-btn mp-scc-btn--primary mp-scc-checkout" href="<?php echo esc_url( $checkout_url ); ?>" data-mp-scc-checkout><?php echo esc_html( OptionResolver::get_label( UiLabelsDefaults::KEY_CHECKOUT ) ); ?></a>
+				<a class="mp-scc-btn mp-scc-btn--primary mp-scc-checkout<?php echo $empty ? ' mp-scc-checkout--disabled' : ''; ?>"
+					href="<?php echo $empty ? '#' : esc_url( $checkout_url ); ?>"
+					data-mp-scc-checkout
+					data-mp-scc-checkout-base="<?php echo esc_url( $checkout_base ); ?>"
+					data-mp-scc-checkout-aria-disabled="<?php echo esc_attr( $checkout_aria_unavailable ); ?>"
+					<?php if ( $empty ) : ?>
+					aria-disabled="true"
+					tabindex="-1"
+					aria-label="<?php echo esc_attr( $checkout_aria_unavailable ); ?>"
+					<?php endif; ?>
+				><?php echo esc_html( $checkout_label ); ?></a>
 			</div>
 		</div>
 	</div>

@@ -40,6 +40,49 @@
 	};
 
 	/**
+	 * Append allowed query keys from the current page URL onto the checkout (UTM, click ids).
+	 * Keys must match {@see CheckoutQueryPreserve::allowed_keys()} / `checkoutPreserveQueryKeys` in `mpSccData`.
+	 *
+	 * @param {string} baseUrl Absolute or site-relative checkout URL.
+	 * @returns {string}
+	 */
+	window.mpScc.mergeUrlWithLocationQuery = function (baseUrl) {
+		var keys = data().checkoutPreserveQueryKeys;
+		var base = baseUrl ? String(baseUrl) : '';
+		if (!base || !keys || !keys.length) {
+			return base;
+		}
+		var keyMap = {};
+		for (var i = 0; i < keys.length; i++) {
+			keyMap[String(keys[i])] = true;
+		}
+		var search = window.location.search;
+		if (!search || search === '?') {
+			return base;
+		}
+		var pageParams;
+		try {
+			pageParams = new URLSearchParams(search.slice(1));
+		} catch (e) {
+			return base;
+		}
+		try {
+			var u = new URL(base, window.location.href);
+			pageParams.forEach(function (value, key) {
+				if (!keyMap[key]) {
+					return;
+				}
+				if (!u.searchParams.has(key)) {
+					u.searchParams.set(key, value);
+				}
+			});
+			return u.toString();
+		} catch (err) {
+			return base;
+		}
+	};
+
+	/**
 	 * admin-ajax.php URL, global nonce, and action names for jQuery.post / fetch.
 	 * @returns {{ ajaxUrl: string, nonce: string, actions: Record<string, string> }}
 	 */
@@ -692,6 +735,7 @@
 		this.$qtySr = this.$root.find('[data-mp-scc-cart-qty-total]');
 		this.$items = this.$root.find('[data-mp-scc-drawer-items]');
 		this.$empty = this.$root.find('[data-mp-scc-drawer-empty]');
+		this.$checkout = this.$root.find('[data-mp-scc-checkout]');
 		this.snapshotLocked = false;
 		this.pendingRefresh = false;
 		this.mutationInFlight = false;
@@ -822,6 +866,38 @@
 		} else {
 			this.$empty.attr('hidden', 'hidden');
 			this.renderLineItems(items);
+		}
+
+		this.syncCheckoutState(empty);
+	};
+
+	/**
+	 * @param {boolean} empty Whether the cart has no line items.
+	 */
+	StickyCartController.prototype.syncCheckoutState = function (empty) {
+		var $a = this.$checkout;
+		if (!$a.length) {
+			return;
+		}
+		var base = $a.attr('data-mp-scc-checkout-base') || '';
+		var disabledAria = $a.attr('data-mp-scc-checkout-aria-disabled') || '';
+		if (empty) {
+			$a.addClass('mp-scc-checkout--disabled');
+			$a.attr('href', '#');
+			$a.attr('aria-disabled', 'true');
+			$a.attr('tabindex', '-1');
+			if (disabledAria) {
+				$a.attr('aria-label', disabledAria);
+			}
+		} else {
+			$a.removeClass('mp-scc-checkout--disabled');
+			$a.removeAttr('aria-disabled');
+			$a.removeAttr('tabindex');
+			$a.removeAttr('aria-label');
+			if (base) {
+				var merged = window.mpScc.mergeUrlWithLocationQuery(base);
+				$a.attr('href', merged);
+			}
 		}
 	};
 
@@ -1050,6 +1126,21 @@
 					self.clearCartLocked = false;
 					$btn.prop('disabled', false).removeAttr('aria-busy').removeClass('mp-scc-clear-cart--loading');
 				});
+		});
+
+		this.$root.on('click', '[data-mp-scc-checkout]', function (e) {
+			var $a = $(e.currentTarget);
+			if ($a.hasClass('mp-scc-checkout--disabled')) {
+				e.preventDefault();
+				return false;
+			}
+		});
+
+		this.$root.on('keydown', '[data-mp-scc-checkout].mp-scc-checkout--disabled', function (e) {
+			var k = e.key;
+			if (k === ' ' || k === 'Enter') {
+				e.preventDefault();
+			}
 		});
 
 		var wooRefresh = function () {
