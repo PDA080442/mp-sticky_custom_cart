@@ -44,6 +44,18 @@ final class CssVariablesContract {
 				'format' => 'raw',
 			),
 			array(
+				'name'   => self::PREFIX . 'catalog-hover-slide-y',
+				'path'   => 'catalog.hover_slide_offset_px',
+				'suffix' => 'px',
+				'format' => 'unit',
+			),
+			array(
+				'name'   => self::PREFIX . 'catalog-hover-hide-delay-ms',
+				'path'   => 'catalog.hover_hide_delay_ms',
+				'suffix' => 'ms',
+				'format' => 'unit',
+			),
+			array(
 				'name'   => self::PREFIX . 'sticky-z-index',
 				'path'   => 'sticky_cart.z_index',
 				'suffix' => '',

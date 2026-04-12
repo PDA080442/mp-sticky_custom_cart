@@ -38,6 +38,16 @@ final class SettingsValidationSchema {
 					'type' => 'text',
 					'oneof' => array( 'fade_slide', 'fade', 'slide' ),
 				),
+				'hover_slide_offset_px'     => array(
+					'type' => 'integer',
+					'min'  => 0,
+					'max'  => 48,
+				),
+				'hover_hide_delay_ms'       => array(
+					'type' => 'integer',
+					'min'  => 0,
+					'max'  => 500,
+				),
 				'image_click_selector'      => array(
 					'type'        => 'text',
 					'max_length'  => 500,
