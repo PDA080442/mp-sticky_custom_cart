@@ -33,7 +33,8 @@ final class FrontendFlagResolver {
 			'ajaxUrl'  => admin_url( 'admin-ajax.php' ),
 			'nonce'    => wp_create_nonce( Constants::AJAX_NONCE_ACTION ),
 			'actions'  => array(
-				'cartSnapshot' => Constants::AJAX_ACTION_CART_SNAPSHOT,
+				'cartSnapshot'     => Constants::AJAX_ACTION_CART_SNAPSHOT,
+				'setLineQuantity' => Constants::AJAX_ACTION_SET_LINE_QUANTITY,
 			),
 			'flags'    => $provider->for_js(),
 			'labels'   => OptionResolver::get_labels(),

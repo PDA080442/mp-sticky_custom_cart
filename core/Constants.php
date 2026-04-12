@@ -66,6 +66,11 @@ final class Constants {
 	public const AJAX_ACTION_CART_SNAPSHOT = 'mp_scc_cart_snapshot';
 
 	/**
+	 * Registered {@see wp_ajax_*} action: set line quantity (debounced from storefront JS).
+	 */
+	public const AJAX_ACTION_SET_LINE_QUANTITY = 'mp_scc_set_line_quantity';
+
+	/**
 	 * Not instantiable.
 	 */
 	private function __construct() {

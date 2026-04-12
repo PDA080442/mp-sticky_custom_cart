@@ -350,6 +350,98 @@
 	background: rgba(0, 0, 0, 0.05);
 }
 
+/* Drawer line items (filled from cart snapshot in JS) */
+.mp-scc-line {
+	list-style: none;
+	margin: 0;
+	padding: 10px 0;
+	border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.mp-scc-line:last-child {
+	border-bottom: 0;
+}
+
+.mp-scc-line__row {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: flex-start;
+	justify-content: space-between;
+	gap: 10px 12px;
+}
+
+.mp-scc-line__main {
+	flex: 1 1 auto;
+	min-width: 0;
+}
+
+.mp-scc-line__name {
+	font-size: var(--mp-scc-sticky-summary-font-size, 15px);
+	font-weight: 500;
+	color: inherit;
+	text-decoration: none;
+}
+
+.mp-scc-line__name:hover,
+.mp-scc-line__name:focus-visible {
+	text-decoration: underline;
+}
+
+.mp-scc-line__qty {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	margin-top: 6px;
+}
+
+.mp-scc-qty-btn {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	min-width: 36px;
+	min-height: 36px;
+	margin: 0;
+	padding: 0;
+	border: 1px solid rgba(0, 0, 0, 0.2);
+	border-radius: 6px;
+	background: rgba(255, 255, 255, 0.6);
+	color: inherit;
+	font-size: 18px;
+	line-height: 1;
+	cursor: pointer;
+	touch-action: manipulation;
+	transition:
+		background-color var(--mp-scc-motion-duration) var(--mp-scc-motion-easing),
+		border-color var(--mp-scc-motion-duration) var(--mp-scc-motion-easing);
+}
+
+.mp-scc-qty-btn:hover {
+	background: rgba(0, 0, 0, 0.06);
+}
+
+.mp-scc-qty-btn:focus {
+	outline: none;
+}
+
+.mp-scc-qty-btn:focus-visible {
+	outline: 2px solid var(--mp-scc-color-button-primary, #111);
+	outline-offset: 2px;
+}
+
+.mp-scc-line__qty-val {
+	min-width: 1.5em;
+	text-align: center;
+	font-variant-numeric: tabular-nums;
+	font-weight: var(--mp-scc-sticky-summary-font-weight, 600);
+}
+
+.mp-scc-line__subtotal {
+	flex: 0 0 auto;
+	font-size: var(--mp-scc-sticky-summary-font-size, 15px);
+	font-weight: var(--mp-scc-sticky-summary-font-weight, 600);
+	font-variant-numeric: tabular-nums;
+}
+
 /* 8) Reduced motion: keep layout, shorten transitions */
 @media (prefers-reduced-motion: reduce) {
 	.mp-scc-root {
