@@ -56,6 +56,11 @@ final class Constants {
 	public const OPTION_ERROR_LOG = self::STORAGE_PREFIX . 'error_log';
 
 	/**
+	 * Running count of cart-page requests that had {@see $_GET['add-to-cart']} before redirect (optional tracking).
+	 */
+	public const OPTION_EXTERNAL_CART_LINK_HITS = self::STORAGE_PREFIX . 'external_cart_link_hits';
+
+	/**
 	 * Nonce action for storefront AJAX ({@see check_ajax_referer} / {@see wp_verify_nonce}).
 	 */
 	public const AJAX_NONCE_ACTION = 'mp_scc_frontend';

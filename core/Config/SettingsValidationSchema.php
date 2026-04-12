@@ -65,6 +65,16 @@ final class SettingsValidationSchema {
 					'max'  => 100,
 				),
 			),
+			'cart_route'  => array(
+				'redirect_to_home'     => array( 'type' => 'boolean' ),
+				'redirect_status_code' => array(
+					'type'  => 'integer',
+					'oneof' => array( 301, 302, 303, 307 ),
+				),
+				'log_redirect_events'                   => array( 'type' => 'boolean' ),
+				'preserve_marketing_params_on_redirect' => array( 'type' => 'boolean' ),
+				'track_external_cart_link_hits'         => array( 'type' => 'boolean' ),
+			),
 			'sticky_cart' => array(
 				'z_index'                   => array( 'type' => 'integer', 'min' => 1, 'max' => 9999999 ),
 				'surface_backdrop_blur_px'  => array( 'type' => 'integer', 'min' => 0, 'max' => 100 ),
@@ -101,6 +111,9 @@ final class SettingsValidationSchema {
 			'diagnostics' => array(
 				'client_error_logging' => array( 'type' => 'boolean' ),
 				'log_retention_days'   => array( 'type' => 'integer', 'min' => 1, 'max' => 365 ),
+			),
+			'notices'     => array(
+				'remove_view_cart_link' => array( 'type' => 'boolean' ),
 			),
 			'labels'      => array(
 				'more_info'          => array( 'type' => 'text', 'max_length' => 500 ),
