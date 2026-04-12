@@ -1,0 +1,78 @@
+/**
+ * Settings screen: drawer empty-state preview (subset of storefront empty styles).
+ */
+.mp-scc-admin-drawer-empty-preview {
+	max-width: 420px;
+	margin: 12px 0 0;
+	padding: 16px;
+	border: 1px solid #c3c4c7;
+	border-radius: 8px;
+	background: #fff;
+	box-shadow: 0 1px 1px rgba(0, 0, 0, 0.04);
+}
+
+.mp-scc-admin-drawer-empty-preview .mp-scc-drawer-empty {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	gap: 10px;
+	width: 100%;
+	box-sizing: border-box;
+	padding: 12px 8px 16px;
+	text-align: center;
+}
+
+.mp-scc-admin-drawer-empty-preview .mp-scc-drawer-empty-visual {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	flex: 0 0 auto;
+}
+
+.mp-scc-admin-drawer-empty-preview .mp-scc-drawer-empty-icon {
+	display: block;
+	width: 52px;
+	height: 52px;
+	border-radius: 50%;
+	background-color: rgba(26, 26, 26, 0.07);
+	background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%231a1a1a' stroke-width='1.1'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M15.75 10.5V6a3.75 3.75 0 10-7.5 0v4.5m11.356-1.993l1.263 12c.07.659-.45 1.243-1.118 1.243H4.25a1.125 1.125 0 01-1.12-1.243l1.264-12A1.125 1.125 0 015.513 7.5h12.974c.576 0 1.059.435 1.119 1.007z'/%3E%3C/svg%3E");
+	background-repeat: no-repeat;
+	background-position: center;
+	background-size: 28px 28px;
+	opacity: 0.65;
+}
+
+.mp-scc-admin-drawer-empty-preview .mp-scc-drawer-empty-title {
+	margin: 0;
+	font-size: 15px;
+	font-weight: 600;
+	line-height: 1.35;
+	color: #1a1a1a;
+}
+
+.mp-scc-admin-drawer-empty-preview .mp-scc-drawer-empty-hint {
+	margin: 0;
+	font-size: 13px;
+	font-weight: 500;
+	line-height: 1.4;
+	color: rgba(26, 26, 26, 0.72);
+	max-width: 22em;
+}
+
+@media (min-width: 783px) {
+	.mp-scc-admin-drawer-empty-preview .mp-scc-drawer-empty {
+		padding: 16px 12px 20px;
+		gap: 12px;
+	}
+
+	.mp-scc-admin-drawer-empty-preview .mp-scc-drawer-empty-icon {
+		width: 56px;
+		height: 56px;
+		background-size: 30px 30px;
+	}
+
+	.mp-scc-admin-drawer-empty-preview .mp-scc-drawer-empty-title {
+		font-size: 15.5px;
+	}
+}

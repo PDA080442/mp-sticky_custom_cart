@@ -916,8 +916,10 @@
 
 		if (empty || items.length === 0) {
 			this.$items.empty();
+			this.$items.attr('hidden', 'hidden').attr('aria-hidden', 'true');
 			this.$empty.removeAttr('hidden');
 		} else {
+			this.$items.removeAttr('hidden').removeAttr('aria-hidden');
 			this.$empty.attr('hidden', 'hidden');
 			this.renderLineItems(items);
 		}
@@ -925,7 +927,34 @@
 		this.$root.attr('data-mp-scc-cart-empty', empty ? '1' : '0');
 		this.$root.toggleClass('mp-scc-sticky--empty', !!empty);
 
+		this.syncStickyActions(empty);
+	};
+
+	/**
+	 * @param {boolean} empty Whether the cart has no line items.
+	 */
+	StickyCartController.prototype.syncStickyActions = function (empty) {
 		this.syncCheckoutState(empty);
+		var $clear = this.$root.find('[data-mp-scc-clear-cart]');
+		if ($clear.length) {
+			var clearAria = $clear.attr('data-mp-scc-clear-aria-disabled') || '';
+			if (empty) {
+				$clear.addClass('mp-scc-clear-cart--disabled').prop('disabled', true).attr('aria-disabled', 'true');
+				if (clearAria) {
+					$clear.attr('aria-label', clearAria);
+				}
+			} else {
+				$clear.removeClass('mp-scc-clear-cart--disabled').prop('disabled', false).removeAttr('aria-disabled');
+				$clear.removeAttr('aria-label');
+			}
+		}
+		if (this.$drawer.length) {
+			this.$drawer.toggleClass('mp-scc-drawer--empty', !!empty);
+			var $inner = this.$drawer.find('.mp-scc-drawer-inner');
+			if ($inner.length) {
+				$inner.toggleClass('mp-scc-drawer-inner--empty', !!empty);
+			}
+		}
 	};
 
 	/**
@@ -1397,11 +1426,14 @@
 			if (!cfg.ajaxUrl || !cfg.actions.clearCart) {
 				return;
 			}
+			var $btn = $(e.currentTarget);
+			if ($btn.prop('disabled') || $btn.hasClass('mp-scc-clear-cart--disabled')) {
+				return;
+			}
 			if (self.clearCartLocked || self.snapshotLocked || self.mutationInFlight) {
 				return;
 			}
 			self.clearCartLocked = true;
-			var $btn = $(e.currentTarget);
 			$btn.prop('disabled', true).attr('aria-busy', 'true').addClass('mp-scc-clear-cart--loading');
 			window.mpScc
 				.postAjax('clearCart', {})
@@ -1425,7 +1457,14 @@
 				})
 				.always(function () {
 					self.clearCartLocked = false;
-					$btn.prop('disabled', false).removeAttr('aria-busy').removeClass('mp-scc-clear-cart--loading');
+					$btn.removeAttr('aria-busy').removeClass('mp-scc-clear-cart--loading');
+					var isEmpty = self.$root.attr('data-mp-scc-cart-empty') === '1';
+					if (isEmpty) {
+						self.syncStickyActions(true);
+					} else {
+						$btn.prop('disabled', false).removeAttr('aria-disabled').removeClass('mp-scc-clear-cart--disabled');
+						$btn.removeAttr('aria-label');
+					}
 				});
 		});
 

@@ -20,6 +20,7 @@ assert.ok(renderer.includes('mp-scc-checkout--disabled'), 'Renderer should mark 
 assert.ok(renderer.includes('data-mp-scc-checkout-aria-disabled'), 'Renderer should expose disabled aria text');
 assert.ok(js.includes('mergeUrlWithLocationQuery'), 'JS should merge page query onto checkout');
 assert.ok(js.includes('syncCheckoutState'), 'JS should sync checkout link when cart snapshot updates');
+assert.ok(js.includes('syncStickyActions'), 'JS should sync checkout + clear + drawer empty state');
 assert.ok(js.includes('data().checkoutPreserveQueryKeys'), 'mergeUrl should read allowed keys from mpSccData');
 assert.ok(localize.includes('checkoutPreserveQueryKeys'), 'Localized data should list preserved query keys');
 assert.ok(preserve.includes('merge_request_into_url'), 'PHP should merge allowed query params into checkout URL');
