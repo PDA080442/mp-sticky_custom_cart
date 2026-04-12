@@ -759,6 +759,103 @@
 		return false;
 	}
 
+	function getVariationIdFromForm($form) {
+		if (!$form || !$form.length) {
+			return 0;
+		}
+		var $vid = $form.find('input.variation_id, input[name="variation_id"]').first();
+		if (!$vid.length) {
+			return 0;
+		}
+		var n = parseInt($vid.val(), 10);
+		return isNaN(n) || n <= 0 ? 0 : n;
+	}
+
+	function $variationHighlightTarget($form) {
+		var $t = $form.find('.variations').first();
+		if ($t.length) {
+			return $t;
+		}
+		return $form;
+	}
+
+	function clearVariationErrorHighlight($form) {
+		if (!$form || !$form.length) {
+			return;
+		}
+		$form.find('.mp-scc-variation--error').removeClass('mp-scc-variation--error');
+	}
+
+	function showVariationRequiredFromGuard($form) {
+		var msg = window.mpScc.label('variation_required');
+		if (!msg) {
+			msg = 'Выберите вариацию товара';
+		}
+		var sticky = window.mpScc.sticky;
+		if (sticky && typeof sticky.showStickyInlineFeedback === 'function') {
+			sticky.showStickyInlineFeedback(msg, 'error');
+		}
+		var $target = $variationHighlightTarget($form);
+		$target.addClass('mp-scc-variation--error');
+		var el = $target.get(0);
+		if (el && el.scrollIntoView) {
+			try {
+				el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+			} catch (err) {
+				el.scrollIntoView(true);
+			}
+		}
+	}
+
+	/**
+	 * Block add-to-cart when no variation is selected (capture phase — before Woo handlers).
+	 * Message: mpScc.label('variation_required') from admin / translations.
+	 */
+	function initVariableProductVariationGuard() {
+		document.body.addEventListener(
+			'click',
+			function (e) {
+				var t = e.target;
+				if (!t || typeof t.closest !== 'function') {
+					return;
+				}
+				if (e.button !== 0) {
+					return;
+				}
+				var btn = t.closest(
+					'form.variations_form button.single_add_to_cart_button, form.variations_form input.single_add_to_cart_button'
+				);
+				if (!btn) {
+					return;
+				}
+				var form = btn.closest('form.variations_form');
+				if (!form) {
+					return;
+				}
+				var $form = $(form);
+				if (getVariationIdFromForm($form) > 0) {
+					return;
+				}
+				e.preventDefault();
+				e.stopPropagation();
+				e.stopImmediatePropagation();
+				showVariationRequiredFromGuard($form);
+			},
+			true
+		);
+
+		$(document.body).on(
+			'change',
+			'form.variations_form .variations input, form.variations_form .variations select',
+			function () {
+				clearVariationErrorHighlight($(this).closest('form.variations_form'));
+			}
+		);
+		$(document.body).on('found_variation reset_data', 'form.variations_form', function () {
+			clearVariationErrorHighlight($(this));
+		});
+	}
+
 	function initSingleProductAddToCart() {
 		$(document.body).on('added_to_cart.mpSccSingle', function (ev, fragments, cart_hash, $button) {
 			if (!shouldShowSingleProductAddFeedback($button)) {
@@ -1665,6 +1762,7 @@
 			window.mpScc.sticky = sticky;
 		}
 
+		initVariableProductVariationGuard();
 		initSingleProductAddToCart();
 
 		initCatalogOverlayPropagation();
