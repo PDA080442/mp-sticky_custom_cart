@@ -95,6 +95,27 @@
 	min-width: 0;
 }
 
+.mp-scc-clear-cart--loading {
+	opacity: 0.65;
+	pointer-events: none;
+}
+
+.mp-scc-sticky-inline-feedback {
+	margin: 0 0 8px;
+	font-size: calc(var(--mp-scc-sticky-button-font-size, 14px) * 0.95);
+	font-weight: 500;
+	line-height: 1.35;
+	width: 100%;
+}
+
+.mp-scc-sticky-inline-feedback--success {
+	color: color-mix(in srgb, var(--mp-scc-color-text-primary, #1a1a1a) 88%, #0a7a3e);
+}
+
+.mp-scc-sticky-inline-feedback--error {
+	color: color-mix(in srgb, var(--mp-scc-color-text-primary, #1a1a1a) 88%, #b42318);
+}
+
 @media (min-width: 783px) {
 	.mp-scc-sticky-bar {
 		padding-top: var(--mp-scc-sticky-padding-y-desktop, 14px);

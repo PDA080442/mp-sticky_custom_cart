@@ -106,6 +106,7 @@ final class SettingsValidationSchema {
 				'more_info'          => array( 'type' => 'text', 'max_length' => 500 ),
 				'out_of_stock'       => array( 'type' => 'text', 'max_length' => 500 ),
 				'clear_cart'         => array( 'type' => 'text', 'max_length' => 500 ),
+				'cart_cleared'       => array( 'type' => 'text', 'max_length' => 500 ),
 				'checkout'           => array( 'type' => 'text', 'max_length' => 500 ),
 				'variation_required' => array( 'type' => 'text', 'max_length' => 500 ),
 				'drawer_empty'       => array( 'type' => 'text', 'max_length' => 500 ),
