@@ -92,6 +92,19 @@ final class FrontendFlagResolver {
 		 */
 		$image_title_block_selectors = apply_filters( 'mp_sticky_custom_cart_catalog_image_title_block_selectors', $image_title_block_selectors );
 
+		$overlay_host_selectors = array(
+			'a.woocommerce-LoopProduct-link',
+			'a.woocommerce-loop-product__link',
+			'.woocommerce-LoopProduct-link',
+		);
+
+		/**
+		 * Filters node(s) that wrap the catalog thumbnail; overlay is injected inside the first match (prefer anchor-wrapped images).
+		 *
+		 * @param string[] $selectors Relative selectors for {@see jQuery#find} on the card root.
+		 */
+		$overlay_host_selectors = apply_filters( 'mp_sticky_custom_cart_catalog_overlay_host_selectors', $overlay_host_selectors );
+
 		$catalog_js = array(
 			'imageClickSelector'       => $img_sel,
 			'cardRootSelector'         => $card_sel,
@@ -99,6 +112,9 @@ final class FrontendFlagResolver {
 			'titleLinkSelectors'         => array_values( $title_link_selectors ),
 			'titleAnalyticsSelectors'    => array_values( $title_analytics_selectors ),
 			'imageTitleBlockSelectors'   => array_values( $image_title_block_selectors ),
+			'hoverOverlayMobileAlways'   => ! empty( $catalog_settings['hover_overlay_mobile_always'] ),
+			'overlayHostSelectors'       => array_values( $overlay_host_selectors ),
+			'hoverMotionPreset'          => isset( $catalog_settings['hover_motion_preset'] ) ? (string) $catalog_settings['hover_motion_preset'] : 'fade_slide',
 		);
 
 		$data = array(

@@ -443,7 +443,8 @@
 }
 
 /* Catalog: image add-to-cart — toast positioning */
-ul.products li.product {
+ul.products li.product,
+.woocommerce .products li.product {
 	position: relative;
 }
 
@@ -496,6 +497,115 @@ li.product.mp-scc-card--added {
 
 li.product.mp-scc-card--error {
 	animation: mp-scc-card-shake 0.42s ease;
+}
+
+/* Catalog: «Подробнее» band over thumbnail (Phase 5.1) */
+ul.products li.product .mp-scc-catalog-overlay--floating,
+.woocommerce .products li.product .mp-scc-catalog-overlay--floating {
+	position: absolute;
+	z-index: 4;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	box-sizing: border-box;
+	padding: 6px 10px;
+	text-decoration: none;
+	border-radius: 8px;
+	background: rgba(17, 17, 17, 0.88);
+	background: color-mix(in srgb, var(--mp-scc-color-button-primary, #111) 88%, transparent);
+	color: var(--mp-scc-color-button-primary-text, #fff);
+	font-size: 12px;
+	font-weight: 600;
+	line-height: 1.25;
+	text-align: center;
+	box-shadow: 0 2px 12px rgba(0, 0, 0, 0.18);
+	transition:
+		opacity var(--mp-scc-catalog-hover-duration-ms, 220ms) var(--mp-scc-catalog-hover-easing, ease),
+		transform var(--mp-scc-catalog-hover-duration-ms, 220ms) var(--mp-scc-catalog-hover-easing, ease);
+	/* Reserve top-right for wishlist heart + clearance */
+	padding-right: calc(
+		10px + var(--mp-scc-wishlist-heart-reserve-right, 10px) + var(--mp-scc-wishlist-overlay-clearance, 8px)
+	);
+}
+
+ul.products li.product .mp-scc-catalog-overlay__label,
+.woocommerce .products li.product .mp-scc-catalog-overlay__label {
+	display: block;
+	max-width: 100%;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+/* Desktop: reveal on card hover; upper image area stays free for image add-to-cart */
+@media (min-width: 783px) {
+	ul.products li.product .mp-scc-catalog-overlay--floating,
+	.woocommerce .products li.product .mp-scc-catalog-overlay--floating {
+		opacity: 0;
+		pointer-events: none;
+	}
+
+	ul.products li.product:hover .mp-scc-catalog-overlay--floating,
+	ul.products li.product:focus-within .mp-scc-catalog-overlay--floating,
+	.woocommerce .products li.product:hover .mp-scc-catalog-overlay--floating,
+	.woocommerce .products li.product:focus-within .mp-scc-catalog-overlay--floating {
+		opacity: 1;
+		pointer-events: auto;
+	}
+
+	ul.products li.product .mp-scc-catalog-overlay--motion-fade_slide,
+	.woocommerce .products li.product .mp-scc-catalog-overlay--motion-fade_slide {
+		transform: translateY(8px);
+	}
+
+	ul.products li.product:hover .mp-scc-catalog-overlay--motion-fade_slide,
+	ul.products li.product:focus-within .mp-scc-catalog-overlay--motion-fade_slide,
+	.woocommerce .products li.product:hover .mp-scc-catalog-overlay--motion-fade_slide,
+	.woocommerce .products li.product:focus-within .mp-scc-catalog-overlay--motion-fade_slide {
+		transform: translateY(0);
+	}
+
+	ul.products li.product .mp-scc-catalog-overlay--motion-fade,
+	.woocommerce .products li.product .mp-scc-catalog-overlay--motion-fade {
+		transform: none;
+	}
+
+	ul.products li.product .mp-scc-catalog-overlay--motion-slide,
+	.woocommerce .products li.product .mp-scc-catalog-overlay--motion-slide {
+		transform: translateY(14px);
+	}
+
+	ul.products li.product:hover .mp-scc-catalog-overlay--motion-slide,
+	ul.products li.product:focus-within .mp-scc-catalog-overlay--motion-slide,
+	.woocommerce .products li.product:hover .mp-scc-catalog-overlay--motion-slide,
+	.woocommerce .products li.product:focus-within .mp-scc-catalog-overlay--motion-slide {
+		transform: translateY(0);
+	}
+}
+
+/* Mobile: optional always-visible strip (setting hover_overlay_mobile_always) */
+@media (max-width: 782px) {
+	ul.products li.product .mp-scc-catalog-overlay--floating.mp-scc-catalog-overlay--mobile-always,
+	.woocommerce .products li.product .mp-scc-catalog-overlay--floating.mp-scc-catalog-overlay--mobile-always {
+		opacity: 1;
+		pointer-events: auto;
+		transform: none;
+	}
+
+	ul.products li.product .mp-scc-catalog-overlay--floating:not(.mp-scc-catalog-overlay--mobile-always),
+	.woocommerce .products li.product .mp-scc-catalog-overlay--floating:not(.mp-scc-catalog-overlay--mobile-always) {
+		opacity: 0;
+		pointer-events: none;
+	}
+
+	ul.products li.product:hover .mp-scc-catalog-overlay--floating:not(.mp-scc-catalog-overlay--mobile-always),
+	ul.products li.product:focus-within .mp-scc-catalog-overlay--floating:not(.mp-scc-catalog-overlay--mobile-always),
+	.woocommerce .products li.product:hover .mp-scc-catalog-overlay--floating:not(.mp-scc-catalog-overlay--mobile-always),
+	.woocommerce .products li.product:focus-within .mp-scc-catalog-overlay--floating:not(.mp-scc-catalog-overlay--mobile-always) {
+		opacity: 1;
+		pointer-events: auto;
+		transform: none;
+	}
 }
 
 @keyframes mp-scc-card-shake {
@@ -565,5 +675,11 @@ li.product.mp-scc-card--error {
 	li.product.mp-scc-card--loading::after {
 		animation: none;
 		border-top-color: rgba(0, 0, 0, 0.25);
+	}
+
+	ul.products li.product .mp-scc-catalog-overlay--floating,
+	.woocommerce .products li.product .mp-scc-catalog-overlay--floating {
+		transform: none !important;
+		transition-duration: 0.01ms !important;
 	}
 }
