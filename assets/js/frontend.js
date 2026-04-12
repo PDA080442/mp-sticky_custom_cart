@@ -354,6 +354,38 @@
 		});
 	}
 
+	/**
+	 * Enables wishlist coexistence CSS ({@see assets/css/frontend.css}) when the feature flag is on.
+	 */
+	function initWishlistIntegrationBodyClass() {
+		if (!window.mpScc.flagEnabled('wishlist_icon_integration_enabled')) {
+			return;
+		}
+		document.body.classList.add('mp-scc-wishlist-integration-on');
+	}
+
+	/**
+	 * Append ?mp_scc_wishlist_debug=1 to catch duplicate wishlist widgets in one card (theme/plugin issue).
+	 */
+	function warnDuplicateWishlistButtonsInCard() {
+		if (!window.mpScc.flagEnabled('wishlist_icon_integration_enabled')) {
+			return;
+		}
+		if (window.location.search.indexOf('mp_scc_wishlist_debug=1') === -1) {
+			return;
+		}
+		var catalog = data().catalog || {};
+		var cardSel = catalog.cardRootSelector || 'li.product';
+		var sel =
+			'.yith-wcwl-add-button, a.tinvwl_add_to_wishlist_button, .woosw-btn';
+		$(cardSel).each(function () {
+			var n = $(this).find(sel).length;
+			if (n > 1) {
+				window.console.warn('[mp-scc] Multiple wishlist controls in one product card', this);
+			}
+		});
+	}
+
 	var catalogOverlayInitTimer = null;
 	function scheduleCatalogMoreInfoOverlay() {
 		if (catalogOverlayInitTimer) {
@@ -882,6 +914,8 @@
 	};
 
 	$(function () {
+		initWishlistIntegrationBodyClass();
+
 		var $root = $('#mp-scc-sticky-root');
 		if ($root.length) {
 			var sticky = new StickyCartController($root[0]);
@@ -895,6 +929,7 @@
 		initCatalogMoreInfoOverlay();
 		initCatalogImageAddToCart();
 		runCatalogTitleLinkSanity();
+		warnDuplicateWishlistButtonsInCard();
 
 		$(document.body).on(
 			'wc_fragments_refreshed updated_wc_div etheme_ajax_loaded post-load',

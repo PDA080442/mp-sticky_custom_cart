@@ -503,7 +503,7 @@ li.product.mp-scc-card--error {
 ul.products li.product .mp-scc-catalog-overlay--floating,
 .woocommerce .products li.product .mp-scc-catalog-overlay--floating {
 	position: absolute;
-	z-index: 4;
+	z-index: var(--mp-scc-catalog-overlay-z-index, 4);
 	display: flex;
 	align-items: center;
 	justify-content: center;
@@ -537,6 +537,33 @@ ul.products li.product .mp-scc-catalog-overlay__label,
 	overflow: hidden;
 	text-overflow: ellipsis;
 	white-space: nowrap;
+}
+
+/*
+ * Wishlist coexistence: raise third-party heart controls above «Подробнее» (lower z-index).
+ * body.mp-scc-wishlist-integration-on is set in assets/js/frontend.js when the flag is on.
+ * Only position + z-index — theme/plugin :hover/:active styles stay intact.
+ */
+body.mp-scc-wishlist-integration-on ul.products li.product .yith-wcwl-add-to-wishlist,
+body.mp-scc-wishlist-integration-on .woocommerce .products li.product .yith-wcwl-add-to-wishlist,
+body.mp-scc-wishlist-integration-on ul.products li.product .yith-wcwl-add-button,
+body.mp-scc-wishlist-integration-on .woocommerce .products li.product .yith-wcwl-add-button,
+body.mp-scc-wishlist-integration-on ul.products li.product a.tinvwl_add_to_wishlist_button,
+body.mp-scc-wishlist-integration-on .woocommerce .products li.product a.tinvwl_add_to_wishlist_button,
+body.mp-scc-wishlist-integration-on ul.products li.product .tinv-wrap .tinvwl_add_to_wishlist_button,
+body.mp-scc-wishlist-integration-on ul.products li.product .woosw-btn,
+body.mp-scc-wishlist-integration-on .woocommerce .products li.product .woosw-btn,
+body.mp-scc-wishlist-integration-on ul.products li.product .woosw-wishlist,
+body.mp-scc-wishlist-integration-on .woocommerce .products li.product .woosw-wishlist {
+	position: relative;
+	z-index: var(--mp-scc-wishlist-icon-z-index, 6);
+	pointer-events: auto;
+}
+
+body.mp-scc-wishlist-integration-on ul.products li.product a.mp-scc-catalog-overlay:focus-visible,
+body.mp-scc-wishlist-integration-on .woocommerce .products li.product a.mp-scc-catalog-overlay:focus-visible {
+	outline: 2px solid var(--mp-scc-color-button-primary, #111111);
+	outline-offset: 3px;
 }
 
 /* Desktop: fade/slide in on hover, delayed fade-out + slide back to reduce edge flicker */
