@@ -71,6 +71,11 @@ final class Constants {
 	public const AJAX_ACTION_SET_LINE_QUANTITY = 'mp_scc_set_line_quantity';
 
 	/**
+	 * Registered {@see wp_ajax_*} action: add simple product (catalog image click).
+	 */
+	public const AJAX_ACTION_ADD_SIMPLE_PRODUCT = 'mp_scc_add_simple_product';
+
+	/**
 	 * Not instantiable.
 	 */
 	private function __construct() {

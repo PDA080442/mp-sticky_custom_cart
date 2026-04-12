@@ -53,16 +53,10 @@ final class FrontendFlagResolver {
 		$card_sel = (string) apply_filters( 'mp_sticky_custom_cart_catalog_card_root_selector', $card_sel );
 
 		$catalog_js = array(
-			'imageClickSelector'   => $img_sel,
-			'cardRootSelector'     => $card_sel,
-			'wcAddToCartNonce'     => wp_create_nonce( 'woocommerce-add-to-cart' ),
-			'resolveErrorMessage'  => __( 'Не удалось определить товар для добавления в корзину.', 'mp-sticky-custom-cart' ),
+			'imageClickSelector'  => $img_sel,
+			'cardRootSelector'    => $card_sel,
+			'resolveErrorMessage' => __( 'Не удалось определить товар для добавления в корзину.', 'mp-sticky-custom-cart' ),
 		);
-		if ( class_exists( '\WC_AJAX', false ) ) {
-			$catalog_js['wcAjaxAddToCartUrl'] = \WC_AJAX::get_endpoint( 'add_to_cart' );
-		} else {
-			$catalog_js['wcAjaxAddToCartUrl'] = '';
-		}
 
 		$data = array(
 			'version'  => MP_STICKY_CUSTOM_CART_VERSION,
@@ -70,8 +64,9 @@ final class FrontendFlagResolver {
 			'ajaxUrl'  => admin_url( 'admin-ajax.php' ),
 			'nonce'    => wp_create_nonce( Constants::AJAX_NONCE_ACTION ),
 			'actions'  => array(
-				'cartSnapshot'     => Constants::AJAX_ACTION_CART_SNAPSHOT,
-				'setLineQuantity' => Constants::AJAX_ACTION_SET_LINE_QUANTITY,
+				'cartSnapshot'      => Constants::AJAX_ACTION_CART_SNAPSHOT,
+				'setLineQuantity'   => Constants::AJAX_ACTION_SET_LINE_QUANTITY,
+				'addSimpleProduct'  => Constants::AJAX_ACTION_ADD_SIMPLE_PRODUCT,
 			),
 			'flags'    => $provider->for_js(),
 			'labels'   => OptionResolver::get_labels(),

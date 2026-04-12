@@ -7,8 +7,6 @@
 
 namespace MpStickyCustomCart\Frontend;
 
-use MpStickyCustomCart\Core\Config\FeatureFlagsDefaults;
-use MpStickyCustomCart\Core\OptionResolver;
 use MpStickyCustomCart\Core\PluginPaths;
 
 defined( 'ABSPATH' ) || exit;
@@ -37,10 +35,6 @@ final class FrontendAssetsHooks {
 		$script_deps = array( 'jquery' );
 		if ( wp_script_is( 'wc-cart-fragments', 'registered' ) ) {
 			$script_deps[] = 'wc-cart-fragments';
-		}
-		if ( OptionResolver::get_flag( FeatureFlagsDefaults::KEY_PRODUCT_IMAGE_ADD_TO_CART, true ) && wp_script_is( 'wc-add-to-cart', 'registered' ) ) {
-			wp_enqueue_script( 'wc-add-to-cart' );
-			$script_deps[] = 'wc-add-to-cart';
 		}
 
 		wp_enqueue_script(
