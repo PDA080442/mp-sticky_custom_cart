@@ -38,6 +38,16 @@ final class SettingsValidationSchema {
 					'type' => 'text',
 					'oneof' => array( 'fade_slide', 'fade', 'slide' ),
 				),
+				'hover_slide_offset_px'     => array(
+					'type' => 'integer',
+					'min'  => 0,
+					'max'  => 48,
+				),
+				'hover_hide_delay_ms'       => array(
+					'type' => 'integer',
+					'min'  => 0,
+					'max'  => 500,
+				),
 				'image_click_selector'      => array(
 					'type'        => 'text',
 					'max_length'  => 500,
@@ -45,6 +55,14 @@ final class SettingsValidationSchema {
 				'card_root_selector'        => array(
 					'type'        => 'text',
 					'max_length'  => 200,
+				),
+				'more_info_new_tab'         => array(
+					'type' => 'boolean',
+				),
+				'catalog_overlay_z_index'   => array(
+					'type' => 'integer',
+					'min'  => 0,
+					'max'  => 100,
 				),
 			),
 			'sticky_cart' => array(
@@ -72,6 +90,7 @@ final class SettingsValidationSchema {
 				'heart_reserve_top_px'       => array( 'type' => 'integer', 'min' => 0, 'max' => 200 ),
 				'heart_reserve_right_px'     => array( 'type' => 'integer', 'min' => 0, 'max' => 200 ),
 				'overlay_clearance_heart_px'   => array( 'type' => 'integer', 'min' => 0, 'max' => 200 ),
+				'heart_icon_z_index'           => array( 'type' => 'integer', 'min' => 0, 'max' => 100 ),
 			),
 			'styles'      => array(
 				'color_text_primary'        => array( 'type' => 'color' ),

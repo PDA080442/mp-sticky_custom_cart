@@ -24,10 +24,18 @@ final class UiSettingsDefaults {
 				'hover_animation_duration_ms'  => 220,
 				'hover_animation_easing'       => 'cubic-bezier(0.4, 0, 0.2, 1)',
 				'hover_motion_preset'          => 'fade_slide',
+				/** Vertical slide distance (px) for overlay enter/leave motion. */
+				'hover_slide_offset_px'        => 8,
+				/** Extra delay before fade-out when pointer leaves the card (reduces flicker). */
+				'hover_hide_delay_ms'          => 50,
 				/** CSS selector for delegated image clicks (shop loop); empty = built-in default. */
 				'image_click_selector'         => '',
 				/** Closest ancestor for loading/added/error states (jQuery selector). */
 				'card_root_selector'           => 'li.product',
+				/** Open «Подробнее» product URL in a new browser tab (adds target + rel). */
+				'more_info_new_tab'            => false,
+				/** Stacking: «Подробнее» overlay (keep below wishlist heart). */
+				'catalog_overlay_z_index'      => 4,
 			),
 			'sticky_cart' => array(
 				'z_index'                    => 100050,
@@ -51,6 +59,8 @@ final class UiSettingsDefaults {
 				'heart_reserve_top_px'       => 10,
 				'heart_reserve_right_px'     => 10,
 				'overlay_clearance_heart_px' => 8,
+				/** Stacking: wishlist control above catalog overlay. */
+				'heart_icon_z_index'         => 6,
 			),
 			'styles'      => array(
 				'color_text_primary'        => '#1a1a1a',
