@@ -111,6 +111,7 @@ final class SettingsValidationSchema {
 				'variation_required' => array( 'type' => 'text', 'max_length' => 500 ),
 				'drawer_empty'       => array( 'type' => 'text', 'max_length' => 500 ),
 				'drawer_remove_line' => array( 'type' => 'text', 'max_length' => 500 ),
+				'line_removed'       => array( 'type' => 'text', 'max_length' => 500 ),
 			),
 		);
 	}

@@ -453,6 +453,12 @@ body.popup-overlay-open .mp-scc-sticky-bar {
 	border-bottom: 0;
 }
 
+.mp-scc-line--removing {
+	opacity: 0.55;
+	pointer-events: none;
+	transition: opacity var(--mp-scc-motion-duration) var(--mp-scc-motion-easing);
+}
+
 .mp-scc-line__row {
 	display: flex;
 	align-items: flex-start;

@@ -26,6 +26,8 @@ final class AjaxEndpointsHooks {
 		add_action( 'wp_ajax_nopriv_' . Constants::AJAX_ACTION_ADD_SIMPLE_PRODUCT, array( self::class, 'handle_add_simple_product' ) );
 		add_action( 'wp_ajax_' . Constants::AJAX_ACTION_CLEAR_CART, array( self::class, 'handle_clear_cart' ) );
 		add_action( 'wp_ajax_nopriv_' . Constants::AJAX_ACTION_CLEAR_CART, array( self::class, 'handle_clear_cart' ) );
+		add_action( 'wp_ajax_' . Constants::AJAX_ACTION_REMOVE_CART_LINE, array( self::class, 'handle_remove_cart_line' ) );
+		add_action( 'wp_ajax_nopriv_' . Constants::AJAX_ACTION_REMOVE_CART_LINE, array( self::class, 'handle_remove_cart_line' ) );
 
 		/**
 		 * Fires when AJAX endpoint hooks are registered — attach real handlers here.
@@ -87,6 +89,74 @@ final class AjaxEndpointsHooks {
 			wp_send_json_error(
 				array(
 					'message' => __( 'Корзина очищена, но не удалось обновить данные.', 'mp-sticky-custom-cart' ),
+					'code'    => 'snapshot_failed',
+				)
+			);
+		}
+
+		wp_send_json_success( $payload );
+	}
+
+	/**
+	 * Remove a single cart line (sticky drawer); returns unified snapshot.
+	 */
+	public static function handle_remove_cart_line() {
+		self::verify_nonce();
+		if ( ! function_exists( 'WC' ) || ! WC()->cart ) {
+			self::log_remove_line_failure( 'no_cart', 'Cart unavailable.', array() );
+			wp_send_json_error(
+				array(
+					'message' => __( 'Корзина недоступна.', 'mp-sticky-custom-cart' ),
+					'code'    => 'cart_unavailable',
+				)
+			);
+		}
+
+		$key = isset( $_POST['cart_item_key'] ) ? sanitize_text_field( wp_unslash( $_POST['cart_item_key'] ) ) : '';
+		if ( '' === $key ) {
+			self::log_remove_line_failure( 'missing_key', 'cart_item_key missing.', array() );
+			wp_send_json_error(
+				array(
+					'message' => __( 'Не указана позиция корзины.', 'mp-sticky-custom-cart' ),
+					'code'    => 'missing_cart_line',
+				)
+			);
+		}
+
+		$cart     = WC()->cart;
+		$contents = $cart->get_cart();
+		if ( ! isset( $contents[ $key ] ) ) {
+			self::log_remove_line_failure( 'cart_line_not_found', 'Line not in cart.', array( 'cart_item_key' => $key ) );
+			wp_send_json_error(
+				array(
+					'message' => __( 'Позиция в корзине не найдена.', 'mp-sticky-custom-cart' ),
+					'code'    => 'cart_line_not_found',
+				)
+			);
+		}
+
+		$removed = $cart->remove_cart_item( $key );
+		if ( ! $removed ) {
+			self::log_remove_line_failure( 'remove_failed', 'remove_cart_item returned false.', array( 'cart_item_key' => $key ) );
+			wp_send_json_error(
+				array(
+					'message' => __( 'Не удалось удалить позицию.', 'mp-sticky-custom-cart' ),
+					'code'    => 'remove_failed',
+				)
+			);
+		}
+
+		$cart->calculate_totals();
+		if ( function_exists( 'wc_clear_notices' ) ) {
+			wc_clear_notices();
+		}
+
+		$payload = self::build_cart_snapshot_payload();
+		if ( is_wp_error( $payload ) ) {
+			self::log_remove_line_failure( 'snapshot_failed', $payload->get_error_message(), array( 'cart_item_key' => $key ) );
+			wp_send_json_error(
+				array(
+					'message' => __( 'Позиция удалена, но не удалось обновить данные корзины.', 'mp-sticky-custom-cart' ),
 					'code'    => 'snapshot_failed',
 				)
 			);
@@ -716,6 +786,42 @@ final class AjaxEndpointsHooks {
 		 * @param array<string, mixed> $entry Log entry.
 		 */
 		$entry = apply_filters( 'mp_sticky_custom_cart_clear_cart_log_entry', $entry );
+
+		$log = get_option( Constants::OPTION_ERROR_LOG, array() );
+		if ( ! is_array( $log ) ) {
+			$log = array();
+		}
+		$log[] = $entry;
+		if ( count( $log ) > 100 ) {
+			$log = array_slice( $log, -100 );
+		}
+		update_option( Constants::OPTION_ERROR_LOG, $log, false );
+	}
+
+	/**
+	 * @param string               $code    Stable error code.
+	 * @param string               $message Technical message.
+	 * @param array<string, mixed> $context Extra context.
+	 */
+	private static function log_remove_line_failure( $code, $message, array $context ) {
+		if ( ! OptionResolver::get_setting( 'diagnostics.client_error_logging', true ) ) {
+			return;
+		}
+
+		$entry = array(
+			't'       => time(),
+			'type'    => 'remove_cart_line',
+			'code'    => sanitize_key( (string) $code ),
+			'message' => (string) $message,
+			'context' => $context,
+		);
+
+		/**
+		 * Filters a remove-line failure log entry before it is stored.
+		 *
+		 * @param array<string, mixed> $entry Log entry.
+		 */
+		$entry = apply_filters( 'mp_sticky_custom_cart_remove_cart_line_log_entry', $entry );
 
 		$log = get_option( Constants::OPTION_ERROR_LOG, array() );
 		if ( ! is_array( $log ) ) {
