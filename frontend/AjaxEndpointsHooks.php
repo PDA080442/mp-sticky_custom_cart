@@ -158,9 +158,55 @@ final class AjaxEndpointsHooks {
 			);
 		}
 
+		$cart_item = $contents[ $key ];
+		$product   = isset( $cart_item['data'] ) ? $cart_item['data'] : null;
+
 		if ( 0 === $qty ) {
 			$cart->remove_cart_item( $key );
 		} else {
+			if ( ! is_a( $product, 'WC_Product' ) ) {
+				wp_send_json_error(
+					array(
+						'message' => __( 'Товар для позиции недоступен.', 'mp-sticky-custom-cart' ),
+						'code'    => 'invalid_product',
+					)
+				);
+			}
+
+			$min_req = 1;
+			if ( is_callable( array( $product, 'get_min_purchase_quantity' ) ) ) {
+				$mp = (int) $product->get_min_purchase_quantity();
+				if ( $mp > 1 ) {
+					$min_req = $mp;
+				}
+			}
+			if ( $qty < $min_req ) {
+				wp_send_json_error(
+					array(
+						'message' => sprintf(
+							/* translators: %d: minimum quantity for the line */
+							__( 'Минимальное количество для этой позиции: %d.', 'mp-sticky-custom-cart' ),
+							$min_req
+						),
+						'code'    => 'below_min_quantity',
+					)
+				);
+			}
+
+			$max_q = $product->get_max_purchase_quantity();
+			if ( is_numeric( $max_q ) && (int) $max_q > 0 && $qty > (int) $max_q ) {
+				wp_send_json_error(
+					array(
+						'message' => sprintf(
+							/* translators: %d: maximum quantity that can be purchased */
+							__( 'Доступно не более %d шт.', 'mp-sticky-custom-cart' ),
+							(int) $max_q
+						),
+						'code'    => 'above_max_quantity',
+					)
+				);
+			}
+
 			$ok = $cart->set_quantity( $key, $qty, true );
 			if ( ! $ok ) {
 				wp_send_json_error(
