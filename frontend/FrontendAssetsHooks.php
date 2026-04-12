@@ -32,12 +32,25 @@ final class FrontendAssetsHooks {
 	 * Enqueue or register storefront assets.
 	 */
 	public static function enqueue() {
+		$script_deps = array( 'jquery' );
+		if ( wp_script_is( 'wc-cart-fragments', 'registered' ) ) {
+			$script_deps[] = 'wc-cart-fragments';
+		}
+
 		wp_enqueue_script(
 			self::HANDLE_SCRIPT,
 			PluginPaths::url( 'assets/js/frontend.js' ),
-			array(),
+			$script_deps,
 			MP_STICKY_CUSTOM_CART_ASSET_VERSION,
 			true
+		);
+
+		wp_enqueue_style(
+			self::HANDLE_STYLE,
+			PluginPaths::url( 'assets/css/frontend.css' ),
+			array( DynamicStylesProvider::STYLE_HANDLE ),
+			MP_STICKY_CUSTOM_CART_ASSET_VERSION,
+			'all'
 		);
 
 		FrontendFlagResolver::localize( self::HANDLE_SCRIPT );

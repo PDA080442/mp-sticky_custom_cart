@@ -7,6 +7,8 @@
 
 namespace MpStickyCustomCart\Frontend;
 
+use MpStickyCustomCart\Core\Constants;
+
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -15,8 +17,8 @@ defined( 'ABSPATH' ) || exit;
 final class AjaxEndpointsHooks {
 
 	public static function register() {
-		add_action( 'wp_ajax_mp_scc_cart_snapshot', array( self::class, 'stub_snapshot' ) );
-		add_action( 'wp_ajax_nopriv_mp_scc_cart_snapshot', array( self::class, 'stub_snapshot' ) );
+		add_action( 'wp_ajax_' . Constants::AJAX_ACTION_CART_SNAPSHOT, array( self::class, 'stub_snapshot' ) );
+		add_action( 'wp_ajax_nopriv_' . Constants::AJAX_ACTION_CART_SNAPSHOT, array( self::class, 'stub_snapshot' ) );
 
 		/**
 		 * Fires when AJAX endpoint hooks are registered — attach real handlers here.
