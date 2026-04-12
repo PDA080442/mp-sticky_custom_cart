@@ -519,6 +519,7 @@ ul.products li.product .mp-scc-catalog-overlay--floating,
 	line-height: 1.25;
 	text-align: center;
 	box-shadow: 0 2px 12px rgba(0, 0, 0, 0.18);
+	touch-action: manipulation;
 	transition-property: opacity, transform;
 	transition-duration: var(--mp-scc-catalog-hover-duration-ms, 220ms), var(--mp-scc-catalog-hover-duration-ms, 220ms);
 	transition-timing-function: var(--mp-scc-catalog-hover-easing, ease), var(--mp-scc-catalog-hover-easing, ease);

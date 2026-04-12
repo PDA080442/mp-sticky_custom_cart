@@ -115,6 +115,7 @@ final class FrontendFlagResolver {
 			'hoverOverlayMobileAlways'   => ! empty( $catalog_settings['hover_overlay_mobile_always'] ),
 			'overlayHostSelectors'       => array_values( $overlay_host_selectors ),
 			'hoverMotionPreset'          => isset( $catalog_settings['hover_motion_preset'] ) ? (string) $catalog_settings['hover_motion_preset'] : 'fade_slide',
+			'moreInfoNewTab'             => ! empty( $catalog_settings['more_info_new_tab'] ),
 		);
 
 		$data = array(
