@@ -71,7 +71,9 @@ final class SettingsValidationSchema {
 					'type'  => 'integer',
 					'oneof' => array( 301, 302, 303, 307 ),
 				),
-				'log_redirect_events'  => array( 'type' => 'boolean' ),
+				'log_redirect_events'                   => array( 'type' => 'boolean' ),
+				'preserve_marketing_params_on_redirect' => array( 'type' => 'boolean' ),
+				'track_external_cart_link_hits'         => array( 'type' => 'boolean' ),
 			),
 			'sticky_cart' => array(
 				'z_index'                   => array( 'type' => 'integer', 'min' => 1, 'max' => 9999999 ),

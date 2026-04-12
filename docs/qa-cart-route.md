@@ -33,8 +33,11 @@ WooCommerce сам нормализует запрос: и `/cart`, и `/cart/` 
 - Целевой URL можно изменить фильтром **`mp_sticky_custom_cart_cart_redirect_url`**.
 - Отменить редирект в коде: **`mp_sticky_custom_cart_cart_redirect_short_circuit`** → `false`.
 
+Внешние ссылки с `add-to-cart` и UTM: **`docs/qa-external-cart-links.md`**.
+
 ## Автопроверка репозитория
 
 ```bash
 node tests/cart-route-redirect.test.js
+node tests/external-cart-links.test.js
 ```
