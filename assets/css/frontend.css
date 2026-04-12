@@ -442,6 +442,11 @@
 	font-variant-numeric: tabular-nums;
 }
 
+/* Catalog: image add-to-cart — toast positioning */
+ul.products li.product {
+	position: relative;
+}
+
 /* Catalog: image add-to-cart card states */
 li.product.mp-scc-card--loading {
 	position: relative;
@@ -528,6 +533,18 @@ li.product.mp-scc-card--error {
 	text-align: center;
 	box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
 	pointer-events: none;
+}
+
+.mp-scc-card__toast--stock {
+	background: rgba(120, 40, 40, 0.94);
+	color: #fff;
+	border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.mp-scc-card__toast--error {
+	background: rgba(35, 35, 40, 0.94);
+	color: #fff;
+	border: 1px solid rgba(255, 80, 80, 0.35);
 }
 
 /* 8) Reduced motion: keep layout, shorten transitions */
