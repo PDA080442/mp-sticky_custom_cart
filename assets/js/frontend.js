@@ -722,6 +722,13 @@
 		});
 	}
 
+	/** Coalesce rapid WooCommerce body events (added_to_cart + fragments + totals) into one snapshot. */
+	var WOO_CART_EVENT_DEBOUNCE_MS = 100;
+	/** Second snapshot if the first Woo-driven refresh did not apply payload (network/lock race). */
+	var WOO_CART_SYNC_FALLBACK_MS = 2600;
+	var SNAPSHOT_FAIL_BURST_WINDOW_MS = 8000;
+	var SNAPSHOT_FAIL_BURST_THRESHOLD = 4;
+
 	/**
 	 * Sticky bar + drawer: lifecycle, drawer toggle, cart snapshot UI, debounced qty, request lock.
 	 */
@@ -743,6 +750,11 @@
 		this.qtyTimers = {};
 		this.pendingQty = {};
 		this.reconcileTimer = null;
+		this.wooEventDebounceTimer = null;
+		this.wooFallbackTimer = null;
+		this._lastSnapshotAppliedAt = 0;
+		this._syncFailCount = 0;
+		this._syncFailWindowStart = 0;
 		this.lastSnapshotTs = 0;
 		this._skipLoadingOnce = true;
 		this._fallbackSubtotalHtml = this.$total.length ? this.$total.html() : '';
@@ -850,11 +862,83 @@
 		}, 380);
 	};
 
+	StickyCartController.prototype._resetSnapshotSyncFailures = function () {
+		this._syncFailCount = 0;
+		this._syncFailWindowStart = 0;
+	};
+
+	/**
+	 * @param {string} [reason]
+	 */
+	StickyCartController.prototype._recordSnapshotSyncFailure = function (reason) {
+		var now = Date.now();
+		var w = SNAPSHOT_FAIL_BURST_WINDOW_MS;
+		if (!this._syncFailWindowStart || now - this._syncFailWindowStart > w) {
+			this._syncFailWindowStart = now;
+			this._syncFailCount = 0;
+		}
+		this._syncFailCount++;
+		if (this._syncFailCount < SNAPSHOT_FAIL_BURST_THRESHOLD) {
+			return;
+		}
+		var ctx = String(reason || '').slice(0, 120);
+		if (window.mpScc && typeof window.mpScc.logClientEvent === 'function') {
+			window.mpScc.logClientEvent('woo_cart_snapshot_sync_fail_burst', { context: ctx });
+		}
+		this._syncFailCount = 0;
+		this._syncFailWindowStart = now;
+	};
+
+	/**
+	 * Debounced snapshot refresh after Woo cart-related DOM events (deduplicates cascades).
+	 * @param {string} [eventType] Woo event name (for future diagnostics).
+	 */
+	StickyCartController.prototype.scheduleRefreshFromWooEvent = function (eventType) {
+		var self = this;
+		if (this.wooEventDebounceTimer) {
+			clearTimeout(this.wooEventDebounceTimer);
+		}
+		this.wooEventDebounceTimer = window.setTimeout(function () {
+			self.wooEventDebounceTimer = null;
+			self._onWooCartEventRefresh(eventType);
+		}, WOO_CART_EVENT_DEBOUNCE_MS);
+	};
+
+	/**
+	 * @param {string} [eventType]
+	 */
+	StickyCartController.prototype._onWooCartEventRefresh = function (eventType) {
+		var scheduledAt = Date.now();
+		this.refresh();
+		this._armWooSyncFallback(scheduledAt);
+	};
+
+	/**
+	 * If applyPayload did not run after this Woo-driven refresh, request snapshot again.
+	 * @param {number} scheduledAt Value of Date.now() when the Woo debounced handler ran.
+	 */
+	StickyCartController.prototype._armWooSyncFallback = function (scheduledAt) {
+		var self = this;
+		if (this.wooFallbackTimer) {
+			clearTimeout(this.wooFallbackTimer);
+		}
+		this.wooFallbackTimer = window.setTimeout(function () {
+			self.wooFallbackTimer = null;
+			if (self._lastSnapshotAppliedAt >= scheduledAt) {
+				return;
+			}
+			self.refresh();
+		}, WOO_CART_SYNC_FALLBACK_MS);
+	};
+
 	StickyCartController.prototype.applyPayload = function (p) {
 		if (!p || typeof p !== 'object') {
 			this.scheduleReconcile();
 			return;
 		}
+
+		this._lastSnapshotAppliedAt = Date.now();
+		this._resetSnapshotSyncFailures();
 
 		var items = Array.isArray(p.items) ? p.items : [];
 		var lineCount = typeof p.line_count === 'number' ? p.line_count : items.length;
@@ -1341,10 +1425,12 @@
 				if (resp && resp.success && resp.data) {
 					self.applyPayload(resp.data);
 				} else {
+					self._recordSnapshotSyncFailure('bad_response');
 					self.scheduleReconcile();
 				}
 			})
 			.fail(function () {
+				self._recordSnapshotSyncFailure('ajax_fail');
 				self.scheduleReconcile();
 			})
 			.always(function () {
@@ -1483,12 +1569,11 @@
 			}
 		});
 
-		var wooRefresh = function () {
-			self.refresh();
-		};
 		$(document.body).on(
-			'added_to_cart removed_from_cart wc_fragments_refreshed updated_cart_totals wc_fragments_loaded',
-			wooRefresh
+			'added_to_cart removed_from_cart wc_fragments_refreshed updated_cart_totals wc_fragments_loaded updated_wc_div',
+			function (e) {
+				self.scheduleRefreshFromWooEvent(e && e.type ? e.type : 'woo');
+			}
 		);
 	};
 

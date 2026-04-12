@@ -15,6 +15,7 @@ var php = fs.readFileSync(path.join(__dirname, '..', 'frontend', 'AjaxEndpointsH
 assert.ok(js.includes('line_count') && js.includes('scheduleReconcile'), 'JS should reconcile and use line_count');
 assert.ok(js.includes('mp-scc-sticky-summary--loading'), 'JS should toggle loading class on summary');
 assert.ok(js.includes('wc_fragments_loaded'), 'JS should listen for wc_fragments_loaded');
+assert.ok(js.includes('scheduleRefreshFromWooEvent'), 'JS should debounce Woo cart event refreshes');
 assert.ok(js.includes('snapshot_ts'), 'JS should handle snapshot_ts');
 assert.ok(php.includes("'snapshot_ts'"), 'PHP payload should include snapshot_ts');
 assert.ok(js.includes("postAjax('clearCart'"), 'JS should call clearCart AJAX');
