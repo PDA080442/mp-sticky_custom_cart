@@ -86,6 +86,11 @@ final class Constants {
 	public const AJAX_ACTION_CLEAR_CART = 'mp_scc_clear_cart';
 
 	/**
+	 * Registered {@see wp_ajax_*} action: remove one cart line from sticky drawer.
+	 */
+	public const AJAX_ACTION_REMOVE_CART_LINE = 'mp_scc_remove_cart_line';
+
+	/**
 	 * Not instantiable.
 	 */
 	private function __construct() {

@@ -131,6 +131,7 @@ final class FrontendFlagResolver {
 				'setLineQuantity'   => Constants::AJAX_ACTION_SET_LINE_QUANTITY,
 				'addSimpleProduct'  => Constants::AJAX_ACTION_ADD_SIMPLE_PRODUCT,
 				'clearCart'         => Constants::AJAX_ACTION_CLEAR_CART,
+				'removeCartLine'    => Constants::AJAX_ACTION_REMOVE_CART_LINE,
 				'logClientEvent'    => Constants::AJAX_ACTION_LOG_CLIENT_EVENT,
 			),
 			'flags'    => $provider->for_js(),
