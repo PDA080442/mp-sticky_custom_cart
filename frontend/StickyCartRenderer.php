@@ -65,11 +65,12 @@ final class StickyCartRenderer implements StickyCartRendererInterface {
 	}
 
 	public function render() {
-		$cart   = WC()->cart;
-		$empty  = $cart->is_empty();
-		$count  = (int) $cart->get_cart_contents_count();
-		$total  = $empty ? wc_price( 0 ) : $cart->get_cart_subtotal();
-		$total  = is_string( $total ) ? $total : wc_price( 0 );
+		$cart        = WC()->cart;
+		$empty       = $cart->is_empty();
+		$qty_total   = (int) $cart->get_cart_contents_count();
+		$line_count  = $empty ? 0 : count( $cart->get_cart() );
+		$total       = $empty ? wc_price( 0 ) : $cart->get_cart_subtotal();
+		$total       = is_string( $total ) ? $total : wc_price( 0 );
 		$drawer = OptionResolver::get_flag( FeatureFlagsDefaults::KEY_STICKY_DRAWER_ENABLED, true );
 
 		$checkout_url = function_exists( 'wc_get_checkout_url' ) ? wc_get_checkout_url() : '';
@@ -98,7 +99,8 @@ final class StickyCartRenderer implements StickyCartRendererInterface {
 				</button>
 				<?php endif; ?>
 				<div class="mp-scc-sticky-summary-text">
-					<span class="mp-scc-cart-count" data-mp-scc-cart-count><?php echo esc_html( (string) $count ); ?></span>
+					<span class="mp-scc-cart-count" data-mp-scc-cart-count><?php echo esc_html( (string) $line_count ); ?></span>
+					<span class="mp-scc-sr-only" data-mp-scc-cart-qty-total><?php echo esc_html( sprintf( /* translators: %d: total quantity of all line items */ __( 'Total quantity in cart: %d', 'mp-sticky-custom-cart' ), $qty_total ) ); ?></span>
 					<span class="mp-scc-cart-total" data-mp-scc-cart-total><?php echo wp_kses_post( $total ); ?></span>
 				</div>
 			</section>
@@ -120,7 +122,8 @@ final class StickyCartRenderer implements StickyCartRendererInterface {
 		 */
 		$context = array(
 			'cart_empty'     => $empty,
-			'cart_count'     => $count,
+			'cart_count'     => $qty_total,
+			'line_count'     => $line_count,
 			'drawer_enabled' => $drawer,
 		);
 
