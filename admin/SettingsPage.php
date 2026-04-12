@@ -269,6 +269,25 @@ final class SettingsPage {
 			__( 'Писать события редиректа в debug.log', 'mp-sticky-custom-cart' ),
 			! empty( $cr['log_redirect_events'] )
 		);
+		self::field_checkbox(
+			$opt,
+			'cart_route',
+			'preserve_marketing_params_on_redirect',
+			__( 'Сохранять UTM/рекламные параметры при редиректе на главную', 'mp-sticky-custom-cart' ),
+			! isset( $cr['preserve_marketing_params_on_redirect'] ) || ! empty( $cr['preserve_marketing_params_on_redirect'] )
+		);
+		self::field_checkbox(
+			$opt,
+			'cart_route',
+			'track_external_cart_link_hits',
+			__( 'Считать заходы на /cart/ с ?add-to-cart в URL', 'mp-sticky-custom-cart' ),
+			! empty( $cr['track_external_cart_link_hits'] )
+		);
+		$hits = (int) get_option( Constants::OPTION_EXTERNAL_CART_LINK_HITS, 0 );
+		echo '<tr><th scope="row">' . esc_html__( 'Счётчик add-to-cart на странице корзины', 'mp-sticky-custom-cart' ) . '</th><td>';
+		echo '<p class="description">' . esc_html( (string) $hits ) . '</p>';
+		echo '<p class="description">' . esc_html__( 'Увеличивается при включённом редиректе и учёте, если в запросе был параметр add-to-cart (типичные внешние ссылки).', 'mp-sticky-custom-cart' ) . '</p>';
+		echo '</td></tr>';
 		echo '</tbody></table>';
 
 		echo '<p class="description">' . esc_html__( 'Анимация карточки каталога (hover) настраивается на вкладке «Каталог».', 'mp-sticky-custom-cart' ) . '</p>';

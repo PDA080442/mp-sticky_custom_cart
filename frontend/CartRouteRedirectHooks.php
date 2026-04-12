@@ -7,6 +7,8 @@
 
 namespace MpStickyCustomCart\Frontend;
 
+use MpStickyCustomCart\Core\CheckoutQueryPreserve;
+use MpStickyCustomCart\Core\Constants;
 use MpStickyCustomCart\Core\OptionResolver;
 
 defined( 'ABSPATH' ) || exit;
@@ -40,6 +42,10 @@ final class CartRouteRedirectHooks {
 			return;
 		}
 
+		if ( function_exists( 'is_checkout' ) && is_checkout() ) {
+			return;
+		}
+
 		if ( ! function_exists( 'is_cart' ) || ! is_cart() ) {
 			return;
 		}
@@ -61,6 +67,8 @@ final class CartRouteRedirectHooks {
 			return;
 		}
 
+		$had_add_to_cart = isset( $_GET['add-to-cart'] );
+
 		$target = (string) apply_filters( 'mp_sticky_custom_cart_cart_redirect_url', home_url( '/' ) );
 		$target = wp_validate_redirect( $target, home_url( '/' ) );
 
@@ -74,12 +82,37 @@ final class CartRouteRedirectHooks {
 			}
 		}
 
+		if ( OptionResolver::get_setting( 'cart_route.preserve_marketing_params_on_redirect', true ) ) {
+			$target = CheckoutQueryPreserve::merge_request_into_url( $target );
+		}
+
+		/**
+		 * Final redirect URL after marketing merge (cart page with ?add-to-cart=&quantity=&utm_… → home with UTM only).
+		 *
+		 * @param string $target          Validated base + optional marketing params.
+		 * @param bool   $had_add_to_cart Whether the request had an add-to-cart query arg (product may already be added by Woo).
+		 */
+		$target = (string) apply_filters( 'mp_sticky_custom_cart_cart_redirect_final_url', $target, $had_add_to_cart );
+		$target = wp_validate_redirect( $target, home_url( '/' ) );
+
+		if ( $had_add_to_cart && OptionResolver::get_setting( 'cart_route.track_external_cart_link_hits', false ) ) {
+			$n = (int) get_option( Constants::OPTION_EXTERNAL_CART_LINK_HITS, 0 );
+			update_option( Constants::OPTION_EXTERNAL_CART_LINK_HITS, $n + 1, false );
+		}
+
 		$code = (int) OptionResolver::get_setting( 'cart_route.redirect_status_code', 302 );
 		if ( ! in_array( $code, array( 301, 302, 303, 307 ), true ) ) {
 			$code = 302;
 		}
 
-		self::maybe_log( sprintf( 'redirect status=%d to=%s', $code, $target ) );
+		self::maybe_log(
+			sprintf(
+				'redirect status=%d to=%s add_to_cart=%s',
+				$code,
+				$target,
+				$had_add_to_cart ? '1' : '0'
+			)
+		);
 
 		wp_safe_redirect( $target, $code );
 		exit;

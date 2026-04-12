@@ -44,6 +44,10 @@ final class UiSettingsDefaults {
 				'redirect_status_code' => 302,
 				/** Write redirect lines to the PHP debug log (wp-content/debug.log when WP_DEBUG_LOG). */
 				'log_redirect_events'  => false,
+				/** Append UTM / click ids from the current cart URL onto the redirect target (not add-to-cart params). */
+				'preserve_marketing_params_on_redirect' => true,
+				/** Increment {@see Constants::OPTION_EXTERNAL_CART_LINK_HITS} when cart URL contained add-to-cart. */
+				'track_external_cart_link_hits'         => false,
 			),
 			'sticky_cart' => array(
 				'z_index'                    => 100050,
