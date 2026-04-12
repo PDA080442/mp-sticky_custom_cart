@@ -132,6 +132,9 @@ final class SettingsSanitizer {
 		if ( isset( $field['max'] ) ) {
 			$n = min( (int) $field['max'], $n );
 		}
+		if ( isset( $field['oneof'] ) && is_array( $field['oneof'] ) && ! in_array( $n, $field['oneof'], true ) ) {
+			return is_int( $fallback ) ? (int) $fallback : (int) $field['oneof'][0];
+		}
 		return $n;
 	}
 

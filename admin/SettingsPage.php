@@ -197,7 +197,8 @@ final class SettingsPage {
 	 * @param string               $opt
 	 */
 	private static function render_cart_tab( array $s, $opt ) {
-		$c = isset( $s['sticky_cart'] ) && is_array( $s['sticky_cart'] ) ? $s['sticky_cart'] : array();
+		$c  = isset( $s['sticky_cart'] ) && is_array( $s['sticky_cart'] ) ? $s['sticky_cart'] : array();
+		$cr = isset( $s['cart_route'] ) && is_array( $s['cart_route'] ) ? $s['cart_route'] : array();
 		echo '<h2>' . esc_html__( 'Нижняя корзина (sticky)', 'mp-sticky-custom-cart' ) . '</h2>';
 		echo '<p class="description">' . esc_html__( 'Значения ниже попадают в CSS-переменные (--mp-scc-*) на сайте.', 'mp-sticky-custom-cart' ) . '</p>';
 
@@ -235,6 +236,39 @@ final class SettingsPage {
 		self::field_number( $opt, 'sticky_cart', 'summary_font_weight', __( 'Начертание summary (100–900)', 'mp-sticky-custom-cart' ), isset( $c['summary_font_weight'] ) ? (int) $c['summary_font_weight'] : 600 );
 		self::field_number( $opt, 'sticky_cart', 'button_font_size_px', __( 'Размер шрифта кнопок (px)', 'mp-sticky-custom-cart' ), isset( $c['button_font_size_px'] ) ? (int) $c['button_font_size_px'] : 14 );
 		self::field_number( $opt, 'sticky_cart', 'button_font_weight', __( 'Начертание кнопок (100–900)', 'mp-sticky-custom-cart' ), isset( $c['button_font_weight'] ) ? (int) $c['button_font_weight'] : 600 );
+		echo '</tbody></table>';
+
+		echo '<h3>' . esc_html__( 'Маршрут страницы корзины WooCommerce', 'mp-sticky-custom-cart' ) . '</h3>';
+		echo '<p class="description">' . esc_html__( 'Редирект URL страницы корзины (например /cart/) на главную сайта. Не включайте, если страница корзины задана как главная или нужны ссылки с параметрами удаления позиций.', 'mp-sticky-custom-cart' ) . '</p>';
+		echo '<table class="form-table" role="presentation"><tbody>';
+		self::field_checkbox(
+			$opt,
+			'cart_route',
+			'redirect_to_home',
+			__( 'Редирект страницы корзины на главную', 'mp-sticky-custom-cart' ),
+			! empty( $cr['redirect_to_home'] )
+		);
+		$status = isset( $cr['redirect_status_code'] ) ? (int) $cr['redirect_status_code'] : 302;
+		self::field_select(
+			$opt,
+			'cart_route',
+			'redirect_status_code',
+			__( 'HTTP-код редиректа', 'mp-sticky-custom-cart' ),
+			(string) $status,
+			array(
+				'301' => '301 ' . __( 'Moved Permanently', 'mp-sticky-custom-cart' ),
+				'302' => '302 ' . __( 'Found', 'mp-sticky-custom-cart' ),
+				'303' => '303 ' . __( 'See Other', 'mp-sticky-custom-cart' ),
+				'307' => '307 ' . __( 'Temporary Redirect', 'mp-sticky-custom-cart' ),
+			)
+		);
+		self::field_checkbox(
+			$opt,
+			'cart_route',
+			'log_redirect_events',
+			__( 'Писать события редиректа в debug.log', 'mp-sticky-custom-cart' ),
+			! empty( $cr['log_redirect_events'] )
+		);
 		echo '</tbody></table>';
 
 		echo '<p class="description">' . esc_html__( 'Анимация карточки каталога (hover) настраивается на вкладке «Каталог».', 'mp-sticky-custom-cart' ) . '</p>';

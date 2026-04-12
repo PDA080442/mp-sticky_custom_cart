@@ -12,6 +12,7 @@ use MpStickyCustomCart\Admin\SettingsApiHooks;
 use MpStickyCustomCart\Admin\SettingsPage;
 use MpStickyCustomCart\Frontend\AddedToCartHooks;
 use MpStickyCustomCart\Frontend\AjaxEndpointsHooks;
+use MpStickyCustomCart\Frontend\CartRouteRedirectHooks;
 use MpStickyCustomCart\Frontend\DynamicStylesProvider;
 use MpStickyCustomCart\Frontend\FrontendAssetsHooks;
 use MpStickyCustomCart\Frontend\StickyCartRenderer;
@@ -29,6 +30,7 @@ final class HookRegistry {
 	 */
 	public static function register() {
 		FrontendAssetsHooks::register();
+		CartRouteRedirectHooks::register();
 		( new DynamicStylesProvider() )->register_hooks();
 		AdminAssetsHooks::register();
 		StickyCartRenderHooks::register();
