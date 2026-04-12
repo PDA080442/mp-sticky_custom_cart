@@ -61,6 +61,47 @@
 }
 
 /* -------------------------------------------------------------------------
+   Body reserve + CLS: keep page content clear of the fixed bar (footer, long scroll).
+   --mp-scc-sticky-layout-reserve is emitted from settings (see CssVariablesContract).
+   ------------------------------------------------------------------------- */
+body.mp-scc-sticky-active {
+	padding-bottom: calc(var(--mp-scc-sticky-layout-reserve, 96px) + env(safe-area-inset-bottom, 0px));
+}
+
+/* iPhone landscape / short viewports: notch insets often move to left/right */
+@media (orientation: landscape) and (max-height: 500px) {
+	body.mp-scc-sticky-active {
+		padding-bottom: calc(
+			var(--mp-scc-sticky-layout-reserve, 96px) + env(safe-area-inset-bottom, 0px) +
+				min(12px, max(env(safe-area-inset-left, 0px), env(safe-area-inset-right, 0px)))
+		);
+	}
+
+	.mp-scc-sticky-bar {
+		padding-left: max(
+			var(--mp-scc-sticky-padding-x-mobile, 16px),
+			env(safe-area-inset-left, 0px)
+		);
+		padding-right: max(
+			var(--mp-scc-sticky-padding-x-mobile, 16px),
+			env(safe-area-inset-right, 0px)
+		);
+	}
+}
+
+/* Explicit opt-out when a theme modal opens (toggle via theme JS if the bar covers dialogs). */
+body.mp-scc-sticky-suppress .mp-scc-sticky-bar {
+	visibility: hidden;
+	pointer-events: none;
+}
+
+/* Typical Bootstrap/modal stacks use ~1050+; drop the bar below so dialogs stay on top (adjust per theme). */
+body.modal-open .mp-scc-sticky-bar,
+body.popup-overlay-open .mp-scc-sticky-bar {
+	z-index: 1030;
+}
+
+/* -------------------------------------------------------------------------
    5–6) Mobile-first row group: column + full-width actions; desktop = one row
    ------------------------------------------------------------------------- */
 .mp-scc-sticky-inner {
@@ -93,6 +134,34 @@
 .mp-scc-sticky-actions .mp-scc-btn {
 	flex: 1 1 0;
 	min-width: 0;
+}
+
+.mp-scc-clear-cart--loading {
+	opacity: 0.65;
+	pointer-events: none;
+}
+
+.mp-scc-checkout--disabled {
+	opacity: 0.45;
+	pointer-events: none;
+	cursor: not-allowed;
+	text-decoration: none;
+}
+
+.mp-scc-sticky-inline-feedback {
+	margin: 0 0 8px;
+	font-size: calc(var(--mp-scc-sticky-button-font-size, 14px) * 0.95);
+	font-weight: 500;
+	line-height: 1.35;
+	width: 100%;
+}
+
+.mp-scc-sticky-inline-feedback--success {
+	color: color-mix(in srgb, var(--mp-scc-color-text-primary, #1a1a1a) 88%, #0a7a3e);
+}
+
+.mp-scc-sticky-inline-feedback--error {
+	color: color-mix(in srgb, var(--mp-scc-color-text-primary, #1a1a1a) 88%, #b42318);
 }
 
 @media (min-width: 783px) {
@@ -266,8 +335,30 @@
 	font-weight: var(--mp-scc-sticky-summary-font-weight, 600);
 }
 
+.mp-scc-cart-count,
 .mp-scc-cart-total {
 	font-variant-numeric: tabular-nums;
+	transition: opacity 0.2s ease;
+}
+
+.mp-scc-sticky-summary--loading .mp-scc-cart-count,
+.mp-scc-sticky-summary--loading .mp-scc-cart-total {
+	opacity: 0.45;
+}
+
+@keyframes mp-scc-summary-pulse {
+	0%,
+	100% {
+		transform: scale(1);
+	}
+	45% {
+		transform: scale(1.06);
+	}
+}
+
+.mp-scc-summary-value--pulse {
+	display: inline-block;
+	animation: mp-scc-summary-pulse 0.38s ease;
 }
 
 .mp-scc-btn {
@@ -706,6 +797,10 @@ body.mp-scc-wishlist-integration-on .woocommerce .products li.product a.mp-scc-c
 @media (prefers-reduced-motion: reduce) {
 	.mp-scc-root {
 		--mp-scc-motion-duration: 0.01ms;
+	}
+
+	.mp-scc-summary-value--pulse {
+		animation: none !important;
 	}
 
 	.mp-scc-drawer-toggle-icon {

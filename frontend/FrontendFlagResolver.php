@@ -7,6 +7,7 @@
 
 namespace MpStickyCustomCart\Frontend;
 
+use MpStickyCustomCart\Core\CheckoutQueryPreserve;
 use MpStickyCustomCart\Core\Constants;
 use MpStickyCustomCart\Core\FeatureFlagProvider;
 use MpStickyCustomCart\Core\OptionResolver;
@@ -120,13 +121,16 @@ final class FrontendFlagResolver {
 
 		$data = array(
 			'version'  => MP_STICKY_CUSTOM_CART_VERSION,
+			'cartQtyTotalLabel'   => __( 'Total quantity in cart: %d', 'mp-sticky-custom-cart' ),
 			'networkErrorMessage' => __( 'Не удалось отправить запрос. Проверьте подключение к сети.', 'mp-sticky-custom-cart' ),
+			'checkoutPreserveQueryKeys' => CheckoutQueryPreserve::allowed_keys(),
 			'ajaxUrl'  => admin_url( 'admin-ajax.php' ),
 			'nonce'    => wp_create_nonce( Constants::AJAX_NONCE_ACTION ),
 			'actions'  => array(
 				'cartSnapshot'      => Constants::AJAX_ACTION_CART_SNAPSHOT,
 				'setLineQuantity'   => Constants::AJAX_ACTION_SET_LINE_QUANTITY,
 				'addSimpleProduct'  => Constants::AJAX_ACTION_ADD_SIMPLE_PRODUCT,
+				'clearCart'         => Constants::AJAX_ACTION_CLEAR_CART,
 				'logClientEvent'    => Constants::AJAX_ACTION_LOG_CLIENT_EVENT,
 			),
 			'flags'    => $provider->for_js(),

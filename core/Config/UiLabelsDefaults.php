@@ -20,6 +20,7 @@ final class UiLabelsDefaults {
 	public const KEY_MORE_INFO           = 'more_info';
 	public const KEY_OUT_OF_STOCK        = 'out_of_stock';
 	public const KEY_CLEAR_CART          = 'clear_cart';
+	public const KEY_CART_CLEARED        = 'cart_cleared';
 	public const KEY_CHECKOUT            = 'checkout';
 	public const KEY_VARIATION_REQUIRED  = 'variation_required';
 	public const KEY_DRAWER_EMPTY        = 'drawer_empty';
@@ -32,6 +33,7 @@ final class UiLabelsDefaults {
 			self::KEY_MORE_INFO          => __( 'Подробнее о товаре', 'mp-sticky-custom-cart' ),
 			self::KEY_OUT_OF_STOCK       => __( 'Товара нет в наличии', 'mp-sticky-custom-cart' ),
 			self::KEY_CLEAR_CART         => __( 'Очистить корзину', 'mp-sticky-custom-cart' ),
+			self::KEY_CART_CLEARED       => __( 'Корзина очищена', 'mp-sticky-custom-cart' ),
 			self::KEY_CHECKOUT            => __( 'Оформить заказ', 'mp-sticky-custom-cart' ),
 			self::KEY_VARIATION_REQUIRED => __( 'Выберите вариацию товара', 'mp-sticky-custom-cart' ),
 			self::KEY_DRAWER_EMPTY       => __( 'Корзина пуста', 'mp-sticky-custom-cart' ),
@@ -48,6 +50,7 @@ final class UiLabelsDefaults {
 			self::KEY_MORE_INFO          => 'Подробнее о товаре',
 			self::KEY_OUT_OF_STOCK       => 'Товара нет в наличии',
 			self::KEY_CLEAR_CART         => 'Очистить корзину',
+			self::KEY_CART_CLEARED       => 'Корзина очищена',
 			self::KEY_CHECKOUT            => 'Оформить заказ',
 			self::KEY_VARIATION_REQUIRED => 'Выберите вариацию товара',
 			self::KEY_DRAWER_EMPTY       => 'Корзина пуста',

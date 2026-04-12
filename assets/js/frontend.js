@@ -40,6 +40,49 @@
 	};
 
 	/**
+	 * Append allowed query keys from the current page URL onto the checkout (UTM, click ids).
+	 * Keys must match {@see CheckoutQueryPreserve::allowed_keys()} / `checkoutPreserveQueryKeys` in `mpSccData`.
+	 *
+	 * @param {string} baseUrl Absolute or site-relative checkout URL.
+	 * @returns {string}
+	 */
+	window.mpScc.mergeUrlWithLocationQuery = function (baseUrl) {
+		var keys = data().checkoutPreserveQueryKeys;
+		var base = baseUrl ? String(baseUrl) : '';
+		if (!base || !keys || !keys.length) {
+			return base;
+		}
+		var keyMap = {};
+		for (var i = 0; i < keys.length; i++) {
+			keyMap[String(keys[i])] = true;
+		}
+		var search = window.location.search;
+		if (!search || search === '?') {
+			return base;
+		}
+		var pageParams;
+		try {
+			pageParams = new URLSearchParams(search.slice(1));
+		} catch (e) {
+			return base;
+		}
+		try {
+			var u = new URL(base, window.location.href);
+			pageParams.forEach(function (value, key) {
+				if (!keyMap[key]) {
+					return;
+				}
+				if (!u.searchParams.has(key)) {
+					u.searchParams.set(key, value);
+				}
+			});
+			return u.toString();
+		} catch (err) {
+			return base;
+		}
+	};
+
+	/**
 	 * admin-ajax.php URL, global nonce, and action names for jQuery.post / fetch.
 	 * @returns {{ ajaxUrl: string, nonce: string, actions: Record<string, string> }}
 	 */
@@ -686,17 +729,25 @@
 		this.$root = $(root);
 		this.$drawer = this.$root.find('[data-mp-scc-drawer]');
 		this.$toggle = this.$root.find('[data-mp-scc-drawer-toggle]');
+		this.$summary = this.$root.find('.mp-scc-sticky-summary');
 		this.$count = this.$root.find('[data-mp-scc-cart-count]');
 		this.$total = this.$root.find('[data-mp-scc-cart-total]');
+		this.$qtySr = this.$root.find('[data-mp-scc-cart-qty-total]');
 		this.$items = this.$root.find('[data-mp-scc-drawer-items]');
 		this.$empty = this.$root.find('[data-mp-scc-drawer-empty]');
+		this.$checkout = this.$root.find('[data-mp-scc-checkout]');
 		this.snapshotLocked = false;
 		this.pendingRefresh = false;
 		this.mutationInFlight = false;
 		this.mutationQueue = [];
 		this.qtyTimers = {};
 		this.pendingQty = {};
+		this.reconcileTimer = null;
+		this.lastSnapshotTs = 0;
+		this._skipLoadingOnce = true;
+		this._fallbackSubtotalHtml = this.$total.length ? this.$total.html() : '';
 		this.debounceMs = parseDebounceMs();
+		this.clearCartLocked = false;
 	}
 
 	StickyCartController.prototype.isDrawerOpen = function () {
@@ -723,20 +774,91 @@
 		this.setDrawerOpen(!this.isDrawerOpen());
 	};
 
+	StickyCartController.prototype.pulseSummaryEl = function ($el) {
+		if (!$el || !$el.length) {
+			return;
+		}
+		var el = $el.get(0);
+		$el.addClass('mp-scc-summary-value--pulse');
+		window.setTimeout(function () {
+			if (el && el.classList) {
+				el.classList.remove('mp-scc-summary-value--pulse');
+			}
+		}, 420);
+	};
+
+	StickyCartController.prototype.scheduleReconcile = function () {
+		var self = this;
+		if (this.reconcileTimer) {
+			clearTimeout(this.reconcileTimer);
+		}
+		this.reconcileTimer = window.setTimeout(function () {
+			self.reconcileTimer = null;
+			self.refresh();
+		}, 380);
+	};
+
 	StickyCartController.prototype.applyPayload = function (p) {
 		if (!p || typeof p !== 'object') {
+			this.scheduleReconcile();
 			return;
 		}
 
-		var count = typeof p.cart_contents_count === 'number' ? p.cart_contents_count : 0;
-		this.$count.text(String(count));
+		var items = Array.isArray(p.items) ? p.items : [];
+		var lineCount = typeof p.line_count === 'number' ? p.line_count : items.length;
+		var qty = typeof p.cart_contents_count === 'number' ? p.cart_contents_count : 0;
+		var empty = !!p.is_empty;
 
-		if (typeof p.subtotal_html === 'string') {
-			this.$total.html(p.subtotal_html);
+		if (items.length && lineCount !== items.length) {
+			lineCount = items.length;
+		}
+		if (!empty && items.length && qty === 0) {
+			qty = items.reduce(function (acc, it) {
+				var q = typeof it.quantity === 'number' ? it.quantity : parseInt(it.quantity, 10);
+				return acc + (isNaN(q) ? 0 : q);
+			}, 0);
+		}
+		if (empty) {
+			lineCount = 0;
+			qty = 0;
 		}
 
-		var empty = !!p.is_empty;
-		var items = Array.isArray(p.items) ? p.items : [];
+		var prevLineText = this.$count.text();
+		var prevSubHtml = this.$total.html();
+
+		this.$count.text(String(lineCount));
+
+		if (this.$qtySr.length) {
+			var fmt =
+				data().cartQtyTotalLabel ||
+				'Total quantity in cart: %d';
+			this.$qtySr.text(fmt.replace('%d', String(qty)));
+		}
+
+		var subHtml = typeof p.subtotal_html === 'string' && p.subtotal_html.length ? p.subtotal_html : '';
+		if (!subHtml) {
+			subHtml = this._fallbackSubtotalHtml || '';
+		}
+		if (!subHtml) {
+			subHtml = '<span class="woocommerce-Price-amount amount">&mdash;</span>';
+		}
+		this.$total.html(subHtml);
+		this._fallbackSubtotalHtml = subHtml;
+
+		if (String(prevLineText) !== String(lineCount)) {
+			this.pulseSummaryEl(this.$count);
+		}
+		if (prevSubHtml !== subHtml) {
+			this.pulseSummaryEl(this.$total);
+		}
+
+		if (typeof p.snapshot_ts === 'number') {
+			this.lastSnapshotTs = p.snapshot_ts;
+		}
+
+		if (!empty && items.length > 0 && lineCount === 0) {
+			this.scheduleReconcile();
+		}
 
 		if (empty || items.length === 0) {
 			this.$items.empty();
@@ -744,6 +866,41 @@
 		} else {
 			this.$empty.attr('hidden', 'hidden');
 			this.renderLineItems(items);
+		}
+
+		this.$root.attr('data-mp-scc-cart-empty', empty ? '1' : '0');
+		this.$root.toggleClass('mp-scc-sticky--empty', !!empty);
+
+		this.syncCheckoutState(empty);
+	};
+
+	/**
+	 * @param {boolean} empty Whether the cart has no line items.
+	 */
+	StickyCartController.prototype.syncCheckoutState = function (empty) {
+		var $a = this.$checkout;
+		if (!$a.length) {
+			return;
+		}
+		var base = $a.attr('data-mp-scc-checkout-base') || '';
+		var disabledAria = $a.attr('data-mp-scc-checkout-aria-disabled') || '';
+		if (empty) {
+			$a.addClass('mp-scc-checkout--disabled');
+			$a.attr('href', '#');
+			$a.attr('aria-disabled', 'true');
+			$a.attr('tabindex', '-1');
+			if (disabledAria) {
+				$a.attr('aria-label', disabledAria);
+			}
+		} else {
+			$a.removeClass('mp-scc-checkout--disabled');
+			$a.removeAttr('aria-disabled');
+			$a.removeAttr('tabindex');
+			$a.removeAttr('aria-label');
+			if (base) {
+				var merged = window.mpScc.mergeUrlWithLocationQuery(base);
+				$a.attr('href', merged);
+			}
 		}
 	};
 
@@ -825,7 +982,12 @@
 			.done(function (resp) {
 				if (resp && resp.success && resp.data) {
 					self.applyPayload(resp.data);
+				} else {
+					self.scheduleReconcile();
 				}
+			})
+			.fail(function () {
+				self.scheduleReconcile();
 			})
 			.always(function () {
 				self.mutationInFlight = false;
@@ -840,7 +1002,29 @@
 	 * @returns {boolean} True while cart snapshot or quantity mutation AJAX is in flight.
 	 */
 	StickyCartController.prototype.isLoading = function () {
-		return this.snapshotLocked || this.mutationInFlight;
+		return this.snapshotLocked || this.mutationInFlight || this.clearCartLocked;
+	};
+
+	/**
+	 * @param {string} message
+	 * @param {'success'|'error'} variant
+	 */
+	StickyCartController.prototype.showStickyInlineFeedback = function (message, variant) {
+		var text = message ? String(message) : '';
+		if (!text) {
+			return;
+		}
+		this.$root.find('.mp-scc-sticky-inline-feedback').remove();
+		var cls =
+			variant === 'error'
+				? 'mp-scc-sticky-inline-feedback mp-scc-sticky-inline-feedback--error'
+				: 'mp-scc-sticky-inline-feedback mp-scc-sticky-inline-feedback--success';
+		var role = variant === 'error' ? 'alert' : 'status';
+		var $p = $('<p />').addClass(cls).attr('role', role).text(text);
+		this.$root.find('.mp-scc-sticky-inner').prepend($p);
+		window.setTimeout(function () {
+			$p.remove();
+		}, variant === 'error' ? 6000 : 4000);
 	};
 
 	StickyCartController.prototype.refresh = function () {
@@ -850,14 +1034,24 @@
 			return;
 		}
 		this.snapshotLocked = true;
+		if (!this._skipLoadingOnce && this.$summary.length) {
+			this.$summary.addClass('mp-scc-sticky-summary--loading');
+		}
+		this._skipLoadingOnce = false;
 		window.mpScc
 			.postAjax('cartSnapshot', {})
 			.done(function (resp) {
 				if (resp && resp.success && resp.data) {
 					self.applyPayload(resp.data);
+				} else {
+					self.scheduleReconcile();
 				}
 			})
+			.fail(function () {
+				self.scheduleReconcile();
+			})
 			.always(function () {
+				self.$summary.removeClass('mp-scc-sticky-summary--loading');
 				self.snapshotLocked = false;
 				if (self.pendingRefresh) {
 					self.pendingRefresh = false;
@@ -899,11 +1093,64 @@
 			self.scheduleQuantityCommit(key, q);
 		});
 
+		this.$root.on('click', '[data-mp-scc-clear-cart]', function (e) {
+			e.preventDefault();
+			var cfg = window.mpScc.ajaxConfig();
+			if (!cfg.ajaxUrl || !cfg.actions.clearCart) {
+				return;
+			}
+			if (self.clearCartLocked || self.snapshotLocked || self.mutationInFlight) {
+				return;
+			}
+			self.clearCartLocked = true;
+			var $btn = $(e.currentTarget);
+			$btn.prop('disabled', true).attr('aria-busy', 'true').addClass('mp-scc-clear-cart--loading');
+			window.mpScc
+				.postAjax('clearCart', {})
+				.done(function (resp) {
+					if (resp && resp.success && resp.data) {
+						self.applyPayload(resp.data);
+						$(document.body).trigger('removed_from_cart');
+						var okMsg = window.mpScc.label('cart_cleared') || 'Корзина очищена';
+						self.showStickyInlineFeedback(okMsg, 'success');
+					} else {
+						self.scheduleReconcile();
+					}
+				})
+				.fail(function (xhr) {
+					var msg = data().networkErrorMessage ? String(data().networkErrorMessage) : '';
+					if (xhr && xhr.responseJSON && xhr.responseJSON.data && xhr.responseJSON.data.message) {
+						msg = String(xhr.responseJSON.data.message);
+					}
+					self.showStickyInlineFeedback(msg, 'error');
+					self.scheduleReconcile();
+				})
+				.always(function () {
+					self.clearCartLocked = false;
+					$btn.prop('disabled', false).removeAttr('aria-busy').removeClass('mp-scc-clear-cart--loading');
+				});
+		});
+
+		this.$root.on('click', '[data-mp-scc-checkout]', function (e) {
+			var $a = $(e.currentTarget);
+			if ($a.hasClass('mp-scc-checkout--disabled')) {
+				e.preventDefault();
+				return false;
+			}
+		});
+
+		this.$root.on('keydown', '[data-mp-scc-checkout].mp-scc-checkout--disabled', function (e) {
+			var k = e.key;
+			if (k === ' ' || k === 'Enter') {
+				e.preventDefault();
+			}
+		});
+
 		var wooRefresh = function () {
 			self.refresh();
 		};
 		$(document.body).on(
-			'added_to_cart removed_from_cart wc_fragments_refreshed updated_cart_totals',
+			'added_to_cart removed_from_cart wc_fragments_refreshed updated_cart_totals wc_fragments_loaded',
 			wooRefresh
 		);
 	};

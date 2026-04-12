@@ -7,6 +7,7 @@
 
 namespace MpStickyCustomCart\Frontend;
 
+use MpStickyCustomCart\Core\CheckoutQueryPreserve;
 use MpStickyCustomCart\Core\Config\FeatureFlagsDefaults;
 use MpStickyCustomCart\Core\Config\UiLabelsDefaults;
 use MpStickyCustomCart\Core\Contracts\StickyCartRendererInterface;
@@ -20,28 +21,7 @@ defined( 'ABSPATH' ) || exit;
 final class StickyCartRenderer implements StickyCartRendererInterface {
 
 	public function should_render() {
-		if ( ! OptionResolver::get_flag( FeatureFlagsDefaults::KEY_STICKY_CART_ENABLED, true ) ) {
-			return false;
-		}
-
-		if ( is_admin() && ! wp_doing_ajax() ) {
-			return false;
-		}
-
-		if ( is_feed() || is_embed() ) {
-			return false;
-		}
-
-		if ( ! function_exists( 'WC' ) || ! WC()->cart ) {
-			return false;
-		}
-
-		/**
-		 * Filters whether the sticky cart root is printed on this request.
-		 *
-		 * @param bool $show Default decision.
-		 */
-		return (bool) apply_filters( 'mp_sticky_custom_cart_should_render_sticky', true );
+		return StickyCartVisibility::should_render_sticky();
 	}
 
 	public function register_hooks() {
@@ -65,19 +45,27 @@ final class StickyCartRenderer implements StickyCartRendererInterface {
 	}
 
 	public function render() {
-		$cart   = WC()->cart;
-		$empty  = $cart->is_empty();
-		$count  = (int) $cart->get_cart_contents_count();
-		$total  = $empty ? wc_price( 0 ) : $cart->get_cart_subtotal();
-		$total  = is_string( $total ) ? $total : wc_price( 0 );
+		$cart        = WC()->cart;
+		$empty       = $cart->is_empty();
+		$qty_total   = (int) $cart->get_cart_contents_count();
+		$line_count  = $empty ? 0 : count( $cart->get_cart() );
+		$total       = $empty ? wc_price( 0 ) : $cart->get_cart_subtotal();
+		$total       = is_string( $total ) ? $total : wc_price( 0 );
 		$drawer = OptionResolver::get_flag( FeatureFlagsDefaults::KEY_STICKY_DRAWER_ENABLED, true );
 
-		$checkout_url = function_exists( 'wc_get_checkout_url' ) ? wc_get_checkout_url() : '';
-		$checkout_url = is_string( $checkout_url ) ? $checkout_url : '';
+		$checkout_base = function_exists( 'wc_get_checkout_url' ) ? (string) wc_get_checkout_url() : '';
+		$checkout_url  = CheckoutQueryPreserve::merge_request_into_url( $checkout_base );
+
+		$checkout_label            = OptionResolver::get_label( UiLabelsDefaults::KEY_CHECKOUT );
+		$checkout_aria_unavailable = sprintf(
+			/* translators: %s: visible checkout button label */
+			__( '%s — недоступно: корзина пуста', 'mp-sticky-custom-cart' ),
+			$checkout_label
+		);
 
 		ob_start();
 		?>
-<div id="mp-scc-sticky-root" class="mp-scc-root mp-scc-sticky-bar" role="region" aria-label="<?php esc_attr_e( 'Shopping cart', 'mp-sticky-custom-cart' ); ?>" data-mp-scc-sticky-root>
+<div id="mp-scc-sticky-root" class="mp-scc-root mp-scc-sticky-bar<?php echo $empty ? ' mp-scc-sticky--empty' : ''; ?>" role="region" aria-label="<?php esc_attr_e( 'Shopping cart', 'mp-sticky-custom-cart' ); ?>" data-mp-scc-sticky-root data-mp-scc-cart-empty="<?php echo $empty ? '1' : '0'; ?>">
 	<div class="mp-scc-sticky-stack">
 		<?php if ( $drawer ) : ?>
 		<div id="mp-scc-drawer" class="mp-scc-drawer" role="region" aria-labelledby="mp-scc-drawer-toggle" hidden data-mp-scc-drawer>
@@ -98,13 +86,24 @@ final class StickyCartRenderer implements StickyCartRendererInterface {
 				</button>
 				<?php endif; ?>
 				<div class="mp-scc-sticky-summary-text">
-					<span class="mp-scc-cart-count" data-mp-scc-cart-count><?php echo esc_html( (string) $count ); ?></span>
+					<span class="mp-scc-cart-count" data-mp-scc-cart-count><?php echo esc_html( (string) $line_count ); ?></span>
+					<span class="mp-scc-sr-only" data-mp-scc-cart-qty-total><?php echo esc_html( sprintf( /* translators: %d: total quantity of all line items */ __( 'Total quantity in cart: %d', 'mp-sticky-custom-cart' ), $qty_total ) ); ?></span>
 					<span class="mp-scc-cart-total" data-mp-scc-cart-total><?php echo wp_kses_post( $total ); ?></span>
 				</div>
 			</section>
 			<div class="mp-scc-sticky-actions" role="toolbar" aria-orientation="horizontal" aria-label="<?php esc_attr_e( 'Cart actions', 'mp-sticky-custom-cart' ); ?>" data-mp-scc-actions>
 				<button type="button" class="mp-scc-btn mp-scc-btn--ghost mp-scc-clear-cart" data-mp-scc-clear-cart><?php echo esc_html( OptionResolver::get_label( UiLabelsDefaults::KEY_CLEAR_CART ) ); ?></button>
-				<a class="mp-scc-btn mp-scc-btn--primary mp-scc-checkout" href="<?php echo esc_url( $checkout_url ); ?>" data-mp-scc-checkout><?php echo esc_html( OptionResolver::get_label( UiLabelsDefaults::KEY_CHECKOUT ) ); ?></a>
+				<a class="mp-scc-btn mp-scc-btn--primary mp-scc-checkout<?php echo $empty ? ' mp-scc-checkout--disabled' : ''; ?>"
+					href="<?php echo $empty ? '#' : esc_url( $checkout_url ); ?>"
+					data-mp-scc-checkout
+					data-mp-scc-checkout-base="<?php echo esc_url( $checkout_base ); ?>"
+					data-mp-scc-checkout-aria-disabled="<?php echo esc_attr( $checkout_aria_unavailable ); ?>"
+					<?php if ( $empty ) : ?>
+					aria-disabled="true"
+					tabindex="-1"
+					aria-label="<?php echo esc_attr( $checkout_aria_unavailable ); ?>"
+					<?php endif; ?>
+				><?php echo esc_html( $checkout_label ); ?></a>
 			</div>
 		</div>
 	</div>
@@ -120,7 +119,8 @@ final class StickyCartRenderer implements StickyCartRendererInterface {
 		 */
 		$context = array(
 			'cart_empty'     => $empty,
-			'cart_count'     => $count,
+			'cart_count'     => $qty_total,
+			'line_count'     => $line_count,
 			'drawer_enabled' => $drawer,
 		);
 

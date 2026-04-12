@@ -24,11 +24,75 @@ final class AjaxEndpointsHooks {
 		add_action( 'wp_ajax_nopriv_' . Constants::AJAX_ACTION_SET_LINE_QUANTITY, array( self::class, 'handle_set_line_quantity' ) );
 		add_action( 'wp_ajax_' . Constants::AJAX_ACTION_ADD_SIMPLE_PRODUCT, array( self::class, 'handle_add_simple_product' ) );
 		add_action( 'wp_ajax_nopriv_' . Constants::AJAX_ACTION_ADD_SIMPLE_PRODUCT, array( self::class, 'handle_add_simple_product' ) );
+		add_action( 'wp_ajax_' . Constants::AJAX_ACTION_CLEAR_CART, array( self::class, 'handle_clear_cart' ) );
+		add_action( 'wp_ajax_nopriv_' . Constants::AJAX_ACTION_CLEAR_CART, array( self::class, 'handle_clear_cart' ) );
 
 		/**
 		 * Fires when AJAX endpoint hooks are registered — attach real handlers here.
 		 */
 		do_action( 'mp_sticky_custom_cart_ajax_endpoints_registered' );
+	}
+
+	/**
+	 * Remove all items from the cart and return the unified snapshot.
+	 */
+	public static function handle_clear_cart() {
+		self::verify_nonce();
+		if ( ! function_exists( 'WC' ) || ! WC()->cart ) {
+			self::log_clear_cart_failure( 'no_cart', 'Cart unavailable.', array() );
+			wp_send_json_error(
+				array(
+					'message' => __( 'Корзина недоступна.', 'mp-sticky-custom-cart' ),
+					'code'    => 'cart_unavailable',
+				)
+			);
+		}
+
+		$cart = WC()->cart;
+		if ( $cart->is_empty() ) {
+			$payload = self::build_cart_snapshot_payload();
+			if ( is_wp_error( $payload ) ) {
+				self::log_clear_cart_failure( 'snapshot_failed', $payload->get_error_message(), array( 'phase' => 'already_empty' ) );
+				wp_send_json_error(
+					array(
+						'message' => __( 'Не удалось получить состояние корзины.', 'mp-sticky-custom-cart' ),
+						'code'    => 'snapshot_failed',
+					)
+				);
+			}
+			wp_send_json_success( $payload );
+			return;
+		}
+
+		try {
+			$cart->empty_cart();
+			$cart->calculate_totals();
+		} catch ( \Throwable $e ) {
+			self::log_clear_cart_failure( 'empty_cart_exception', $e->getMessage(), array() );
+			wp_send_json_error(
+				array(
+					'message' => __( 'Не удалось очистить корзину.', 'mp-sticky-custom-cart' ),
+					'code'    => 'clear_failed',
+				)
+			);
+		}
+
+		if ( function_exists( 'wc_clear_notices' ) ) {
+			wc_clear_notices();
+		}
+
+		$payload = self::build_cart_snapshot_payload();
+		if ( is_wp_error( $payload ) ) {
+			self::log_clear_cart_failure( 'snapshot_after_clear', $payload->get_error_message(), array() );
+			wp_send_json_error(
+				array(
+					'message' => __( 'Корзина очищена, но не удалось обновить данные.', 'mp-sticky-custom-cart' ),
+					'code'    => 'snapshot_failed',
+				)
+			);
+		}
+
+		wp_send_json_success( $payload );
 	}
 
 	/**
@@ -421,6 +485,7 @@ final class AjaxEndpointsHooks {
 			'line_count'          => count( $items ),
 			'subtotal_html'       => $subtotal_html,
 			'items'               => $items,
+			'snapshot_ts'         => time(),
 		);
 	}
 
@@ -489,6 +554,42 @@ final class AjaxEndpointsHooks {
 		 * @param array<string, mixed> $entry Log entry.
 		 */
 		$entry = apply_filters( 'mp_sticky_custom_cart_add_simple_product_log_entry', $entry );
+
+		$log = get_option( Constants::OPTION_ERROR_LOG, array() );
+		if ( ! is_array( $log ) ) {
+			$log = array();
+		}
+		$log[] = $entry;
+		if ( count( $log ) > 100 ) {
+			$log = array_slice( $log, -100 );
+		}
+		update_option( Constants::OPTION_ERROR_LOG, $log, false );
+	}
+
+	/**
+	 * @param string               $code    Stable error code.
+	 * @param string               $message Technical message.
+	 * @param array<string, mixed> $context Extra context.
+	 */
+	private static function log_clear_cart_failure( $code, $message, array $context ) {
+		if ( ! OptionResolver::get_setting( 'diagnostics.client_error_logging', true ) ) {
+			return;
+		}
+
+		$entry = array(
+			't'       => time(),
+			'type'    => 'clear_cart',
+			'code'    => sanitize_key( (string) $code ),
+			'message' => (string) $message,
+			'context' => $context,
+		);
+
+		/**
+		 * Filters a clear-cart failure log entry before it is stored.
+		 *
+		 * @param array<string, mixed> $entry Log entry.
+		 */
+		$entry = apply_filters( 'mp_sticky_custom_cart_clear_cart_log_entry', $entry );
 
 		$log = get_option( Constants::OPTION_ERROR_LOG, array() );
 		if ( ! is_array( $log ) ) {

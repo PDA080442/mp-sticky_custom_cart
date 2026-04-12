@@ -81,6 +81,11 @@ final class Constants {
 	public const AJAX_ACTION_LOG_CLIENT_EVENT = 'mp_scc_log_client_error';
 
 	/**
+	 * Registered {@see wp_ajax_*} action: empty cart from sticky UI.
+	 */
+	public const AJAX_ACTION_CLEAR_CART = 'mp_scc_clear_cart';
+
+	/**
 	 * Not instantiable.
 	 */
 	private function __construct() {
