@@ -465,14 +465,63 @@ final class AjaxEndpointsHooks {
 				$cart_item_key
 			);
 
-			$items[] = array(
+			$thumb_html = $product->get_image(
+				'woocommerce_thumbnail',
+				array(
+					'class'   => 'mp-scc-line__img',
+					'alt'     => '',
+					'loading' => 'lazy',
+				),
+				true
+			);
+			$thumb_html = is_string( $thumb_html ) ? $thumb_html : '';
+			if ( '' === trim( $thumb_html ) && function_exists( 'wc_placeholder_img' ) ) {
+				$thumb_html = wc_placeholder_img(
+					'woocommerce_thumbnail',
+					array(
+						'class' => 'mp-scc-line__img mp-scc-line__img--placeholder',
+						'alt'   => '',
+					)
+				);
+			}
+			$thumb_html = wp_kses_post( is_string( $thumb_html ) ? $thumb_html : '' );
+
+			$price_raw       = $cart->get_product_price( $product );
+			$line_price_html = apply_filters( 'woocommerce_cart_item_price', $price_raw, $cart_item, $cart_item_key );
+			$line_price_html = is_string( $line_price_html ) ? wp_kses_post( $line_price_html ) : '';
+
+			$max_qty   = $product->get_max_purchase_quantity();
+			$max_q_out = null;
+			if ( is_numeric( $max_qty ) && (int) $max_qty > 0 ) {
+				$max_q_out = (int) $max_qty;
+			}
+
+			$stock_notice = self::build_cart_line_stock_notice( $product, $cart_item );
+
+			$line_data = array(
 				'key'                => (string) $cart_item_key,
+				'snapshot_line_id'   => (string) $cart_item_key,
 				'product_id'         => (int) $cart_item['product_id'],
+				'variation_id'       => isset( $cart_item['variation_id'] ) ? (int) $cart_item['variation_id'] : 0,
 				'name'               => wp_strip_all_tags( (string) $name ),
 				'quantity'           => (int) $cart_item['quantity'],
 				'line_subtotal_html' => is_string( $line_subtotal_html ) ? $line_subtotal_html : '',
+				'line_price_html'    => $line_price_html,
+				'thumbnail_html'     => $thumb_html,
 				'permalink'          => is_string( $permalink ) ? $permalink : '',
+				'stock_status'       => (string) $product->get_stock_status(),
+				'stock_notice'       => $stock_notice,
+				'max_quantity'       => $max_q_out,
 			);
+
+			/**
+			 * Filters one cart line in the sticky drawer snapshot (add fields for custom templates).
+			 *
+			 * @param array<string, mixed> $line_data    Line payload for JS.
+			 * @param array<string, mixed> $cart_item    WooCommerce cart row.
+			 * @param string               $cart_item_key Line key.
+			 */
+			$items[] = apply_filters( 'mp_sticky_custom_cart_cart_line_snapshot', $line_data, $cart_item, $cart_item_key );
 		}
 
 		$empty          = $cart->is_empty();
@@ -487,6 +536,37 @@ final class AjaxEndpointsHooks {
 			'items'               => $items,
 			'snapshot_ts'         => time(),
 		);
+	}
+
+	/**
+	 * Short availability hint when stock or purchasability changes (drawer line).
+	 *
+	 * @param \WC_Product          $product   Cart line product.
+	 * @param array<string, mixed> $cart_item Cart row.
+	 */
+	private static function build_cart_line_stock_notice( $product, array $cart_item ) {
+		if ( ! is_a( $product, 'WC_Product' ) ) {
+			return '';
+		}
+		if ( ! $product->is_purchasable() ) {
+			return __( 'Недоступно к покупке', 'mp-sticky-custom-cart' );
+		}
+		$status = $product->get_stock_status();
+		if ( 'outofstock' === $status && ! $product->backorders_allowed() ) {
+			return __( 'Нет в наличии', 'mp-sticky-custom-cart' );
+		}
+		$max = $product->get_max_purchase_quantity();
+		if ( is_numeric( $max ) && (int) $max > 0 && isset( $cart_item['quantity'] ) && (int) $cart_item['quantity'] > (int) $max ) {
+			return sprintf(
+				/* translators: %d: maximum quantity that can be purchased */
+				__( 'Доступно не более %d шт.', 'mp-sticky-custom-cart' ),
+				(int) $max
+			);
+		}
+		if ( 'onbackorder' === $status && $product->backorders_require_notification() ) {
+			return __( 'Под заказ', 'mp-sticky-custom-cart' );
+		}
+		return '';
 	}
 
 	private static function verify_nonce() {

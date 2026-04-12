@@ -904,21 +904,74 @@
 		}
 	};
 
+	StickyCartController.prototype.removeLine = function (cartItemKey) {
+		var k = cartItemKey ? String(cartItemKey) : '';
+		if (!k) {
+			return;
+		}
+		if (this.qtyTimers[k]) {
+			clearTimeout(this.qtyTimers[k]);
+			delete this.qtyTimers[k];
+		}
+		delete this.pendingQty[k];
+		this.commitQuantity(k, 0);
+	};
+
 	StickyCartController.prototype.renderLineItems = function (items) {
 		var self = this;
 		this.$items.empty();
+		var removeLabel = window.mpScc.label('drawer_remove_line') || '';
+
 		items.forEach(function (item) {
 			var key = item.key ? String(item.key) : '';
 			if (!key) {
 				return;
 			}
 			var qty = typeof item.quantity === 'number' ? item.quantity : parseInt(item.quantity, 10) || 0;
-			var $li = $('<li class="mp-scc-line" />').attr('data-cart-item-key', key);
+			var snapId = item.snapshot_line_id ? String(item.snapshot_line_id) : key;
 
-			var $row = $('<div class="mp-scc-line__row" />');
+			var $li = $('<li class="mp-scc-line" />')
+				.attr('data-cart-item-key', key)
+				.attr('data-mp-scc-line-key', key)
+				.attr('data-mp-scc-snapshot-line-id', snapId)
+				.attr('data-mp-scc-product-id', item.product_id != null ? String(item.product_id) : '')
+				.attr('data-mp-scc-variation-id', item.variation_id != null ? String(item.variation_id) : '');
+
+			if (item.stock_notice) {
+				$li.addClass('mp-scc-line--warn');
+			}
+
+			var $thumb = $('<div class="mp-scc-line__thumb" />');
+			if (item.thumbnail_html && String(item.thumbnail_html).trim()) {
+				$thumb.html(item.thumbnail_html);
+				$thumb.find('img').each(function () {
+					var $img = $(this);
+					if (!$img.attr('alt')) {
+						$img.attr('alt', item.name || '');
+					}
+					$img.attr('loading', 'lazy');
+				});
+			} else {
+				$thumb.append($('<span class="mp-scc-line__thumb-fallback" aria-hidden="true" />'));
+			}
+
+			var $warn = $('<p class="mp-scc-line__warning" role="status" />');
+			if (item.stock_notice) {
+				$warn.text(String(item.stock_notice));
+			} else {
+				$warn.attr('hidden', 'hidden');
+			}
+
 			var $title = item.permalink
 				? $('<a class="mp-scc-line__name" />').attr('href', item.permalink).text(item.name || '')
 				: $('<span class="mp-scc-line__name" />').text(item.name || '');
+
+			var $unit = $('<div class="mp-scc-line__unit" />');
+			if (item.line_price_html && String(item.line_price_html).trim()) {
+				$unit.html(item.line_price_html);
+			} else {
+				$unit.attr('hidden', 'hidden');
+			}
 
 			var $qty = $('<div class="mp-scc-line__qty" />');
 			var $dec = $('<button type="button" class="mp-scc-qty-btn" data-mp-scc-qty-dec />')
@@ -929,14 +982,29 @@
 				.attr('aria-label', 'Increase')
 				.text('+');
 
+			var maxQ = item.max_quantity;
+			if (maxQ !== null && maxQ !== undefined) {
+				var maxN = parseInt(maxQ, 10);
+				if (!isNaN(maxN) && maxN > 0 && qty >= maxN) {
+					$inc.prop('disabled', true).attr('aria-disabled', 'true');
+				}
+			}
+
 			$qty.append($dec, $num, $inc);
+
+			var $remove = $('<button type="button" class="mp-scc-line__remove mp-scc-btn mp-scc-btn--ghost" data-mp-scc-line-remove />')
+				.attr('aria-label', removeLabel || 'Remove line')
+				.text('\u00d7');
+
+			var $controls = $('<div class="mp-scc-line__controls" />').append($qty, $remove);
 
 			var $sub = $('<div class="mp-scc-line__subtotal" />');
 			if (typeof item.line_subtotal_html === 'string') {
 				$sub.html(item.line_subtotal_html);
 			}
 
-			$row.append($('<div class="mp-scc-line__main" />').append($title, $qty), $sub);
+			var $main = $('<div class="mp-scc-line__main" />').append($warn, $title, $unit, $controls);
+			var $row = $('<div class="mp-scc-line__row" />').append($thumb, $main, $sub);
 			$li.append($row);
 			self.$items.append($li);
 		});
@@ -1091,6 +1159,16 @@
 			q = Math.max(0, q - 1);
 			$disp.text(String(q));
 			self.scheduleQuantityCommit(key, q);
+		});
+
+		this.$root.on('click', '[data-mp-scc-line-remove]', function (e) {
+			e.preventDefault();
+			var $line = $(e.currentTarget).closest('.mp-scc-line');
+			var key = $line.attr('data-mp-scc-line-key') || $line.attr('data-cart-item-key');
+			if (!key || self.snapshotLocked || self.clearCartLocked) {
+				return;
+			}
+			self.removeLine(key);
 		});
 
 		this.$root.on('click', '[data-mp-scc-clear-cart]', function (e) {
