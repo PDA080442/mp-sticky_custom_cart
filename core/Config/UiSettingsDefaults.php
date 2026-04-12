@@ -37,6 +37,14 @@ final class UiSettingsDefaults {
 				/** Stacking: «Подробнее» overlay (keep below wishlist heart). */
 				'catalog_overlay_z_index'      => 4,
 			),
+			'cart_route'  => array(
+				/** When true, requests to the WooCommerce cart page redirect to the site front (sticky-only UX). */
+				'redirect_to_home'     => false,
+				/** HTTP status for the redirect (301 permanent, 302/303/307 temporary). */
+				'redirect_status_code' => 302,
+				/** Write redirect lines to the PHP debug log (wp-content/debug.log when WP_DEBUG_LOG). */
+				'log_redirect_events'  => false,
+			),
 			'sticky_cart' => array(
 				'z_index'                    => 100050,
 				'surface_backdrop_blur_px'   => 14,

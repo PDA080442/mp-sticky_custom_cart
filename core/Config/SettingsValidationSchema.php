@@ -65,6 +65,14 @@ final class SettingsValidationSchema {
 					'max'  => 100,
 				),
 			),
+			'cart_route'  => array(
+				'redirect_to_home'     => array( 'type' => 'boolean' ),
+				'redirect_status_code' => array(
+					'type'  => 'integer',
+					'oneof' => array( 301, 302, 303, 307 ),
+				),
+				'log_redirect_events'  => array( 'type' => 'boolean' ),
+			),
 			'sticky_cart' => array(
 				'z_index'                   => array( 'type' => 'integer', 'min' => 1, 'max' => 9999999 ),
 				'surface_backdrop_blur_px'  => array( 'type' => 'integer', 'min' => 0, 'max' => 100 ),
