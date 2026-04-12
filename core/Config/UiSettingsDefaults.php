@@ -24,6 +24,10 @@ final class UiSettingsDefaults {
 				'hover_animation_duration_ms'  => 220,
 				'hover_animation_easing'       => 'cubic-bezier(0.4, 0, 0.2, 1)',
 				'hover_motion_preset'          => 'fade_slide',
+				/** Vertical slide distance (px) for overlay enter/leave motion. */
+				'hover_slide_offset_px'        => 8,
+				/** Extra delay before fade-out when pointer leaves the card (reduces flicker). */
+				'hover_hide_delay_ms'          => 50,
 				/** CSS selector for delegated image clicks (shop loop); empty = built-in default. */
 				'image_click_selector'         => '',
 				/** Closest ancestor for loading/added/error states (jQuery selector). */
