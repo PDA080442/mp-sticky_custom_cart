@@ -421,6 +421,7 @@ final class AjaxEndpointsHooks {
 			'line_count'          => count( $items ),
 			'subtotal_html'       => $subtotal_html,
 			'items'               => $items,
+			'snapshot_ts'         => time(),
 		);
 	}
 
