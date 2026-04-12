@@ -115,26 +115,6 @@
 		return 0;
 	}
 
-	function getWcAddToCartUrl(catalog) {
-		if (catalog && catalog.wcAjaxAddToCartUrl) {
-			return String(catalog.wcAjaxAddToCartUrl);
-		}
-		if (typeof wc_add_to_cart_params !== 'undefined' && wc_add_to_cart_params.wc_ajax_url) {
-			return wc_add_to_cart_params.wc_ajax_url.toString().replace('%%endpoint%%', 'add_to_cart');
-		}
-		return '';
-	}
-
-	function getWcAddToCartNonce(catalog) {
-		if (catalog && catalog.wcAddToCartNonce) {
-			return String(catalog.wcAddToCartNonce);
-		}
-		if (typeof wc_add_to_cart_params !== 'undefined' && wc_add_to_cart_params.wc_ajax_nonce) {
-			return String(wc_add_to_cart_params.wc_ajax_nonce);
-		}
-		return '';
-	}
-
 	function setCatalogCardLoading($card, on) {
 		if (on) {
 			$card.addClass('mp-scc-card--loading');
@@ -187,9 +167,8 @@
 		if (!sel) {
 			return;
 		}
-		var url = getWcAddToCartUrl(catalog);
-		var nonce = getWcAddToCartNonce(catalog);
-		if (!url || !nonce) {
+		var cfg = window.mpScc.ajaxConfig();
+		if (!cfg.ajaxUrl || !cfg.actions.addSimpleProduct) {
 			return;
 		}
 
@@ -222,49 +201,37 @@
 			setCatalogCardLoading($card, true);
 			$card.removeClass('mp-scc-card--error');
 
-			$.ajax({
-				url: url,
-				type: 'POST',
-				data: {
-					product_id: productId,
-					product_sku: '',
-					quantity: 1,
-					security: nonce
-				},
-				dataType: 'json'
-			})
+			window.mpScc
+				.postAjax('addSimpleProduct', { product_id: productId, quantity: 1 })
 				.done(function (resp) {
-					if (!resp) {
+					if (resp && resp.success && resp.data) {
 						setCatalogCardLoading($card, false);
-						$card.addClass('mp-scc-card--error');
-						showCatalogToast($card, window.mpScc.label('out_of_stock'));
+						triggerCatalogAddedAnimation($card);
+						$(document.body).trigger('added_to_cart', [{}, '', $img]);
 						return;
 					}
-					if (resp.error) {
-						setCatalogCardLoading($card, false);
-						$card.addClass('mp-scc-card--error');
-						window.setTimeout(function () {
-							$card.removeClass('mp-scc-card--error');
-						}, 500);
-						showCatalogToast($card, window.mpScc.label('out_of_stock'));
-						return;
-					}
-					setCatalogCardLoading($card, false);
-					triggerCatalogAddedAnimation($card);
-					$(document.body).trigger('added_to_cart', [
-						resp.fragments || {},
-						resp.cart_hash || '',
-						$img
-					]);
-				})
-				.fail(function () {
 					setCatalogCardLoading($card, false);
 					$card.addClass('mp-scc-card--error');
 					window.setTimeout(function () {
 						$card.removeClass('mp-scc-card--error');
 					}, 500);
-					var netMsg = data().networkErrorMessage ? String(data().networkErrorMessage) : '';
-					showCatalogToast($card, netMsg);
+					var errMsg =
+						resp && resp.data && resp.data.message
+							? String(resp.data.message)
+							: window.mpScc.label('out_of_stock');
+					showCatalogToast($card, errMsg);
+				})
+				.fail(function (xhr) {
+					setCatalogCardLoading($card, false);
+					$card.addClass('mp-scc-card--error');
+					window.setTimeout(function () {
+						$card.removeClass('mp-scc-card--error');
+					}, 500);
+					var msg = data().networkErrorMessage ? String(data().networkErrorMessage) : '';
+					if (xhr && xhr.responseJSON && xhr.responseJSON.data && xhr.responseJSON.data.message) {
+						msg = String(xhr.responseJSON.data.message);
+					}
+					showCatalogToast($card, msg);
 				});
 		});
 	}
