@@ -117,30 +117,182 @@ final class ErrorLogService implements LoggingServiceInterface {
 	}
 
 	/**
-	 * @param array<string, mixed> $args Keys: limit (int), level (string), offset (int).
+	 * @param array<string, mixed> $args Keys: limit, offset, level, date_from (Y-m-d), date_to (Y-m-d), source (substring), search (substring).
 	 * @return array<int, array<string, mixed>>
 	 */
 	public function query( array $args = array() ) {
+		$r = $this->query_with_meta( $args );
+		return $r['entries'];
+	}
+
+	/**
+	 * Filtered list with total count for pagination.
+	 *
+	 * @param array<string, mixed> $args Same as {@see query()} plus limit/offset.
+	 * @return array{ entries: array<int, array<string, mixed>>, total: int }
+	 */
+	public function query_with_meta( array $args = array() ) {
 		$limit  = isset( $args['limit'] ) ? max( 1, min( 500, (int) $args['limit'] ) ) : 100;
 		$offset = isset( $args['offset'] ) ? max( 0, (int) $args['offset'] ) : 0;
-		$level  = isset( $args['level'] ) ? sanitize_key( (string) $args['level'] ) : '';
 
+		$filtered = $this->filter_entries( $this->list_entries_newest_first(), $args );
+		$total    = count( $filtered );
+		$page     = array_slice( $filtered, $offset, $limit );
+
+		return array(
+			'entries' => $page,
+			'total'   => $total,
+		);
+	}
+
+	/**
+	 * All matching entries for export (capped).
+	 *
+	 * @param array<string, mixed> $args Filter args; optional export_limit (max 5000).
+	 * @return array<int, array<string, mixed>>
+	 */
+	public function query_for_export( array $args = array() ) {
+		$max = isset( $args['export_limit'] ) ? max( 1, min( 5000, (int) $args['export_limit'] ) ) : 5000;
+		unset( $args['offset'], $args['limit'] );
+		$args['limit'] = $max;
+
+		$filtered = $this->filter_entries( $this->list_entries_newest_first(), $args );
+		return array_slice( $filtered, 0, $max );
+	}
+
+	/**
+	 * @return array<int, array<string, mixed>>
+	 */
+	private function list_entries_newest_first() {
 		$log = $this->load_raw_entries();
-		$log = array_reverse( $log );
+		return array_reverse( array_values( $log ) );
+	}
 
+	/**
+	 * @param array<int, array<string, mixed>> $entries
+	 * @param array<string, mixed>             $args
+	 * @return array<int, array<string, mixed>>
+	 */
+	private function filter_entries( array $entries, array $args ) {
+		$out = array();
+		foreach ( $entries as $e ) {
+			if ( ! is_array( $e ) ) {
+				continue;
+			}
+			if ( ! $this->entry_matches_filters( $e, $args ) ) {
+				continue;
+			}
+			$out[] = $e;
+		}
+		return $out;
+	}
+
+	/**
+	 * @param array<string, mixed> $e
+	 * @param array<string, mixed> $args
+	 */
+	private function entry_matches_filters( array $e, array $args ) {
+		$level = isset( $args['level'] ) ? sanitize_key( (string) $args['level'] ) : '';
 		if ( '' !== $level ) {
-			$log = array_values(
-				array_filter(
-					$log,
-					function ( $e ) use ( $level ) {
-						$el = $this->infer_level( $e );
-						return $el === $level;
-					}
-				)
-			);
+			if ( $this->infer_level( $e ) !== $level ) {
+				return false;
+			}
 		}
 
-		return array_slice( $log, $offset, $limit );
+		$ts = isset( $e['ts'] ) ? (int) $e['ts'] : ( isset( $e['t'] ) ? (int) $e['t'] : 0 );
+
+		if ( ! empty( $args['date_from'] ) ) {
+			$from = self::parse_ymd_boundary( (string) $args['date_from'], true );
+			if ( null !== $from && $ts < $from ) {
+				return false;
+			}
+		}
+		if ( ! empty( $args['date_to'] ) ) {
+			$to = self::parse_ymd_boundary( (string) $args['date_to'], false );
+			if ( null !== $to && $ts > $to ) {
+				return false;
+			}
+		}
+
+		if ( ! empty( $args['source'] ) ) {
+			$needle = $this->strtolower_utf8( trim( (string) $args['source'] ) );
+			if ( '' !== $needle ) {
+				$src = isset( $e['source'] ) ? $this->strtolower_utf8( (string) $e['source'] ) : '';
+				$end = isset( $e['endpoint'] ) ? $this->strtolower_utf8( (string) $e['endpoint'] ) : '';
+				if ( false === strpos( $src, $needle ) && false === strpos( $end, $needle ) ) {
+					return false;
+				}
+			}
+		}
+
+		if ( ! empty( $args['search'] ) ) {
+			$needle = $this->strtolower_utf8( trim( (string) $args['search'] ) );
+			if ( '' !== $needle && false === strpos( $this->entry_search_blob( $e ), $needle ) ) {
+				return false;
+			}
+		}
+
+		return true;
+	}
+
+	/**
+	 * @param string $ymd Y-m-d.
+	 * @param bool   $start_of_day True = 00:00:00, false = 23:59:59 (site timezone).
+	 * @return int|null
+	 */
+	private static function parse_ymd_boundary( $ymd, $start_of_day ) {
+		if ( ! preg_match( '/^\d{4}-\d{2}-\d{2}$/', $ymd ) ) {
+			return null;
+		}
+		try {
+			$tz = wp_timezone();
+			$d  = \DateTimeImmutable::createFromFormat( '!Y-m-d', $ymd, $tz );
+			if ( ! $d ) {
+				return null;
+			}
+			if ( $start_of_day ) {
+				return $d->setTime( 0, 0, 0 )->getTimestamp();
+			}
+			return $d->setTime( 23, 59, 59 )->getTimestamp();
+		} catch ( \Exception $e ) {
+			return null;
+		}
+	}
+
+	/**
+	 * @param array<string, mixed> $e
+	 */
+	private function entry_search_blob( array $e ) {
+		$parts = array();
+		foreach ( array( 'message', 'code', 'source', 'endpoint' ) as $k ) {
+			if ( isset( $e[ $k ] ) ) {
+				$parts[] = (string) $e[ $k ];
+			}
+		}
+		if ( isset( $e['payload'] ) && is_array( $e['payload'] ) ) {
+			$enc = wp_json_encode( $e['payload'] );
+			if ( is_string( $enc ) ) {
+				$parts[] = $enc;
+			}
+		}
+		if ( isset( $e['context'] ) && is_array( $e['context'] ) ) {
+			$enc = wp_json_encode( $e['context'] );
+			if ( is_string( $enc ) ) {
+				$parts[] = $enc;
+			}
+		}
+		return $this->strtolower_utf8( implode( ' ', $parts ) );
+	}
+
+	/**
+	 * @param string $s
+	 * @return string
+	 */
+	private function strtolower_utf8( $s ) {
+		if ( function_exists( 'mb_strtolower' ) ) {
+			return mb_strtolower( (string) $s, 'UTF-8' );
+		}
+		return strtolower( (string) $s );
 	}
 
 	public function purge() {
