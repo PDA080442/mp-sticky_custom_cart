@@ -60,6 +60,9 @@ final class SettingsValidationSchema {
 					'type'        => 'text',
 					'max_length'  => 200,
 				),
+				'wrap_loop_item_add_to_cart' => array(
+					'type' => 'boolean',
+				),
 				'more_info_new_tab'         => array(
 					'type' => 'boolean',
 				),

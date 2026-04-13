@@ -748,14 +748,18 @@ body.popup-overlay-open .mp-scc-sticky-bar {
 }
 
 /*
- * Desktop: stretch the theme’s real add-to-cart link invisibly over the first loop image.
- * Bottom strip stays free for «Подробнее» (z-index 4 > 3). Woo `ajax_add_to_cart` handles the click.
+ * Desktop: invisible hit layer (theme link or plugin button.mp-scc-catalog-atc-hit--proxy).
+ * Clicks go to plugin AJAX — not theme handlers. «Подробнее» stays above (z-index 4 > 3).
  */
 @media (min-width: 769px) {
 	body:not(.single-product):not(.woocommerce-cart):not(.woocommerce-checkout)
 		ul.products
 		li.product.mp-scc-catalog-card--atc-hit
-		a.mp-scc-catalog-atc-hit {
+		a.mp-scc-catalog-atc-hit,
+	body:not(.single-product):not(.woocommerce-cart):not(.woocommerce-checkout)
+		ul.products
+		li.product.mp-scc-catalog-card--atc-hit
+		button.mp-scc-catalog-atc-hit {
 		display: block !important;
 		visibility: visible !important;
 		opacity: 0 !important;
@@ -769,6 +773,10 @@ body.popup-overlay-open .mp-scc-sticky-bar {
 		overflow: hidden !important;
 		cursor: pointer !important;
 		-webkit-tap-highlight-color: transparent;
+		appearance: none !important;
+		background: transparent !important;
+		font: inherit !important;
+		line-height: 0 !important;
 	}
 
 	ul.products li.product.mp-scc-catalog-card--atc-hit a.mp-scc-catalog-atc-hit svg,
@@ -1045,6 +1053,26 @@ body.mp-scc-wishlist-integration-on .woocommerce .products li.product a.mp-scc-c
 	background: rgba(35, 35, 40, 0.94);
 	color: #fff;
 	border: 1px solid rgba(255, 80, 80, 0.35);
+}
+
+/*
+ * Optional: {@see ShopLoopAddToCartWrapper} — one anchor in the standard Woo loop (setting «wrap_loop_item_add_to_cart»).
+ * Homepage without body.woocommerce still matches via .mp-scc-shop-loop-wrap-atc.
+ */
+body.mp-scc-shop-loop-wrap-atc ul.products li.product > a.mp-scc-loop-wrap-atc,
+body.mp-scc-shop-loop-wrap-atc ul.products li.product > a.mp-scc-loop-wrap-permalink {
+	display: block;
+	text-decoration: none;
+	color: inherit;
+	background: transparent;
+	padding: 0;
+	margin: 0;
+	border: none;
+	box-shadow: none;
+}
+
+body.mp-scc-shop-loop-wrap-atc ul.products li.product > a.mp-scc-loop-wrap-atc img {
+	pointer-events: none;
 }
 
 /* 8) Reduced motion: keep layout, shorten transitions */

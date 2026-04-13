@@ -654,7 +654,7 @@
 			});
 		}
 
-		var $hit = $card.find('a.mp-scc-catalog-atc-hit').first();
+		var $hit = $card.find('.mp-scc-catalog-atc-hit').first();
 		if ($hit.length) {
 			var hitH = $overlay.length ? Math.max(0, ih - band) : ih;
 			$hit.css({
@@ -695,8 +695,9 @@
 	}
 
 	/**
-	 * Desktop: stretch the theme’s AJAX add-to-cart anchor invisibly over the first image, leaving the
-	 * bottom band (same geometry as «Подробнее») free for the overlay link (z-index above the hit layer).
+	 * Desktop: invisible hit layer over the first loop image (theme-agnostic).
+	 * Prefer stretching the theme’s add-to-cart link when present; otherwise inject a plugin-owned
+	 * {@see HTMLButtonElement} — same capture handler + {@see postAjax} as for theme links.
 	 */
 	function initCatalogAtcHitLayer() {
 		var catalog = data().catalog || {};
@@ -706,7 +707,8 @@
 			$(cardSel).each(function () {
 				var $c = $(this);
 				$c.removeClass('mp-scc-catalog-card--atc-hit');
-				$c.find('a.mp-scc-catalog-atc-hit').removeClass('mp-scc-catalog-atc-hit').removeAttr('style');
+				$c.find('.mp-scc-catalog-atc-hit--proxy').remove();
+				$c.find('.mp-scc-catalog-atc-hit').removeClass('mp-scc-catalog-atc-hit').removeAttr('style');
 				var ro = $c.data('mpSccCatalogChromeRo');
 				if (ro && typeof ro.disconnect === 'function') {
 					ro.disconnect();
@@ -736,6 +738,8 @@
 			if (!$card.find('img').length) {
 				return;
 			}
+			$card.find('.mp-scc-catalog-atc-hit--proxy').remove();
+
 			var $hit = $card
 				.find('a.add_to_cart_button, a.ld-sp-add-to-cart')
 				.filter(function () {
@@ -744,13 +748,26 @@
 					return href.indexOf('add-to-cart') !== -1 || $a.is('[data-product_id]');
 				})
 				.first();
+
 			if (!$hit.length) {
-				$card.removeClass('mp-scc-catalog-card--atc-hit');
-				$card.find('a.mp-scc-catalog-atc-hit').removeClass('mp-scc-catalog-atc-hit').removeAttr('style');
-				return;
+				var pid = resolveCatalogProductId($card);
+				if (!pid || !$card.hasClass('product-type-simple')) {
+					$card.removeClass('mp-scc-catalog-card--atc-hit');
+					return;
+				}
+				var $proxy = $(
+					'<button type="button" class="mp-scc-catalog-atc-hit mp-scc-catalog-atc-hit--proxy" />'
+				);
+				$proxy.attr('aria-label', 'Добавить в корзину');
+				$proxy.attr('data-mp-scc-proxy', '1');
+				$card.append($proxy);
+				$hit = $proxy;
 			}
+
 			$card.addClass('mp-scc-catalog-card--atc-hit');
-			$hit.addClass('mp-scc-catalog-atc-hit');
+			if (!$hit.hasClass('mp-scc-catalog-atc-hit')) {
+				$hit.addClass('mp-scc-catalog-atc-hit');
+			}
 			attachCatalogCardResizeSync($card);
 		});
 	}
@@ -1072,6 +1089,15 @@
 	var CATALOG_IMAGE_CLICK_SELECTOR_DEFAULT =
 		'ul.products li.product img, ul.products div.product img, .woocommerce ul.products li.product img, .woocommerce ul.products div.product img, .products li.product img, .products div.product img, div.products div.product img';
 
+	function isCatalogImageZoneTarget(t) {
+		if (!t || !t.closest) {
+			return false;
+		}
+		return !!t.closest(
+			'.ld-sp-img, .ld-sp-img-gallery, .ld-sp-img-gal-trigger, a.woocommerce-LoopProduct-link, a.woocommerce-loop-product__link'
+		);
+	}
+
 	/**
 	 * Resolve product thumbnail {@link HTMLImageElement} from click target (img, picture, anchor wrapping img, theme wrappers).
 	 *
@@ -1135,6 +1161,13 @@
 				) {
 					img = ph.querySelector('img');
 				}
+			}
+			if (!img && isCatalogImageZoneTarget(t)) {
+				img =
+					card.querySelector('figure.ld-sp-img img') ||
+					card.querySelector('.ld-sp-img img') ||
+					card.querySelector('a.woocommerce-LoopProduct-link img') ||
+					card.querySelector('img');
 			}
 		}
 		if (!img || img.nodeName !== 'IMG' || !card.contains(img)) {
@@ -1226,7 +1259,7 @@
 		if (!t || !t.closest) {
 			return false;
 		}
-		var hit = t.closest('a.mp-scc-catalog-atc-hit');
+		var hit = t.closest('.mp-scc-catalog-atc-hit');
 		if (!hit) {
 			return false;
 		}
@@ -1344,8 +1377,17 @@
 				if (!imgEl) {
 					return;
 				}
-				if (!catalogImageMatchesConfiguredSelector(imgEl, cat)) {
+				var inImageZone = isCatalogImageZoneTarget(e.target);
+				var selectorMatches = catalogImageMatchesConfiguredSelector(imgEl, cat);
+				if (!selectorMatches && !inImageZone) {
 					return;
+				}
+
+				// Gallery trigger overlays often sit above the image anchor; stop navigation unconditionally here.
+				if (inImageZone) {
+					e.preventDefault();
+					e.stopPropagation();
+					e.stopImmediatePropagation();
 				}
 
 				var $img = $(imgEl);

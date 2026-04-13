@@ -382,6 +382,18 @@ final class SettingsPage {
 			isset( $c['card_root_selector'] ) ? (string) $c['card_root_selector'] : 'li.product',
 			__( 'Предок товара для классов «загрузка / добавлено / ошибка»; обычно li.product или кастомный контейнер темы.', 'mp-sticky-custom-cart' )
 		);
+		echo '<tr><td colspan="2"><p class="description">';
+		echo esc_html(
+			__( 'Вариант «обёртка карточки в одну ссылку» из советов для functions.php: он работает только в стандартном цикле WooCommerce (хуки woocommerce_before_shop_loop_item). Виджеты Elementor / Liquid (ld_woo_products_list и т.п.) эти хуки не вызывают — там разметку нужно менять в шаблоне виджета или в дочерней теме. Вложенные ссылки внутри обёртки (заголовок, кнопки) дают невалидный HTML и ломают вёрстку в части темах.', 'mp-sticky-custom-cart' )
+		);
+		echo '</p></td></tr>';
+		self::field_checkbox(
+			$opt,
+			'catalog',
+			'wrap_loop_item_add_to_cart',
+			__( 'Эксперимент: одна ссылка на карточку в стандартном цикле Woo (как в functions.php)', 'mp-sticky-custom-cart' ),
+			! empty( $c['wrap_loop_item_add_to_cart'] )
+		);
 		echo '</tbody></table>';
 
 		echo '<h3>' . esc_html__( 'Кнопка «Подробнее» и анимация hover', 'mp-sticky-custom-cart' ) . '</h3>';

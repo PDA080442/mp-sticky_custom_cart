@@ -13,6 +13,7 @@ use MpStickyCustomCart\Frontend\AjaxEndpointsHooks;
 use MpStickyCustomCart\Frontend\CartRouteRedirectHooks;
 use MpStickyCustomCart\Frontend\DynamicStylesProvider;
 use MpStickyCustomCart\Frontend\FrontendAssetsHooks;
+use MpStickyCustomCart\Frontend\ShopLoopAddToCartWrapper;
 use MpStickyCustomCart\Frontend\StickyCartRenderer;
 use MpStickyCustomCart\Frontend\StickyCartRenderHooks;
 
@@ -27,6 +28,7 @@ final class HookRegistry {
 	 * Register all WooCommerce-dependent hooks.
 	 */
 	public static function register() {
+		ShopLoopAddToCartWrapper::register();
 		FrontendAssetsHooks::register();
 		CartRouteRedirectHooks::register();
 		( new DynamicStylesProvider() )->register_hooks();

@@ -72,6 +72,11 @@ final class UiSettingsDefaults {
 				'image_click_selector'         => '',
 				/** Closest ancestor for loading/added/error states (jQuery selector). */
 				'card_root_selector'           => 'li.product',
+				/**
+				 * Standard Woo loop only: replace the default thumbnail link with one wrapper
+				 * ({@see \MpStickyCustomCart\Frontend\ShopLoopAddToCartWrapper}). Ignored by Elementor/Liquid.
+				 */
+				'wrap_loop_item_add_to_cart'   => false,
 				/** Open «Подробнее» product URL in a new browser tab (adds target + rel). */
 				'more_info_new_tab'            => false,
 				/** Stacking: «Подробнее» overlay (keep below wishlist heart). */
