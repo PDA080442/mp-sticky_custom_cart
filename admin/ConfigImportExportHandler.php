@@ -35,7 +35,7 @@ final class ConfigImportExportHandler {
 			Constants::NONCE_CONFIG_IMPORT_EXPORT
 		);
 
-		echo '<div class="mp-scc-config-io card" style="max-width:56rem;margin-top:16px;padding:12px 16px 16px;">';
+		echo '<div class="mp-scc-config-io">';
 		echo '<h2>' . esc_html__( 'Экспорт и импорт конфигурации', 'mp-sticky-custom-cart' ) . '</h2>';
 		echo '<p class="description">' . esc_html__( 'Сохраните настройки плагина (все вкладки) и feature flags в JSON-файл на тестовом сайте и загрузите его на боевом. Журнал ошибок и счётчики не выгружаются.', 'mp-sticky-custom-cart' ) . '</p>';
 
