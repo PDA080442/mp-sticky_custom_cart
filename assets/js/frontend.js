@@ -1632,6 +1632,33 @@
 	var SNAPSHOT_FAIL_BURST_THRESHOLD = 4;
 
 	/**
+	 * Show/hide the drawer empty-state block. Uses `!important` inline display so theme CSS on
+	 * `#mp-scc-drawer-empty` cannot keep it visible when the cart has lines.
+	 *
+	 * @param {JQuery} $empty
+	 * @param {boolean} visible
+	 */
+	function setDrawerEmptyBlockVisible($empty, visible) {
+		if (!$empty || !$empty.length) {
+			return;
+		}
+		$empty.each(function () {
+			var el = this;
+			if (visible) {
+				el.classList.remove('mp-scc-drawer-empty--off');
+				el.removeAttribute('hidden');
+				el.removeAttribute('aria-hidden');
+				el.style.removeProperty('display');
+			} else {
+				el.classList.add('mp-scc-drawer-empty--off');
+				el.setAttribute('hidden', 'hidden');
+				el.setAttribute('aria-hidden', 'true');
+				el.style.setProperty('display', 'none', 'important');
+			}
+		});
+	}
+
+	/**
 	 * Sticky bar + drawer: lifecycle, drawer toggle, cart snapshot UI, debounced qty, request lock.
 	 */
 	function StickyCartController(root) {
@@ -1902,12 +1929,14 @@
 
 		if (empty || items.length === 0) {
 			this.$items.empty();
-			this.$items.attr('hidden', 'hidden').attr('aria-hidden', 'true');
-			this.$empty.removeAttr('hidden');
+			this.$items.attr('hidden', 'hidden').attr('aria-hidden', 'true').css('display', 'none');
+			setDrawerEmptyBlockVisible(this.$empty, true);
+			this.$drawer.addClass('mp-scc-drawer--show-empty').removeClass('mp-scc-drawer--show-items');
 		} else {
-			this.$items.removeAttr('hidden').removeAttr('aria-hidden');
-			this.$empty.attr('hidden', 'hidden');
+			this.$items.removeAttr('hidden').removeAttr('aria-hidden').css('display', '');
+			setDrawerEmptyBlockVisible(this.$empty, false);
 			this.renderLineItems(items);
+			this.$drawer.addClass('mp-scc-drawer--show-items').removeClass('mp-scc-drawer--show-empty');
 		}
 
 		this.$root.attr('data-mp-scc-cart-empty', empty ? '1' : '0');

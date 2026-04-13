@@ -289,6 +289,10 @@ body.popup-overlay-open .mp-scc-sticky-bar {
 	padding: 0;
 }
 
+.mp-scc-drawer-items[hidden] {
+	display: none !important;
+}
+
 .mp-scc-drawer-empty {
 	display: flex;
 	flex-direction: column;
@@ -299,6 +303,43 @@ body.popup-overlay-open .mp-scc-sticky-bar {
 	box-sizing: border-box;
 	padding: 12px 8px 16px;
 	text-align: center;
+}
+
+/* ID-level specificity: themes often target #mp-scc-drawer-empty with display:flex !important */
+#mp-scc-drawer-empty[hidden],
+#mp-scc-drawer-empty.mp-scc-drawer-empty--off {
+	display: none !important;
+	visibility: hidden !important;
+	pointer-events: none !important;
+}
+
+.mp-scc-drawer-empty[hidden] {
+	display: none !important;
+}
+
+/* JS toggles this when the cart has lines; survives themes that override [hidden] or display. */
+.mp-scc-drawer-empty.mp-scc-drawer-empty--off {
+	display: none !important;
+	visibility: hidden !important;
+	pointer-events: none !important;
+}
+
+.mp-scc-drawer.mp-scc-drawer--show-items #mp-scc-drawer-empty,
+.mp-scc-drawer.mp-scc-drawer--show-items .mp-scc-drawer-empty {
+	display: none !important;
+}
+
+.mp-scc-drawer.mp-scc-drawer--show-empty .mp-scc-drawer-items {
+	display: none !important;
+}
+
+.mp-scc-drawer.mp-scc-drawer--show-items .mp-scc-drawer-items {
+	display: block !important;
+}
+
+.mp-scc-drawer.mp-scc-drawer--show-empty #mp-scc-drawer-empty,
+.mp-scc-drawer.mp-scc-drawer--show-empty .mp-scc-drawer-empty {
+	display: flex !important;
 }
 
 .mp-scc-drawer-empty-visual {

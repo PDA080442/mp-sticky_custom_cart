@@ -25,6 +25,8 @@ assert.ok(renderer.includes('data-mp-scc-clear-aria-disabled'), 'Renderer should
 assert.ok(renderer.includes('aria-hidden="true"'), 'Renderer should hide item list from AT when empty');
 assert.ok(js.includes('syncStickyActions'), 'JS should sync clear + drawer classes via syncStickyActions');
 assert.ok(js.includes('mp-scc-drawer--empty'), 'JS should toggle drawer empty class');
+assert.ok(js.includes('mp-scc-drawer-empty--off'), 'JS should mark empty block off when cart has lines');
+assert.ok(js.includes('setDrawerEmptyBlockVisible'), 'JS should centralize empty-block visibility (incl. !important)');
 assert.ok(js.includes('mp-scc-clear-cart--disabled'), 'JS should toggle clear button disabled class');
 assert.ok(schema.includes('drawer_empty_hint'), 'Validation schema should allow drawer_empty_hint');
 assert.ok(settingsPage.includes('render_drawer_empty_preview'), 'Settings should render drawer empty preview');
