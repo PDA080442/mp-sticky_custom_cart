@@ -14,6 +14,7 @@ var plugin = fs.readFileSync(path.join(root, 'core', 'Plugin.php'), 'utf8');
 var adminModule = fs.readFileSync(path.join(root, 'admin', 'AdminModule.php'), 'utf8');
 var settingsPage = fs.readFileSync(path.join(root, 'admin', 'SettingsPage.php'), 'utf8');
 var resetHandler = fs.readFileSync(path.join(root, 'admin', 'SettingsTabResetHandler.php'), 'utf8');
+var sanitizer = fs.readFileSync(path.join(root, 'admin', 'SettingsSanitizer.php'), 'utf8');
 var assets = fs.readFileSync(path.join(root, 'admin', 'AdminAssetsHooks.php'), 'utf8');
 var adminJs = fs.readFileSync(path.join(root, 'admin', 'js', 'settings-page.js'), 'utf8');
 var registry = fs.readFileSync(path.join(root, 'core', 'HookRegistry.php'), 'utf8');
@@ -27,12 +28,20 @@ assert.ok(settingsPage.includes('render_admin_notices'), 'Settings page should r
 assert.ok(settingsPage.includes('preserve_settings_tab_in_redirect'), 'Settings should preserve tab on options.php redirect');
 assert.ok(settingsPage.includes('mp_scc_active_tab'), 'Form should post active tab for redirect merge');
 assert.ok(settingsPage.includes('mp-scc-settings-form'), 'Main form should have class for dirty-state script');
+assert.ok(settingsPage.includes('mp-scc-style-live-preview'), 'Styles tab should render live preview anchor');
+assert.ok(settingsPage.includes('data-mp-scc-preview-baseline'), 'Sticky preview should store baseline for revert');
 assert.ok(settingsPage.includes('mp-scc-reset-tab-form'), 'Reset form should be separate from options form');
 assert.ok(settingsPage.includes('help_tip_button'), 'Settings should support contextual help tooltips');
 assert.ok(resetHandler.includes("admin_post_' . self::ACTION") && resetHandler.includes('mp_scc_reset_settings_tab'), 'Reset handler should use admin-post action');
+assert.ok(resetHandler.includes('reset_styles_tab_appearance'), 'Reset handler should reset styles tab appearance keys');
+assert.ok(sanitizer.includes('Tabbed UI'), 'Sanitizer should skip missing posted fields for tabbed settings');
 assert.ok(assets.includes('settings-page.js'), 'Admin assets should enqueue settings-page.js');
 assert.ok(assets.includes('mpSccAdmin'), 'Admin script should localize beforeUnload string');
 assert.ok(adminJs.includes('beforeunload.mpSccAdmin'), 'Admin JS should warn on unsaved leave');
 assert.ok(adminJs.includes('mp-scc-form-dirty'), 'Admin JS should toggle dirty class');
+assert.ok(adminJs.includes('initStyleLivePreview'), 'Admin JS should define style live preview');
+assert.ok(adminJs.includes('data-mp-scc-preview'), 'Admin JS should bind preview from data-mp-scc-preview');
+assert.ok(adminJs.includes('mp-scc-style-live-preview'), 'Admin JS should target style preview id');
+assert.ok(assets.includes('stylePreview'), 'Admin assets should localize stylePreview config');
 
 console.log('admin-settings-ux: OK');

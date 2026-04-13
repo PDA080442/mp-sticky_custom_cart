@@ -46,8 +46,12 @@ final class SettingsSanitizer {
 			foreach ( $fields as $key => $field ) {
 				$path   = $section . '.' . $key;
 				$exists = array_key_exists( $key, $input[ $section ] );
-				$raw    = $exists ? $input[ $section ][ $key ] : null;
-				$out    = self::set_path( $out, $path, self::sanitize_field( $raw, $field, $defaults, $path, $exists ) );
+				if ( ! $exists ) {
+					// Tabbed UI: only the active tab posts fields; keep merged saved values for the rest.
+					continue;
+				}
+				$raw = $input[ $section ][ $key ];
+				$out = self::set_path( $out, $path, self::sanitize_field( $raw, $field, $defaults, $path, true ) );
 			}
 		}
 
