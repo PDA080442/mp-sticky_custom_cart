@@ -28,24 +28,71 @@ final class SettingsPage {
 
 	public static function register() {
 		add_action( 'admin_menu', array( self::class, 'add_menu_page' ), 99 );
+		add_filter( 'wp_redirect', array( self::class, 'preserve_settings_tab_in_redirect' ), 10, 1 );
 	}
 
 	/**
-	 * Submenu under WooCommerce when available, else top-level.
+	 * Submenu under WooCommerce when Woo is active; otherwise top-level so settings stay reachable.
 	 */
 	public static function add_menu_page() {
-		$cap = 'manage_options';
+		$cap  = 'manage_options';
 		$slug = Constants::SLUG;
 
-		$hook = add_submenu_page(
-			'woocommerce',
-			__( 'Sticky Cart', 'mp-sticky-custom-cart' ),
-			__( 'Sticky Cart', 'mp-sticky-custom-cart' ),
-			$cap,
-			$slug,
-			array( self::class, 'render' )
-		);
+		if ( class_exists( '\WooCommerce', false ) && function_exists( 'WC' ) ) {
+			$hook = add_submenu_page(
+				'woocommerce',
+				__( 'Sticky Cart', 'mp-sticky-custom-cart' ),
+				__( 'Sticky Cart', 'mp-sticky-custom-cart' ),
+				$cap,
+				$slug,
+				array( self::class, 'render' )
+			);
+		} else {
+			$hook = add_menu_page(
+				__( 'Sticky Cart', 'mp-sticky-custom-cart' ),
+				__( 'Sticky Cart', 'mp-sticky-custom-cart' ),
+				$cap,
+				$slug,
+				array( self::class, 'render' ),
+				'dashicons-cart',
+				56
+			);
+		}
 		self::$hook_suffix = false === $hook ? '' : (string) $hook;
+	}
+
+	/**
+	 * After saving via options.php, keep the active tab if Referer dropped the query string.
+	 *
+	 * @param string $location Redirect target.
+	 * @return string
+	 */
+	public static function preserve_settings_tab_in_redirect( $location ) {
+		if ( ! is_string( $location ) || '' === $location ) {
+			return $location;
+		}
+		if ( empty( $_POST['option_page'] ) || empty( $_POST['mp_scc_active_tab'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Missing
+			return $location;
+		}
+		$expected = Constants::SLUG . '_settings';
+		if ( $expected !== (string) wp_unslash( $_POST['option_page'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Missing
+			return $location;
+		}
+		$tab = sanitize_key( wp_unslash( $_POST['mp_scc_active_tab'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Missing
+		if ( ! isset( self::tabs()[ $tab ] ) ) {
+			return $location;
+		}
+		if ( false === strpos( $location, 'page=' . Constants::SLUG ) ) {
+			return $location;
+		}
+		$location = remove_query_arg( array( 'tab', 'settings-updated', 'mp-scc-reset', 'mp-scc-reset-error' ), $location );
+		return add_query_arg(
+			array(
+				'settings-updated' => 'true',
+				'tab'              => $tab,
+			),
+			$location
+		);
 	}
 
 	/**
@@ -78,6 +125,7 @@ final class SettingsPage {
 		?>
 		<div class="wrap mp-scc-settings">
 			<h1><?php echo esc_html( get_admin_page_title() ); ?></h1>
+			<?php self::render_admin_notices(); ?>
 
 			<h2 class="nav-tab-wrapper">
 				<?php
@@ -94,7 +142,31 @@ final class SettingsPage {
 				?>
 			</h2>
 
-			<form action="options.php" method="post">
+			<?php
+			$intro_map = self::tab_intro_descriptions();
+			if ( isset( $intro_map[ $tab ] ) ) {
+				echo '<p class="mp-scc-tab-intro description">' . esc_html( $intro_map[ $tab ] ) . '</p>';
+			}
+			?>
+
+			<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" class="mp-scc-reset-tab-form">
+				<?php wp_nonce_field( SettingsTabResetHandler::ACTION, 'mp_scc_reset_nonce' ); ?>
+				<input type="hidden" name="action" value="<?php echo esc_attr( SettingsTabResetHandler::ACTION ); ?>" />
+				<input type="hidden" name="mp_scc_tab" value="<?php echo esc_attr( $tab ); ?>" />
+				<?php
+				submit_button(
+					__( 'Сбросить только эту вкладку к значениям по умолчанию', 'mp-sticky-custom-cart' ),
+					'secondary',
+					'submit',
+					false,
+					array(
+						'onclick' => 'return confirm(' . wp_json_encode( __( 'Заменить настройки этой вкладки на значения по умолчанию? На вкладке «Служебное» также сбросятся feature flags.', 'mp-sticky-custom-cart' ) ) . ');',
+					)
+				);
+				?>
+			</form>
+
+			<form action="options.php" method="post" class="mp-scc-settings-form" id="mp-scc-settings-form">
 				<?php settings_fields( Constants::SLUG . '_settings' ); ?>
 				<input type="hidden" name="mp_scc_active_tab" value="<?php echo esc_attr( $tab ); ?>" />
 
@@ -138,6 +210,45 @@ final class SettingsPage {
 	}
 
 	/**
+	 * Short context under the tab bar (one line per tab).
+	 *
+	 * @return array<string, string>
+	 */
+	private static function tab_intro_descriptions() {
+		return array(
+			'catalog'     => __( 'Карточки в лупе WooCommerce: hover «Подробнее», клик по изображению, селекторы и подписи интерфейса.', 'mp-sticky-custom-cart' ),
+			'cart'        => __( 'Нижняя панель и drawer: внешний вид, редирект страницы корзины, уведомление после добавления в корзину.', 'mp-sticky-custom-cart' ),
+			'wishlist'    => __( 'Отступы и слой иконки избранного относительно overlay каталога (см. docs/wishlist-integration.md).', 'mp-sticky-custom-cart' ),
+			'styles'      => __( 'Базовые цвета панели; попадают в CSS-переменные темы плагина на витрине.', 'mp-sticky-custom-cart' ),
+			'diagnostics' => __( 'Логи с клиента, срок хранения и переключатели функций (feature flags).', 'mp-sticky-custom-cart' ),
+		);
+	}
+
+	private static function render_admin_notices() {
+		if ( isset( $_GET['settings-updated'] ) && 'true' === $_GET['settings-updated'] ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			echo '<div class="notice notice-success is-dismissible"><p>' . esc_html__( 'Настройки сохранены.', 'mp-sticky-custom-cart' ) . '</p></div>';
+		}
+		if ( isset( $_GET['mp-scc-reset'] ) && '1' === $_GET['mp-scc-reset'] ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			echo '<div class="notice notice-success is-dismissible"><p>' . esc_html__( 'Настройки этой вкладки сброшены к значениям по умолчанию.', 'mp-sticky-custom-cart' ) . '</p></div>';
+		}
+		if ( isset( $_GET['mp-scc-reset-error'] ) && '1' === $_GET['mp-scc-reset-error'] ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			echo '<div class="notice notice-error is-dismissible"><p>' . esc_html__( 'Не удалось сбросить вкладку: неверный запрос.', 'mp-sticky-custom-cart' ) . '</p></div>';
+		}
+	}
+
+	/**
+	 * @param string $text Tooltip / aria-label (plain text).
+	 * @return string HTML button (empty if no text).
+	 */
+	private static function help_tip_button( $text ) {
+		$text = is_string( $text ) ? trim( $text ) : '';
+		if ( '' === $text ) {
+			return '';
+		}
+		return ' <button type="button" class="button-link mp-scc-help-tip" aria-label="' . esc_attr( $text ) . '" title="' . esc_attr( $text ) . '"><span class="dashicons dashicons-editor-help" aria-hidden="true"></span></button>';
+	}
+
+	/**
 	 * @param array<string, mixed> $s   Settings tree.
 	 * @param string               $opt Option key (name prefix).
 	 */
@@ -160,15 +271,37 @@ final class SettingsPage {
 				'fade_slide' => 'fade + slide',
 				'fade'       => 'fade',
 				'slide'      => 'slide',
-			)
+			),
+			__( 'Комбинация fade и сдвига для overlay «Подробнее» в каталоге.', 'mp-sticky-custom-cart' )
 		);
 		self::field_number( $opt, 'catalog', 'hover_slide_offset_px', __( 'Смещение slide (px)', 'mp-sticky-custom-cart' ), isset( $c['hover_slide_offset_px'] ) ? (int) $c['hover_slide_offset_px'] : 8 );
 		self::field_number( $opt, 'catalog', 'hover_hide_delay_ms', __( 'Задержка перед скрытием overlay (мс)', 'mp-sticky-custom-cart' ), isset( $c['hover_hide_delay_ms'] ) ? (int) $c['hover_hide_delay_ms'] : 50 );
 		self::field_checkbox( $opt, 'catalog', 'more_info_new_tab', __( 'Открывать «Подробнее» в новой вкладке', 'mp-sticky-custom-cart' ), ! empty( $c['more_info_new_tab'] ) );
-		self::field_number( $opt, 'catalog', 'catalog_overlay_z_index', __( 'Z-index слоя «Подробнее»', 'mp-sticky-custom-cart' ), isset( $c['catalog_overlay_z_index'] ) ? (int) $c['catalog_overlay_z_index'] : 4 );
+		self::field_number(
+			$opt,
+			'catalog',
+			'catalog_overlay_z_index',
+			__( 'Z-index слоя «Подробнее»', 'mp-sticky-custom-cart' ),
+			isset( $c['catalog_overlay_z_index'] ) ? (int) $c['catalog_overlay_z_index'] : 4,
+			__( 'Слой должен быть выше изображения карточки и ниже иконки избранного (см. вкладку «Избранное»).', 'mp-sticky-custom-cart' )
+		);
 		echo '<tr><td colspan="2"><p class="description">' . esc_html__( 'Клик по изображению в каталоге: если пусто, используется стандартный селектор WooCommerce (см. документацию плагина).', 'mp-sticky-custom-cart' ) . '</p></td></tr>';
-		self::field_text( $opt, 'catalog', 'image_click_selector', __( 'Селектор изображения карточки (CSS)', 'mp-sticky-custom-cart' ), isset( $c['image_click_selector'] ) ? (string) $c['image_click_selector'] : '' );
-		self::field_text( $opt, 'catalog', 'card_root_selector', __( 'Корень карточки для состояний (closest, CSS)', 'mp-sticky-custom-cart' ), isset( $c['card_root_selector'] ) ? (string) $c['card_root_selector'] : 'li.product' );
+		self::field_text(
+			$opt,
+			'catalog',
+			'image_click_selector',
+			__( 'Селектор изображения карточки (CSS)', 'mp-sticky-custom-cart' ),
+			isset( $c['image_click_selector'] ) ? (string) $c['image_click_selector'] : '',
+			__( 'Пустое значение: используется встроенный селектор Woo для миниатюры в лупе. Укажите свой, если тема меняет разметку.', 'mp-sticky-custom-cart' )
+		);
+		self::field_text(
+			$opt,
+			'catalog',
+			'card_root_selector',
+			__( 'Корень карточки для состояний (closest, CSS)', 'mp-sticky-custom-cart' ),
+			isset( $c['card_root_selector'] ) ? (string) $c['card_root_selector'] : 'li.product',
+			__( 'Предок товара для классов «загрузка / добавлено / ошибка»; обычно li.product или кастомный контейнер темы.', 'mp-sticky-custom-cart' )
+		);
 
 		echo '</tbody></table>';
 
@@ -205,9 +338,23 @@ final class SettingsPage {
 
 		echo '<h3>' . esc_html__( 'Панель: прозрачность, blur, скругление', 'mp-sticky-custom-cart' ) . '</h3>';
 		echo '<table class="form-table" role="presentation"><tbody>';
-		self::field_number( $opt, 'sticky_cart', 'z_index', __( 'z-index панели', 'mp-sticky-custom-cart' ), isset( $c['z_index'] ) ? (int) $c['z_index'] : 100050 );
+		self::field_number(
+			$opt,
+			'sticky_cart',
+			'z_index',
+			__( 'z-index панели', 'mp-sticky-custom-cart' ),
+			isset( $c['z_index'] ) ? (int) $c['z_index'] : 100050,
+			__( 'Панель должна быть поверх контента, но не перекрывать важные модальные окна темы; при конфликте уменьшите или увеличьте значение.', 'mp-sticky-custom-cart' )
+		);
 		self::field_number( $opt, 'sticky_cart', 'surface_backdrop_blur_px', __( 'Blur подложки (px)', 'mp-sticky-custom-cart' ), isset( $c['surface_backdrop_blur_px'] ) ? (int) $c['surface_backdrop_blur_px'] : 14 );
-		self::field_text( $opt, 'sticky_cart', 'surface_background_alpha', __( 'Прозрачность фона (0–1)', 'mp-sticky-custom-cart' ), isset( $c['surface_background_alpha'] ) ? (string) $c['surface_background_alpha'] : '0.78' );
+		self::field_text(
+			$opt,
+			'sticky_cart',
+			'surface_background_alpha',
+			__( 'Прозрачность фона (0–1)', 'mp-sticky-custom-cart' ),
+			isset( $c['surface_background_alpha'] ) ? (string) $c['surface_background_alpha'] : '0.78',
+			__( 'Дробь от 0 до 1; вместе с blur задаёт «стекло» под панелью. Неверный формат при сохранении будет приведён к допустимому.', 'mp-sticky-custom-cart' )
+		);
 		self::field_number( $opt, 'sticky_cart', 'border_radius_px', __( 'Радиус скругления углов (px)', 'mp-sticky-custom-cart' ), isset( $c['border_radius_px'] ) ? (int) $c['border_radius_px'] : 14 );
 		echo '</tbody></table>';
 
@@ -227,7 +374,14 @@ final class SettingsPage {
 		echo '<table class="form-table" role="presentation"><tbody>';
 		self::field_number( $opt, 'sticky_cart', 'drawer_max_height_vh', __( 'Макс. высота drawer (vh)', 'mp-sticky-custom-cart' ), isset( $c['drawer_max_height_vh'] ) ? (int) $c['drawer_max_height_vh'] : 55 );
 		self::field_number( $opt, 'sticky_cart', 'drawer_toggle_duration_ms', __( 'Длительность анимации drawer (мс)', 'mp-sticky-custom-cart' ), isset( $c['drawer_toggle_duration_ms'] ) ? (int) $c['drawer_toggle_duration_ms'] : 260 );
-		self::field_text( $opt, 'sticky_cart', 'drawer_toggle_easing', __( 'Кривая easing (CSS, например cubic-bezier)', 'mp-sticky-custom-cart' ), isset( $c['drawer_toggle_easing'] ) ? (string) $c['drawer_toggle_easing'] : 'cubic-bezier(0.4, 0, 0.2, 1)' );
+		self::field_text(
+			$opt,
+			'sticky_cart',
+			'drawer_toggle_easing',
+			__( 'Кривая easing (CSS, например cubic-bezier)', 'mp-sticky-custom-cart' ),
+			isset( $c['drawer_toggle_easing'] ) ? (string) $c['drawer_toggle_easing'] : 'cubic-bezier(0.4, 0, 0.2, 1)',
+			__( 'Стандартное значение Material-like; можно заменить на linear или свою cubic-bezier().', 'mp-sticky-custom-cart' )
+		);
 		self::field_number( $opt, 'sticky_cart', 'quantity_debounce_ms', __( 'Debounce изменения количества (мс)', 'mp-sticky-custom-cart' ), isset( $c['quantity_debounce_ms'] ) ? (int) $c['quantity_debounce_ms'] : 320 );
 		echo '</tbody></table>';
 
@@ -247,7 +401,8 @@ final class SettingsPage {
 			'cart_route',
 			'redirect_to_home',
 			__( 'Редирект страницы корзины на главную', 'mp-sticky-custom-cart' ),
-			! empty( $cr['redirect_to_home'] )
+			! empty( $cr['redirect_to_home'] ),
+			__( 'Не включайте, если страница корзины = главная или нужны прямые ссылки с параметрами удаления позиций с URL корзины.', 'mp-sticky-custom-cart' )
 		);
 		$status = isset( $cr['redirect_status_code'] ) ? (int) $cr['redirect_status_code'] : 302;
 		self::field_select(
@@ -261,7 +416,8 @@ final class SettingsPage {
 				'302' => '302 ' . __( 'Found', 'mp-sticky-custom-cart' ),
 				'303' => '303 ' . __( 'See Other', 'mp-sticky-custom-cart' ),
 				'307' => '307 ' . __( 'Temporary Redirect', 'mp-sticky-custom-cart' ),
-			)
+			),
+			__( '302/303/307 — для временного поведения; 301 кешируется агрессивнее и реже подходит для «скрытой» корзины.', 'mp-sticky-custom-cart' )
 		);
 		self::field_checkbox(
 			$opt,
@@ -317,7 +473,14 @@ final class SettingsPage {
 		self::field_number( $opt, 'wishlist_ui', 'heart_reserve_top_px', __( 'Отступ сердечка сверху (px)', 'mp-sticky-custom-cart' ), isset( $c['heart_reserve_top_px'] ) ? (int) $c['heart_reserve_top_px'] : 10 );
 		self::field_number( $opt, 'wishlist_ui', 'heart_reserve_right_px', __( 'Отступ сердечка справа (px)', 'mp-sticky-custom-cart' ), isset( $c['heart_reserve_right_px'] ) ? (int) $c['heart_reserve_right_px'] : 10 );
 		self::field_number( $opt, 'wishlist_ui', 'overlay_clearance_heart_px', __( 'Зазор overlay от сердечка (px)', 'mp-sticky-custom-cart' ), isset( $c['overlay_clearance_heart_px'] ) ? (int) $c['overlay_clearance_heart_px'] : 8 );
-		self::field_number( $opt, 'wishlist_ui', 'heart_icon_z_index', __( 'Z-index иконки избранного (выше overlay)', 'mp-sticky-custom-cart' ), isset( $c['heart_icon_z_index'] ) ? (int) $c['heart_icon_z_index'] : 6 );
+		self::field_number(
+			$opt,
+			'wishlist_ui',
+			'heart_icon_z_index',
+			__( 'Z-index иконки избранного (выше overlay)', 'mp-sticky-custom-cart' ),
+			isset( $c['heart_icon_z_index'] ) ? (int) $c['heart_icon_z_index'] : 6,
+			__( 'Должен быть выше z-index overlay «Подробнее» на вкладке «Каталог», иначе сердечко уйдёт под слой.', 'mp-sticky-custom-cart' )
+		);
 		echo '</tbody></table>';
 		echo '<p class="description">' . esc_html__( 'Рекомендуется: z-index избранного больше, чем у overlay «Подробнее». Подробности — docs/wishlist-integration.md в каталоге плагина.', 'mp-sticky-custom-cart' ) . '</p>';
 	}
@@ -354,7 +517,14 @@ final class SettingsPage {
 			__( 'Логировать ошибки JS/AJAX на сервер', 'mp-sticky-custom-cart' ),
 			! empty( $d['client_error_logging'] )
 		);
-		self::field_number( $opt, 'diagnostics', 'log_retention_days', __( 'Хранить логи (дней)', 'mp-sticky-custom-cart' ), isset( $d['log_retention_days'] ) ? (int) $d['log_retention_days'] : 14 );
+		self::field_number(
+			$opt,
+			'diagnostics',
+			'log_retention_days',
+			__( 'Хранить логи (дней)', 'mp-sticky-custom-cart' ),
+			isset( $d['log_retention_days'] ) ? (int) $d['log_retention_days'] : 14,
+			__( 'Срок хранения записей клиентских ошибок в опции плагина; старые записи подрезаются при новых событиях.', 'mp-sticky-custom-cart' )
+		);
 		echo '</tbody></table>';
 
 		echo '<h3>' . esc_html__( 'Feature flags', 'mp-sticky-custom-cart' ) . '</h3>';
@@ -376,9 +546,9 @@ final class SettingsPage {
 	 * @param string $section Section key.
 	 * @param string $field Field key.
 	 */
-	private static function field_checkbox( $opt, $section, $field, $label, $checked ) {
+	private static function field_checkbox( $opt, $section, $field, $label, $checked, $help = '' ) {
 		$name = sprintf( '%s[%s][%s]', $opt, $section, $field );
-		echo '<tr><th scope="row">' . esc_html( $label ) . '</th><td>';
+		echo '<tr><th scope="row">' . esc_html( $label ) . self::help_tip_button( $help ) . '</th><td>';
 		printf(
 			'<input type="hidden" name="%s" value="0" />',
 			esc_attr( $name )
@@ -428,9 +598,9 @@ final class SettingsPage {
 	 * @param string $section Section key.
 	 * @param string $field Field key.
 	 */
-	private static function field_number( $opt, $section, $field, $label, $value ) {
+	private static function field_number( $opt, $section, $field, $label, $value, $help = '' ) {
 		$name = sprintf( '%s[%s][%s]', $opt, $section, $field );
-		echo '<tr><th scope="row"><label for="' . esc_attr( $name ) . '">' . esc_html( $label ) . '</label></th><td>';
+		echo '<tr><th scope="row"><label for="' . esc_attr( $name ) . '">' . esc_html( $label ) . '</label>' . self::help_tip_button( $help ) . '</th><td>';
 		printf(
 			'<input type="number" class="small-text" id="%1$s" name="%1$s" value="%2$s" />',
 			esc_attr( $name ),
@@ -444,9 +614,9 @@ final class SettingsPage {
 	 * @param string $section Section key.
 	 * @param string $field Field key.
 	 */
-	private static function field_text( $opt, $section, $field, $label, $value ) {
+	private static function field_text( $opt, $section, $field, $label, $value, $help = '' ) {
 		$name = sprintf( '%s[%s][%s]', $opt, $section, $field );
-		echo '<tr><th scope="row"><label for="' . esc_attr( $name ) . '">' . esc_html( $label ) . '</label></th><td>';
+		echo '<tr><th scope="row"><label for="' . esc_attr( $name ) . '">' . esc_html( $label ) . '</label>' . self::help_tip_button( $help ) . '</th><td>';
 		printf(
 			'<input type="text" class="regular-text" id="%1$s" name="%1$s" value="%2$s" />',
 			esc_attr( $name ),
@@ -460,9 +630,9 @@ final class SettingsPage {
 	 * @param string $section Section key.
 	 * @param string $field Field key.
 	 */
-	private static function field_color( $opt, $section, $field, $label, $value ) {
+	private static function field_color( $opt, $section, $field, $label, $value, $help = '' ) {
 		$name = sprintf( '%s[%s][%s]', $opt, $section, $field );
-		echo '<tr><th scope="row"><label for="' . esc_attr( $name ) . '">' . esc_html( $label ) . '</label></th><td>';
+		echo '<tr><th scope="row"><label for="' . esc_attr( $name ) . '">' . esc_html( $label ) . '</label>' . self::help_tip_button( $help ) . '</th><td>';
 		printf(
 			'<input type="text" class="mp-scc-color" id="%1$s" name="%1$s" value="%2$s" pattern="^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$" />',
 			esc_attr( $name ),
@@ -477,9 +647,9 @@ final class SettingsPage {
 	 * @param string               $field Field key.
 	 * @param array<string, string> $options Value => label.
 	 */
-	private static function field_select( $opt, $section, $field, $label, $current, array $options ) {
+	private static function field_select( $opt, $section, $field, $label, $current, array $options, $help = '' ) {
 		$name = sprintf( '%s[%s][%s]', $opt, $section, $field );
-		echo '<tr><th scope="row"><label for="' . esc_attr( $name ) . '">' . esc_html( $label ) . '</label></th><td>';
+		echo '<tr><th scope="row"><label for="' . esc_attr( $name ) . '">' . esc_html( $label ) . '</label>' . self::help_tip_button( $help ) . '</th><td>';
 		echo '<select id="' . esc_attr( $name ) . '" name="' . esc_attr( $name ) . '">';
 		foreach ( $options as $val => $opt_label ) {
 			printf(
