@@ -90,6 +90,61 @@ final class SettingsSanitizer {
 	}
 
 	/**
+	 * Sanitize a complete settings tree (e.g. from JSON import): merge over defaults, then validate every schema field.
+	 *
+	 * @param array<string, mixed> $input Raw imported `settings` object.
+	 * @return array<string, mixed>
+	 */
+	public static function sanitize_settings_for_import( array $input ) {
+		$defaults = self::default_settings_bundle();
+		$merged   = self::merge_deep( $defaults, $input );
+		$out      = $defaults;
+
+		foreach ( SettingsValidationSchema::get_settings_schema() as $section => $fields ) {
+			if ( ! is_array( $fields ) ) {
+				continue;
+			}
+			foreach ( $fields as $key => $field ) {
+				if ( ! is_array( $field ) ) {
+					continue;
+				}
+				$path = $section . '.' . $key;
+				$raw  = self::get_path( $merged, $path, self::get_path( $defaults, $path, null ) );
+				$out  = self::set_path( $out, $path, self::sanitize_field( $raw, $field, $defaults, $path, true ) );
+			}
+		}
+
+		OptionResolver::flush_cache();
+
+		return $out;
+	}
+
+	/**
+	 * Sanitize imported feature flags: unknown keys ignored; schema keys coerced to bool.
+	 *
+	 * @param array<string, mixed> $input Raw `feature_flags` object.
+	 * @return array<string, bool>
+	 */
+	public static function sanitize_feature_flags_for_import( array $input ) {
+		$defaults = FeatureFlagsDefaults::get();
+		$merged   = array_merge( $defaults, $input );
+		$out      = array();
+
+		foreach ( SettingsValidationSchema::get_flags_schema() as $key => $field ) {
+			if ( ! array_key_exists( $key, $merged ) ) {
+				$out[ $key ] = isset( $defaults[ $key ] ) ? (bool) $defaults[ $key ] : false;
+				continue;
+			}
+			$raw         = $merged[ $key ];
+			$out[ $key ] = ( '1' === (string) $raw || 1 === $raw || true === $raw || 'on' === $raw );
+		}
+
+		OptionResolver::flush_cache();
+
+		return $out;
+	}
+
+	/**
 	 * @param mixed                $raw     Raw value.
 	 * @param array<string, mixed> $field   Schema fragment.
 	 * @param array<string, mixed> $defaults Full default tree.
@@ -116,6 +171,9 @@ final class SettingsSanitizer {
 			case 'text':
 			default:
 				$text = self::sanitize_text( $raw, isset( $field['max_length'] ) ? (int) $field['max_length'] : 1000 );
+				if ( 'styles.font_family_custom' === $path ) {
+					$text = self::sanitize_font_family_stack( $text );
+				}
 				if ( isset( $field['oneof'] ) && is_array( $field['oneof'] ) && ! in_array( $text, $field['oneof'], true ) ) {
 					return is_string( $fallback ) ? $fallback : $text;
 				}
@@ -183,11 +241,11 @@ final class SettingsSanitizer {
 	 */
 	private static function sanitize_float( $raw, array $field, $fallback, $exists = false, $path = '' ) {
 		if ( ! is_numeric( $raw ) ) {
-			if ( $exists && is_string( $raw ) && '' !== trim( $raw ) && 'sticky_cart.surface_background_alpha' === $path ) {
+			if ( $exists && is_string( $raw ) && '' !== trim( $raw ) && in_array( $path, array( 'sticky_cart.surface_background_alpha', 'sticky_cart.drawer_surface_background_alpha' ), true ) ) {
 				add_settings_error(
 					'mp_scc_sticky',
 					'mp_scc_bad_surface_alpha',
-					__( 'Прозрачность фона панели: ожидается число от 0 до 1. Использовано значение по умолчанию.', 'mp-sticky-custom-cart' ),
+					__( 'Прозрачность фона: ожидается число от 0 до 1. Использовано значение по умолчанию.', 'mp-sticky-custom-cart' ),
 					'warning'
 				);
 			}
@@ -230,6 +288,27 @@ final class SettingsSanitizer {
 
 	/**
 	 * @param mixed  $raw
+	 * @param string $fallback
+	 */
+	/**
+	 * Allowed characters in a CSS font-family list (conservative).
+	 *
+	 * @param string $text Already tag-stripped text.
+	 * @return string
+	 */
+	private static function sanitize_font_family_stack( $text ) {
+		$text = is_string( $text ) ? trim( $text ) : '';
+		if ( '' === $text ) {
+			return '';
+		}
+		if ( ! preg_match( '/^[\s\,\"\'\-\._a-zA-Z0-9\(\)]+$/u', $text ) ) {
+			return '';
+		}
+		return mb_substr( $text, 0, 500 );
+	}
+
+	/**
+	 * @param mixed $raw
 	 * @param string $fallback
 	 */
 	private static function sanitize_color( $raw, $fallback ) {

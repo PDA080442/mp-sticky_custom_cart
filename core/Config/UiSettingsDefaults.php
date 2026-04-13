@@ -46,6 +46,12 @@ final class UiSettingsDefaults {
 			'drawer_max_height_vh',
 			'drawer_padding_x_px',
 			'drawer_padding_y_px',
+			'drawer_surface_background_alpha',
+			'drawer_line_title_font_size_px',
+			'drawer_line_title_font_weight',
+			'drawer_line_unit_font_size_px',
+			'drawer_line_price_font_size_px',
+			'drawer_line_price_font_weight',
 		);
 	}
 
@@ -72,6 +78,11 @@ final class UiSettingsDefaults {
 				'image_click_selector'         => '',
 				/** Closest ancestor for loading/added/error states (jQuery selector). */
 				'card_root_selector'           => 'li.product',
+				/**
+				 * Standard Woo loop only: replace the default thumbnail link with one wrapper
+				 * ({@see \MpStickyCustomCart\Frontend\ShopLoopAddToCartWrapper}). Ignored by Elementor/Liquid.
+				 */
+				'wrap_loop_item_add_to_cart'   => false,
 				/** Open «Подробнее» product URL in a new browser tab (adds target + rel). */
 				'more_info_new_tab'            => false,
 				/** Stacking: «Подробнее» overlay (keep below wishlist heart). */
@@ -101,6 +112,13 @@ final class UiSettingsDefaults {
 				'drawer_max_height_vh'       => 55,
 				'drawer_padding_x_px'        => 16,
 				'drawer_padding_y_px'        => 12,
+				/** Drawer panel surface (independent from bottom bar when customized). */
+				'drawer_surface_background_alpha' => 0.94,
+				'drawer_line_title_font_size_px'   => 15,
+				'drawer_line_title_font_weight'    => 500,
+				'drawer_line_unit_font_size_px'    => 13,
+				'drawer_line_price_font_size_px'   => 15,
+				'drawer_line_price_font_weight'    => 600,
 				'drawer_toggle_duration_ms'  => 260,
 				'drawer_toggle_easing'       => 'cubic-bezier(0.4, 0, 0.2, 1)',
 				'quantity_debounce_ms'       => 320,
@@ -132,8 +150,23 @@ final class UiSettingsDefaults {
 			'styles'      => array(
 				'color_text_primary'        => '#1a1a1a',
 				'color_surface_tint'        => '#ffffff',
+				'color_drawer_surface_tint' => '#ffffff',
+				'color_clear_button_text'   => '#1a1a1a',
+				'color_clear_button_border' => '#cfcfcf',
+				'color_qty_button_bg'       => '#ffffff',
+				'color_qty_button_border'   => '#cccccc',
+				'color_qty_button_text'     => '#1a1a1a',
+				'color_drawer_line_title'   => '#1a1a1a',
+				'color_drawer_line_unit'    => '#5c5c5c',
+				'color_drawer_line_price'   => '#1a1a1a',
 				'color_button_primary'      => '#111111',
 				'color_button_primary_text' => '#ffffff',
+				/** inherit | system | serif | mono | custom */
+				'font_family_preset'        => 'inherit',
+				/** Used when preset is custom; CSS font-family stack. */
+				'font_family_custom'        => '',
+				/** Scales summary + button font sizes on the sticky bar (70–130%). */
+				'typography_scale_percent'  => 100,
 			),
 			'diagnostics' => array(
 				'client_error_logging' => true,

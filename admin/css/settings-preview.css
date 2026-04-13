@@ -1,6 +1,13 @@
 /**
  * Settings screen: drawer empty-state preview + admin UX (tabs, tooltips, dirty state).
  */
+/* WordPress color picker (wpColorPicker) alignment in settings tables */
+.mp-scc-settings .form-table .wp-picker-container {
+	display: inline-block;
+	vertical-align: middle;
+	margin-top: 0;
+}
+
 .mp-scc-settings .mp-scc-tab-intro {
 	margin: 12px 0 8px;
 	max-width: 72em;
@@ -26,7 +33,7 @@
 }
 
 .mp-scc-settings-form.mp-scc-form-dirty .submit .button-primary {
-	box-shadow: 0 0 0 1px #dba617;
+	box-shadow: 0 0 0 1px var(--mp-scc-admin-accent-bright, #dba617);
 }
 
 /* Catalog tab: impact notes + overlay preview */
@@ -310,8 +317,8 @@
 
 .mp-scc-admin-sticky-preview .mp-scc-btn--ghost {
 	background: transparent;
-	color: inherit;
-	border-color: rgba(0, 0, 0, 0.2);
+	color: var(--mp-scc-color-clear-button-text, inherit);
+	border-color: var(--mp-scc-color-clear-button-border, #cfcfcf);
 }
 
 .mp-scc-admin-sticky-preview .mp-scc-btn--primary {

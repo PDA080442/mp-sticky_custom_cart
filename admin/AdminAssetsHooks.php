@@ -20,10 +20,12 @@ final class AdminAssetsHooks {
 	public const HANDLE_SCRIPT        = 'mp-scc-admin';
 	public const HANDLE_STYLE         = 'mp-scc-admin';
 	public const HANDLE_SETTINGS_PAGE = 'mp-scc-admin-settings-page';
+	public const HANDLE_SETTINGS_SHELL  = 'mp-scc-admin-settings-shell';
 	public const HANDLE_ERROR_LOG     = 'mp-scc-error-log-panel';
 
 	public static function register() {
 		add_action( 'admin_enqueue_scripts', array( self::class, 'enqueue' ), 20 );
+		add_filter( 'admin_body_class', array( self::class, 'admin_body_class' ) );
 
 		/**
 		 * Fires when admin asset hooks are registered.
@@ -42,17 +44,26 @@ final class AdminAssetsHooks {
 			return;
 		}
 
+		wp_enqueue_style( 'wp-color-picker' );
+
+		wp_enqueue_style(
+			self::HANDLE_SETTINGS_SHELL,
+			PluginPaths::url( 'admin/css/settings-page-shell.css' ),
+			array(),
+			MP_STICKY_CUSTOM_CART_ASSET_VERSION
+		);
+
 		wp_enqueue_style(
 			self::HANDLE_STYLE,
 			PluginPaths::url( 'admin/css/settings-preview.css' ),
-			array( 'dashicons' ),
+			array( 'dashicons', 'wp-color-picker', self::HANDLE_SETTINGS_SHELL ),
 			MP_STICKY_CUSTOM_CART_ASSET_VERSION
 		);
 
 		wp_enqueue_script(
 			self::HANDLE_SETTINGS_PAGE,
 			PluginPaths::url( 'admin/js/settings-page.js' ),
-			array( 'jquery' ),
+			array( 'jquery', 'wp-color-picker' ),
 			MP_STICKY_CUSTOM_CART_ASSET_VERSION,
 			true
 		);
@@ -114,6 +125,23 @@ final class AdminAssetsHooks {
 		 * @param string $hook_suffix Current admin page hook.
 		 */
 		do_action( 'mp_sticky_custom_cart_enqueue_admin_assets', $hook_suffix );
+	}
+
+	/**
+	 * Marks the plugin settings screen for shell CSS (background, layout).
+	 *
+	 * @param string $classes Space-separated body classes.
+	 * @return string
+	 */
+	public static function admin_body_class( $classes ) {
+		$screen = function_exists( 'get_current_screen' ) ? get_current_screen() : null;
+		if ( ! $screen || ! isset( $screen->id ) ) {
+			return $classes;
+		}
+		if ( false !== strpos( (string) $screen->id, Constants::SLUG ) ) {
+			return trim( $classes . ' mp-scc-settings-screen' );
+		}
+		return $classes;
 	}
 
 	/**

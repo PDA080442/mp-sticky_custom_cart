@@ -16,16 +16,91 @@
 		}
 	}
 
+	function qsByName(name) {
+		if (!name) {
+			return null;
+		}
+		return document.querySelector('[name="' + String(name).replace(/\\/g, '\\\\').replace(/"/g, '\\"') + '"]');
+	}
+
+	function resolveFontFamilyForPreview(meta) {
+		var presetEl = meta.presetName ? qsByName(meta.presetName) : null;
+		var customEl = meta.customName ? qsByName(meta.customName) : null;
+		var preset = presetEl ? String(presetEl.value || 'inherit') : 'inherit';
+		var custom = customEl ? String(customEl.value || '').trim() : '';
+
+		if (preset === 'custom') {
+			return custom !== '' ? custom : 'inherit';
+		}
+		switch (preset) {
+			case 'system':
+				return 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+			case 'serif':
+				return 'Georgia, "Times New Roman", Times, serif';
+			case 'mono':
+				return 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace';
+			case 'inherit':
+			default:
+				return 'inherit';
+		}
+	}
+
 	function buildStyleFromPreviewInputs(root) {
 		var inputs = (root || document).querySelectorAll('[data-mp-scc-preview]');
 		var parts = [];
-		for (var i = 0; i < inputs.length; i++) {
+		var i;
+		var seenFont = false;
+		for (i = 0; i < inputs.length; i++) {
 			var el = inputs[i];
 			var meta = parsePreviewMeta(el);
-			if (!meta || !meta.var || !meta.fmt) {
+			if (!meta || !meta.fmt) {
+				continue;
+			}
+
+			if (meta.fmt === 'font_family') {
+				if (seenFont) {
+					continue;
+				}
+				seenFont = true;
+				var ff = resolveFontFamilyForPreview(meta);
+				if (meta.var) {
+					parts.push(meta.var + ':' + ff);
+				}
+				continue;
+			}
+
+			if (meta.fmt === 'typography_scale') {
+				var scale = parseInt(el.value, 10);
+				if (isNaN(scale)) {
+					scale = 100;
+				}
+				scale = Math.max(70, Math.min(130, scale));
+				var sumEl = meta.summaryField ? qsByName(meta.summaryField) : null;
+				var btnEl = meta.buttonField ? qsByName(meta.buttonField) : null;
+				var sumPx = sumEl ? parseInt(sumEl.value, 10) : 15;
+				var btnPx = btnEl ? parseInt(btnEl.value, 10) : 14;
+				if (isNaN(sumPx)) {
+					sumPx = 15;
+				}
+				if (isNaN(btnPx)) {
+					btnPx = 14;
+				}
+				var sPx = Math.max(8, Math.round((sumPx * scale) / 100));
+				var bPx = Math.max(8, Math.round((btnPx * scale) / 100));
+				if (meta.varSummary) {
+					parts.push(meta.varSummary + ':' + sPx + 'px');
+				}
+				if (meta.varButton) {
+					parts.push(meta.varButton + ':' + bPx + 'px');
+				}
+				continue;
+			}
+
+			if (!meta.var) {
 				continue;
 			}
 			var v = el.value;
+
 			if (meta.fmt === 'color') {
 				if (!/^#([A-Fa-f0-9]{3}|[A-Fa-f0-9]{6})$/.test(String(v).trim())) {
 					continue;
@@ -103,6 +178,19 @@
 		}
 
 		$(document).on('input change', '[data-mp-scc-preview]', schedule);
+		$(document).on('input change', '.mp-scc-font-family-custom', schedule);
+
+		$('.mp-scc-color').each(function () {
+			var $inp = $(this);
+			$inp.wpColorPicker({
+				change: function () {
+					schedule();
+				},
+				clear: function () {
+					schedule();
+				},
+			});
+		});
 
 		var $mobile = $('#mp-scc-style-preview-mobile');
 		if ($mobile.length) {
