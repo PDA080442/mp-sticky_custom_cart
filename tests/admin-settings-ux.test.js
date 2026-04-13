@@ -47,6 +47,10 @@ assert.ok(assets.includes('wp-color-picker'), 'Admin assets should load WP color
 assert.ok(adminJs.includes('wpColorPicker'), 'Admin JS should init wpColorPicker on palette fields');
 assert.ok(adminJs.includes('typography_scale'), 'Admin JS should handle typography scale preview');
 assert.ok(adminJs.includes('font_family'), 'Admin JS should handle font_family preview');
+assert.ok(adminJs.includes('initHelpTipPopovers'), 'Admin JS should open help tips on click');
+assert.ok(adminJs.includes('mp-scc-help-popover'), 'Admin JS should render help popover');
 assert.ok(settingsPage.includes('font_family_preset'), 'Styles tab should expose font_family_preset');
+assert.ok(settingsPage.includes('render_font_family_examples_line'), 'Settings should show font stack examples helper');
+assert.ok(settingsPage.includes('Montserrat, sans-serif'), 'Settings should document Montserrat example');
 
 console.log('admin-settings-ux: OK');

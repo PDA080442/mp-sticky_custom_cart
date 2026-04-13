@@ -306,7 +306,19 @@ final class SettingsPage {
 		if ( '' === $text ) {
 			return '';
 		}
-		return ' <button type="button" class="button-link mp-scc-help-tip" aria-label="' . esc_attr( $text ) . '" title="' . esc_attr( $text ) . '"><span class="dashicons dashicons-editor-help" aria-hidden="true"></span></button>';
+		return ' <button type="button" class="button-link mp-scc-help-tip" aria-label="' . esc_attr( $text ) . '" title="' . esc_attr( $text ) . '" data-mp-scc-help="' . esc_attr( $text ) . '"><span class="dashicons dashicons-editor-help" aria-hidden="true"></span></button>';
+	}
+
+	/**
+	 * Copy-paste examples for CSS font-family (web fonts often named Montserrat, Playfair Display, Raleway).
+	 *
+	 * @param string $lead Intro sentence (translated), shown before the code samples.
+	 */
+	private static function render_font_family_examples_line( $lead ) {
+		echo '<p class="description">' . esc_html( $lead ) . ' ';
+		echo '<code>' . esc_html( 'Montserrat, sans-serif' ) . '</code>; ';
+		echo '<code>' . esc_html( '"Playfair Display", serif' ) . '</code>; ';
+		echo '<code>' . esc_html( 'Raleway, sans-serif' ) . '</code>.</p>';
 	}
 
 	/**
@@ -829,6 +841,9 @@ final class SettingsPage {
 
 		echo '<h3>' . esc_html__( 'Шрифт', 'mp-sticky-custom-cart' ) . '</h3>';
 		echo '<p class="description">' . esc_html__( 'Гарнитура применяется к нижней панели и drawer.', 'mp-sticky-custom-cart' ) . '</p>';
+		self::render_font_family_examples_line(
+			__( 'Свой стек в поле ниже вводите как в CSS: через запятую; имена с пробелами — в двойных кавычках (как у Playfair Display); в конце generic family. Подключите шрифты на сайте (тема, плагин или @font-face). Примеры одной гарнитуры:', 'mp-sticky-custom-cart' )
+		);
 		echo '<table class="form-table" role="presentation"><tbody>';
 		$ff_preset   = isset( $st['font_family_preset'] ) ? (string) $st['font_family_preset'] : 'inherit';
 		$ff_custom   = isset( $st['font_family_custom'] ) ? (string) $st['font_family_custom'] : '';
@@ -847,7 +862,10 @@ final class SettingsPage {
 				'mono'    => __( 'Моноширинный', 'mp-sticky-custom-cart' ),
 				'custom'  => __( 'Свой стек (поле ниже)', 'mp-sticky-custom-cart' ),
 			),
-			'',
+			__(
+				'«Как у темы» — наследует шрифт страницы. Пресеты — готовые стопки без файлов. «Свой стек» — ввод в поле ниже.',
+				'mp-sticky-custom-cart'
+			),
 			array(
 				'var'        => $p . 'sticky-font-family',
 				'fmt'        => 'font_family',
@@ -861,7 +879,10 @@ final class SettingsPage {
 			'font_family_custom',
 			__( 'Свой CSS font-family', 'mp-sticky-custom-cart' ),
 			$ff_custom,
-			__( 'Только при выборе «Свой стек». Пример: "Helvetica Neue", Helvetica, Arial, sans-serif', 'mp-sticky-custom-cart' ),
+			__(
+				'Только при выборе «Свой стек». Формат как в CSS; примеры см. в абзаце над таблицей.',
+				'mp-sticky-custom-cart'
+			),
 			array(
 				'maxlength'   => 500,
 				'input_class' => 'large-text code mp-scc-font-family-custom',

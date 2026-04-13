@@ -246,5 +246,85 @@
 		});
 
 		initStyleLivePreview();
+		initHelpTipPopovers();
 	});
+
+	/**
+	 * Click/tap opens help text in a popover (native title= is hover-only and poor on touch).
+	 */
+	function initHelpTipPopovers() {
+		var $pop = null;
+		var anchorEl = null;
+
+		function ensurePopover() {
+			if (!$pop || !$pop.length) {
+				$pop = $(
+					'<div id="mp-scc-help-popover" class="mp-scc-help-popover" role="tooltip" hidden></div>'
+				);
+				$('body').append($pop);
+				$pop.on('click', function (e) {
+					e.stopPropagation();
+				});
+			}
+			return $pop;
+		}
+
+		function close() {
+			anchorEl = null;
+			if ($pop && $pop.length) {
+				$pop.prop('hidden', true).removeClass('is-open').empty();
+			}
+		}
+
+		function position($btn) {
+			var el = $btn[0];
+			var r = el.getBoundingClientRect();
+			var $p = ensurePopover();
+			var pad = 8;
+			var top = r.bottom + window.scrollY + 6;
+			var left = r.left + window.scrollX;
+			$p.css({ top: top, left: left });
+			var w = $p.outerWidth();
+			var maxLeft = window.scrollX + window.innerWidth - w - pad;
+			if (left > maxLeft) {
+				$p.css('left', Math.max(pad + window.scrollX, maxLeft));
+			}
+		}
+
+		$(document).on('click', '.mp-scc-settings .mp-scc-help-tip', function (e) {
+			e.preventDefault();
+			e.stopPropagation();
+			e.stopImmediatePropagation();
+			var $btn = $(this);
+			var txt = ($btn.attr('data-mp-scc-help') || $btn.attr('aria-label') || '').trim();
+			if (!txt) {
+				return;
+			}
+			var $p = ensurePopover();
+			if (anchorEl === $btn[0] && $p.hasClass('is-open')) {
+				close();
+				return;
+			}
+			anchorEl = $btn[0];
+			$p.text(txt).prop('hidden', false).addClass('is-open');
+			position($btn);
+		});
+
+		$(document).on('click', function () {
+			close();
+		});
+
+		$(document).on('keydown', function (e) {
+			if (e.key === 'Escape' || e.keyCode === 27) {
+				close();
+			}
+		});
+
+		$(window).on('resize scroll', function () {
+			if (!anchorEl || !$pop || !$pop.length || !$pop.hasClass('is-open')) {
+				return;
+			}
+			position($(anchorEl));
+		});
+	}
 })(window.jQuery);
