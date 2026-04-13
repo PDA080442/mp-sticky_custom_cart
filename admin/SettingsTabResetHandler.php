@@ -34,16 +34,20 @@ final class SettingsTabResetHandler {
 		check_admin_referer( self::ACTION, 'mp_scc_reset_nonce' );
 
 		$tab = isset( $_POST['mp_scc_tab'] ) ? sanitize_key( wp_unslash( $_POST['mp_scc_tab'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Missing
-		$map = self::tab_to_sections();
-		if ( '' === $tab || ! isset( $map[ $tab ] ) ) {
-			self::redirect_invalid_tab();
-		}
+		if ( 'styles' === $tab ) {
+			self::reset_styles_tab_appearance();
+		} else {
+			$map = self::tab_to_sections();
+			if ( '' === $tab || ! isset( $map[ $tab ] ) ) {
+				self::redirect_invalid_tab();
+			}
 
-		$sections = $map[ $tab ];
-		self::reset_settings_sections( $sections );
+			$sections = $map[ $tab ];
+			self::reset_settings_sections( $sections );
 
-		if ( in_array( 'diagnostics', $sections, true ) ) {
-			self::reset_feature_flags();
+			if ( in_array( 'diagnostics', $sections, true ) ) {
+				self::reset_feature_flags();
+			}
 		}
 
 		OptionResolver::flush_cache();
@@ -59,9 +63,36 @@ final class SettingsTabResetHandler {
 			'catalog'     => array( 'catalog', 'labels' ),
 			'cart'        => array( 'sticky_cart', 'cart_route', 'notices' ),
 			'wishlist'    => array( 'wishlist_ui' ),
-			'styles'      => array( 'styles' ),
 			'diagnostics' => array( 'diagnostics' ),
 		);
+	}
+
+	/**
+	 * Styles tab: reset `styles` plus appearance-related keys in `sticky_cart` (preserve z-index, drawer motion, debounce).
+	 */
+	private static function reset_styles_tab_appearance() {
+		$defaults = self::full_defaults_tree();
+		$saved    = get_option( Constants::OPTION_SETTINGS, array() );
+		if ( ! is_array( $saved ) ) {
+			$saved = array();
+		}
+
+		if ( isset( $defaults['styles'] ) && is_array( $defaults['styles'] ) ) {
+			$saved['styles'] = $defaults['styles'];
+		}
+
+		$sticky_def = isset( $defaults['sticky_cart'] ) && is_array( $defaults['sticky_cart'] ) ? $defaults['sticky_cart'] : array();
+		$sticky     = isset( $saved['sticky_cart'] ) && is_array( $saved['sticky_cart'] ) ? $saved['sticky_cart'] : array();
+
+		foreach ( UiSettingsDefaults::get_sticky_cart_visual_keys() as $key ) {
+			if ( array_key_exists( $key, $sticky_def ) ) {
+				$sticky[ $key ] = $sticky_def[ $key ];
+			}
+		}
+
+		$saved['sticky_cart'] = $sticky;
+
+		update_option( Constants::OPTION_SETTINGS, $saved, false );
 	}
 
 	/**

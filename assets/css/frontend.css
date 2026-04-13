@@ -412,6 +412,7 @@ body.popup-overlay-open .mp-scc-sticky-bar {
 	min-width: 0;
 	font-size: var(--mp-scc-sticky-summary-font-size, 15px);
 	font-weight: var(--mp-scc-sticky-summary-font-weight, 600);
+	line-height: var(--mp-scc-sticky-summary-line-height, 1.35);
 }
 
 .mp-scc-cart-count,
@@ -450,7 +451,7 @@ body.popup-overlay-open .mp-scc-sticky-bar {
 	border-radius: 8px;
 	font-size: var(--mp-scc-sticky-button-font-size, 14px);
 	font-weight: var(--mp-scc-sticky-button-font-weight, 600);
-	line-height: 1.2;
+	line-height: var(--mp-scc-sticky-button-line-height, 1.2);
 	text-decoration: none;
 	cursor: pointer;
 	border: 1px solid transparent;

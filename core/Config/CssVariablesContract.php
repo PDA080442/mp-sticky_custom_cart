@@ -158,6 +158,12 @@ final class CssVariablesContract {
 				'format' => 'integer',
 			),
 			array(
+				'name'   => self::PREFIX . 'sticky-summary-line-height',
+				'path'   => 'sticky_cart.summary_line_height',
+				'suffix' => '',
+				'format' => 'float',
+			),
+			array(
 				'name'   => self::PREFIX . 'sticky-button-font-size',
 				'path'   => 'sticky_cart.button_font_size_px',
 				'suffix' => 'px',
@@ -168,6 +174,12 @@ final class CssVariablesContract {
 				'path'   => 'sticky_cart.button_font_weight',
 				'suffix' => '',
 				'format' => 'integer',
+			),
+			array(
+				'name'   => self::PREFIX . 'sticky-button-line-height',
+				'path'   => 'sticky_cart.button_line_height',
+				'suffix' => '',
+				'format' => 'float',
 			),
 			array(
 				'name'   => self::PREFIX . 'sticky-inner-gap-mobile',

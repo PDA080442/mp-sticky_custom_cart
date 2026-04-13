@@ -270,6 +270,7 @@
 	min-width: 0;
 	font-size: var(--mp-scc-sticky-summary-font-size, 15px);
 	font-weight: var(--mp-scc-sticky-summary-font-weight, 600);
+	line-height: var(--mp-scc-sticky-summary-line-height, 1.35);
 }
 
 .mp-scc-admin-sticky-preview .mp-scc-sticky-actions {
@@ -293,7 +294,7 @@
 	border-radius: 8px;
 	font-size: var(--mp-scc-sticky-button-font-size, 14px);
 	font-weight: var(--mp-scc-sticky-button-font-weight, 600);
-	line-height: 1.2;
+	line-height: var(--mp-scc-sticky-button-line-height, 1.2);
 	text-decoration: none;
 	border: 1px solid transparent;
 	cursor: default;
@@ -361,4 +362,67 @@
 		flex: 0 0 auto;
 		min-width: auto;
 	}
+}
+
+/* Styles tab: notes + toolbar + mobile width toggle */
+.mp-scc-styles-impact-notes {
+	max-width: 72em;
+	margin: 0 0 16px;
+	padding: 10px 14px;
+	background: #f6f7f7;
+	border: 1px solid #dcdcde;
+	border-radius: 4px;
+}
+
+.mp-scc-styles-impact-notes ul {
+	margin: 8px 0 0 1.2em;
+}
+
+.mp-scc-style-preview-toolbar {
+	margin: 0 0 12px;
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 8px 12px;
+}
+
+.mp-scc-style-preview-toolbar__hint {
+	margin: 0;
+	flex: 1 1 100%;
+}
+
+.mp-scc-admin-sticky-preview.mp-scc-admin-sticky-preview--mobile {
+	max-width: 390px;
+}
+
+.mp-scc-admin-sticky-preview--mobile .mp-scc-admin-sticky-preview__bar.mp-scc-root {
+	padding-top: var(--mp-scc-sticky-padding-y-mobile, 12px);
+	padding-right: var(--mp-scc-sticky-padding-x-mobile, 16px);
+	padding-bottom: var(--mp-scc-sticky-padding-y-mobile, 12px);
+	padding-left: var(--mp-scc-sticky-padding-x-mobile, 16px);
+}
+
+.mp-scc-admin-sticky-preview--mobile .mp-scc-sticky-inner {
+	flex-direction: column !important;
+	flex-wrap: nowrap !important;
+	align-items: stretch !important;
+	justify-content: flex-start !important;
+	gap: var(--mp-scc-sticky-inner-gap-mobile, 10px) !important;
+}
+
+.mp-scc-admin-sticky-preview--mobile .mp-scc-sticky-summary {
+	width: 100% !important;
+	flex: 1 1 auto !important;
+}
+
+.mp-scc-admin-sticky-preview--mobile .mp-scc-sticky-actions {
+	width: 100% !important;
+	flex: 1 1 auto !important;
+	flex-wrap: wrap !important;
+	justify-content: stretch !important;
+}
+
+.mp-scc-admin-sticky-preview--mobile .mp-scc-sticky-actions .mp-scc-btn {
+	flex: 1 1 0 !important;
+	min-width: 0 !important;
 }

@@ -59,6 +59,10 @@ final class AdminAssetsHooks {
 			'mpSccAdmin',
 			array(
 				'beforeUnload' => __( 'Есть несохранённые изменения. Покинуть страницу?', 'mp-sticky-custom-cart' ),
+				'stylePreview' => array(
+					'previewId'  => 'mp-scc-style-live-preview',
+					'throttleMs' => 100,
+				),
 			)
 		);
 
