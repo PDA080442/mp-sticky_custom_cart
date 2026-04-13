@@ -145,6 +145,9 @@ final class FrontendFlagResolver {
 			'cssVars'  => $styles->get_css_custom_properties(),
 			'wcCartFragments' => $cart_fragments,
 			'catalog'  => $catalog_js,
+			'clientLogging'     => (bool) OptionResolver::get_setting( 'diagnostics.client_error_logging', true ),
+			'clientLogFlushMs'  => 1200,
+			'clientLogMaxBatch' => 12,
 		);
 
 		/**

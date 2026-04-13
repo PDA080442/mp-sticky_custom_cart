@@ -123,20 +123,317 @@
 		});
 	};
 
+	var clientDiagBuffer = [];
+	var clientDiagFlushTimer = null;
+	var clientDiagReporting = false;
+
+	function clientDiagPageMeta() {
+		return {
+			page_url: window.location.href ? String(window.location.href).slice(0, 500) : '',
+			user_agent:
+				typeof navigator !== 'undefined' && navigator.userAgent
+					? String(navigator.userAgent).slice(0, 400)
+					: ''
+		};
+	}
+
+	function clientDiagFlushMs() {
+		var d = data();
+		var n = parseInt(d.clientLogFlushMs, 10);
+		return isNaN(n) || n < 200 ? 1200 : Math.min(n, 10000);
+	}
+
+	function clientDiagMaxBatch() {
+		var d = data();
+		var n = parseInt(d.clientLogMaxBatch, 10);
+		return isNaN(n) || n < 1 ? 12 : Math.min(n, 25);
+	}
+
+	function isLogClientAjaxRequest(settings) {
+		var logAct = window.mpScc.ajaxConfig().actions.logClientEvent;
+		if (!logAct || !settings || !settings.data) {
+			return false;
+		}
+		var d = settings.data;
+		if (typeof d === 'string') {
+			return d.indexOf('action=' + logAct) !== -1 || d.indexOf('&action=' + logAct) !== -1;
+		}
+		if (typeof d === 'object' && d !== null && d.action === logAct) {
+			return true;
+		}
+		return false;
+	}
+
+	window.mpScc.queueClientDiagnostic = function (row) {
+		if (!data().clientLogging) {
+			return;
+		}
+		if (!row || typeof row.event !== 'string' || !row.event) {
+			return;
+		}
+		var meta = clientDiagPageMeta();
+		var item = $.extend(
+			{
+				level: 'info',
+				message: '',
+				context: '',
+				detail: '',
+				product_id: 0
+			},
+			row,
+			meta
+		);
+		item.event = String(item.event).slice(0, 80);
+		if (item.message) {
+			item.message = String(item.message).slice(0, 500);
+		}
+		if (item.context) {
+			item.context = String(item.context).slice(0, 300);
+		}
+		if (item.detail) {
+			item.detail = String(item.detail).slice(0, 500);
+		}
+		clientDiagBuffer.push(item);
+		if (clientDiagBuffer.length >= clientDiagMaxBatch()) {
+			window.mpScc.flushClientDiagnostics();
+			return;
+		}
+		if (clientDiagFlushTimer) {
+			clearTimeout(clientDiagFlushTimer);
+		}
+		clientDiagFlushTimer = window.setTimeout(function () {
+			clientDiagFlushTimer = null;
+			window.mpScc.flushClientDiagnostics();
+		}, clientDiagFlushMs());
+	};
+
+	window.mpScc.flushClientDiagnostics = function () {
+		if (!data().clientLogging) {
+			return;
+		}
+		if (clientDiagFlushTimer) {
+			clearTimeout(clientDiagFlushTimer);
+			clientDiagFlushTimer = null;
+		}
+		if (!clientDiagBuffer.length) {
+			return;
+		}
+		var batch = clientDiagBuffer.splice(0, clientDiagMaxBatch());
+		var cfg = window.mpScc.ajaxConfig();
+		if (!cfg.ajaxUrl || !cfg.actions.logClientEvent) {
+			return;
+		}
+		clientDiagReporting = true;
+		$.ajax({
+			url: cfg.ajaxUrl,
+			type: 'POST',
+			data: {
+				action: cfg.actions.logClientEvent,
+				_ajax_nonce: cfg.nonce,
+				batch: JSON.stringify(batch)
+			},
+			dataType: 'json'
+		})
+			.done(function () {
+				if (clientDiagBuffer.length) {
+					window.mpScc.flushClientDiagnostics();
+				}
+			})
+			.fail(function () {
+				clientDiagBuffer = batch.concat(clientDiagBuffer);
+			})
+			.always(function () {
+				clientDiagReporting = false;
+			});
+	};
+
+	window.mpScc.reportStickyError = function (code, message, detail) {
+		window.mpScc.queueClientDiagnostic({
+			event: String(code || 'sticky_error').slice(0, 80),
+			level: 'error',
+			message: message ? String(message).slice(0, 500) : '',
+			detail: detail ? String(detail).slice(0, 500) : ''
+		});
+	};
+
 	/**
 	 * Fire-and-forget client diagnostics (respects `diagnostics.client_error_logging` on the server).
 	 * @param {string} event Sanitized key, e.g. `catalog_image_out_of_stock`.
 	 * @param {Record<string, *>} [payload]
 	 */
 	window.mpScc.logClientEvent = function (event, payload) {
-		var cfg = window.mpScc.ajaxConfig();
-		if (!cfg.ajaxUrl || !cfg.actions.logClientEvent) {
+		if (!data().clientLogging) {
 			return;
 		}
-		window.mpScc
-			.postAjax('logClientEvent', $.extend({ event: event }, payload || {}))
-			.fail(function () {});
+		var p = payload || {};
+		var row = {
+			event: String(event),
+			level: 'info',
+			message: 'client_' + String(event)
+		};
+		if (p.context !== undefined) {
+			row.context = String(p.context).slice(0, 300);
+		}
+		if (p.product_id) {
+			var pid = parseInt(p.product_id, 10);
+			if (!isNaN(pid) && pid > 0) {
+				row.product_id = pid;
+			}
+		}
+		if (p.message) {
+			row.message = String(p.message).slice(0, 500);
+		}
+		window.mpScc.queueClientDiagnostic(row);
 	};
+
+	function initClientDiagnostics() {
+		if (window.__mpSccClientDiagInit) {
+			return;
+		}
+		if (!data().clientLogging) {
+			return;
+		}
+		window.__mpSccClientDiagInit = true;
+
+		var origOnError = window.onerror;
+		window.onerror = function (message, source, lineno, colno, error) {
+			if (typeof origOnError === 'function') {
+				try {
+					origOnError.apply(window, arguments);
+				} catch (e) {}
+			}
+			if (!data().clientLogging || clientDiagReporting) {
+				return false;
+			}
+			var detail =
+				String(source || '') +
+				':' +
+				String(lineno || 0) +
+				':' +
+				String(colno || 0);
+			if (error && error.stack) {
+				detail += ' ' + String(error.stack).slice(0, 400);
+			}
+			window.mpScc.queueClientDiagnostic({
+				event: 'js_error',
+				level: 'error',
+				message: String(message || '').slice(0, 500),
+				detail: detail.slice(0, 500)
+			});
+			return false;
+		};
+
+		window.addEventListener(
+			'unhandledrejection',
+			function (ev) {
+				if (!data().clientLogging || clientDiagReporting) {
+					return;
+				}
+				var r = ev.reason;
+				var msg =
+					r && typeof r === 'object' && r.message
+						? String(r.message)
+						: String(r);
+				window.mpScc.queueClientDiagnostic({
+					event: 'unhandledrejection',
+					level: 'error',
+					message: msg.slice(0, 500)
+				});
+			},
+			true
+		);
+
+		$(document).ajaxError(function (event, jqXHR, settings, thrownError) {
+			if (!data().clientLogging || clientDiagReporting) {
+				return;
+			}
+			var url = settings && settings.url ? String(settings.url) : '';
+			if (!url || url.indexOf('admin-ajax.php') === -1) {
+				return;
+			}
+			if (isLogClientAjaxRequest(settings)) {
+				return;
+			}
+			var status = jqXHR && typeof jqXHR.status !== 'undefined' ? jqXHR.status : 0;
+			var ctx = thrownError ? String(thrownError).slice(0, 120) : '';
+			window.mpScc.queueClientDiagnostic({
+				event: 'xhr_ajax_error',
+				level: 'warn',
+				message: 'HTTP ' + String(status),
+				context: ctx,
+				detail: url.slice(0, 300)
+			});
+		});
+
+		if (typeof window.fetch === 'function') {
+			var origFetch = window.fetch;
+			var logAct = window.mpScc.ajaxConfig().actions.logClientEvent;
+			window.fetch = function (input, init) {
+				return origFetch.apply(this, arguments).then(
+					function (resp) {
+						if (!data().clientLogging || clientDiagReporting) {
+							return resp;
+						}
+						var urlStr = '';
+						try {
+							urlStr =
+								typeof input === 'string'
+									? input
+									: input && input.url
+										? String(input.url)
+										: '';
+						} catch (e) {}
+						if (!urlStr || urlStr.indexOf('admin-ajax.php') === -1 || !resp || resp.ok) {
+							return resp;
+						}
+						try {
+							var u = new URL(urlStr, window.location.href);
+							if (logAct && u.searchParams.get('action') === logAct) {
+								return resp;
+							}
+						} catch (e2) {}
+						window.mpScc.queueClientDiagnostic({
+							event: 'fetch_http',
+							level: 'warn',
+							message: 'HTTP ' + String(resp.status),
+							context: urlStr.slice(0, 200)
+						});
+						return resp;
+					},
+					function (err) {
+						if (!data().clientLogging || clientDiagReporting) {
+							return Promise.reject(err);
+						}
+						var urlStr2 = '';
+						try {
+							urlStr2 =
+								typeof input === 'string'
+									? input
+									: input && input.url
+										? String(input.url)
+										: '';
+						} catch (e3) {}
+						if (!urlStr2 || urlStr2.indexOf('admin-ajax.php') === -1) {
+							return Promise.reject(err);
+						}
+						try {
+							var u2 = new URL(urlStr2, window.location.href);
+							if (logAct && u2.searchParams.get('action') === logAct) {
+								return Promise.reject(err);
+							}
+						} catch (e4) {}
+						window.mpScc.queueClientDiagnostic({
+							event: 'fetch_network',
+							level: 'error',
+							message: String(err && err.message ? err.message : err).slice(0, 500),
+							context: urlStr2.slice(0, 200)
+						});
+						return Promise.reject(err);
+					}
+				);
+			};
+		}
+	}
 
 	function parseDebounceMs() {
 		var raw = window.mpScc.cssVar('--mp-scc-sticky-quantity-debounce-ms') || '';
@@ -1757,13 +2054,24 @@
 	};
 
 	$(function () {
+		initClientDiagnostics();
 		initWishlistIntegrationBodyClass();
 
 		var $root = $('#mp-scc-sticky-root');
 		if ($root.length) {
-			var sticky = new StickyCartController($root[0]);
-			sticky.init();
-			window.mpScc.sticky = sticky;
+			try {
+				var sticky = new StickyCartController($root[0]);
+				sticky.init();
+				window.mpScc.sticky = sticky;
+			} catch (e) {
+				if (window.mpScc.reportStickyError) {
+					window.mpScc.reportStickyError(
+						'sticky_init_failed',
+						e && e.message ? String(e.message) : String(e),
+						e && e.stack ? String(e.stack).slice(0, 500) : ''
+					);
+				}
+			}
 		}
 
 		initVariableProductVariationGuard();
