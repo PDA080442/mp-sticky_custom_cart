@@ -1,6 +1,13 @@
 /**
  * Settings screen: drawer empty-state preview + admin UX (tabs, tooltips, dirty state).
  */
+/* WordPress color picker (wpColorPicker) alignment in settings tables */
+.mp-scc-settings .form-table .wp-picker-container {
+	display: inline-block;
+	vertical-align: middle;
+	margin-top: 0;
+}
+
 .mp-scc-settings .mp-scc-tab-intro {
 	margin: 12px 0 8px;
 	max-width: 72em;

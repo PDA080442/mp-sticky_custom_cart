@@ -42,17 +42,19 @@ final class AdminAssetsHooks {
 			return;
 		}
 
+		wp_enqueue_style( 'wp-color-picker' );
+
 		wp_enqueue_style(
 			self::HANDLE_STYLE,
 			PluginPaths::url( 'admin/css/settings-preview.css' ),
-			array( 'dashicons' ),
+			array( 'dashicons', 'wp-color-picker' ),
 			MP_STICKY_CUSTOM_CART_ASSET_VERSION
 		);
 
 		wp_enqueue_script(
 			self::HANDLE_SETTINGS_PAGE,
 			PluginPaths::url( 'admin/js/settings-page.js' ),
-			array( 'jquery' ),
+			array( 'jquery', 'wp-color-picker' ),
 			MP_STICKY_CUSTOM_CART_ASSET_VERSION,
 			true
 		);

@@ -309,6 +309,17 @@ final class CssVariablesContract {
 			$out[ $row['name'] ] = self::format_value( $raw, $row );
 		}
 
+		$out[ self::PREFIX . 'sticky-font-family' ] = self::resolve_sticky_font_family( $merged_settings );
+
+		$scale = (int) OptionResolver::get_by_path( $merged_settings, 'styles.typography_scale_percent', 100 );
+		$scale = max( 70, min( 130, $scale ) );
+		if ( 100 !== $scale ) {
+			$sum = (int) OptionResolver::get_by_path( $merged_settings, 'sticky_cart.summary_font_size_px', 15 );
+			$btn = (int) OptionResolver::get_by_path( $merged_settings, 'sticky_cart.button_font_size_px', 14 );
+			$out[ self::PREFIX . 'sticky-summary-font-size' ]  = (string) max( 8, (int) round( $sum * $scale / 100 ) ) . 'px';
+			$out[ self::PREFIX . 'sticky-button-font-size' ] = (string) max( 8, (int) round( $btn * $scale / 100 ) ) . 'px';
+		}
+
 		$out[ self::PREFIX . 'sticky-layout-reserve' ] = self::format_sticky_layout_reserve_px( $merged_settings );
 
 		return $out;
@@ -317,6 +328,35 @@ final class CssVariablesContract {
 	/**
 	 * Approximate height of the fixed bar (padding + one/two rows) for body scroll padding — reduces CLS.
 	 *
+	 * @param array<string, mixed> $merged_settings Merged settings tree.
+	 */
+	/**
+	 * Font stack for the sticky bar / drawer (styles tab).
+	 *
+	 * @param array<string, mixed> $merged_settings Merged settings tree.
+	 */
+	public static function resolve_sticky_font_family( array $merged_settings ) {
+		$preset = (string) OptionResolver::get_by_path( $merged_settings, 'styles.font_family_preset', 'inherit' );
+		$custom = trim( (string) OptionResolver::get_by_path( $merged_settings, 'styles.font_family_custom', '' ) );
+
+		if ( 'custom' === $preset ) {
+			return '' !== $custom ? $custom : 'inherit';
+		}
+
+		switch ( $preset ) {
+			case 'system':
+				return 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+			case 'serif':
+				return 'Georgia, "Times New Roman", Times, serif';
+			case 'mono':
+				return 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace';
+			case 'inherit':
+			default:
+				return 'inherit';
+		}
+	}
+
+	/**
 	 * @param array<string, mixed> $merged_settings Merged settings tree.
 	 */
 	private static function format_sticky_layout_reserve_px( array $merged_settings ) {

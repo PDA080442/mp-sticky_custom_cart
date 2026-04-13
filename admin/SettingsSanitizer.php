@@ -116,6 +116,9 @@ final class SettingsSanitizer {
 			case 'text':
 			default:
 				$text = self::sanitize_text( $raw, isset( $field['max_length'] ) ? (int) $field['max_length'] : 1000 );
+				if ( 'styles.font_family_custom' === $path ) {
+					$text = self::sanitize_font_family_stack( $text );
+				}
 				if ( isset( $field['oneof'] ) && is_array( $field['oneof'] ) && ! in_array( $text, $field['oneof'], true ) ) {
 					return is_string( $fallback ) ? $fallback : $text;
 				}
@@ -230,6 +233,27 @@ final class SettingsSanitizer {
 
 	/**
 	 * @param mixed  $raw
+	 * @param string $fallback
+	 */
+	/**
+	 * Allowed characters in a CSS font-family list (conservative).
+	 *
+	 * @param string $text Already tag-stripped text.
+	 * @return string
+	 */
+	private static function sanitize_font_family_stack( $text ) {
+		$text = is_string( $text ) ? trim( $text ) : '';
+		if ( '' === $text ) {
+			return '';
+		}
+		if ( ! preg_match( '/^[\s\,\"\'\-\._a-zA-Z0-9\(\)]+$/u', $text ) ) {
+			return '';
+		}
+		return mb_substr( $text, 0, 500 );
+	}
+
+	/**
+	 * @param mixed $raw
 	 * @param string $fallback
 	 */
 	private static function sanitize_color( $raw, $fallback ) {

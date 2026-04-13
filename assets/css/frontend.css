@@ -9,6 +9,7 @@
 .mp-scc-root {
 	--mp-scc-motion-duration: var(--mp-scc-sticky-drawer-toggle-duration-ms, 220ms);
 	--mp-scc-motion-easing: var(--mp-scc-sticky-drawer-toggle-easing, cubic-bezier(0.4, 0, 0.2, 1));
+	font-family: var(--mp-scc-sticky-font-family, inherit);
 	box-sizing: border-box;
 }
 

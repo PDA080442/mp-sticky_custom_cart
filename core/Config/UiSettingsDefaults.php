@@ -139,6 +139,12 @@ final class UiSettingsDefaults {
 				'color_surface_tint'        => '#ffffff',
 				'color_button_primary'      => '#111111',
 				'color_button_primary_text' => '#ffffff',
+				/** inherit | system | serif | mono | custom */
+				'font_family_preset'        => 'inherit',
+				/** Used when preset is custom; CSS font-family stack. */
+				'font_family_custom'        => '',
+				/** Scales summary + button font sizes on the sticky bar (70–130%). */
+				'typography_scale_percent'  => 100,
 			),
 			'diagnostics' => array(
 				'client_error_logging' => true,

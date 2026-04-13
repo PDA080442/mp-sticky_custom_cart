@@ -127,6 +127,12 @@ final class SettingsValidationSchema {
 				'color_surface_tint'        => array( 'type' => 'color' ),
 				'color_button_primary'      => array( 'type' => 'color' ),
 				'color_button_primary_text' => array( 'type' => 'color' ),
+				'font_family_preset'        => array(
+					'type'  => 'text',
+					'oneof' => array( 'inherit', 'system', 'serif', 'mono', 'custom' ),
+				),
+				'font_family_custom'        => array( 'type' => 'text', 'max_length' => 500 ),
+				'typography_scale_percent'  => array( 'type' => 'integer', 'min' => 70, 'max' => 130 ),
 			),
 			'diagnostics' => array(
 				'client_error_logging' => array( 'type' => 'boolean' ),

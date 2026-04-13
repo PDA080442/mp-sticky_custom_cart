@@ -249,7 +249,13 @@ final class SettingsPage {
 	 * @return string Empty or space + data-mp-scc-preview="...".
 	 */
 	private static function preview_data_attr( array $meta ) {
-		if ( ! isset( $meta['var'], $meta['fmt'] ) ) {
+		if ( ! isset( $meta['fmt'] ) ) {
+			return '';
+		}
+		if ( 'typography_scale' === $meta['fmt'] ) {
+			return ' data-mp-scc-preview="' . esc_attr( wp_json_encode( $meta, JSON_UNESCAPED_UNICODE ) ) . '"';
+		}
+		if ( ! isset( $meta['var'] ) ) {
 			return '';
 		}
 		return ' data-mp-scc-preview="' . esc_attr( wp_json_encode( $meta, JSON_UNESCAPED_UNICODE ) ) . '"';
@@ -720,6 +726,48 @@ final class SettingsPage {
 		self::field_color( $opt, 'styles', 'color_button_primary_text', __( 'Текст на основной кнопке', 'mp-sticky-custom-cart' ), isset( $st['color_button_primary_text'] ) ? (string) $st['color_button_primary_text'] : '#ffffff', '', array( 'var' => $p . 'color-button-primary-text', 'fmt' => 'color' ) );
 		echo '</tbody></table>';
 
+		echo '<h3>' . esc_html__( 'Шрифт', 'mp-sticky-custom-cart' ) . '</h3>';
+		echo '<p class="description">' . esc_html__( 'Гарнитура применяется к нижней панели и drawer.', 'mp-sticky-custom-cart' ) . '</p>';
+		echo '<table class="form-table" role="presentation"><tbody>';
+		$ff_preset   = isset( $st['font_family_preset'] ) ? (string) $st['font_family_preset'] : 'inherit';
+		$ff_custom   = isset( $st['font_family_custom'] ) ? (string) $st['font_family_custom'] : '';
+		$opt_name    = Constants::OPTION_SETTINGS;
+		$custom_name = $opt_name . '[styles][font_family_custom]';
+		self::field_select(
+			$opt,
+			'styles',
+			'font_family_preset',
+			__( 'Гарнитура', 'mp-sticky-custom-cart' ),
+			$ff_preset,
+			array(
+				'inherit' => __( 'Как у темы (inherit)', 'mp-sticky-custom-cart' ),
+				'system'  => __( 'Системный sans-serif', 'mp-sticky-custom-cart' ),
+				'serif'   => __( 'Антиква (serif)', 'mp-sticky-custom-cart' ),
+				'mono'    => __( 'Моноширинный', 'mp-sticky-custom-cart' ),
+				'custom'  => __( 'Свой стек (поле ниже)', 'mp-sticky-custom-cart' ),
+			),
+			'',
+			array(
+				'var'        => $p . 'sticky-font-family',
+				'fmt'        => 'font_family',
+				'customName' => $custom_name,
+				'presetName' => $opt_name . '[styles][font_family_preset]',
+			)
+		);
+		self::field_text(
+			$opt,
+			'styles',
+			'font_family_custom',
+			__( 'Свой CSS font-family', 'mp-sticky-custom-cart' ),
+			$ff_custom,
+			__( 'Только при выборе «Свой стек». Пример: "Helvetica Neue", Helvetica, Arial, sans-serif', 'mp-sticky-custom-cart' ),
+			array(
+				'maxlength'   => 500,
+				'input_class' => 'large-text code mp-scc-font-family-custom',
+			)
+		);
+		echo '</tbody></table>';
+
 		echo '<h3>' . esc_html__( 'Подложка и эффекты', 'mp-sticky-custom-cart' ) . '</h3>';
 		echo '<table class="form-table" role="presentation"><tbody>';
 		self::field_number( $opt, 'sticky_cart', 'surface_backdrop_blur_px', __( 'Blur подложки (px)', 'mp-sticky-custom-cart' ), isset( $c['surface_backdrop_blur_px'] ) ? (int) $c['surface_backdrop_blur_px'] : 14, '', array( 'var' => $p . 'sticky-backdrop-blur', 'fmt' => 'unit', 'suffix' => 'px' ) );
@@ -794,6 +842,27 @@ final class SettingsPage {
 		self::field_number( $opt, 'sticky_cart', 'actions_gap_px', __( 'Зазор между кнопками (px)', 'mp-sticky-custom-cart' ), isset( $c['actions_gap_px'] ) ? (int) $c['actions_gap_px'] : 10, '', array( 'var' => $p . 'sticky-actions-gap', 'fmt' => 'unit', 'suffix' => 'px' ) );
 		self::field_number( $opt, 'sticky_cart', 'clear_button_min_width_px', __( 'Мин. ширина «Очистить» (px, 0 = авто)', 'mp-sticky-custom-cart' ), isset( $c['clear_button_min_width_px'] ) ? (int) $c['clear_button_min_width_px'] : 0, '', array( 'var' => $p . 'sticky-clear-min-width', 'fmt' => 'unit', 'suffix' => 'px', 'omit_if_zero' => true ) );
 		self::field_number( $opt, 'sticky_cart', 'checkout_button_min_width_px', __( 'Мин. ширина «Оформить» (px, 0 = авто)', 'mp-sticky-custom-cart' ), isset( $c['checkout_button_min_width_px'] ) ? (int) $c['checkout_button_min_width_px'] : 0, '', array( 'var' => $p . 'sticky-checkout-min-width', 'fmt' => 'unit', 'suffix' => 'px', 'omit_if_zero' => true ) );
+		echo '</tbody></table>';
+
+		echo '<h3>' . esc_html__( 'Масштаб типографики панели', 'mp-sticky-custom-cart' ) . '</h3>';
+		echo '<p class="description">' . esc_html__( 'Умножает размер текста summary и кнопок (поля выше). 100% — без изменений. Полезно слегка увеличить или уменьшить весь блок, не трогая базовые px.', 'mp-sticky-custom-cart' ) . '</p>';
+		echo '<table class="form-table" role="presentation"><tbody>';
+		$scale_pct = isset( $st['typography_scale_percent'] ) ? (int) $st['typography_scale_percent'] : 100;
+		self::field_number(
+			$opt,
+			'styles',
+			'typography_scale_percent',
+			__( 'Масштаб (%)', 'mp-sticky-custom-cart' ),
+			$scale_pct,
+			'',
+			array(
+				'fmt'          => 'typography_scale',
+				'varSummary'   => $p . 'sticky-summary-font-size',
+				'varButton'    => $p . 'sticky-button-font-size',
+				'summaryField' => Constants::OPTION_SETTINGS . '[sticky_cart][summary_font_size_px]',
+				'buttonField'  => Constants::OPTION_SETTINGS . '[sticky_cart][button_font_size_px]',
+			)
+		);
 		echo '</tbody></table>';
 
 		echo '<h3>' . esc_html__( 'Drawer: высота и внутренние отступы', 'mp-sticky-custom-cart' ) . '</h3>';
@@ -1044,7 +1113,8 @@ final class SettingsPage {
 	private static function field_text( $opt, $section, $field, $label, $value, $help = '', array $extra = array() ) {
 		$name = sprintf( '%s[%s][%s]', $opt, $section, $field );
 		echo '<tr><th scope="row"><label for="' . esc_attr( $name ) . '">' . esc_html( $label ) . '</label>' . self::help_tip_button( $help ) . '</th><td>';
-		$attrs = '';
+		$attrs     = '';
+		$input_cls = isset( $extra['input_class'] ) && is_string( $extra['input_class'] ) ? trim( $extra['input_class'] ) : 'regular-text';
 		if ( isset( $extra['maxlength'] ) ) {
 			$attrs .= ' maxlength="' . (int) $extra['maxlength'] . '"';
 		}
@@ -1052,10 +1122,11 @@ final class SettingsPage {
 			$attrs .= self::preview_data_attr( $extra['preview'] );
 		}
 		printf(
-			'<input type="text" class="regular-text" id="%1$s" name="%1$s" value="%2$s"%3$s />',
+			'<input type="text" class="%4$s" id="%1$s" name="%1$s" value="%2$s"%3$s />',
 			esc_attr( $name ),
 			esc_attr( $value ),
-			$attrs // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- maxlength is int, attribute name fixed
+			$attrs, // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- maxlength is int, attribute name fixed
+			esc_attr( $input_cls )
 		);
 		echo '</td></tr>';
 	}
@@ -1102,10 +1173,11 @@ final class SettingsPage {
 	 * @param string               $field Field key.
 	 * @param array<string, string> $options Value => label.
 	 */
-	private static function field_select( $opt, $section, $field, $label, $current, array $options, $help = '' ) {
+	private static function field_select( $opt, $section, $field, $label, $current, array $options, $help = '', $preview_meta = null ) {
 		$name = sprintf( '%s[%s][%s]', $opt, $section, $field );
 		echo '<tr><th scope="row"><label for="' . esc_attr( $name ) . '">' . esc_html( $label ) . '</label>' . self::help_tip_button( $help ) . '</th><td>';
-		echo '<select id="' . esc_attr( $name ) . '" name="' . esc_attr( $name ) . '">';
+		$pv = is_array( $preview_meta ) ? self::preview_data_attr( $preview_meta ) : '';
+		echo '<select id="' . esc_attr( $name ) . '" name="' . esc_attr( $name ) . '"' . $pv . '>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- preview_data_attr is escaped
 		foreach ( $options as $val => $opt_label ) {
 			printf(
 				'<option value="%s" %s>%s</option>',
