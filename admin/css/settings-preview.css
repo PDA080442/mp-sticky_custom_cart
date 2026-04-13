@@ -317,8 +317,8 @@
 
 .mp-scc-admin-sticky-preview .mp-scc-btn--ghost {
 	background: transparent;
-	color: inherit;
-	border-color: rgba(0, 0, 0, 0.2);
+	color: var(--mp-scc-color-clear-button-text, inherit);
+	border-color: var(--mp-scc-color-clear-button-border, #cfcfcf);
 }
 
 .mp-scc-admin-sticky-preview .mp-scc-btn--primary {

@@ -94,6 +94,12 @@ final class SettingsValidationSchema {
 				'drawer_max_height_vh'      => array( 'type' => 'integer', 'min' => 10, 'max' => 100 ),
 				'drawer_padding_x_px'       => array( 'type' => 'integer', 'min' => 0, 'max' => 64 ),
 				'drawer_padding_y_px'       => array( 'type' => 'integer', 'min' => 0, 'max' => 64 ),
+				'drawer_surface_background_alpha' => array( 'type' => 'float', 'min' => 0, 'max' => 1 ),
+				'drawer_line_title_font_size_px'   => array( 'type' => 'integer', 'min' => 8, 'max' => 48 ),
+				'drawer_line_title_font_weight'    => array( 'type' => 'integer', 'min' => 100, 'max' => 900 ),
+				'drawer_line_unit_font_size_px'    => array( 'type' => 'integer', 'min' => 8, 'max' => 40 ),
+				'drawer_line_price_font_size_px'    => array( 'type' => 'integer', 'min' => 8, 'max' => 48 ),
+				'drawer_line_price_font_weight'     => array( 'type' => 'integer', 'min' => 100, 'max' => 900 ),
 				'drawer_toggle_duration_ms' => array( 'type' => 'integer', 'min' => 0, 'max' => 5000 ),
 				'drawer_toggle_easing'      => array(
 					'type'       => 'text',
@@ -125,6 +131,15 @@ final class SettingsValidationSchema {
 			'styles'      => array(
 				'color_text_primary'        => array( 'type' => 'color' ),
 				'color_surface_tint'        => array( 'type' => 'color' ),
+				'color_drawer_surface_tint' => array( 'type' => 'color' ),
+				'color_clear_button_text'   => array( 'type' => 'color' ),
+				'color_clear_button_border' => array( 'type' => 'color' ),
+				'color_qty_button_bg'       => array( 'type' => 'color' ),
+				'color_qty_button_border'   => array( 'type' => 'color' ),
+				'color_qty_button_text'     => array( 'type' => 'color' ),
+				'color_drawer_line_title'   => array( 'type' => 'color' ),
+				'color_drawer_line_unit'    => array( 'type' => 'color' ),
+				'color_drawer_line_price'   => array( 'type' => 'color' ),
 				'color_button_primary'      => array( 'type' => 'color' ),
 				'color_button_primary_text' => array( 'type' => 'color' ),
 				'font_family_preset'        => array(

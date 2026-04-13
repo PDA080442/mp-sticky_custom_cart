@@ -186,11 +186,11 @@ final class SettingsSanitizer {
 	 */
 	private static function sanitize_float( $raw, array $field, $fallback, $exists = false, $path = '' ) {
 		if ( ! is_numeric( $raw ) ) {
-			if ( $exists && is_string( $raw ) && '' !== trim( $raw ) && 'sticky_cart.surface_background_alpha' === $path ) {
+			if ( $exists && is_string( $raw ) && '' !== trim( $raw ) && in_array( $path, array( 'sticky_cart.surface_background_alpha', 'sticky_cart.drawer_surface_background_alpha' ), true ) ) {
 				add_settings_error(
 					'mp_scc_sticky',
 					'mp_scc_bad_surface_alpha',
-					__( 'Прозрачность фона панели: ожидается число от 0 до 1. Использовано значение по умолчанию.', 'mp-sticky-custom-cart' ),
+					__( 'Прозрачность фона: ожидается число от 0 до 1. Использовано значение по умолчанию.', 'mp-sticky-custom-cart' ),
 					'warning'
 				);
 			}
