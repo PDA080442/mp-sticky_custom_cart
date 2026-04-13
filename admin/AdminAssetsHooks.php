@@ -16,8 +16,9 @@ defined( 'ABSPATH' ) || exit;
  */
 final class AdminAssetsHooks {
 
-	public const HANDLE_SCRIPT = 'mp-scc-admin';
-	public const HANDLE_STYLE  = 'mp-scc-admin';
+	public const HANDLE_SCRIPT        = 'mp-scc-admin';
+	public const HANDLE_STYLE         = 'mp-scc-admin';
+	public const HANDLE_SETTINGS_PAGE = 'mp-scc-admin-settings-page';
 
 	public static function register() {
 		add_action( 'admin_enqueue_scripts', array( self::class, 'enqueue' ), 20 );
@@ -42,8 +43,23 @@ final class AdminAssetsHooks {
 		wp_enqueue_style(
 			self::HANDLE_STYLE,
 			PluginPaths::url( 'admin/css/settings-preview.css' ),
-			array(),
+			array( 'dashicons' ),
 			MP_STICKY_CUSTOM_CART_ASSET_VERSION
+		);
+
+		wp_enqueue_script(
+			self::HANDLE_SETTINGS_PAGE,
+			PluginPaths::url( 'admin/js/settings-page.js' ),
+			array( 'jquery' ),
+			MP_STICKY_CUSTOM_CART_ASSET_VERSION,
+			true
+		);
+		wp_localize_script(
+			self::HANDLE_SETTINGS_PAGE,
+			'mpSccAdmin',
+			array(
+				'beforeUnload' => __( 'Есть несохранённые изменения. Покинуть страницу?', 'mp-sticky-custom-cart' ),
+			)
 		);
 
 		/**

@@ -1,6 +1,34 @@
 /**
- * Settings screen: drawer empty-state preview (subset of storefront empty styles).
+ * Settings screen: drawer empty-state preview + admin UX (tabs, tooltips, dirty state).
  */
+.mp-scc-settings .mp-scc-tab-intro {
+	margin: 12px 0 8px;
+	max-width: 72em;
+}
+
+.mp-scc-settings .mp-scc-reset-tab-form {
+	margin: 0 0 16px;
+	padding-bottom: 12px;
+	border-bottom: 1px solid #c3c4c7;
+}
+
+.mp-scc-settings .mp-scc-help-tip {
+	vertical-align: middle;
+	padding: 0 2px;
+	line-height: 1;
+	color: #646970;
+}
+
+.mp-scc-settings .mp-scc-help-tip .dashicons {
+	width: 18px;
+	height: 18px;
+	font-size: 18px;
+}
+
+.mp-scc-settings-form.mp-scc-form-dirty .submit .button-primary {
+	box-shadow: 0 0 0 1px #dba617;
+}
+
 .mp-scc-admin-drawer-empty-preview {
 	max-width: 420px;
 	margin: 12px 0 0;
