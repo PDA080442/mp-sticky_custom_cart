@@ -115,8 +115,30 @@ final class SettingsSanitizer {
 				if ( isset( $field['oneof'] ) && is_array( $field['oneof'] ) && ! in_array( $text, $field['oneof'], true ) ) {
 					return is_string( $fallback ) ? $fallback : $text;
 				}
+				if ( 'catalog.hover_animation_easing' === $path && $exists && ( ! is_string( $text ) || '' === trim( $text ) ) ) {
+					return is_string( $fallback ) ? $fallback : 'cubic-bezier(0.4, 0, 0.2, 1)';
+				}
+				if ( 'catalog.hover_animation_easing' === $path && $exists && is_string( $text ) && '' !== trim( $text ) && ! self::is_safe_css_easing_token( $text ) ) {
+					add_settings_error(
+						'mp_scc_catalog',
+						'mp_scc_bad_hover_easing',
+						__( 'Недопустимые символы в easing (CSS). Использовано значение по умолчанию.', 'mp-sticky-custom-cart' ),
+						'warning'
+					);
+					return is_string( $fallback ) ? $fallback : 'cubic-bezier(0.4, 0, 0.2, 1)';
+				}
 				return $text;
 		}
+	}
+
+	/**
+	 * Allow typical transition-timing-function values without script injection.
+	 *
+	 * @param string $text Sanitized text.
+	 * @return bool
+	 */
+	private static function is_safe_css_easing_token( $text ) {
+		return (bool) preg_match( '/^[a-zA-Z0-9_.(),%\-\s]+$/', $text );
 	}
 
 	/**
@@ -175,6 +197,7 @@ final class SettingsSanitizer {
 	 */
 	private static function sanitize_text( $raw, $max_length ) {
 		$s = is_string( $raw ) ? wp_strip_all_tags( $raw ) : '';
+		$s = str_replace( "\0", '', $s );
 		if ( $max_length > 0 ) {
 			$s = mb_substr( $s, 0, $max_length );
 		}

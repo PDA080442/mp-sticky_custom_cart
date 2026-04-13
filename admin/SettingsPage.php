@@ -7,7 +7,9 @@
 
 namespace MpStickyCustomCart\Admin;
 
+use MpStickyCustomCart\Core\Config\CssVariablesContract;
 use MpStickyCustomCart\Core\Config\FeatureFlagDefinitions;
+use MpStickyCustomCart\Core\Config\FeatureFlagsDefaults;
 use MpStickyCustomCart\Core\Config\UiLabelsDefaults;
 use MpStickyCustomCart\Core\Constants;
 use MpStickyCustomCart\Core\OptionResolver;
@@ -249,23 +251,143 @@ final class SettingsPage {
 	}
 
 	/**
+	 * How catalog options map to the storefront (for admins).
+	 */
+	private static function render_catalog_impact_notes() {
+		echo '<div class="mp-scc-catalog-impact-notes">';
+		echo '<p><strong>' . esc_html__( 'Как это влияет на витрину', 'mp-sticky-custom-cart' ) . '</strong></p>';
+		echo '<ul class="ul-disc">';
+		echo '<li>' . esc_html__( 'Поведение клика по миниатюре и селекторы задают, будет ли изображение добавлять simple-товар в корзину без перехода на страницу товара.', 'mp-sticky-custom-cart' ) . '</li>';
+		echo '<li>' . esc_html__( 'Блок «Подробнее» и анимация: длительность, easing и пресет попадают в CSS-переменные (--mp-scc-catalog-*) и управляют появлением полосы с текстом «Подробнее».', 'mp-sticky-custom-cart' ) . '</li>';
+		echo '<li>' . esc_html__( 'Тексты «Подробнее» и «Нет в наличии» подставляются в overlay и в тосты на карточке; пустые значения заменяются дефолтами плагина.', 'mp-sticky-custom-cart' ) . '</li>';
+		echo '<li>' . esc_html__( 'Остальные подписи в таблице ниже используются в sticky-корзине и на странице товара, а не только в каталоге.', 'mp-sticky-custom-cart' ) . '</li>';
+		echo '</ul></div>';
+	}
+
+	/**
+	 * Static preview of the catalog overlay (approximate look on shop loop).
+	 *
+	 * @param array<string, mixed> $s Full settings.
+	 * @param array<string, mixed> $c Catalog section.
+	 */
+	private static function render_catalog_card_preview( array $s, array $c ) {
+		$labels = OptionResolver::get_labels();
+		$label  = isset( $labels[ UiLabelsDefaults::KEY_MORE_INFO ] ) ? (string) $labels[ UiLabelsDefaults::KEY_MORE_INFO ] : '';
+
+		$motion = isset( $c['hover_motion_preset'] ) ? (string) $c['hover_motion_preset'] : 'fade_slide';
+		if ( ! in_array( $motion, array( 'fade_slide', 'fade', 'slide' ), true ) ) {
+			$motion = 'fade_slide';
+		}
+		$mobile_always = ! empty( $c['hover_overlay_mobile_always'] );
+
+		$props   = CssVariablesContract::build_properties( $s );
+		$preview = array();
+		$extra   = array(
+			CssVariablesContract::PREFIX . 'color-button-primary',
+			CssVariablesContract::PREFIX . 'color-button-primary-text',
+			CssVariablesContract::PREFIX . 'wishlist-heart-reserve-right',
+			CssVariablesContract::PREFIX . 'wishlist-overlay-clearance',
+		);
+		foreach ( $props as $name => $value ) {
+			if ( 0 === strpos( $name, CssVariablesContract::PREFIX . 'catalog-' ) || in_array( $name, $extra, true ) ) {
+				$preview[ $name ] = $value;
+			}
+		}
+		$style = '';
+		foreach ( $preview as $name => $value ) {
+			$style .= $name . ':' . $value . ';';
+		}
+
+		$cls = 'mp-scc-catalog-overlay mp-scc-catalog-overlay--floating mp-scc-catalog-overlay--motion-' . $motion;
+		if ( $mobile_always ) {
+			$cls .= ' mp-scc-catalog-overlay--mobile-always';
+		}
+
+		echo '<h3>' . esc_html__( 'Предпросмотр кнопки на карточке', 'mp-sticky-custom-cart' ) . '</h3>';
+		echo '<p class="description">' . esc_html__( 'Упрощённый макет: на сайте вид зависит от темы и ширины колонки. Ниже — подпись и стили с учётом текущих чисел и CSS-переменных каталога.', 'mp-sticky-custom-cart' ) . '</p>';
+		echo '<div class="mp-scc-admin-catalog-preview" style="' . esc_attr( $style ) . '">';
+		echo '<div class="mp-scc-admin-catalog-preview__card" role="presentation">';
+		echo '<div class="mp-scc-admin-catalog-preview__thumb">';
+		echo '<div class="mp-scc-admin-catalog-preview__fake-img" aria-hidden="true"></div>';
+		printf(
+			'<a href="#" class="%s" onclick="return false;">',
+			esc_attr( $cls )
+		);
+		echo '<span class="mp-scc-catalog-overlay__label">' . esc_html( $label ) . '</span>';
+		echo '</a>';
+		echo '</div></div></div>';
+	}
+
+	/**
 	 * @param array<string, mixed> $s   Settings tree.
 	 * @param string               $opt Option key (name prefix).
 	 */
 	private static function render_catalog_tab( array $s, $opt ) {
 		$c = isset( $s['catalog'] ) && is_array( $s['catalog'] ) ? $s['catalog'] : array();
 		$l = isset( $s['labels'] ) && is_array( $s['labels'] ) ? $s['labels'] : array();
-		echo '<h2>' . esc_html__( 'Каталог', 'mp-sticky-custom-cart' ) . '</h2>';
-		echo '<table class="form-table" role="presentation"><tbody>';
+		$f = OptionResolver::get_feature_flags();
+		$img_atc_on = ! empty( $f[ FeatureFlagsDefaults::KEY_PRODUCT_IMAGE_ADD_TO_CART ] );
 
+		echo '<h2>' . esc_html__( 'Каталог', 'mp-sticky-custom-cart' ) . '</h2>';
+		self::render_catalog_impact_notes();
+
+		$behavior = isset( $c['image_click_behavior'] ) ? (string) $c['image_click_behavior'] : 'add_to_cart';
+		if ( 'add_to_cart' === $behavior && ! $img_atc_on ) {
+			echo '<div class="notice notice-warning inline"><p>';
+			echo esc_html__( 'Выбрано добавление в корзину по клику на изображение, но на вкладке «Служебное» выключен feature flag «Клик по изображению добавляет в корзину» — на сайте перехват не сработает.', 'mp-sticky-custom-cart' );
+			echo '</p></div>';
+		}
+
+		echo '<h3>' . esc_html__( 'Клик по изображению в лупе', 'mp-sticky-custom-cart' ) . '</h3>';
+		echo '<table class="form-table" role="presentation"><tbody>';
+		self::field_select(
+			$opt,
+			'catalog',
+			'image_click_behavior',
+			__( 'Поведение клика по миниатюре', 'mp-sticky-custom-cart' ),
+			in_array( $behavior, array( 'add_to_cart', 'theme_default' ), true ) ? $behavior : 'add_to_cart',
+			array(
+				'add_to_cart'    => __( 'Добавить в корзину (AJAX, при включённом feature flag)', 'mp-sticky-custom-cart' ),
+				'theme_default' => __( 'Как в теме / Woo (ссылки и стандартное поведение)', 'mp-sticky-custom-cart' ),
+			),
+			__( 'При «Добавить в корзину» клик перехватывается для img по селектору ниже. «Как в теме» отключает скрипт плагина для картинки.', 'mp-sticky-custom-cart' )
+		);
+		echo '<tr><td colspan="2"><p class="description">' . esc_html__( 'Если селектор пустой, на витрине подставляется стандартный селектор миниатюры WooCommerce.', 'mp-sticky-custom-cart' ) . '</p></td></tr>';
+		self::field_text(
+			$opt,
+			'catalog',
+			'image_click_selector',
+			__( 'Селектор изображения карточки (CSS)', 'mp-sticky-custom-cart' ),
+			isset( $c['image_click_selector'] ) ? (string) $c['image_click_selector'] : '',
+			__( 'Пустое значение: используется встроенный селектор Woo для миниатюры в лупе. Укажите свой, если тема меняет разметку.', 'mp-sticky-custom-cart' )
+		);
+		self::field_text(
+			$opt,
+			'catalog',
+			'card_root_selector',
+			__( 'Корень карточки для состояний (closest, CSS)', 'mp-sticky-custom-cart' ),
+			isset( $c['card_root_selector'] ) ? (string) $c['card_root_selector'] : 'li.product',
+			__( 'Предок товара для классов «загрузка / добавлено / ошибка»; обычно li.product или кастомный контейнер темы.', 'mp-sticky-custom-cart' )
+		);
+		echo '</tbody></table>';
+
+		echo '<h3>' . esc_html__( 'Кнопка «Подробнее» и анимация hover', 'mp-sticky-custom-cart' ) . '</h3>';
+		echo '<table class="form-table" role="presentation"><tbody>';
 		self::field_checkbox( $opt, 'catalog', 'hover_overlay_mobile_always', __( 'Показывать кнопку «Подробнее» на мобильных всегда', 'mp-sticky-custom-cart' ), ! empty( $c['hover_overlay_mobile_always'] ) );
 		self::field_number( $opt, 'catalog', 'hover_animation_duration_ms', __( 'Длительность анимации hover (мс)', 'mp-sticky-custom-cart' ), isset( $c['hover_animation_duration_ms'] ) ? (int) $c['hover_animation_duration_ms'] : 220 );
-		self::field_text( $opt, 'catalog', 'hover_animation_easing', __( 'Easing (CSS)', 'mp-sticky-custom-cart' ), isset( $c['hover_animation_easing'] ) ? (string) $c['hover_animation_easing'] : '' );
+		self::field_text(
+			$opt,
+			'catalog',
+			'hover_animation_easing',
+			__( 'Easing (CSS)', 'mp-sticky-custom-cart' ),
+			isset( $c['hover_animation_easing'] ) ? (string) $c['hover_animation_easing'] : '',
+			__( 'Допустимы буквы, цифры, пробелы и символы для cubic-bezier() / ease / linear. Опасные символы отбрасываются при сохранении.', 'mp-sticky-custom-cart' )
+		);
 		self::field_select(
 			$opt,
 			'catalog',
 			'hover_motion_preset',
-			__( 'Пресет анимации', 'mp-sticky-custom-cart' ),
+			__( 'Тип / пресет анимации', 'mp-sticky-custom-cart' ),
 			isset( $c['hover_motion_preset'] ) ? (string) $c['hover_motion_preset'] : 'fade_slide',
 			array(
 				'fade_slide' => 'fade + slide',
@@ -285,31 +407,31 @@ final class SettingsPage {
 			isset( $c['catalog_overlay_z_index'] ) ? (int) $c['catalog_overlay_z_index'] : 4,
 			__( 'Слой должен быть выше изображения карточки и ниже иконки избранного (см. вкладку «Избранное»).', 'mp-sticky-custom-cart' )
 		);
-		echo '<tr><td colspan="2"><p class="description">' . esc_html__( 'Клик по изображению в каталоге: если пусто, используется стандартный селектор WooCommerce (см. документацию плагина).', 'mp-sticky-custom-cart' ) . '</p></td></tr>';
-		self::field_text(
-			$opt,
-			'catalog',
-			'image_click_selector',
-			__( 'Селектор изображения карточки (CSS)', 'mp-sticky-custom-cart' ),
-			isset( $c['image_click_selector'] ) ? (string) $c['image_click_selector'] : '',
-			__( 'Пустое значение: используется встроенный селектор Woo для миниатюры в лупе. Укажите свой, если тема меняет разметку.', 'mp-sticky-custom-cart' )
-		);
-		self::field_text(
-			$opt,
-			'catalog',
-			'card_root_selector',
-			__( 'Корень карточки для состояний (closest, CSS)', 'mp-sticky-custom-cart' ),
-			isset( $c['card_root_selector'] ) ? (string) $c['card_root_selector'] : 'li.product',
-			__( 'Предок товара для классов «загрузка / добавлено / ошибка»; обычно li.product или кастомный контейнер темы.', 'mp-sticky-custom-cart' )
-		);
-
 		echo '</tbody></table>';
 
+		self::render_catalog_card_preview( $s, $c );
+
 		echo '<h3>' . esc_html__( 'Тексты интерфейса', 'mp-sticky-custom-cart' ) . '</h3>';
-		echo '<p class="description">' . esc_html__( 'Пустое поле на сайте заменяется стандартной фразой из плагина.', 'mp-sticky-custom-cart' ) . '</p>';
+		echo '<p class="description">' . esc_html__( 'Пустое поле на сайте заменяется стандартной фразой из плагина. HTML удаляется при сохранении; не более 500 символов для полей каталога ниже.', 'mp-sticky-custom-cart' ) . '</p>';
 		echo '<table class="form-table" role="presentation"><tbody>';
-		self::field_text( $opt, 'labels', 'more_info', __( 'Текст кнопки «Подробнее о товаре»', 'mp-sticky-custom-cart' ), isset( $l['more_info'] ) ? (string) $l['more_info'] : '' );
-		self::field_text( $opt, 'labels', 'out_of_stock', __( 'Сообщение «Товара нет в наличии»', 'mp-sticky-custom-cart' ), isset( $l['out_of_stock'] ) ? (string) $l['out_of_stock'] : '' );
+		self::field_text(
+			$opt,
+			'labels',
+			'more_info',
+			__( 'Текст кнопки «Подробнее о товаре»', 'mp-sticky-custom-cart' ),
+			isset( $l['more_info'] ) ? (string) $l['more_info'] : '',
+			__( 'Отображается на полосе поверх миниатюры в каталоге.', 'mp-sticky-custom-cart' ),
+			array( 'maxlength' => 500 )
+		);
+		self::field_text(
+			$opt,
+			'labels',
+			'out_of_stock',
+			__( 'Сообщение «Товара нет в наличии»', 'mp-sticky-custom-cart' ),
+			isset( $l['out_of_stock'] ) ? (string) $l['out_of_stock'] : '',
+			__( 'Тост на карточке при клике по картинке, если товар не в наличии (DOM), и при ответе сервера out_of_stock.', 'mp-sticky-custom-cart' ),
+			array( 'maxlength' => 500 )
+		);
 		self::field_text( $opt, 'labels', 'clear_cart', __( 'Текст кнопки «Очистить корзину»', 'mp-sticky-custom-cart' ), isset( $l['clear_cart'] ) ? (string) $l['clear_cart'] : '' );
 		self::field_text( $opt, 'labels', 'cart_cleared', __( 'Сообщение после очистки корзины', 'mp-sticky-custom-cart' ), isset( $l['cart_cleared'] ) ? (string) $l['cart_cleared'] : '' );
 		self::field_text( $opt, 'labels', 'checkout', __( 'Текст кнопки «Оформить заказ»', 'mp-sticky-custom-cart' ), isset( $l['checkout'] ) ? (string) $l['checkout'] : '' );
@@ -614,13 +736,18 @@ final class SettingsPage {
 	 * @param string $section Section key.
 	 * @param string $field Field key.
 	 */
-	private static function field_text( $opt, $section, $field, $label, $value, $help = '' ) {
+	private static function field_text( $opt, $section, $field, $label, $value, $help = '', array $extra = array() ) {
 		$name = sprintf( '%s[%s][%s]', $opt, $section, $field );
 		echo '<tr><th scope="row"><label for="' . esc_attr( $name ) . '">' . esc_html( $label ) . '</label>' . self::help_tip_button( $help ) . '</th><td>';
+		$attrs = '';
+		if ( isset( $extra['maxlength'] ) ) {
+			$attrs .= ' maxlength="' . (int) $extra['maxlength'] . '"';
+		}
 		printf(
-			'<input type="text" class="regular-text" id="%1$s" name="%1$s" value="%2$s" />',
+			'<input type="text" class="regular-text" id="%1$s" name="%1$s" value="%2$s"%3$s />',
 			esc_attr( $name ),
-			esc_attr( $value )
+			esc_attr( $value ),
+			$attrs // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- maxlength is int, attribute name fixed
 		);
 		echo '</td></tr>';
 	}

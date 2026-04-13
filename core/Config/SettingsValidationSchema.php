@@ -22,6 +22,10 @@ final class SettingsValidationSchema {
 	public static function get_settings_schema() {
 		return array(
 			'catalog'     => array(
+				'image_click_behavior'        => array(
+					'type'  => 'text',
+					'oneof' => array( 'add_to_cart', 'theme_default' ),
+				),
 				'hover_overlay_mobile_always' => array(
 					'type' => 'boolean',
 				),
