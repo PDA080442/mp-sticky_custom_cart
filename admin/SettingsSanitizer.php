@@ -106,9 +106,9 @@ final class SettingsSanitizer {
 			case 'integer':
 				return self::sanitize_integer( $raw, $field, $fallback );
 			case 'float':
-				return self::sanitize_float( $raw, $field, $fallback );
+				return self::sanitize_float( $raw, $field, $fallback, $exists, $path );
 			case 'color':
-				return self::sanitize_color( $raw, is_string( $fallback ) ? $fallback : '#000000' );
+				return self::sanitize_color_with_notice( $raw, is_string( $fallback ) ? $fallback : '#000000', $exists, $path );
 			case 'text':
 			default:
 				$text = self::sanitize_text( $raw, isset( $field['max_length'] ) ? (int) $field['max_length'] : 1000 );
@@ -123,6 +123,18 @@ final class SettingsSanitizer {
 						'mp_scc_catalog',
 						'mp_scc_bad_hover_easing',
 						__( 'Недопустимые символы в easing (CSS). Использовано значение по умолчанию.', 'mp-sticky-custom-cart' ),
+						'warning'
+					);
+					return is_string( $fallback ) ? $fallback : 'cubic-bezier(0.4, 0, 0.2, 1)';
+				}
+				if ( 'sticky_cart.drawer_toggle_easing' === $path && $exists && ( ! is_string( $text ) || '' === trim( $text ) ) ) {
+					return is_string( $fallback ) ? $fallback : 'cubic-bezier(0.4, 0, 0.2, 1)';
+				}
+				if ( 'sticky_cart.drawer_toggle_easing' === $path && $exists && is_string( $text ) && '' !== trim( $text ) && ! self::is_safe_css_easing_token( $text ) ) {
+					add_settings_error(
+						'mp_scc_sticky',
+						'mp_scc_bad_drawer_easing',
+						__( 'Недопустимые символы в easing drawer (CSS). Использовано значение по умолчанию.', 'mp-sticky-custom-cart' ),
 						'warning'
 					);
 					return is_string( $fallback ) ? $fallback : 'cubic-bezier(0.4, 0, 0.2, 1)';
@@ -165,8 +177,16 @@ final class SettingsSanitizer {
 	 * @param array<string, mixed> $field
 	 * @param mixed                $fallback
 	 */
-	private static function sanitize_float( $raw, array $field, $fallback ) {
+	private static function sanitize_float( $raw, array $field, $fallback, $exists = false, $path = '' ) {
 		if ( ! is_numeric( $raw ) ) {
+			if ( $exists && is_string( $raw ) && '' !== trim( $raw ) && 'sticky_cart.surface_background_alpha' === $path ) {
+				add_settings_error(
+					'mp_scc_sticky',
+					'mp_scc_bad_surface_alpha',
+					__( 'Прозрачность фона панели: ожидается число от 0 до 1. Использовано значение по умолчанию.', 'mp-sticky-custom-cart' ),
+					'warning'
+				);
+			}
 			return is_float( $fallback ) || is_int( $fallback ) ? (float) $fallback : 0.0;
 		}
 		$n = (float) $raw;
@@ -218,6 +238,37 @@ final class SettingsSanitizer {
 			return $hex;
 		}
 
+		return sanitize_hex_color( $fallback ) ? $fallback : '#000000';
+	}
+
+	/**
+	 * @param mixed  $raw      Raw POST.
+	 * @param string $fallback Default hex.
+	 * @param bool   $exists   Key was in POST.
+	 * @param string $path     settings path e.g. styles.color_text_primary.
+	 * @return string
+	 */
+	private static function sanitize_color_with_notice( $raw, $fallback, $exists, $path ) {
+		$c = is_string( $raw ) ? trim( $raw ) : '';
+		if ( '' === $c ) {
+			return sanitize_hex_color( $fallback ) ? $fallback : '#000000';
+		}
+		$hex = sanitize_hex_color( $c );
+		if ( $hex ) {
+			return $hex;
+		}
+		if ( $exists ) {
+			add_settings_error(
+				'mp_scc_styles',
+				'mp_scc_bad_color_' . preg_replace( '/\W+/', '_', (string) $path ),
+				sprintf(
+					/* translators: %s: settings field path */
+					__( 'Некорректный цвет в поле «%s»; подставлен запасной hex.', 'mp-sticky-custom-cart' ),
+					$path
+				),
+				'warning'
+			);
+		}
 		return sanitize_hex_color( $fallback ) ? $fallback : '#000000';
 	}
 
