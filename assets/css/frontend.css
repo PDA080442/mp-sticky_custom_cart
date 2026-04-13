@@ -108,14 +108,14 @@ body.popup-overlay-open .mp-scc-sticky-bar {
 	display: flex;
 	flex-direction: column;
 	align-items: stretch;
-	gap: 10px;
+	gap: var(--mp-scc-sticky-inner-gap-mobile, 10px);
 	width: 100%;
 }
 
 .mp-scc-sticky-summary {
 	display: flex;
 	align-items: center;
-	gap: 10px;
+	gap: var(--mp-scc-sticky-summary-gap, 10px);
 	flex: 1 1 auto;
 	min-width: 0;
 	width: 100%;
@@ -127,13 +127,21 @@ body.popup-overlay-open .mp-scc-sticky-bar {
 	flex-wrap: wrap;
 	align-items: center;
 	justify-content: stretch;
-	gap: 10px;
+	gap: var(--mp-scc-sticky-actions-gap, 10px);
 	width: 100%;
 }
 
 .mp-scc-sticky-actions .mp-scc-btn {
 	flex: 1 1 0;
 	min-width: 0;
+}
+
+.mp-scc-sticky-actions .mp-scc-clear-cart {
+	min-width: var(--mp-scc-sticky-clear-min-width, unset);
+}
+
+.mp-scc-sticky-actions .mp-scc-checkout {
+	min-width: var(--mp-scc-sticky-checkout-min-width, unset);
 }
 
 .mp-scc-clear-cart--loading {
@@ -192,7 +200,7 @@ body.popup-overlay-open .mp-scc-sticky-bar {
 		flex-wrap: nowrap;
 		align-items: center;
 		justify-content: space-between;
-		gap: 16px 24px;
+		gap: var(--mp-scc-sticky-inner-gap-desktop-row, 16px) var(--mp-scc-sticky-inner-gap-desktop-col, 24px);
 	}
 
 	.mp-scc-sticky-summary {
@@ -204,17 +212,13 @@ body.popup-overlay-open .mp-scc-sticky-bar {
 		width: auto;
 		flex: 0 0 auto;
 		flex-wrap: nowrap;
-		gap: 10px;
+		gap: var(--mp-scc-sticky-actions-gap, 10px);
 		justify-content: flex-end;
 	}
 
 	.mp-scc-sticky-actions .mp-scc-btn {
 		flex: 0 0 auto;
 		min-width: auto;
-	}
-
-	.mp-scc-sticky-summary-text {
-		gap: 12px 20px;
 	}
 }
 
@@ -247,7 +251,8 @@ body.popup-overlay-open .mp-scc-sticky-bar {
 	overflow-x: hidden;
 	overflow-y: auto;
 	-webkit-overflow-scrolling: touch;
-	padding: 12px 16px 14px;
+	padding: var(--mp-scc-sticky-drawer-padding-y, 12px) var(--mp-scc-sticky-drawer-padding-x, 16px)
+		calc(var(--mp-scc-sticky-drawer-padding-y, 12px) + 2px);
 	padding-left: calc(16px + env(safe-area-inset-left, 0px));
 	padding-right: calc(16px + env(safe-area-inset-right, 0px));
 	border-radius: var(--mp-scc-sticky-border-radius, 12px) var(--mp-scc-sticky-border-radius, 12px) 0 0;
@@ -403,7 +408,7 @@ body.popup-overlay-open .mp-scc-sticky-bar {
 	display: flex;
 	flex-wrap: wrap;
 	align-items: baseline;
-	gap: 10px 14px;
+	gap: var(--mp-scc-sticky-summary-text-gap-row, 12px) var(--mp-scc-sticky-summary-text-gap-column, 20px);
 	min-width: 0;
 	font-size: var(--mp-scc-sticky-summary-font-size, 15px);
 	font-weight: var(--mp-scc-sticky-summary-font-weight, 600);
