@@ -195,6 +195,9 @@ final class SettingsPage {
 				submit_button();
 				?>
 			</form>
+			<?php if ( 'diagnostics' === $tab ) : ?>
+				<?php ConfigImportExportHandler::render_panel(); ?>
+			<?php endif; ?>
 		</div>
 		<?php
 	}
@@ -223,7 +226,7 @@ final class SettingsPage {
 			'cart'        => __( 'Поведение нижней панели и drawer, редирект страницы корзины, уведомления. Внешний вид — вкладка «Стили».', 'mp-sticky-custom-cart' ),
 			'wishlist'    => __( 'Отступы и слой иконки избранного относительно overlay каталога (см. docs/wishlist-integration.md).', 'mp-sticky-custom-cart' ),
 			'styles'      => __( 'Палитра, эффекты подложки, типографика и отступы нижней панели; живой предпросмотр и CSS-переменные на витрине.', 'mp-sticky-custom-cart' ),
-			'diagnostics' => __( 'Логи с клиента, срок хранения и переключатели функций (feature flags).', 'mp-sticky-custom-cart' ),
+			'diagnostics' => __( 'Логи с клиента, срок хранения, переключатели функций (feature flags), экспорт и импорт конфигурации JSON.', 'mp-sticky-custom-cart' ),
 		);
 	}
 
@@ -239,6 +242,43 @@ final class SettingsPage {
 		}
 		if ( isset( $_GET['mp-scc-log-purged'] ) && '1' === $_GET['mp-scc-log-purged'] ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			echo '<div class="notice notice-success is-dismissible"><p>' . esc_html__( 'Журнал ошибок очищен.', 'mp-sticky-custom-cart' ) . '</p></div>';
+		}
+
+		if ( isset( $_GET['mp-scc-config-import'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			$code = sanitize_key( wp_unslash( $_GET['mp-scc-config-import'] ) );
+			$msg  = '';
+			$ok   = false;
+			switch ( $code ) {
+				case 'ok':
+					$msg = __( 'Конфигурация импортирована. Настройки и feature flags обновлены.', 'mp-sticky-custom-cart' );
+					$ok  = true;
+					break;
+				case 'no_file':
+					$msg = __( 'Файл не выбран или не получен.', 'mp-sticky-custom-cart' );
+					break;
+				case 'upload_error':
+					$msg = __( 'Ошибка загрузки файла.', 'mp-sticky-custom-cart' );
+					break;
+				case 'invalid_upload':
+					$msg = __( 'Недопустимый временный файл загрузки.', 'mp-sticky-custom-cart' );
+					break;
+				case 'file_too_large':
+					$msg = __( 'Файл слишком большой (лимит 512 КБ).', 'mp-sticky-custom-cart' );
+					break;
+				case 'empty_file':
+					$msg = __( 'Файл пустой или не прочитан.', 'mp-sticky-custom-cart' );
+					break;
+				case 'invalid_json':
+					$msg = __( 'Невалидный JSON. Убедитесь, что выбран файл, экспортированный этим плагином.', 'mp-sticky-custom-cart' );
+					break;
+				case 'bad_format':
+					$msg = __( 'Неверный формат конфигурации (ожидается mp_scc_config_version и блоки settings / feature_flags).', 'mp-sticky-custom-cart' );
+					break;
+				default:
+					$msg = __( 'Импорт не выполнен.', 'mp-sticky-custom-cart' );
+			}
+			$class = $ok ? 'notice-success' : 'notice-error';
+			echo '<div class="notice ' . esc_attr( $class ) . ' is-dismissible"><p>' . esc_html( $msg ) . '</p></div>';
 		}
 	}
 

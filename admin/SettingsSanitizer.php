@@ -90,6 +90,61 @@ final class SettingsSanitizer {
 	}
 
 	/**
+	 * Sanitize a complete settings tree (e.g. from JSON import): merge over defaults, then validate every schema field.
+	 *
+	 * @param array<string, mixed> $input Raw imported `settings` object.
+	 * @return array<string, mixed>
+	 */
+	public static function sanitize_settings_for_import( array $input ) {
+		$defaults = self::default_settings_bundle();
+		$merged   = self::merge_deep( $defaults, $input );
+		$out      = $defaults;
+
+		foreach ( SettingsValidationSchema::get_settings_schema() as $section => $fields ) {
+			if ( ! is_array( $fields ) ) {
+				continue;
+			}
+			foreach ( $fields as $key => $field ) {
+				if ( ! is_array( $field ) ) {
+					continue;
+				}
+				$path = $section . '.' . $key;
+				$raw  = self::get_path( $merged, $path, self::get_path( $defaults, $path, null ) );
+				$out  = self::set_path( $out, $path, self::sanitize_field( $raw, $field, $defaults, $path, true ) );
+			}
+		}
+
+		OptionResolver::flush_cache();
+
+		return $out;
+	}
+
+	/**
+	 * Sanitize imported feature flags: unknown keys ignored; schema keys coerced to bool.
+	 *
+	 * @param array<string, mixed> $input Raw `feature_flags` object.
+	 * @return array<string, bool>
+	 */
+	public static function sanitize_feature_flags_for_import( array $input ) {
+		$defaults = FeatureFlagsDefaults::get();
+		$merged   = array_merge( $defaults, $input );
+		$out      = array();
+
+		foreach ( SettingsValidationSchema::get_flags_schema() as $key => $field ) {
+			if ( ! array_key_exists( $key, $merged ) ) {
+				$out[ $key ] = isset( $defaults[ $key ] ) ? (bool) $defaults[ $key ] : false;
+				continue;
+			}
+			$raw         = $merged[ $key ];
+			$out[ $key ] = ( '1' === (string) $raw || 1 === $raw || true === $raw || 'on' === $raw );
+		}
+
+		OptionResolver::flush_cache();
+
+		return $out;
+	}
+
+	/**
 	 * @param mixed                $raw     Raw value.
 	 * @param array<string, mixed> $field   Schema fragment.
 	 * @param array<string, mixed> $defaults Full default tree.

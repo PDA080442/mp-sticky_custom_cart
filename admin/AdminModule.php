@@ -17,6 +17,7 @@ final class AdminModule {
 	public static function register() {
 		SettingsApiHooks::register();
 		SettingsPage::register();
+		ConfigImportExportHandler::register();
 		SettingsTabResetHandler::register();
 		ErrorLogPurgeHandler::register();
 		ErrorLogAdminHooks::register();
