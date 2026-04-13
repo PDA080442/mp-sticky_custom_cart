@@ -1,0 +1,117 @@
+/* Diagnostics: error log toolbar + drawer */
+.mp-scc-error-log {
+	max-width: 100%;
+}
+
+.mp-scc-error-log-toolbar {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 8px;
+	margin-bottom: 12px;
+}
+
+.mp-scc-error-log-toolbar .mp-scc-error-log-filter {
+	max-width: 100%;
+}
+
+.mp-scc-error-log-meta {
+	margin: 8px 0;
+	min-height: 1.2em;
+	color: #646970;
+}
+
+.mp-scc-error-log-table-wrap {
+	overflow-x: auto;
+	margin-bottom: 8px;
+}
+
+.mp-scc-error-log-table {
+	table-layout: auto;
+}
+
+.mp-scc-error-log-table td {
+	vertical-align: top;
+	word-break: break-word;
+}
+
+.mp-scc-error-log-pagination {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 8px;
+}
+
+.mp-scc-error-log-page-info {
+	margin-left: 4px;
+}
+
+.mp-scc-error-log-drawer,
+.mp-scc-error-log-backdrop {
+	display: none;
+}
+
+.mp-scc-error-log-drawer.is-open,
+.mp-scc-error-log-backdrop.is-open {
+	display: block;
+}
+
+.mp-scc-error-log-backdrop.is-open {
+	position: fixed;
+	inset: 0;
+	background: rgba(0, 0, 0, 0.35);
+	z-index: 100000;
+}
+
+.mp-scc-error-log-drawer.is-open {
+	position: fixed;
+	top: 0;
+	right: 0;
+	bottom: 0;
+	width: min(520px, 100vw);
+	z-index: 100001;
+	background: #fff;
+	box-shadow: -4px 0 24px rgba(0, 0, 0, 0.12);
+	overflow: hidden;
+}
+
+.mp-scc-error-log-drawer__inner {
+	display: flex;
+	flex-direction: column;
+	height: 100%;
+}
+
+.mp-scc-error-log-drawer__head {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding: 12px 16px;
+	border-bottom: 1px solid #dcdcde;
+	flex-shrink: 0;
+}
+
+.mp-scc-error-log-drawer__head h4 {
+	margin: 0;
+	font-size: 14px;
+}
+
+.mp-scc-error-log-drawer__body {
+	margin: 0;
+	padding: 12px 16px;
+	overflow: auto;
+	flex: 1;
+	font-size: 12px;
+	line-height: 1.45;
+	white-space: pre-wrap;
+	word-break: break-word;
+	background: #f6f7f7;
+}
+
+.mp-scc-log-row {
+	cursor: pointer;
+}
+
+.mp-scc-log-row:focus {
+	outline: 2px solid #2271b1;
+	outline-offset: -2px;
+}

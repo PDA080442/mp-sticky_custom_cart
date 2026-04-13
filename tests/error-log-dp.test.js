@@ -22,6 +22,11 @@ var adminModule = fs.readFileSync(path.join(root, 'admin', 'AdminModule.php'), '
 var errorLoggingHooks = fs.readFileSync(path.join(root, 'core', 'ErrorLoggingHooks.php'), 'utf8');
 var frontendJs = fs.readFileSync(path.join(root, 'assets', 'js', 'frontend.js'), 'utf8');
 var frontendFlagResolver = fs.readFileSync(path.join(root, 'frontend', 'FrontendFlagResolver.php'), 'utf8');
+var diagnosticsAccess = fs.readFileSync(path.join(root, 'admin', 'DiagnosticsAccess.php'), 'utf8');
+var adminAssets = fs.readFileSync(path.join(root, 'admin', 'AdminAssetsHooks.php'), 'utf8');
+var errorLogPanelJs = fs.readFileSync(path.join(root, 'admin', 'js', 'error-log-panel.js'), 'utf8');
+var activator = fs.readFileSync(path.join(root, 'core', 'Activator.php'), 'utf8');
+var pluginBoot = fs.readFileSync(path.join(root, 'core', 'Plugin.php'), 'utf8');
 
 assert.ok(svc.includes('implements LoggingServiceInterface'), 'ErrorLogService should implement LoggingServiceInterface');
 assert.ok(svc.includes('function prune') || svc.includes('private function prune'), 'ErrorLogService should prune logs');
@@ -41,5 +46,18 @@ assert.ok(frontendJs.includes('initClientDiagnostics'), 'frontend should registe
 assert.ok(frontendJs.includes('unhandledrejection'), 'frontend should listen for unhandledrejection (dp 11.2)');
 assert.ok(frontendJs.includes('queueClientDiagnostic'), 'frontend should buffer client diagnostics (dp 11.2)');
 assert.ok(frontendFlagResolver.includes("'clientLogging'"), 'FrontendFlagResolver should expose clientLogging (dp 11.2)');
+
+assert.ok(constants.includes('CAPABILITY_MANAGE_DIAGNOSTICS'), 'Constants should define diagnostics capability (dp 11.3)');
+assert.ok(constants.includes('AJAX_ACTION_ADMIN_EXPORT_ERROR_LOGS'), 'Constants should define export AJAX action (dp 11.3)');
+assert.ok(diagnosticsAccess.includes('mp_sticky_custom_cart_diagnostics_capability'), 'DiagnosticsAccess should expose filterable capability (dp 11.3)');
+assert.ok(hooks.includes('handle_export_logs'), 'ErrorLogAdminHooks should register export handler (dp 11.3)');
+assert.ok(hooks.includes('DiagnosticsAccess::can_manage'), 'ErrorLogAdminHooks should check diagnostics capability (dp 11.3)');
+assert.ok(purge.includes('DiagnosticsAccess::can_manage'), 'Purge handler should use diagnostics capability (dp 11.3)');
+assert.ok(settingsPage.includes('mp-scc-error-log-root'), 'Settings should render interactive error log root (dp 11.3)');
+assert.ok(adminAssets.includes('error-log-panel.js'), 'Admin assets should enqueue error log panel script (dp 11.3)');
+assert.ok(errorLogPanelJs.includes('mp-scc-error-log-drawer'), 'Error log script should implement detail drawer (dp 11.3)');
+assert.ok(svc.includes('query_with_meta'), 'ErrorLogService should support filtered pagination (dp 11.3)');
+assert.ok(activator.includes('ensure_diagnostics_capability'), 'Activator should grant diagnostics capability (dp 11.3)');
+assert.ok(pluginBoot.includes('OPTION_DIAG_CAP_BOOT'), 'Plugin bootstrap should run diagnostics cap migration (dp 11.3)');
 
 console.log('error-log-dp: OK');
