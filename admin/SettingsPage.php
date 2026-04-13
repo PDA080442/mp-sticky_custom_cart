@@ -12,6 +12,7 @@ use MpStickyCustomCart\Core\Config\FeatureFlagDefinitions;
 use MpStickyCustomCart\Core\Config\FeatureFlagsDefaults;
 use MpStickyCustomCart\Core\Config\UiLabelsDefaults;
 use MpStickyCustomCart\Core\Constants;
+use MpStickyCustomCart\Core\ErrorLogService;
 use MpStickyCustomCart\Core\OptionResolver;
 
 defined( 'ABSPATH' ) || exit;
@@ -236,12 +237,11 @@ final class SettingsPage {
 		if ( isset( $_GET['mp-scc-reset-error'] ) && '1' === $_GET['mp-scc-reset-error'] ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			echo '<div class="notice notice-error is-dismissible"><p>' . esc_html__( 'Не удалось сбросить вкладку: неверный запрос.', 'mp-sticky-custom-cart' ) . '</p></div>';
 		}
+		if ( isset( $_GET['mp-scc-log-purged'] ) && '1' === $_GET['mp-scc-log-purged'] ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			echo '<div class="notice notice-success is-dismissible"><p>' . esc_html__( 'Журнал ошибок очищен.', 'mp-sticky-custom-cart' ) . '</p></div>';
+		}
 	}
 
-	/**
-	 * @param string $text Tooltip / aria-label (plain text).
-	 * @return string HTML button (empty if no text).
-	 */
 	/**
 	 * JSON payload for live style preview (styles tab). Consumed by admin/js/settings-page.js.
 	 *
@@ -815,9 +815,27 @@ final class SettingsPage {
 			'log_retention_days',
 			__( 'Хранить логи (дней)', 'mp-sticky-custom-cart' ),
 			isset( $d['log_retention_days'] ) ? (int) $d['log_retention_days'] : 14,
-			__( 'Срок хранения записей клиентских ошибок в опции плагина; старые записи подрезаются при новых событиях.', 'mp-sticky-custom-cart' )
+			__( 'Записи старше этого срока удаляются при добавлении новых (и при ротации по объёму).', 'mp-sticky-custom-cart' )
+		);
+		self::field_number(
+			$opt,
+			'diagnostics',
+			'log_max_entries',
+			__( 'Макс. число записей в журнале', 'mp-sticky-custom-cart' ),
+			isset( $d['log_max_entries'] ) ? (int) $d['log_max_entries'] : 300,
+			__( 'После превышения удаляются самые старые записи.', 'mp-sticky-custom-cart' )
+		);
+		self::field_number(
+			$opt,
+			'diagnostics',
+			'log_max_bytes',
+			__( 'Макс. размер журнала (байт)', 'mp-sticky-custom-cart' ),
+			isset( $d['log_max_bytes'] ) ? (int) $d['log_max_bytes'] : 262144,
+			__( 'Ограничение размера опции в wp_options; при превышении старые записи отбрасываются.', 'mp-sticky-custom-cart' )
 		);
 		echo '</tbody></table>';
+
+		self::render_error_log_panel();
 
 		echo '<h3>' . esc_html__( 'Feature flags', 'mp-sticky-custom-cart' ) . '</h3>';
 		echo '<table class="form-table" role="presentation"><tbody>';
@@ -831,6 +849,109 @@ final class SettingsPage {
 		}
 
 		echo '</tbody></table>';
+	}
+
+	/**
+	 * Interactive log table (filters, export, detail drawer) + purge for {@see Constants::OPTION_ERROR_LOG}.
+	 */
+	private static function render_error_log_panel() {
+		echo '<h3>' . esc_html__( 'Журнал ошибок (сервер)', 'mp-sticky-custom-cart' ) . '</h3>';
+		echo '<p class="description">' . esc_html__( 'События с витрины, сбои AJAX корзины и снимков. Полные пароли и nonce в записи не сохраняются; IP — только короткий хеш.', 'mp-sticky-custom-cart' ) . '</p>';
+
+		if ( ! DiagnosticsAccess::can_manage() ) {
+			echo '<div class="notice notice-warning inline"><p>';
+			echo esc_html__( 'Просмотр журнала, экспорт и очистка доступны только пользователям с правом управления диагностикой плагина.', 'mp-sticky-custom-cart' );
+			echo '</p></div>';
+			return;
+		}
+
+		echo '<div id="mp-scc-error-log-root" class="mp-scc-error-log" hidden>';
+		echo '<div class="mp-scc-error-log-toolbar">';
+
+		echo '<label class="screen-reader-text" for="mp-scc-log-level">' . esc_html__( 'Уровень', 'mp-sticky-custom-cart' ) . '</label>';
+		echo '<select id="mp-scc-log-level" class="mp-scc-error-log-filter">';
+		echo '<option value="">' . esc_html__( 'Все уровни', 'mp-sticky-custom-cart' ) . '</option>';
+		echo '<option value="debug">debug</option>';
+		echo '<option value="info">info</option>';
+		echo '<option value="warn">warn</option>';
+		echo '<option value="error">error</option>';
+		echo '</select> ';
+
+		echo '<label class="screen-reader-text" for="mp-scc-log-date-from">' . esc_html__( 'С даты', 'mp-sticky-custom-cart' ) . '</label>';
+		echo '<input type="date" id="mp-scc-log-date-from" class="mp-scc-error-log-filter" /> ';
+		echo '<label class="screen-reader-text" for="mp-scc-log-date-to">' . esc_html__( 'По дату', 'mp-sticky-custom-cart' ) . '</label>';
+		echo '<input type="date" id="mp-scc-log-date-to" class="mp-scc-error-log-filter" /> ';
+
+		echo '<label class="screen-reader-text" for="mp-scc-log-source">' . esc_html__( 'Источник / endpoint', 'mp-sticky-custom-cart' ) . '</label>';
+		echo '<input type="search" id="mp-scc-log-source" class="regular-text mp-scc-error-log-filter" placeholder="' . esc_attr__( 'Источник или endpoint', 'mp-sticky-custom-cart' ) . '" /> ';
+
+		echo '<label class="screen-reader-text" for="mp-scc-log-search">' . esc_html__( 'Поиск в записи', 'mp-sticky-custom-cart' ) . '</label>';
+		echo '<input type="search" id="mp-scc-log-search" class="regular-text mp-scc-error-log-filter" placeholder="' . esc_attr__( 'Текст в сообщении / payload', 'mp-sticky-custom-cart' ) . '" /> ';
+
+		echo '<button type="button" class="button button-primary" id="mp-scc-log-apply">' . esc_html__( 'Применить', 'mp-sticky-custom-cart' ) . '</button> ';
+		echo '<button type="button" class="button" id="mp-scc-log-reset">' . esc_html__( 'Сбросить', 'mp-sticky-custom-cart' ) . '</button>';
+
+		echo '</div>';
+
+		echo '<p class="mp-scc-error-log-meta"><span id="mp-scc-log-status"></span></p>';
+
+		echo '<div class="mp-scc-error-log-table-wrap">';
+		echo '<table class="widefat striped mp-scc-error-log-table">';
+		echo '<thead><tr>';
+		echo '<th scope="col">' . esc_html__( 'Время (UTC)', 'mp-sticky-custom-cart' ) . '</th>';
+		echo '<th scope="col">' . esc_html__( 'Уровень', 'mp-sticky-custom-cart' ) . '</th>';
+		echo '<th scope="col">' . esc_html__( 'Источник', 'mp-sticky-custom-cart' ) . '</th>';
+		echo '<th scope="col">' . esc_html__( 'Endpoint', 'mp-sticky-custom-cart' ) . '</th>';
+		echo '<th scope="col">' . esc_html__( 'Код', 'mp-sticky-custom-cart' ) . '</th>';
+		echo '<th scope="col">' . esc_html__( 'Сообщение', 'mp-sticky-custom-cart' ) . '</th>';
+		echo '</tr></thead>';
+		echo '<tbody id="mp-scc-log-tbody"><tr class="mp-scc-log-placeholder"><td colspan="6">' . esc_html__( 'Загрузка…', 'mp-sticky-custom-cart' ) . '</td></tr></tbody>';
+		echo '</table>';
+		echo '</div>';
+
+		echo '<p class="mp-scc-error-log-pagination">';
+		echo '<label for="mp-scc-log-per-page" class="screen-reader-text">' . esc_html__( 'На странице', 'mp-sticky-custom-cart' ) . '</label>';
+		echo '<select id="mp-scc-log-per-page">';
+		echo '<option value="25">25</option>';
+		echo '<option value="50" selected>50</option>';
+		echo '<option value="100">100</option>';
+		echo '</select> ';
+		echo '<button type="button" class="button" id="mp-scc-log-prev">' . esc_html__( 'Назад', 'mp-sticky-custom-cart' ) . '</button> ';
+		echo '<button type="button" class="button" id="mp-scc-log-next">' . esc_html__( 'Вперёд', 'mp-sticky-custom-cart' ) . '</button>';
+		echo '<span id="mp-scc-log-page-info" class="mp-scc-error-log-page-info"></span>';
+		echo '</p>';
+
+		echo '<p class="mp-scc-error-log-actions">';
+		echo '<button type="button" class="button" id="mp-scc-log-export-csv">' . esc_html__( 'Экспорт CSV', 'mp-sticky-custom-cart' ) . '</button> ';
+		echo '<button type="button" class="button" id="mp-scc-log-export-json">' . esc_html__( 'Экспорт JSON', 'mp-sticky-custom-cart' ) . '</button> ';
+		echo '<form method="post" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '" style="display:inline-block;margin-left:8px;">';
+		wp_nonce_field( Constants::ADMIN_POST_PURGE_ERROR_LOG );
+		echo '<input type="hidden" name="action" value="' . esc_attr( Constants::ADMIN_POST_PURGE_ERROR_LOG ) . '" />';
+		echo '<input type="hidden" name="mp_scc_return_tab" value="diagnostics" />';
+		submit_button(
+			__( 'Очистить журнал', 'mp-sticky-custom-cart' ),
+			'delete small',
+			'submit',
+			false,
+			array(
+				'onclick' => 'return confirm(' . wp_json_encode( __( 'Удалить все записи журнала?', 'mp-sticky-custom-cart' ) ) . ');',
+			)
+		);
+		echo '</form>';
+		echo '</p>';
+
+		echo '<div id="mp-scc-error-log-drawer" class="mp-scc-error-log-drawer" aria-hidden="true">';
+		echo '<div class="mp-scc-error-log-drawer__inner">';
+		echo '<div class="mp-scc-error-log-drawer__head">';
+		echo '<h4 id="mp-scc-log-drawer-title">' . esc_html__( 'Запись', 'mp-sticky-custom-cart' ) . '</h4>';
+		echo '<button type="button" class="button-link mp-scc-error-log-drawer__close" id="mp-scc-log-drawer-close" aria-label="' . esc_attr__( 'Закрыть', 'mp-sticky-custom-cart' ) . '"><span class="dashicons dashicons-no-alt" aria-hidden="true"></span></button>';
+		echo '</div>';
+		echo '<pre id="mp-scc-log-drawer-body" class="mp-scc-error-log-drawer__body"></pre>';
+		echo '</div></div>';
+		echo '<div id="mp-scc-error-log-backdrop" class="mp-scc-error-log-backdrop" aria-hidden="true"></div>';
+
+		echo '</div>';
+		echo '<script>document.getElementById("mp-scc-error-log-root").hidden=false;</script>';
 	}
 
 	/**

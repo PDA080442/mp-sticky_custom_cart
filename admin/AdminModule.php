@@ -18,6 +18,8 @@ final class AdminModule {
 		SettingsApiHooks::register();
 		SettingsPage::register();
 		SettingsTabResetHandler::register();
+		ErrorLogPurgeHandler::register();
+		ErrorLogAdminHooks::register();
 		AdminAssetsHooks::register();
 
 		/**

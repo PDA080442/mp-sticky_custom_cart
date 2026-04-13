@@ -138,6 +138,10 @@ final class UiSettingsDefaults {
 			'diagnostics' => array(
 				'client_error_logging' => true,
 				'log_retention_days'   => 14,
+				/** Max rows kept after time-based prune (cap). */
+				'log_max_entries'      => 300,
+				/** Max serialized size of the log option (bytes); oldest rows dropped first. */
+				'log_max_bytes'        => 262144,
 			),
 			'notices'     => array(
 				/** Strip the "View cart" anchor from WooCommerce add-to-cart success HTML (sticky replaces cart UX). */

@@ -128,6 +128,8 @@ final class SettingsValidationSchema {
 			'diagnostics' => array(
 				'client_error_logging' => array( 'type' => 'boolean' ),
 				'log_retention_days'   => array( 'type' => 'integer', 'min' => 1, 'max' => 365 ),
+				'log_max_entries'      => array( 'type' => 'integer', 'min' => 10, 'max' => 2000 ),
+				'log_max_bytes'        => array( 'type' => 'integer', 'min' => 4096, 'max' => 1048576 ),
 			),
 			'notices'     => array(
 				'remove_view_cart_link' => array( 'type' => 'boolean' ),

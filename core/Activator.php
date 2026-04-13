@@ -22,9 +22,21 @@ final class Activator {
 			return;
 		}
 
+		self::ensure_diagnostics_capability();
+
 		/**
 		 * Fires after plugin activation (capabilities already checked).
 		 */
 		do_action( 'mp_sticky_custom_cart_activated' );
+	}
+
+	/**
+	 * Grants {@see Constants::CAPABILITY_MANAGE_DIAGNOSTICS} to the administrator role.
+	 */
+	public static function ensure_diagnostics_capability() {
+		$role = get_role( 'administrator' );
+		if ( $role && ! $role->has_cap( Constants::CAPABILITY_MANAGE_DIAGNOSTICS ) ) {
+			$role->add_cap( Constants::CAPABILITY_MANAGE_DIAGNOSTICS );
+		}
 	}
 }

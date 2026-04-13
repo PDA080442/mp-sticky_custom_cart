@@ -7,6 +7,7 @@
 
 namespace MpStickyCustomCart\Admin;
 
+use MpStickyCustomCart\Core\Constants;
 use MpStickyCustomCart\Core\PluginPaths;
 
 defined( 'ABSPATH' ) || exit;
@@ -19,6 +20,7 @@ final class AdminAssetsHooks {
 	public const HANDLE_SCRIPT        = 'mp-scc-admin';
 	public const HANDLE_STYLE         = 'mp-scc-admin';
 	public const HANDLE_SETTINGS_PAGE = 'mp-scc-admin-settings-page';
+	public const HANDLE_ERROR_LOG     = 'mp-scc-error-log-panel';
 
 	public static function register() {
 		add_action( 'admin_enqueue_scripts', array( self::class, 'enqueue' ), 20 );
@@ -54,6 +56,22 @@ final class AdminAssetsHooks {
 			MP_STICKY_CUSTOM_CART_ASSET_VERSION,
 			true
 		);
+
+		wp_enqueue_style(
+			self::HANDLE_ERROR_LOG,
+			PluginPaths::url( 'admin/css/error-log-panel.css' ),
+			array(),
+			MP_STICKY_CUSTOM_CART_ASSET_VERSION
+		);
+
+		wp_enqueue_script(
+			self::HANDLE_ERROR_LOG,
+			PluginPaths::url( 'admin/js/error-log-panel.js' ),
+			array( 'jquery' ),
+			MP_STICKY_CUSTOM_CART_ASSET_VERSION,
+			true
+		);
+
 		wp_localize_script(
 			self::HANDLE_SETTINGS_PAGE,
 			'mpSccAdmin',
@@ -62,6 +80,30 @@ final class AdminAssetsHooks {
 				'stylePreview' => array(
 					'previewId'  => 'mp-scc-style-live-preview',
 					'throttleMs' => 100,
+				),
+				'errorLogAjax' => array(
+					'url'    => admin_url( 'admin-ajax.php' ),
+					'action' => Constants::AJAX_ACTION_ADMIN_GET_ERROR_LOGS,
+					'nonce'  => wp_create_nonce( Constants::NONCE_ADMIN_ERROR_LOG ),
+				),
+			)
+		);
+
+		wp_localize_script(
+			self::HANDLE_ERROR_LOG,
+			'mpSccErrorLog',
+			array(
+				'ajaxUrl'      => admin_url( 'admin-ajax.php' ),
+				'action'       => Constants::AJAX_ACTION_ADMIN_GET_ERROR_LOGS,
+				'exportAction' => Constants::AJAX_ACTION_ADMIN_EXPORT_ERROR_LOGS,
+				'nonce'        => wp_create_nonce( Constants::NONCE_ADMIN_ERROR_LOG ),
+				'enabled'      => DiagnosticsAccess::can_manage(),
+				'i18n'         => array(
+					'loading'     => __( 'Загрузка…', 'mp-sticky-custom-cart' ),
+					'empty'       => __( 'Записей нет.', 'mp-sticky-custom-cart' ),
+					'loadError'   => __( 'Не удалось загрузить журнал.', 'mp-sticky-custom-cart' ),
+					'pagination'  => __( 'Страница %1$s из %2$s, всего записей: %3$s', 'mp-sticky-custom-cart' ),
+					'drawerTitle' => __( 'Полная запись', 'mp-sticky-custom-cart' ),
 				),
 			)
 		);
