@@ -15,11 +15,51 @@ defined( 'ABSPATH' ) || exit;
 final class UiSettingsDefaults {
 
 	/**
+	 * Sticky cart keys that belong to appearance (Styles tab). Not reset alone when resetting Cart tab behavior — Cart reset still replaces full sticky_cart.
+	 *
+	 * @return list<string>
+	 */
+	public static function get_sticky_cart_visual_keys() {
+		return array(
+			'surface_backdrop_blur_px',
+			'surface_background_alpha',
+			'border_radius_px',
+			'padding_x_desktop_px',
+			'padding_y_desktop_px',
+			'padding_x_mobile_px',
+			'padding_y_mobile_px',
+			'sticky_inner_gap_mobile_px',
+			'sticky_inner_gap_desktop_row_px',
+			'sticky_inner_gap_desktop_col_px',
+			'summary_font_size_px',
+			'summary_font_weight',
+			'summary_line_height',
+			'summary_gap_px',
+			'summary_text_gap_row_px',
+			'summary_text_gap_column_px',
+			'button_font_size_px',
+			'button_font_weight',
+			'button_line_height',
+			'actions_gap_px',
+			'clear_button_min_width_px',
+			'checkout_button_min_width_px',
+			'drawer_max_height_vh',
+			'drawer_padding_x_px',
+			'drawer_padding_y_px',
+		);
+	}
+
+	/**
 	 * @return array<string, mixed> Nested defaults for catalog, sticky cart, wishlist integration, motion.
 	 */
 	public static function get() {
 		return array(
 			'catalog'    => array(
+				/**
+				 * add_to_cart: перехват клика по миниатюре и AJAX (при включённом feature flag).
+				 * theme_default: не вешать обработчик — тема и ссылки Woo ведут себя как обычно.
+				 */
+				'image_click_behavior'        => 'add_to_cart',
 				'hover_overlay_mobile_always' => true,
 				'hover_animation_duration_ms'  => 220,
 				'hover_animation_easing'       => 'cubic-bezier(0.4, 0, 0.2, 1)',
@@ -59,13 +99,28 @@ final class UiSettingsDefaults {
 				'padding_x_mobile_px'        => 14,
 				'padding_y_mobile_px'        => 12,
 				'drawer_max_height_vh'       => 55,
+				'drawer_padding_x_px'        => 16,
+				'drawer_padding_y_px'        => 12,
 				'drawer_toggle_duration_ms'  => 260,
 				'drawer_toggle_easing'       => 'cubic-bezier(0.4, 0, 0.2, 1)',
 				'quantity_debounce_ms'       => 320,
 				'summary_font_size_px'       => 15,
 				'summary_font_weight'        => 600,
+				/** Unitless line-height for summary (count + total). */
+				'summary_line_height'        => 1.35,
+				'summary_gap_px'             => 10,
+				'summary_text_gap_row_px'    => 12,
+				'summary_text_gap_column_px' => 20,
 				'button_font_size_px'        => 14,
 				'button_font_weight'         => 600,
+				/** Unitless line-height for sticky action buttons. */
+				'button_line_height'         => 1.2,
+				'actions_gap_px'             => 10,
+				'clear_button_min_width_px'  => 0,
+				'checkout_button_min_width_px' => 0,
+				'sticky_inner_gap_mobile_px' => 10,
+				'sticky_inner_gap_desktop_row_px' => 16,
+				'sticky_inner_gap_desktop_col_px' => 24,
 			),
 			'wishlist_ui' => array(
 				'heart_reserve_top_px'       => 10,

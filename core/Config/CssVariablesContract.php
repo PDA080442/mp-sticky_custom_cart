@@ -116,6 +116,18 @@ final class CssVariablesContract {
 				'format' => 'unit',
 			),
 			array(
+				'name'   => self::PREFIX . 'sticky-drawer-padding-x',
+				'path'   => 'sticky_cart.drawer_padding_x_px',
+				'suffix' => 'px',
+				'format' => 'unit',
+			),
+			array(
+				'name'   => self::PREFIX . 'sticky-drawer-padding-y',
+				'path'   => 'sticky_cart.drawer_padding_y_px',
+				'suffix' => 'px',
+				'format' => 'unit',
+			),
+			array(
 				'name'   => self::PREFIX . 'sticky-drawer-toggle-duration-ms',
 				'path'   => 'sticky_cart.drawer_toggle_duration_ms',
 				'suffix' => 'ms',
@@ -146,6 +158,12 @@ final class CssVariablesContract {
 				'format' => 'integer',
 			),
 			array(
+				'name'   => self::PREFIX . 'sticky-summary-line-height',
+				'path'   => 'sticky_cart.summary_line_height',
+				'suffix' => '',
+				'format' => 'float',
+			),
+			array(
 				'name'   => self::PREFIX . 'sticky-button-font-size',
 				'path'   => 'sticky_cart.button_font_size_px',
 				'suffix' => 'px',
@@ -156,6 +174,68 @@ final class CssVariablesContract {
 				'path'   => 'sticky_cart.button_font_weight',
 				'suffix' => '',
 				'format' => 'integer',
+			),
+			array(
+				'name'   => self::PREFIX . 'sticky-button-line-height',
+				'path'   => 'sticky_cart.button_line_height',
+				'suffix' => '',
+				'format' => 'float',
+			),
+			array(
+				'name'   => self::PREFIX . 'sticky-inner-gap-mobile',
+				'path'   => 'sticky_cart.sticky_inner_gap_mobile_px',
+				'suffix' => 'px',
+				'format' => 'unit',
+			),
+			array(
+				'name'   => self::PREFIX . 'sticky-inner-gap-desktop-row',
+				'path'   => 'sticky_cart.sticky_inner_gap_desktop_row_px',
+				'suffix' => 'px',
+				'format' => 'unit',
+			),
+			array(
+				'name'   => self::PREFIX . 'sticky-inner-gap-desktop-col',
+				'path'   => 'sticky_cart.sticky_inner_gap_desktop_col_px',
+				'suffix' => 'px',
+				'format' => 'unit',
+			),
+			array(
+				'name'   => self::PREFIX . 'sticky-summary-gap',
+				'path'   => 'sticky_cart.summary_gap_px',
+				'suffix' => 'px',
+				'format' => 'unit',
+			),
+			array(
+				'name'   => self::PREFIX . 'sticky-actions-gap',
+				'path'   => 'sticky_cart.actions_gap_px',
+				'suffix' => 'px',
+				'format' => 'unit',
+			),
+			array(
+				'name'   => self::PREFIX . 'sticky-summary-text-gap-row',
+				'path'   => 'sticky_cart.summary_text_gap_row_px',
+				'suffix' => 'px',
+				'format' => 'unit',
+			),
+			array(
+				'name'   => self::PREFIX . 'sticky-summary-text-gap-column',
+				'path'   => 'sticky_cart.summary_text_gap_column_px',
+				'suffix' => 'px',
+				'format' => 'unit',
+			),
+			array(
+				'name'         => self::PREFIX . 'sticky-clear-min-width',
+				'path'         => 'sticky_cart.clear_button_min_width_px',
+				'suffix'       => 'px',
+				'format'       => 'unit',
+				'omit_if_zero' => true,
+			),
+			array(
+				'name'         => self::PREFIX . 'sticky-checkout-min-width',
+				'path'         => 'sticky_cart.checkout_button_min_width_px',
+				'suffix'       => 'px',
+				'format'       => 'unit',
+				'omit_if_zero' => true,
 			),
 			array(
 				'name'   => self::PREFIX . 'color-text-primary',
@@ -220,6 +300,9 @@ final class CssVariablesContract {
 		foreach ( self::get_map() as $row ) {
 			$raw = OptionResolver::get_by_path( $merged_settings, $row['path'], null );
 			if ( null === $raw ) {
+				continue;
+			}
+			if ( ! empty( $row['omit_if_zero'] ) && is_numeric( $raw ) && (float) $raw <= 0 ) {
 				continue;
 			}
 

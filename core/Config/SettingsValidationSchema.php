@@ -22,6 +22,10 @@ final class SettingsValidationSchema {
 	public static function get_settings_schema() {
 		return array(
 			'catalog'     => array(
+				'image_click_behavior'        => array(
+					'type'  => 'text',
+					'oneof' => array( 'add_to_cart', 'theme_default' ),
+				),
 				'hover_overlay_mobile_always' => array(
 					'type' => 'boolean',
 				),
@@ -85,6 +89,8 @@ final class SettingsValidationSchema {
 				'padding_x_mobile_px'       => array( 'type' => 'integer', 'min' => 0, 'max' => 200 ),
 				'padding_y_mobile_px'       => array( 'type' => 'integer', 'min' => 0, 'max' => 200 ),
 				'drawer_max_height_vh'      => array( 'type' => 'integer', 'min' => 10, 'max' => 100 ),
+				'drawer_padding_x_px'       => array( 'type' => 'integer', 'min' => 0, 'max' => 64 ),
+				'drawer_padding_y_px'       => array( 'type' => 'integer', 'min' => 0, 'max' => 64 ),
 				'drawer_toggle_duration_ms' => array( 'type' => 'integer', 'min' => 0, 'max' => 5000 ),
 				'drawer_toggle_easing'      => array(
 					'type'       => 'text',
@@ -93,8 +99,19 @@ final class SettingsValidationSchema {
 				'quantity_debounce_ms'      => array( 'type' => 'integer', 'min' => 0, 'max' => 5000 ),
 				'summary_font_size_px'      => array( 'type' => 'integer', 'min' => 8, 'max' => 48 ),
 				'summary_font_weight'       => array( 'type' => 'integer', 'min' => 100, 'max' => 900 ),
+				'summary_line_height'       => array( 'type' => 'float', 'min' => 1, 'max' => 2.5 ),
+				'summary_gap_px'            => array( 'type' => 'integer', 'min' => 0, 'max' => 48 ),
+				'summary_text_gap_row_px'   => array( 'type' => 'integer', 'min' => 0, 'max' => 48 ),
+				'summary_text_gap_column_px' => array( 'type' => 'integer', 'min' => 0, 'max' => 64 ),
 				'button_font_size_px'       => array( 'type' => 'integer', 'min' => 8, 'max' => 48 ),
 				'button_font_weight'        => array( 'type' => 'integer', 'min' => 100, 'max' => 900 ),
+				'button_line_height'        => array( 'type' => 'float', 'min' => 1, 'max' => 2.5 ),
+				'actions_gap_px'            => array( 'type' => 'integer', 'min' => 0, 'max' => 48 ),
+				'clear_button_min_width_px' => array( 'type' => 'integer', 'min' => 0, 'max' => 400 ),
+				'checkout_button_min_width_px' => array( 'type' => 'integer', 'min' => 0, 'max' => 400 ),
+				'sticky_inner_gap_mobile_px' => array( 'type' => 'integer', 'min' => 0, 'max' => 48 ),
+				'sticky_inner_gap_desktop_row_px' => array( 'type' => 'integer', 'min' => 0, 'max' => 64 ),
+				'sticky_inner_gap_desktop_col_px' => array( 'type' => 'integer', 'min' => 0, 'max' => 96 ),
 			),
 			'wishlist_ui' => array(
 				'heart_reserve_top_px'       => array( 'type' => 'integer', 'min' => 0, 'max' => 200 ),

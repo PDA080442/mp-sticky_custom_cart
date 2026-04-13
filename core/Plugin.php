@@ -7,6 +7,8 @@
 
 namespace MpStickyCustomCart\Core;
 
+use MpStickyCustomCart\Admin\AdminModule;
+
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -37,6 +39,10 @@ final class Plugin {
 			false,
 			dirname( MP_STICKY_CUSTOM_CART_BASENAME ) . '/languages'
 		);
+
+		if ( is_admin() ) {
+			AdminModule::register();
+		}
 
 		/**
 		 * Fires after the plugin has bootstrapped (text domain loaded).
