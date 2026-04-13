@@ -852,70 +852,98 @@ final class SettingsPage {
 	}
 
 	/**
-	 * Read-only table + JSON API link + purge form for {@see Constants::OPTION_ERROR_LOG}.
+	 * Interactive log table (filters, export, detail drawer) + purge for {@see Constants::OPTION_ERROR_LOG}.
 	 */
 	private static function render_error_log_panel() {
 		echo '<h3>' . esc_html__( 'Журнал ошибок (сервер)', 'mp-sticky-custom-cart' ) . '</h3>';
 		echo '<p class="description">' . esc_html__( 'События с витрины, сбои AJAX корзины и снимков. Полные пароли и nonce в записи не сохраняются; IP — только короткий хеш.', 'mp-sticky-custom-cart' ) . '</p>';
 
-		$svc     = ErrorLogService::instance();
-		$entries = $svc->query( array( 'limit' => 50 ) );
+		if ( ! DiagnosticsAccess::can_manage() ) {
+			echo '<div class="notice notice-warning inline"><p>';
+			echo esc_html__( 'Просмотр журнала, экспорт и очистка доступны только пользователям с правом управления диагностикой плагина.', 'mp-sticky-custom-cart' );
+			echo '</p></div>';
+			return;
+		}
 
+		echo '<div id="mp-scc-error-log-root" class="mp-scc-error-log" hidden>';
+		echo '<div class="mp-scc-error-log-toolbar">';
+
+		echo '<label class="screen-reader-text" for="mp-scc-log-level">' . esc_html__( 'Уровень', 'mp-sticky-custom-cart' ) . '</label>';
+		echo '<select id="mp-scc-log-level" class="mp-scc-error-log-filter">';
+		echo '<option value="">' . esc_html__( 'Все уровни', 'mp-sticky-custom-cart' ) . '</option>';
+		echo '<option value="debug">debug</option>';
+		echo '<option value="info">info</option>';
+		echo '<option value="warn">warn</option>';
+		echo '<option value="error">error</option>';
+		echo '</select> ';
+
+		echo '<label class="screen-reader-text" for="mp-scc-log-date-from">' . esc_html__( 'С даты', 'mp-sticky-custom-cart' ) . '</label>';
+		echo '<input type="date" id="mp-scc-log-date-from" class="mp-scc-error-log-filter" /> ';
+		echo '<label class="screen-reader-text" for="mp-scc-log-date-to">' . esc_html__( 'По дату', 'mp-sticky-custom-cart' ) . '</label>';
+		echo '<input type="date" id="mp-scc-log-date-to" class="mp-scc-error-log-filter" /> ';
+
+		echo '<label class="screen-reader-text" for="mp-scc-log-source">' . esc_html__( 'Источник / endpoint', 'mp-sticky-custom-cart' ) . '</label>';
+		echo '<input type="search" id="mp-scc-log-source" class="regular-text mp-scc-error-log-filter" placeholder="' . esc_attr__( 'Источник или endpoint', 'mp-sticky-custom-cart' ) . '" /> ';
+
+		echo '<label class="screen-reader-text" for="mp-scc-log-search">' . esc_html__( 'Поиск в записи', 'mp-sticky-custom-cart' ) . '</label>';
+		echo '<input type="search" id="mp-scc-log-search" class="regular-text mp-scc-error-log-filter" placeholder="' . esc_attr__( 'Текст в сообщении / payload', 'mp-sticky-custom-cart' ) . '" /> ';
+
+		echo '<button type="button" class="button button-primary" id="mp-scc-log-apply">' . esc_html__( 'Применить', 'mp-sticky-custom-cart' ) . '</button> ';
+		echo '<button type="button" class="button" id="mp-scc-log-reset">' . esc_html__( 'Сбросить', 'mp-sticky-custom-cart' ) . '</button>';
+
+		echo '</div>';
+
+		echo '<p class="mp-scc-error-log-meta"><span id="mp-scc-log-status"></span></p>';
+
+		echo '<div class="mp-scc-error-log-table-wrap">';
 		echo '<table class="widefat striped mp-scc-error-log-table">';
 		echo '<thead><tr>';
 		echo '<th scope="col">' . esc_html__( 'Время (UTC)', 'mp-sticky-custom-cart' ) . '</th>';
 		echo '<th scope="col">' . esc_html__( 'Уровень', 'mp-sticky-custom-cart' ) . '</th>';
 		echo '<th scope="col">' . esc_html__( 'Источник', 'mp-sticky-custom-cart' ) . '</th>';
+		echo '<th scope="col">' . esc_html__( 'Endpoint', 'mp-sticky-custom-cart' ) . '</th>';
 		echo '<th scope="col">' . esc_html__( 'Код', 'mp-sticky-custom-cart' ) . '</th>';
 		echo '<th scope="col">' . esc_html__( 'Сообщение', 'mp-sticky-custom-cart' ) . '</th>';
-		echo '</tr></thead><tbody>';
+		echo '</tr></thead>';
+		echo '<tbody id="mp-scc-log-tbody"><tr class="mp-scc-log-placeholder"><td colspan="6">' . esc_html__( 'Загрузка…', 'mp-sticky-custom-cart' ) . '</td></tr></tbody>';
+		echo '</table>';
+		echo '</div>';
 
-		if ( array() === $entries ) {
-			echo '<tr><td colspan="5">' . esc_html__( 'Записей пока нет.', 'mp-sticky-custom-cart' ) . '</td></tr>';
-		} else {
-			foreach ( $entries as $e ) {
-				if ( ! is_array( $e ) ) {
-					continue;
-				}
-				$ts = isset( $e['ts'] ) ? (int) $e['ts'] : ( isset( $e['t'] ) ? (int) $e['t'] : 0 );
-				$time = $ts ? gmdate( 'Y-m-d H:i:s', $ts ) : '—';
-				$level = $svc->infer_level( $e );
-				$label = $svc->format_entry_label( $e );
-				$code  = isset( $e['code'] ) ? (string) $e['code'] : '';
-				$msg   = isset( $e['message'] ) ? (string) $e['message'] : '';
-				echo '<tr>';
-				echo '<td><code>' . esc_html( $time ) . '</code></td>';
-				echo '<td>' . esc_html( $level ) . '</td>';
-				echo '<td>' . esc_html( $label ) . '</td>';
-				echo '<td><code>' . esc_html( $code ) . '</code></td>';
-				echo '<td>' . esc_html( $msg ) . '</td>';
-				echo '</tr>';
-			}
-		}
-		echo '</tbody></table>';
-
-		$ajax_url = admin_url( 'admin-ajax.php' );
-		$json_url = wp_nonce_url(
-			add_query_arg(
-				array(
-					'action' => Constants::AJAX_ACTION_ADMIN_GET_ERROR_LOGS,
-					'limit'  => 100,
-				),
-				$ajax_url
-			),
-			Constants::NONCE_ADMIN_ERROR_LOG
-		);
+		echo '<p class="mp-scc-error-log-pagination">';
+		echo '<label for="mp-scc-log-per-page" class="screen-reader-text">' . esc_html__( 'На странице', 'mp-sticky-custom-cart' ) . '</label>';
+		echo '<select id="mp-scc-log-per-page">';
+		echo '<option value="25">25</option>';
+		echo '<option value="50" selected>50</option>';
+		echo '<option value="100">100</option>';
+		echo '</select> ';
+		echo '<button type="button" class="button" id="mp-scc-log-prev">' . esc_html__( 'Назад', 'mp-sticky-custom-cart' ) . '</button> ';
+		echo '<button type="button" class="button" id="mp-scc-log-next">' . esc_html__( 'Вперёд', 'mp-sticky-custom-cart' ) . '</button>';
+		echo '<span id="mp-scc-log-page-info" class="mp-scc-error-log-page-info"></span>';
+		echo '</p>';
 
 		echo '<p class="mp-scc-error-log-actions">';
-		echo '<a class="button" href="' . esc_url( $json_url ) . '" target="_blank" rel="noopener noreferrer">' . esc_html__( 'Открыть JSON (API)', 'mp-sticky-custom-cart' ) . '</a> ';
-
+		echo '<button type="button" class="button" id="mp-scc-log-export-csv">' . esc_html__( 'Экспорт CSV', 'mp-sticky-custom-cart' ) . '</button> ';
+		echo '<button type="button" class="button" id="mp-scc-log-export-json">' . esc_html__( 'Экспорт JSON', 'mp-sticky-custom-cart' ) . '</button> ';
 		echo '<form method="post" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '" style="display:inline-block;margin-left:8px;">';
 		wp_nonce_field( Constants::ADMIN_POST_PURGE_ERROR_LOG );
 		echo '<input type="hidden" name="action" value="' . esc_attr( Constants::ADMIN_POST_PURGE_ERROR_LOG ) . '" />';
 		echo '<input type="hidden" name="mp_scc_return_tab" value="diagnostics" />';
-		submit_button( __( 'Очистить журнал', 'mp-sticky-custom-cart' ), 'delete small', 'submit', false );
+		submit_button( __( 'Очистить журнал', 'mp-sticky-custom-cart' ), 'delete small', 'submit', false, array( 'onclick' => "return confirm('" . esc_js( __( 'Удалить все записи журнала?', 'mp-sticky-custom-cart' ) ) . "');" ) );
 		echo '</form>';
 		echo '</p>';
+
+		echo '<div id="mp-scc-error-log-drawer" class="mp-scc-error-log-drawer" aria-hidden="true">';
+		echo '<div class="mp-scc-error-log-drawer__inner">';
+		echo '<div class="mp-scc-error-log-drawer__head">';
+		echo '<h4 id="mp-scc-log-drawer-title">' . esc_html__( 'Запись', 'mp-sticky-custom-cart' ) . '</h4>';
+		echo '<button type="button" class="button-link mp-scc-error-log-drawer__close" id="mp-scc-log-drawer-close" aria-label="' . esc_attr__( 'Закрыть', 'mp-sticky-custom-cart' ) . '"><span class="dashicons dashicons-no-alt" aria-hidden="true"></span></button>';
+		echo '</div>';
+		echo '<pre id="mp-scc-log-drawer-body" class="mp-scc-error-log-drawer__body"></pre>';
+		echo '</div></div>';
+		echo '<div id="mp-scc-error-log-backdrop" class="mp-scc-error-log-backdrop" aria-hidden="true"></div>';
+
+		echo '</div>';
+		echo '<script>document.getElementById("mp-scc-error-log-root").hidden=false;</script>';
 	}
 
 	/**

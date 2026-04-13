@@ -23,7 +23,7 @@ final class ErrorLogPurgeHandler {
 	}
 
 	public static function handle() {
-		if ( ! current_user_can( 'manage_options' ) ) {
+		if ( ! DiagnosticsAccess::can_manage() ) {
 			wp_die( esc_html__( 'You do not have permission to access this page.', 'mp-sticky-custom-cart' ), '', array( 'response' => 403 ) );
 		}
 

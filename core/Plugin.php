@@ -40,6 +40,11 @@ final class Plugin {
 			dirname( MP_STICKY_CUSTOM_CART_BASENAME ) . '/languages'
 		);
 
+		if ( ! get_option( Constants::OPTION_DIAG_CAP_BOOT ) ) {
+			Activator::ensure_diagnostics_capability();
+			update_option( Constants::OPTION_DIAG_CAP_BOOT, '1', false );
+		}
+
 		if ( is_admin() ) {
 			AdminModule::register();
 		}
