@@ -928,7 +928,15 @@ final class SettingsPage {
 		wp_nonce_field( Constants::ADMIN_POST_PURGE_ERROR_LOG );
 		echo '<input type="hidden" name="action" value="' . esc_attr( Constants::ADMIN_POST_PURGE_ERROR_LOG ) . '" />';
 		echo '<input type="hidden" name="mp_scc_return_tab" value="diagnostics" />';
-		submit_button( __( 'Очистить журнал', 'mp-sticky-custom-cart' ), 'delete small', 'submit', false, array( 'onclick' => "return confirm('" . esc_js( __( 'Удалить все записи журнала?', 'mp-sticky-custom-cart' ) ) . "');" ) );
+		submit_button(
+			__( 'Очистить журнал', 'mp-sticky-custom-cart' ),
+			'delete small',
+			'submit',
+			false,
+			array(
+				'onclick' => 'return confirm(' . wp_json_encode( __( 'Удалить все записи журнала?', 'mp-sticky-custom-cart' ) ) . ');',
+			)
+		);
 		echo '</form>';
 		echo '</p>';
 
