@@ -20,6 +20,11 @@ final class UiSettingsDefaults {
 	public static function get() {
 		return array(
 			'catalog'    => array(
+				/**
+				 * add_to_cart: перехват клика по миниатюре и AJAX (при включённом feature flag).
+				 * theme_default: не вешать обработчик — тема и ссылки Woo ведут себя как обычно.
+				 */
+				'image_click_behavior'        => 'add_to_cart',
 				'hover_overlay_mobile_always' => true,
 				'hover_animation_duration_ms'  => 220,
 				'hover_animation_easing'       => 'cubic-bezier(0.4, 0, 0.2, 1)',

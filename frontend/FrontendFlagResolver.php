@@ -106,7 +106,13 @@ final class FrontendFlagResolver {
 		 */
 		$overlay_host_selectors = apply_filters( 'mp_sticky_custom_cart_catalog_overlay_host_selectors', $overlay_host_selectors );
 
+		$image_click_behavior = isset( $catalog_settings['image_click_behavior'] ) ? (string) $catalog_settings['image_click_behavior'] : 'add_to_cart';
+		if ( ! in_array( $image_click_behavior, array( 'add_to_cart', 'theme_default' ), true ) ) {
+			$image_click_behavior = 'add_to_cart';
+		}
+
 		$catalog_js = array(
+			'imageClickBehavior'       => $image_click_behavior,
 			'imageClickSelector'       => $img_sel,
 			'cardRootSelector'         => $card_sel,
 			'resolveErrorMessage'      => __( 'Не удалось определить товар для добавления в корзину.', 'mp-sticky-custom-cart' ),

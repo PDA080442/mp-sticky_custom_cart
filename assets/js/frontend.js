@@ -606,10 +606,14 @@
 	}
 
 	function initCatalogImageAddToCart() {
+		var catalog = data().catalog || {};
+		var behavior = catalog.imageClickBehavior || 'add_to_cart';
+		if (behavior === 'theme_default') {
+			return;
+		}
 		if (!window.mpScc.flagEnabled('product_image_add_to_cart')) {
 			return;
 		}
-		var catalog = data().catalog || {};
 		var sel = catalog.imageClickSelector || '';
 		var cardClosest = catalog.cardRootSelector || 'li.product';
 		if (!sel) {
