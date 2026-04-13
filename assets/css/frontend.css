@@ -787,6 +787,21 @@ body.popup-overlay-open .mp-scc-sticky-bar {
 	}
 }
 
+/*
+ * Single product -> related products: hide theme hover add-to-cart layer (black square in Hub/Liquid).
+ * Keep single product form button intact; this scopes only to related loop cards.
+ */
+@media (min-width: 769px) {
+	body.single-product .related ul.products li.product a[href*='add-to-cart'],
+	body.single-product .related ul.products li.product a.add_to_cart_button,
+	body.single-product .related ul.products li.product a.ld-sp-add-to-cart,
+	body.single-product .related ul.products li.product .ld-sp-btn {
+		display: none !important;
+		visibility: hidden !important;
+		pointer-events: none !important;
+	}
+}
+
 /* Catalog: image add-to-cart — toast positioning */
 ul.products li.product,
 ul.products div.product,
