@@ -316,14 +316,72 @@
 }
 
 .mp-scc-admin-sticky-preview .mp-scc-btn--ghost {
-	background: transparent;
+	background-color: var(--mp-scc-color-clear-button-bg, #ffffff);
 	color: var(--mp-scc-color-clear-button-text, inherit);
 	border-color: var(--mp-scc-color-clear-button-border, #cfcfcf);
+}
+
+.mp-scc-admin-sticky-preview .mp-scc-btn--ghost:hover {
+	background-color: var(--mp-scc-color-clear-button-bg-hover, #f0f0f0);
+	color: var(--mp-scc-color-clear-button-text-hover, var(--mp-scc-color-clear-button-text, #1a1a1a));
+	border-color: var(
+		--mp-scc-color-clear-button-border-hover,
+		var(--mp-scc-color-clear-button-border, #cfcfcf)
+	);
 }
 
 .mp-scc-admin-sticky-preview .mp-scc-btn--primary {
 	background-color: var(--mp-scc-color-button-primary, #111111);
 	color: var(--mp-scc-color-button-primary-text, #ffffff);
+}
+
+.mp-scc-admin-sticky-preview .mp-scc-btn--primary:hover {
+	background-color: var(--mp-scc-color-button-primary-hover, #333333);
+	color: var(
+		--mp-scc-color-button-primary-text-hover,
+		var(--mp-scc-color-button-primary-text, #ffffff)
+	);
+}
+
+/* Mirror storefront !important block so WP admin theme does not skew the preview. */
+.mp-scc-admin-sticky-preview a.mp-scc-checkout.mp-scc-btn--primary {
+	background-color: var(--mp-scc-color-button-primary, #111111) !important;
+	background-image: none !important;
+	color: var(--mp-scc-color-button-primary-text, #ffffff) !important;
+	border: 1px solid transparent !important;
+	-webkit-text-fill-color: var(--mp-scc-color-button-primary-text, #ffffff) !important;
+}
+
+.mp-scc-admin-sticky-preview a.mp-scc-checkout.mp-scc-btn--primary:hover {
+	background-color: var(--mp-scc-color-button-primary-hover, #333333) !important;
+	color: var(
+			--mp-scc-color-button-primary-text-hover,
+			var(--mp-scc-color-button-primary-text, #ffffff)
+		) !important;
+	-webkit-text-fill-color: var(
+			--mp-scc-color-button-primary-text-hover,
+			var(--mp-scc-color-button-primary-text, #ffffff)
+		) !important;
+}
+
+.mp-scc-admin-sticky-preview span.mp-scc-checkout.mp-scc-btn--primary {
+	background-color: var(--mp-scc-color-button-primary, #111111) !important;
+	background-image: none !important;
+	color: var(--mp-scc-color-button-primary-text, #ffffff) !important;
+	border: 1px solid transparent !important;
+	-webkit-text-fill-color: var(--mp-scc-color-button-primary-text, #ffffff) !important;
+}
+
+.mp-scc-admin-sticky-preview span.mp-scc-checkout.mp-scc-btn--primary:hover {
+	background-color: var(--mp-scc-color-button-primary-hover, #333333) !important;
+	color: var(
+			--mp-scc-color-button-primary-text-hover,
+			var(--mp-scc-color-button-primary-text, #ffffff)
+		) !important;
+	-webkit-text-fill-color: var(
+			--mp-scc-color-button-primary-text-hover,
+			var(--mp-scc-color-button-primary-text, #ffffff)
+		) !important;
 }
 
 .mp-scc-admin-sticky-preview__chev {

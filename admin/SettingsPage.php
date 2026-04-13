@@ -766,15 +766,23 @@ final class SettingsPage {
 		echo '</tbody></table>';
 
 		echo '<h3>' . esc_html__( 'Кнопка «Оформить заказ»', 'mp-sticky-custom-cart' ) . '</h3>';
+		echo '<p class="description">' . esc_html__( 'Обычное состояние и при наведении (курсор на кнопке).', 'mp-sticky-custom-cart' ) . '</p>';
 		echo '<table class="form-table" role="presentation"><tbody>';
 		self::field_color( $opt, 'styles', 'color_button_primary', __( 'Фон', 'mp-sticky-custom-cart' ), isset( $st['color_button_primary'] ) ? (string) $st['color_button_primary'] : '#111111', '', array( 'var' => $p . 'color-button-primary', 'fmt' => 'color' ) );
 		self::field_color( $opt, 'styles', 'color_button_primary_text', __( 'Текст', 'mp-sticky-custom-cart' ), isset( $st['color_button_primary_text'] ) ? (string) $st['color_button_primary_text'] : '#ffffff', '', array( 'var' => $p . 'color-button-primary-text', 'fmt' => 'color' ) );
+		self::field_color( $opt, 'styles', 'color_button_primary_hover', __( 'Фон при наведении', 'mp-sticky-custom-cart' ), isset( $st['color_button_primary_hover'] ) ? (string) $st['color_button_primary_hover'] : '#333333', '', array( 'var' => $p . 'color-button-primary-hover', 'fmt' => 'color' ) );
+		self::field_color( $opt, 'styles', 'color_button_primary_text_hover', __( 'Текст при наведении', 'mp-sticky-custom-cart' ), isset( $st['color_button_primary_text_hover'] ) ? (string) $st['color_button_primary_text_hover'] : '#ffffff', '', array( 'var' => $p . 'color-button-primary-text-hover', 'fmt' => 'color' ) );
 		echo '</tbody></table>';
 
 		echo '<h3>' . esc_html__( 'Кнопка «Очистить корзину»', 'mp-sticky-custom-cart' ) . '</h3>';
+		echo '<p class="description">' . esc_html__( 'Фон, обводка и текст — в покое и при наведении.', 'mp-sticky-custom-cart' ) . '</p>';
 		echo '<table class="form-table" role="presentation"><tbody>';
-		self::field_color( $opt, 'styles', 'color_clear_button_text', __( 'Цвет текста', 'mp-sticky-custom-cart' ), isset( $st['color_clear_button_text'] ) ? (string) $st['color_clear_button_text'] : '#1a1a1a', '', array( 'var' => $p . 'color-clear-button-text', 'fmt' => 'color' ) );
-		self::field_color( $opt, 'styles', 'color_clear_button_border', __( 'Цвет обводки', 'mp-sticky-custom-cart' ), isset( $st['color_clear_button_border'] ) ? (string) $st['color_clear_button_border'] : '#cfcfcf', '', array( 'var' => $p . 'color-clear-button-border', 'fmt' => 'color' ) );
+		self::field_color( $opt, 'styles', 'color_clear_button_bg', __( 'Фон', 'mp-sticky-custom-cart' ), isset( $st['color_clear_button_bg'] ) ? (string) $st['color_clear_button_bg'] : '#ffffff', '', array( 'var' => $p . 'color-clear-button-bg', 'fmt' => 'color' ) );
+		self::field_color( $opt, 'styles', 'color_clear_button_bg_hover', __( 'Фон при наведении', 'mp-sticky-custom-cart' ), isset( $st['color_clear_button_bg_hover'] ) ? (string) $st['color_clear_button_bg_hover'] : '#f0f0f0', '', array( 'var' => $p . 'color-clear-button-bg-hover', 'fmt' => 'color' ) );
+		self::field_color( $opt, 'styles', 'color_clear_button_border', __( 'Обводка', 'mp-sticky-custom-cart' ), isset( $st['color_clear_button_border'] ) ? (string) $st['color_clear_button_border'] : '#cfcfcf', '', array( 'var' => $p . 'color-clear-button-border', 'fmt' => 'color' ) );
+		self::field_color( $opt, 'styles', 'color_clear_button_border_hover', __( 'Обводка при наведении', 'mp-sticky-custom-cart' ), isset( $st['color_clear_button_border_hover'] ) ? (string) $st['color_clear_button_border_hover'] : '#b0b0b0', '', array( 'var' => $p . 'color-clear-button-border-hover', 'fmt' => 'color' ) );
+		self::field_color( $opt, 'styles', 'color_clear_button_text', __( 'Текст', 'mp-sticky-custom-cart' ), isset( $st['color_clear_button_text'] ) ? (string) $st['color_clear_button_text'] : '#1a1a1a', '', array( 'var' => $p . 'color-clear-button-text', 'fmt' => 'color' ) );
+		self::field_color( $opt, 'styles', 'color_clear_button_text_hover', __( 'Текст при наведении', 'mp-sticky-custom-cart' ), isset( $st['color_clear_button_text_hover'] ) ? (string) $st['color_clear_button_text_hover'] : '#1a1a1a', '', array( 'var' => $p . 'color-clear-button-text-hover', 'fmt' => 'color' ) );
 		echo '</tbody></table>';
 
 		echo '<h3>' . esc_html__( 'Раскрывающаяся панель (drawer): подложка', 'mp-sticky-custom-cart' ) . '</h3>';
@@ -796,12 +804,15 @@ final class SettingsPage {
 		);
 		echo '</tbody></table>';
 
-		echo '<h3>' . esc_html__( 'Кнопки количества в списке (+ / − / строка)', 'mp-sticky-custom-cart' ) . '</h3>';
-		echo '<p class="description">' . esc_html__( 'Стили блока +/− и кнопки удаления позиции в drawer.', 'mp-sticky-custom-cart' ) . '</p>';
+		echo '<h3>' . esc_html__( 'Кнопки количества в списке (+ / − / удалить строку)', 'mp-sticky-custom-cart' ) . '</h3>';
+		echo '<p class="description">' . esc_html__( 'Стили блока +/− и кнопки удаления позиции в drawer — в покое и при наведении.', 'mp-sticky-custom-cart' ) . '</p>';
 		echo '<table class="form-table" role="presentation"><tbody>';
 		self::field_color( $opt, 'styles', 'color_qty_button_bg', __( 'Фон', 'mp-sticky-custom-cart' ), isset( $st['color_qty_button_bg'] ) ? (string) $st['color_qty_button_bg'] : '#ffffff', '', array( 'var' => $p . 'color-qty-button-bg', 'fmt' => 'color' ) );
+		self::field_color( $opt, 'styles', 'color_qty_button_bg_hover', __( 'Фон при наведении', 'mp-sticky-custom-cart' ), isset( $st['color_qty_button_bg_hover'] ) ? (string) $st['color_qty_button_bg_hover'] : '#ececec', '', array( 'var' => $p . 'color-qty-button-bg-hover', 'fmt' => 'color' ) );
 		self::field_color( $opt, 'styles', 'color_qty_button_border', __( 'Обводка', 'mp-sticky-custom-cart' ), isset( $st['color_qty_button_border'] ) ? (string) $st['color_qty_button_border'] : '#cccccc', '', array( 'var' => $p . 'color-qty-button-border', 'fmt' => 'color' ) );
+		self::field_color( $opt, 'styles', 'color_qty_button_border_hover', __( 'Обводка при наведении', 'mp-sticky-custom-cart' ), isset( $st['color_qty_button_border_hover'] ) ? (string) $st['color_qty_button_border_hover'] : '#9a9a9a', '', array( 'var' => $p . 'color-qty-button-border-hover', 'fmt' => 'color' ) );
 		self::field_color( $opt, 'styles', 'color_qty_button_text', __( 'Текст и символы', 'mp-sticky-custom-cart' ), isset( $st['color_qty_button_text'] ) ? (string) $st['color_qty_button_text'] : '#1a1a1a', '', array( 'var' => $p . 'color-qty-button-text', 'fmt' => 'color' ) );
+		self::field_color( $opt, 'styles', 'color_qty_button_text_hover', __( 'Текст при наведении', 'mp-sticky-custom-cart' ), isset( $st['color_qty_button_text_hover'] ) ? (string) $st['color_qty_button_text_hover'] : '#1a1a1a', '', array( 'var' => $p . 'color-qty-button-text-hover', 'fmt' => 'color' ) );
 		echo '</tbody></table>';
 
 		echo '<h3>' . esc_html__( 'Строка товара в drawer', 'mp-sticky-custom-cart' ) . '</h3>';
