@@ -12,6 +12,7 @@ use MpStickyCustomCart\Core\Config\FeatureFlagDefinitions;
 use MpStickyCustomCart\Core\Config\FeatureFlagsDefaults;
 use MpStickyCustomCart\Core\Config\UiLabelsDefaults;
 use MpStickyCustomCart\Core\Constants;
+use MpStickyCustomCart\Core\ErrorLogService;
 use MpStickyCustomCart\Core\OptionResolver;
 
 defined( 'ABSPATH' ) || exit;
@@ -236,12 +237,11 @@ final class SettingsPage {
 		if ( isset( $_GET['mp-scc-reset-error'] ) && '1' === $_GET['mp-scc-reset-error'] ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			echo '<div class="notice notice-error is-dismissible"><p>' . esc_html__( 'Не удалось сбросить вкладку: неверный запрос.', 'mp-sticky-custom-cart' ) . '</p></div>';
 		}
+		if ( isset( $_GET['mp-scc-log-purged'] ) && '1' === $_GET['mp-scc-log-purged'] ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			echo '<div class="notice notice-success is-dismissible"><p>' . esc_html__( 'Журнал ошибок очищен.', 'mp-sticky-custom-cart' ) . '</p></div>';
+		}
 	}
 
-	/**
-	 * @param string $text Tooltip / aria-label (plain text).
-	 * @return string HTML button (empty if no text).
-	 */
 	/**
 	 * JSON payload for live style preview (styles tab). Consumed by admin/js/settings-page.js.
 	 *
@@ -815,9 +815,27 @@ final class SettingsPage {
 			'log_retention_days',
 			__( 'Хранить логи (дней)', 'mp-sticky-custom-cart' ),
 			isset( $d['log_retention_days'] ) ? (int) $d['log_retention_days'] : 14,
-			__( 'Срок хранения записей клиентских ошибок в опции плагина; старые записи подрезаются при новых событиях.', 'mp-sticky-custom-cart' )
+			__( 'Записи старше этого срока удаляются при добавлении новых (и при ротации по объёму).', 'mp-sticky-custom-cart' )
+		);
+		self::field_number(
+			$opt,
+			'diagnostics',
+			'log_max_entries',
+			__( 'Макс. число записей в журнале', 'mp-sticky-custom-cart' ),
+			isset( $d['log_max_entries'] ) ? (int) $d['log_max_entries'] : 300,
+			__( 'После превышения удаляются самые старые записи.', 'mp-sticky-custom-cart' )
+		);
+		self::field_number(
+			$opt,
+			'diagnostics',
+			'log_max_bytes',
+			__( 'Макс. размер журнала (байт)', 'mp-sticky-custom-cart' ),
+			isset( $d['log_max_bytes'] ) ? (int) $d['log_max_bytes'] : 262144,
+			__( 'Ограничение размера опции в wp_options; при превышении старые записи отбрасываются.', 'mp-sticky-custom-cart' )
 		);
 		echo '</tbody></table>';
+
+		self::render_error_log_panel();
 
 		echo '<h3>' . esc_html__( 'Feature flags', 'mp-sticky-custom-cart' ) . '</h3>';
 		echo '<table class="form-table" role="presentation"><tbody>';
@@ -831,6 +849,73 @@ final class SettingsPage {
 		}
 
 		echo '</tbody></table>';
+	}
+
+	/**
+	 * Read-only table + JSON API link + purge form for {@see Constants::OPTION_ERROR_LOG}.
+	 */
+	private static function render_error_log_panel() {
+		echo '<h3>' . esc_html__( 'Журнал ошибок (сервер)', 'mp-sticky-custom-cart' ) . '</h3>';
+		echo '<p class="description">' . esc_html__( 'События с витрины, сбои AJAX корзины и снимков. Полные пароли и nonce в записи не сохраняются; IP — только короткий хеш.', 'mp-sticky-custom-cart' ) . '</p>';
+
+		$svc     = ErrorLogService::instance();
+		$entries = $svc->query( array( 'limit' => 50 ) );
+
+		echo '<table class="widefat striped mp-scc-error-log-table">';
+		echo '<thead><tr>';
+		echo '<th scope="col">' . esc_html__( 'Время (UTC)', 'mp-sticky-custom-cart' ) . '</th>';
+		echo '<th scope="col">' . esc_html__( 'Уровень', 'mp-sticky-custom-cart' ) . '</th>';
+		echo '<th scope="col">' . esc_html__( 'Источник', 'mp-sticky-custom-cart' ) . '</th>';
+		echo '<th scope="col">' . esc_html__( 'Код', 'mp-sticky-custom-cart' ) . '</th>';
+		echo '<th scope="col">' . esc_html__( 'Сообщение', 'mp-sticky-custom-cart' ) . '</th>';
+		echo '</tr></thead><tbody>';
+
+		if ( array() === $entries ) {
+			echo '<tr><td colspan="5">' . esc_html__( 'Записей пока нет.', 'mp-sticky-custom-cart' ) . '</td></tr>';
+		} else {
+			foreach ( $entries as $e ) {
+				if ( ! is_array( $e ) ) {
+					continue;
+				}
+				$ts = isset( $e['ts'] ) ? (int) $e['ts'] : ( isset( $e['t'] ) ? (int) $e['t'] : 0 );
+				$time = $ts ? gmdate( 'Y-m-d H:i:s', $ts ) : '—';
+				$level = $svc->infer_level( $e );
+				$label = $svc->format_entry_label( $e );
+				$code  = isset( $e['code'] ) ? (string) $e['code'] : '';
+				$msg   = isset( $e['message'] ) ? (string) $e['message'] : '';
+				echo '<tr>';
+				echo '<td><code>' . esc_html( $time ) . '</code></td>';
+				echo '<td>' . esc_html( $level ) . '</td>';
+				echo '<td>' . esc_html( $label ) . '</td>';
+				echo '<td><code>' . esc_html( $code ) . '</code></td>';
+				echo '<td>' . esc_html( $msg ) . '</td>';
+				echo '</tr>';
+			}
+		}
+		echo '</tbody></table>';
+
+		$ajax_url = admin_url( 'admin-ajax.php' );
+		$json_url = wp_nonce_url(
+			add_query_arg(
+				array(
+					'action' => Constants::AJAX_ACTION_ADMIN_GET_ERROR_LOGS,
+					'limit'  => 100,
+				),
+				$ajax_url
+			),
+			Constants::NONCE_ADMIN_ERROR_LOG
+		);
+
+		echo '<p class="mp-scc-error-log-actions">';
+		echo '<a class="button" href="' . esc_url( $json_url ) . '" target="_blank" rel="noopener noreferrer">' . esc_html__( 'Открыть JSON (API)', 'mp-sticky-custom-cart' ) . '</a> ';
+
+		echo '<form method="post" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '" style="display:inline-block;margin-left:8px;">';
+		wp_nonce_field( Constants::ADMIN_POST_PURGE_ERROR_LOG );
+		echo '<input type="hidden" name="action" value="' . esc_attr( Constants::ADMIN_POST_PURGE_ERROR_LOG ) . '" />';
+		echo '<input type="hidden" name="mp_scc_return_tab" value="diagnostics" />';
+		submit_button( __( 'Очистить журнал', 'mp-sticky-custom-cart' ), 'delete small', 'submit', false );
+		echo '</form>';
+		echo '</p>';
 	}
 
 	/**

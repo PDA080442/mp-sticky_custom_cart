@@ -7,6 +7,7 @@
 
 namespace MpStickyCustomCart\Admin;
 
+use MpStickyCustomCart\Core\Constants;
 use MpStickyCustomCart\Core\PluginPaths;
 
 defined( 'ABSPATH' ) || exit;
@@ -62,6 +63,11 @@ final class AdminAssetsHooks {
 				'stylePreview' => array(
 					'previewId'  => 'mp-scc-style-live-preview',
 					'throttleMs' => 100,
+				),
+				'errorLogAjax' => array(
+					'url'    => admin_url( 'admin-ajax.php' ),
+					'action' => Constants::AJAX_ACTION_ADMIN_GET_ERROR_LOGS,
+					'nonce'  => wp_create_nonce( Constants::NONCE_ADMIN_ERROR_LOG ),
 				),
 			)
 		);

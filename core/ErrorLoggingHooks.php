@@ -7,6 +7,8 @@
 
 namespace MpStickyCustomCart\Core;
 
+use MpStickyCustomCart\Core\Contracts\LoggingServiceInterface;
+
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -57,29 +59,19 @@ final class ErrorLoggingHooks {
 			$context = substr( $context, 0, 200 );
 		}
 
-		$entry = array(
-			't'          => time(),
-			'type'       => 'client_' . $event,
-			'product_id' => $product_id,
-			'context'    => $context,
+		ErrorLogService::instance()->log(
+			LoggingServiceInterface::LEVEL_INFO,
+			'client_' . $event,
+			array(
+				'source'   => 'client_event',
+				'endpoint' => Constants::AJAX_ACTION_LOG_CLIENT_EVENT,
+				'code'     => $event,
+				'payload'  => array(
+					'product_id' => $product_id,
+					'context'    => $context,
+				),
+			)
 		);
-
-		/**
-		 * Filters a client log entry before storage.
-		 *
-		 * @param array<string, mixed> $entry Log entry.
-		 */
-		$entry = apply_filters( 'mp_sticky_custom_cart_client_log_entry', $entry );
-
-		$log = get_option( Constants::OPTION_ERROR_LOG, array() );
-		if ( ! is_array( $log ) ) {
-			$log = array();
-		}
-		$log[] = $entry;
-		if ( count( $log ) > 100 ) {
-			$log = array_slice( $log, -100 );
-		}
-		update_option( Constants::OPTION_ERROR_LOG, $log, false );
 
 		wp_send_json_success( array( 'logged' => true ) );
 	}

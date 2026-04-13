@@ -92,6 +92,14 @@ final class OptionMigrationHandler {
 					}
 				}
 			}
+			if ( isset( $settings['diagnostics'], $defaults['diagnostics'] ) && is_array( $settings['diagnostics'] ) && is_array( $defaults['diagnostics'] ) ) {
+				foreach ( $defaults['diagnostics'] as $dk => $dv ) {
+					if ( ! array_key_exists( $dk, $settings['diagnostics'] ) ) {
+						$settings['diagnostics'][ $dk ] = $dv;
+						$dirty                          = true;
+					}
+				}
+			}
 			if ( isset( $settings['sticky_cart'], $defaults['sticky_cart'] ) && is_array( $settings['sticky_cart'] ) && is_array( $defaults['sticky_cart'] ) ) {
 				foreach ( $defaults['sticky_cart'] as $sk => $sv ) {
 					if ( ! array_key_exists( $sk, $settings['sticky_cart'] ) ) {

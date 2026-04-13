@@ -96,6 +96,21 @@ final class Constants {
 	public const AJAX_ACTION_REMOVE_CART_LINE = 'mp_scc_remove_cart_line';
 
 	/**
+	 * Admin-only: JSON list of {@see Constants::OPTION_ERROR_LOG} entries.
+	 */
+	public const AJAX_ACTION_ADMIN_GET_ERROR_LOGS = 'mp_scc_admin_get_error_logs';
+
+	/**
+	 * Nonce action for admin error log AJAX / purge.
+	 */
+	public const NONCE_ADMIN_ERROR_LOG = 'mp_scc_admin_error_log';
+
+	/**
+	 * Admin-post: purge error log option.
+	 */
+	public const ADMIN_POST_PURGE_ERROR_LOG = 'mp_scc_purge_error_log';
+
+	/**
 	 * Not instantiable.
 	 */
 	private function __construct() {
