@@ -19,6 +19,9 @@ var defaults = fs.readFileSync(path.join(root, 'core', 'Config', 'UiSettingsDefa
 var schema = fs.readFileSync(path.join(root, 'core', 'Config', 'SettingsValidationSchema.php'), 'utf8');
 var settingsPage = fs.readFileSync(path.join(root, 'admin', 'SettingsPage.php'), 'utf8');
 var adminModule = fs.readFileSync(path.join(root, 'admin', 'AdminModule.php'), 'utf8');
+var errorLoggingHooks = fs.readFileSync(path.join(root, 'core', 'ErrorLoggingHooks.php'), 'utf8');
+var frontendJs = fs.readFileSync(path.join(root, 'assets', 'js', 'frontend.js'), 'utf8');
+var frontendFlagResolver = fs.readFileSync(path.join(root, 'frontend', 'FrontendFlagResolver.php'), 'utf8');
 
 assert.ok(svc.includes('implements LoggingServiceInterface'), 'ErrorLogService should implement LoggingServiceInterface');
 assert.ok(svc.includes('function prune') || svc.includes('private function prune'), 'ErrorLogService should prune logs');
@@ -31,5 +34,12 @@ assert.ok(defaults.includes('log_max_entries'), 'Defaults should include log_max
 assert.ok(schema.includes('log_max_bytes'), 'Schema should validate log_max_bytes');
 assert.ok(settingsPage.includes('render_error_log_panel'), 'Settings should render error log panel');
 assert.ok(adminModule.includes('ErrorLogAdminHooks::register'), 'Admin module should register error log hooks');
+
+assert.ok(errorLoggingHooks.includes('handle_client_log_batch'), 'ErrorLoggingHooks should ingest batched client diagnostics (dp 11.2)');
+assert.ok(errorLoggingHooks.includes("'batch'"), 'ErrorLoggingHooks should accept batch POST field');
+assert.ok(frontendJs.includes('initClientDiagnostics'), 'frontend should register client diagnostics (dp 11.2)');
+assert.ok(frontendJs.includes('unhandledrejection'), 'frontend should listen for unhandledrejection (dp 11.2)');
+assert.ok(frontendJs.includes('queueClientDiagnostic'), 'frontend should buffer client diagnostics (dp 11.2)');
+assert.ok(frontendFlagResolver.includes("'clientLogging'"), 'FrontendFlagResolver should expose clientLogging (dp 11.2)');
 
 console.log('error-log-dp: OK');
