@@ -8,6 +8,8 @@
 namespace MpStickyCustomCart\Frontend;
 
 use MpStickyCustomCart\Core\Constants;
+use MpStickyCustomCart\Core\Contracts\LoggingServiceInterface;
+use MpStickyCustomCart\Core\ErrorLogService;
 use MpStickyCustomCart\Core\OptionResolver;
 
 defined( 'ABSPATH' ) || exit;
@@ -172,6 +174,7 @@ final class AjaxEndpointsHooks {
 		self::verify_nonce();
 		$payload = self::build_cart_snapshot_payload();
 		if ( is_wp_error( $payload ) ) {
+			self::log_snapshot_failure( $payload->get_error_code(), $payload->get_error_message() );
 			wp_send_json_error(
 				array(
 					'message' => __( 'Корзина недоступна.', 'mp-sticky-custom-cart' ),
@@ -188,6 +191,7 @@ final class AjaxEndpointsHooks {
 	public static function handle_set_line_quantity() {
 		self::verify_nonce();
 		if ( ! function_exists( 'WC' ) || ! WC()->cart ) {
+			self::log_line_quantity_failure( 'cart_unavailable', 'Cart unavailable.', array() );
 			wp_send_json_error(
 				array(
 					'message' => __( 'Корзина недоступна.', 'mp-sticky-custom-cart' ),
@@ -200,6 +204,7 @@ final class AjaxEndpointsHooks {
 		$qty = isset( $_POST['quantity'] ) ? (int) wp_unslash( $_POST['quantity'] ) : 0;
 
 		if ( '' === $key ) {
+			self::log_line_quantity_failure( 'missing_cart_line', 'cart_item_key missing.', array() );
 			wp_send_json_error(
 				array(
 					'message' => __( 'Не указана позиция корзины.', 'mp-sticky-custom-cart' ),
@@ -209,6 +214,7 @@ final class AjaxEndpointsHooks {
 		}
 
 		if ( $qty < 0 ) {
+			self::log_line_quantity_failure( 'invalid_quantity', 'Negative quantity.', array( 'quantity' => $qty ) );
 			wp_send_json_error(
 				array(
 					'message' => __( 'Некорректное количество.', 'mp-sticky-custom-cart' ),
@@ -220,6 +226,7 @@ final class AjaxEndpointsHooks {
 		$cart = WC()->cart;
 		$contents = $cart->get_cart();
 		if ( ! isset( $contents[ $key ] ) ) {
+			self::log_line_quantity_failure( 'cart_line_not_found', 'Line not in cart.', array( 'cart_item_key' => $key ) );
 			wp_send_json_error(
 				array(
 					'message' => __( 'Позиция в корзине не найдена.', 'mp-sticky-custom-cart' ),
@@ -235,6 +242,7 @@ final class AjaxEndpointsHooks {
 			$cart->remove_cart_item( $key );
 		} else {
 			if ( ! is_a( $product, 'WC_Product' ) ) {
+				self::log_line_quantity_failure( 'invalid_product', 'Product object missing.', array( 'cart_item_key' => $key ) );
 				wp_send_json_error(
 					array(
 						'message' => __( 'Товар для позиции недоступен.', 'mp-sticky-custom-cart' ),
@@ -251,6 +259,11 @@ final class AjaxEndpointsHooks {
 				}
 			}
 			if ( $qty < $min_req ) {
+				self::log_line_quantity_failure(
+					'below_min_quantity',
+					'Below min purchase quantity.',
+					array( 'cart_item_key' => $key, 'quantity' => $qty, 'min' => $min_req )
+				);
 				wp_send_json_error(
 					array(
 						'message' => sprintf(
@@ -265,6 +278,11 @@ final class AjaxEndpointsHooks {
 
 			$max_q = $product->get_max_purchase_quantity();
 			if ( is_numeric( $max_q ) && (int) $max_q > 0 && $qty > (int) $max_q ) {
+				self::log_line_quantity_failure(
+					'above_max_quantity',
+					'Above max purchase quantity.',
+					array( 'cart_item_key' => $key, 'quantity' => $qty, 'max' => $max_q )
+				);
 				wp_send_json_error(
 					array(
 						'message' => sprintf(
@@ -279,6 +297,7 @@ final class AjaxEndpointsHooks {
 
 			$ok = $cart->set_quantity( $key, $qty, true );
 			if ( ! $ok ) {
+				self::log_line_quantity_failure( 'set_quantity_failed', 'set_quantity returned false.', array( 'cart_item_key' => $key, 'quantity' => $qty ) );
 				wp_send_json_error(
 					array(
 						'message' => __( 'Не удалось обновить количество.', 'mp-sticky-custom-cart' ),
@@ -292,6 +311,7 @@ final class AjaxEndpointsHooks {
 
 		$payload = self::build_cart_snapshot_payload();
 		if ( is_wp_error( $payload ) ) {
+			self::log_line_quantity_failure( 'snapshot_failed', $payload->get_error_message(), array( 'phase' => 'after_set_quantity' ) );
 			wp_send_json_error(
 				array(
 					'message' => __( 'Не удалось получить состояние корзины.', 'mp-sticky-custom-cart' ),
@@ -732,34 +752,17 @@ final class AjaxEndpointsHooks {
 	 * @param array<string, mixed> $context Extra context (product_id, notices, …).
 	 */
 	private static function log_add_simple_failure( $code, $message, array $context ) {
-		if ( ! OptionResolver::get_setting( 'diagnostics.client_error_logging', true ) ) {
-			return;
-		}
-
-		$entry = array(
-			't'       => time(),
-			'type'    => 'add_simple_product',
-			'code'    => sanitize_key( (string) $code ),
-			'message' => (string) $message,
-			'context' => $context,
+		ErrorLogService::instance()->log(
+			LoggingServiceInterface::LEVEL_ERROR,
+			(string) $message,
+			array(
+				'source'   => 'ajax_add_simple_product',
+				'endpoint' => Constants::AJAX_ACTION_ADD_SIMPLE_PRODUCT,
+				'code'     => (string) $code,
+				'payload'  => self::summarize_post_fields( array( 'product_id', 'quantity' ) ),
+				'context'  => $context,
+			)
 		);
-
-		/**
-		 * Filters a single add-to-cart failure log entry before it is stored.
-		 *
-		 * @param array<string, mixed> $entry Log entry.
-		 */
-		$entry = apply_filters( 'mp_sticky_custom_cart_add_simple_product_log_entry', $entry );
-
-		$log = get_option( Constants::OPTION_ERROR_LOG, array() );
-		if ( ! is_array( $log ) ) {
-			$log = array();
-		}
-		$log[] = $entry;
-		if ( count( $log ) > 100 ) {
-			$log = array_slice( $log, -100 );
-		}
-		update_option( Constants::OPTION_ERROR_LOG, $log, false );
 	}
 
 	/**
@@ -768,34 +771,17 @@ final class AjaxEndpointsHooks {
 	 * @param array<string, mixed> $context Extra context.
 	 */
 	private static function log_clear_cart_failure( $code, $message, array $context ) {
-		if ( ! OptionResolver::get_setting( 'diagnostics.client_error_logging', true ) ) {
-			return;
-		}
-
-		$entry = array(
-			't'       => time(),
-			'type'    => 'clear_cart',
-			'code'    => sanitize_key( (string) $code ),
-			'message' => (string) $message,
-			'context' => $context,
+		ErrorLogService::instance()->log(
+			LoggingServiceInterface::LEVEL_ERROR,
+			(string) $message,
+			array(
+				'source'   => 'ajax_clear_cart',
+				'endpoint' => Constants::AJAX_ACTION_CLEAR_CART,
+				'code'     => (string) $code,
+				'payload'  => self::summarize_post_fields( array() ),
+				'context'  => $context,
+			)
 		);
-
-		/**
-		 * Filters a clear-cart failure log entry before it is stored.
-		 *
-		 * @param array<string, mixed> $entry Log entry.
-		 */
-		$entry = apply_filters( 'mp_sticky_custom_cart_clear_cart_log_entry', $entry );
-
-		$log = get_option( Constants::OPTION_ERROR_LOG, array() );
-		if ( ! is_array( $log ) ) {
-			$log = array();
-		}
-		$log[] = $entry;
-		if ( count( $log ) > 100 ) {
-			$log = array_slice( $log, -100 );
-		}
-		update_option( Constants::OPTION_ERROR_LOG, $log, false );
 	}
 
 	/**
@@ -804,34 +790,78 @@ final class AjaxEndpointsHooks {
 	 * @param array<string, mixed> $context Extra context.
 	 */
 	private static function log_remove_line_failure( $code, $message, array $context ) {
-		if ( ! OptionResolver::get_setting( 'diagnostics.client_error_logging', true ) ) {
-			return;
-		}
-
-		$entry = array(
-			't'       => time(),
-			'type'    => 'remove_cart_line',
-			'code'    => sanitize_key( (string) $code ),
-			'message' => (string) $message,
-			'context' => $context,
+		ErrorLogService::instance()->log(
+			LoggingServiceInterface::LEVEL_ERROR,
+			(string) $message,
+			array(
+				'source'   => 'ajax_remove_cart_line',
+				'endpoint' => Constants::AJAX_ACTION_REMOVE_CART_LINE,
+				'code'     => (string) $code,
+				'payload'  => self::summarize_post_fields( array( 'cart_item_key' ) ),
+				'context'  => $context,
+			)
 		);
+	}
 
-		/**
-		 * Filters a remove-line failure log entry before it is stored.
-		 *
-		 * @param array<string, mixed> $entry Log entry.
-		 */
-		$entry = apply_filters( 'mp_sticky_custom_cart_remove_cart_line_log_entry', $entry );
+	/**
+	 * @param string               $code    Error code.
+	 * @param string               $message Message.
+	 * @param array<string, mixed> $context Extra context.
+	 */
+	private static function log_line_quantity_failure( $code, $message, array $context ) {
+		ErrorLogService::instance()->log(
+			LoggingServiceInterface::LEVEL_ERROR,
+			(string) $message,
+			array(
+				'source'   => 'ajax_set_line_quantity',
+				'endpoint' => Constants::AJAX_ACTION_SET_LINE_QUANTITY,
+				'code'     => (string) $code,
+				'payload'  => self::summarize_post_fields( array( 'cart_item_key', 'quantity' ) ),
+				'context'  => $context,
+			)
+		);
+	}
 
-		$log = get_option( Constants::OPTION_ERROR_LOG, array() );
-		if ( ! is_array( $log ) ) {
-			$log = array();
+	/**
+	 * @param string $code    WP_Error code.
+	 * @param string $message Error message.
+	 */
+	private static function log_snapshot_failure( $code, $message ) {
+		ErrorLogService::instance()->log(
+			LoggingServiceInterface::LEVEL_ERROR,
+			(string) $message,
+			array(
+				'source'   => 'ajax_cart_snapshot',
+				'endpoint' => Constants::AJAX_ACTION_CART_SNAPSHOT,
+				'code'     => (string) $code,
+				'payload'  => self::summarize_post_fields( array() ),
+				'context'  => array(),
+			)
+		);
+	}
+
+	/**
+	 * Safe subset of $_POST for diagnostics (whitelisted keys only).
+	 *
+	 * @param list<string> $keys POST keys to copy.
+	 * @return array<string, mixed>
+	 */
+	private static function summarize_post_fields( array $keys ) {
+		$out = array();
+		foreach ( $keys as $k ) {
+			if ( ! isset( $_POST[ $k ] ) ) {
+				continue;
+			}
+			$raw = wp_unslash( $_POST[ $k ] );
+			if ( 'product_id' === $k || 'quantity' === $k ) {
+				$out[ $k ] = (int) $raw;
+			} elseif ( 'cart_item_key' === $k ) {
+				$out[ $k ] = substr( sanitize_text_field( (string) $raw ), 0, 64 );
+			} else {
+				$out[ $k ] = is_scalar( $raw ) ? substr( (string) $raw, 0, 200 ) : '[complex]';
+			}
 		}
-		$log[] = $entry;
-		if ( count( $log ) > 100 ) {
-			$log = array_slice( $log, -100 );
-		}
-		update_option( Constants::OPTION_ERROR_LOG, $log, false );
+		return $out;
 	}
 
 	/**
