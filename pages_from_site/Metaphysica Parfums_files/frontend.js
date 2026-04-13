@@ -123,317 +123,20 @@
 		});
 	};
 
-	var clientDiagBuffer = [];
-	var clientDiagFlushTimer = null;
-	var clientDiagReporting = false;
-
-	function clientDiagPageMeta() {
-		return {
-			page_url: window.location.href ? String(window.location.href).slice(0, 500) : '',
-			user_agent:
-				typeof navigator !== 'undefined' && navigator.userAgent
-					? String(navigator.userAgent).slice(0, 400)
-					: ''
-		};
-	}
-
-	function clientDiagFlushMs() {
-		var d = data();
-		var n = parseInt(d.clientLogFlushMs, 10);
-		return isNaN(n) || n < 200 ? 1200 : Math.min(n, 10000);
-	}
-
-	function clientDiagMaxBatch() {
-		var d = data();
-		var n = parseInt(d.clientLogMaxBatch, 10);
-		return isNaN(n) || n < 1 ? 12 : Math.min(n, 25);
-	}
-
-	function isLogClientAjaxRequest(settings) {
-		var logAct = window.mpScc.ajaxConfig().actions.logClientEvent;
-		if (!logAct || !settings || !settings.data) {
-			return false;
-		}
-		var d = settings.data;
-		if (typeof d === 'string') {
-			return d.indexOf('action=' + logAct) !== -1 || d.indexOf('&action=' + logAct) !== -1;
-		}
-		if (typeof d === 'object' && d !== null && d.action === logAct) {
-			return true;
-		}
-		return false;
-	}
-
-	window.mpScc.queueClientDiagnostic = function (row) {
-		if (!data().clientLogging) {
-			return;
-		}
-		if (!row || typeof row.event !== 'string' || !row.event) {
-			return;
-		}
-		var meta = clientDiagPageMeta();
-		var item = $.extend(
-			{
-				level: 'info',
-				message: '',
-				context: '',
-				detail: '',
-				product_id: 0
-			},
-			row,
-			meta
-		);
-		item.event = String(item.event).slice(0, 80);
-		if (item.message) {
-			item.message = String(item.message).slice(0, 500);
-		}
-		if (item.context) {
-			item.context = String(item.context).slice(0, 300);
-		}
-		if (item.detail) {
-			item.detail = String(item.detail).slice(0, 500);
-		}
-		clientDiagBuffer.push(item);
-		if (clientDiagBuffer.length >= clientDiagMaxBatch()) {
-			window.mpScc.flushClientDiagnostics();
-			return;
-		}
-		if (clientDiagFlushTimer) {
-			clearTimeout(clientDiagFlushTimer);
-		}
-		clientDiagFlushTimer = window.setTimeout(function () {
-			clientDiagFlushTimer = null;
-			window.mpScc.flushClientDiagnostics();
-		}, clientDiagFlushMs());
-	};
-
-	window.mpScc.flushClientDiagnostics = function () {
-		if (!data().clientLogging) {
-			return;
-		}
-		if (clientDiagFlushTimer) {
-			clearTimeout(clientDiagFlushTimer);
-			clientDiagFlushTimer = null;
-		}
-		if (!clientDiagBuffer.length) {
-			return;
-		}
-		var batch = clientDiagBuffer.splice(0, clientDiagMaxBatch());
-		var cfg = window.mpScc.ajaxConfig();
-		if (!cfg.ajaxUrl || !cfg.actions.logClientEvent) {
-			return;
-		}
-		clientDiagReporting = true;
-		$.ajax({
-			url: cfg.ajaxUrl,
-			type: 'POST',
-			data: {
-				action: cfg.actions.logClientEvent,
-				_ajax_nonce: cfg.nonce,
-				batch: JSON.stringify(batch)
-			},
-			dataType: 'json'
-		})
-			.done(function () {
-				if (clientDiagBuffer.length) {
-					window.mpScc.flushClientDiagnostics();
-				}
-			})
-			.fail(function () {
-				clientDiagBuffer = batch.concat(clientDiagBuffer);
-			})
-			.always(function () {
-				clientDiagReporting = false;
-			});
-	};
-
-	window.mpScc.reportStickyError = function (code, message, detail) {
-		window.mpScc.queueClientDiagnostic({
-			event: String(code || 'sticky_error').slice(0, 80),
-			level: 'error',
-			message: message ? String(message).slice(0, 500) : '',
-			detail: detail ? String(detail).slice(0, 500) : ''
-		});
-	};
-
 	/**
 	 * Fire-and-forget client diagnostics (respects `diagnostics.client_error_logging` on the server).
 	 * @param {string} event Sanitized key, e.g. `catalog_image_out_of_stock`.
 	 * @param {Record<string, *>} [payload]
 	 */
 	window.mpScc.logClientEvent = function (event, payload) {
-		if (!data().clientLogging) {
+		var cfg = window.mpScc.ajaxConfig();
+		if (!cfg.ajaxUrl || !cfg.actions.logClientEvent) {
 			return;
 		}
-		var p = payload || {};
-		var row = {
-			event: String(event),
-			level: 'info',
-			message: 'client_' + String(event)
-		};
-		if (p.context !== undefined) {
-			row.context = String(p.context).slice(0, 300);
-		}
-		if (p.product_id) {
-			var pid = parseInt(p.product_id, 10);
-			if (!isNaN(pid) && pid > 0) {
-				row.product_id = pid;
-			}
-		}
-		if (p.message) {
-			row.message = String(p.message).slice(0, 500);
-		}
-		window.mpScc.queueClientDiagnostic(row);
+		window.mpScc
+			.postAjax('logClientEvent', $.extend({ event: event }, payload || {}))
+			.fail(function () {});
 	};
-
-	function initClientDiagnostics() {
-		if (window.__mpSccClientDiagInit) {
-			return;
-		}
-		if (!data().clientLogging) {
-			return;
-		}
-		window.__mpSccClientDiagInit = true;
-
-		var origOnError = window.onerror;
-		window.onerror = function (message, source, lineno, colno, error) {
-			if (typeof origOnError === 'function') {
-				try {
-					origOnError.apply(window, arguments);
-				} catch (e) {}
-			}
-			if (!data().clientLogging || clientDiagReporting) {
-				return false;
-			}
-			var detail =
-				String(source || '') +
-				':' +
-				String(lineno || 0) +
-				':' +
-				String(colno || 0);
-			if (error && error.stack) {
-				detail += ' ' + String(error.stack).slice(0, 400);
-			}
-			window.mpScc.queueClientDiagnostic({
-				event: 'js_error',
-				level: 'error',
-				message: String(message || '').slice(0, 500),
-				detail: detail.slice(0, 500)
-			});
-			return false;
-		};
-
-		window.addEventListener(
-			'unhandledrejection',
-			function (ev) {
-				if (!data().clientLogging || clientDiagReporting) {
-					return;
-				}
-				var r = ev.reason;
-				var msg =
-					r && typeof r === 'object' && r.message
-						? String(r.message)
-						: String(r);
-				window.mpScc.queueClientDiagnostic({
-					event: 'unhandledrejection',
-					level: 'error',
-					message: msg.slice(0, 500)
-				});
-			},
-			true
-		);
-
-		$(document).ajaxError(function (event, jqXHR, settings, thrownError) {
-			if (!data().clientLogging || clientDiagReporting) {
-				return;
-			}
-			var url = settings && settings.url ? String(settings.url) : '';
-			if (!url || url.indexOf('admin-ajax.php') === -1) {
-				return;
-			}
-			if (isLogClientAjaxRequest(settings)) {
-				return;
-			}
-			var status = jqXHR && typeof jqXHR.status !== 'undefined' ? jqXHR.status : 0;
-			var ctx = thrownError ? String(thrownError).slice(0, 120) : '';
-			window.mpScc.queueClientDiagnostic({
-				event: 'xhr_ajax_error',
-				level: 'warn',
-				message: 'HTTP ' + String(status),
-				context: ctx,
-				detail: url.slice(0, 300)
-			});
-		});
-
-		if (typeof window.fetch === 'function') {
-			var origFetch = window.fetch;
-			var logAct = window.mpScc.ajaxConfig().actions.logClientEvent;
-			window.fetch = function (input, init) {
-				return origFetch.apply(this, arguments).then(
-					function (resp) {
-						if (!data().clientLogging || clientDiagReporting) {
-							return resp;
-						}
-						var urlStr = '';
-						try {
-							urlStr =
-								typeof input === 'string'
-									? input
-									: input && input.url
-										? String(input.url)
-										: '';
-						} catch (e) {}
-						if (!urlStr || urlStr.indexOf('admin-ajax.php') === -1 || !resp || resp.ok) {
-							return resp;
-						}
-						try {
-							var u = new URL(urlStr, window.location.href);
-							if (logAct && u.searchParams.get('action') === logAct) {
-								return resp;
-							}
-						} catch (e2) {}
-						window.mpScc.queueClientDiagnostic({
-							event: 'fetch_http',
-							level: 'warn',
-							message: 'HTTP ' + String(resp.status),
-							context: urlStr.slice(0, 200)
-						});
-						return resp;
-					},
-					function (err) {
-						if (!data().clientLogging || clientDiagReporting) {
-							return Promise.reject(err);
-						}
-						var urlStr2 = '';
-						try {
-							urlStr2 =
-								typeof input === 'string'
-									? input
-									: input && input.url
-										? String(input.url)
-										: '';
-						} catch (e3) {}
-						if (!urlStr2 || urlStr2.indexOf('admin-ajax.php') === -1) {
-							return Promise.reject(err);
-						}
-						try {
-							var u2 = new URL(urlStr2, window.location.href);
-							if (logAct && u2.searchParams.get('action') === logAct) {
-								return Promise.reject(err);
-							}
-						} catch (e4) {}
-						window.mpScc.queueClientDiagnostic({
-							event: 'fetch_network',
-							level: 'error',
-							message: String(err && err.message ? err.message : err).slice(0, 500),
-							context: urlStr2.slice(0, 200)
-						});
-						return Promise.reject(err);
-					}
-				);
-			};
-		}
-	}
 
 	function parseDebounceMs() {
 		var raw = window.mpScc.cssVar('--mp-scc-sticky-quantity-debounce-ms') || '';
@@ -468,77 +171,6 @@
 			}
 		}
 		return 0;
-	}
-
-	/**
-	 * Themes often use `div.product` / `article.product` (Elementor, XStore) instead of `li.product`.
-	 *
-	 * @param {EventTarget|null} el
-	 * @param {Record<string, *>} [catalog]
-	 * @returns {Element|null}
-	 */
-	function findProductCardElement(el, catalog) {
-		var t = el;
-		if (!t || !t.nodeType) {
-			return null;
-		}
-		if (t.nodeType === 3 && t.parentElement) {
-			t = t.parentElement;
-		}
-		if (!t || !t.closest) {
-			return null;
-		}
-		var pref =
-			catalog && catalog.cardRootSelector != null
-				? String(catalog.cardRootSelector).trim()
-				: '';
-		var fallbacks = [
-			'li.product',
-			'div.product.type-product',
-			'div.product',
-			'article.product',
-			'.wc-block-grid__product'
-		];
-		var seen = {};
-		var order = [];
-		var i;
-		if (pref) {
-			order.push(pref);
-		}
-		for (i = 0; i < fallbacks.length; i++) {
-			if (fallbacks[i] !== pref) {
-				order.push(fallbacks[i]);
-			}
-		}
-		for (i = 0; i < order.length; i++) {
-			var s = order[i];
-			if (!s || seen[s]) {
-				continue;
-			}
-			seen[s] = true;
-			var node = t.closest(s);
-			if (node && resolveCatalogProductId($(node)) > 0) {
-				return node;
-			}
-		}
-		return null;
-	}
-
-	/**
-	 * jQuery selector for catalog cards (loop) — includes `div.product` when admin leaves default `li.product`.
-	 *
-	 * @param {Record<string, *>} catalog
-	 * @returns {string}
-	 */
-	function catalogLoopCardSelector(catalog) {
-		var raw =
-			catalog && catalog.cardRootSelector != null ? String(catalog.cardRootSelector).trim() : '';
-		if (raw) {
-			return raw;
-		}
-		return (
-			'ul.products li.product, ul.products div.product, div.products div.product, .woocommerce .products li.product, .woocommerce .products div.product'
-		);
 	}
 
 	var CATALOG_ATC_POST_SUCCESS_COOLDOWN_MS = 480;
@@ -620,58 +252,11 @@
 	}
 
 	/**
-	 * Positions «Подробнее» band + invisible add-to-cart hit layer from the first loop image geometry.
-	 * Band height matches the «Подробнее» strip (same formula as {@see syncCatalogCardLayouts} overlay block).
-	 *
+	 * Place the overlay as a bottom band over the first product image (sibling inside the card, no nested anchors).
 	 * @param {JQuery} $card
+	 * @param {JQuery} $overlay
 	 */
-	function syncCatalogCardLayouts($card) {
-		if (!$card || !$card.length) {
-			return;
-		}
-		var $img = $card.find('img').first();
-		if (!$img.length) {
-			return;
-		}
-		var io = $img.offset();
-		var co = $card.offset();
-		if (!io || !co) {
-			return;
-		}
-		var ih = $img.outerHeight();
-		var iw = $img.outerWidth();
-		var band = Math.max(40, Math.min(56, Math.round(ih * 0.26)));
-		var topRel = io.top - co.top;
-		var leftRel = io.left - co.left;
-
-		var $overlay = $card.find('.mp-scc-catalog-overlay').first();
-		if ($overlay.length) {
-			$overlay.css({
-				top: topRel + ih - band,
-				left: leftRel,
-				width: iw,
-				height: band
-			});
-		}
-
-		var $hit = $card.find('a.mp-scc-catalog-atc-hit').first();
-		if ($hit.length) {
-			var hitH = $overlay.length ? Math.max(0, ih - band) : ih;
-			$hit.css({
-				top: topRel,
-				left: leftRel,
-				width: iw,
-				height: hitH
-			});
-		}
-	}
-
-	/**
-	 * Re-run layout when the card or first image box changes (resize, lazy-load, filters).
-	 *
-	 * @param {JQuery} $card
-	 */
-	function attachCatalogCardResizeSync($card) {
+	function layoutCatalogMoreInfoOverlayBand($card, $overlay) {
 		var $img = $card.find('img').first();
 		if (!$img.length) {
 			return;
@@ -679,10 +264,27 @@
 		var imgEl = $img.get(0);
 		var cardEl = $card.get(0);
 		function sync() {
-			syncCatalogCardLayouts($card);
+			if (!imgEl || !cardEl || !$overlay.parent().length) {
+				return;
+			}
+			var io = $img.offset();
+			var co = $card.offset();
+			if (!io || !co) {
+				return;
+			}
+			var ih = $img.outerHeight();
+			var band = Math.max(40, Math.min(56, Math.round(ih * 0.26)));
+			var topRel = io.top - co.top + ih - band;
+			var leftRel = io.left - co.left;
+			$overlay.css({
+				top: topRel,
+				left: leftRel,
+				width: $img.outerWidth(),
+				height: band
+			});
 		}
 		sync();
-		var ro = $card.data('mpSccCatalogChromeRo');
+		var ro = $card.data('mpSccOverlayRo');
 		if (ro && typeof ro.disconnect === 'function') {
 			ro.disconnect();
 		}
@@ -690,69 +292,8 @@
 			ro = new ResizeObserver(sync);
 			ro.observe(cardEl);
 			ro.observe(imgEl);
-			$card.data('mpSccCatalogChromeRo', ro);
+			$card.data('mpSccOverlayRo', ro);
 		}
-	}
-
-	/**
-	 * Desktop: stretch the theme’s AJAX add-to-cart anchor invisibly over the first image, leaving the
-	 * bottom band (same geometry as «Подробнее») free for the overlay link (z-index above the hit layer).
-	 */
-	function initCatalogAtcHitLayer() {
-		var catalog = data().catalog || {};
-		var cardSel = catalogLoopCardSelector(catalog);
-
-		function cleanupAtcHitUi() {
-			$(cardSel).each(function () {
-				var $c = $(this);
-				$c.removeClass('mp-scc-catalog-card--atc-hit');
-				$c.find('a.mp-scc-catalog-atc-hit').removeClass('mp-scc-catalog-atc-hit').removeAttr('style');
-				var ro = $c.data('mpSccCatalogChromeRo');
-				if (ro && typeof ro.disconnect === 'function') {
-					ro.disconnect();
-				}
-				$c.removeData('mpSccCatalogChromeRo');
-			});
-		}
-
-		if (!window.mpScc.flagEnabled('product_image_add_to_cart')) {
-			cleanupAtcHitUi();
-			return;
-		}
-
-		if (typeof window.matchMedia === 'function' && !window.matchMedia('(min-width: 769px)').matches) {
-			cleanupAtcHitUi();
-			return;
-		}
-
-		var behavior = catalog.imageClickBehavior || 'add_to_cart';
-		if (behavior === 'theme_default') {
-			cleanupAtcHitUi();
-			return;
-		}
-
-		$(cardSel).each(function () {
-			var $card = $(this);
-			if (!$card.find('img').length) {
-				return;
-			}
-			var $hit = $card
-				.find('a.add_to_cart_button, a.ld-sp-add-to-cart')
-				.filter(function () {
-					var $a = $(this);
-					var href = $a.attr('href') || '';
-					return href.indexOf('add-to-cart') !== -1 || $a.is('[data-product_id]');
-				})
-				.first();
-			if (!$hit.length) {
-				$card.removeClass('mp-scc-catalog-card--atc-hit');
-				$card.find('a.mp-scc-catalog-atc-hit').removeClass('mp-scc-catalog-atc-hit').removeAttr('style');
-				return;
-			}
-			$card.addClass('mp-scc-catalog-card--atc-hit');
-			$hit.addClass('mp-scc-catalog-atc-hit');
-			attachCatalogCardResizeSync($card);
-		});
 	}
 
 	/**
@@ -796,7 +337,7 @@
 			return;
 		}
 		var catalog = data().catalog || {};
-		var cardSel = catalogLoopCardSelector(catalog);
+		var cardSel = catalog.cardRootSelector || 'li.product';
 		var label = window.mpScc.label('more_info');
 		if (!String(label || '').trim()) {
 			label = 'Подробнее о товаре';
@@ -828,7 +369,6 @@
 					$existing.attr('href', productHref);
 				}
 				applyMoreInfoLinkAttrs($existing, newTab);
-				attachCatalogCardResizeSync($card);
 				return;
 			}
 
@@ -853,7 +393,7 @@
 			}
 			$ov.append($('<span class="mp-scc-catalog-overlay__label" />').text(label));
 			$card.append($ov);
-			attachCatalogCardResizeSync($card);
+			layoutCatalogMoreInfoOverlayBand($card, $ov);
 		});
 	}
 
@@ -889,14 +429,13 @@
 		});
 	}
 
-	var catalogChromeLayoutTimer = null;
-	function scheduleCatalogChromeLayouts() {
-		if (catalogChromeLayoutTimer) {
-			clearTimeout(catalogChromeLayoutTimer);
+	var catalogOverlayInitTimer = null;
+	function scheduleCatalogMoreInfoOverlay() {
+		if (catalogOverlayInitTimer) {
+			clearTimeout(catalogOverlayInitTimer);
 		}
-		catalogChromeLayoutTimer = window.setTimeout(function () {
-			catalogChromeLayoutTimer = null;
-			initCatalogAtcHitLayer();
+		catalogOverlayInitTimer = window.setTimeout(function () {
+			catalogOverlayInitTimer = null;
 			initCatalogMoreInfoOverlay();
 		}, 80);
 	}
@@ -1066,232 +605,6 @@
 		$card.data('mpSccToastTimer', t);
 	}
 
-	/**
-	 * Default + fallback selectors: some themes omit `.woocommerce` wrapper or use `div.products`.
-	 */
-	var CATALOG_IMAGE_CLICK_SELECTOR_DEFAULT =
-		'ul.products li.product img, ul.products div.product img, .woocommerce ul.products li.product img, .woocommerce ul.products div.product img, .products li.product img, .products div.product img, div.products div.product img';
-
-	/**
-	 * Resolve product thumbnail {@link HTMLImageElement} from click target (img, picture, anchor wrapping img, theme wrappers).
-	 *
-	 * @param {EventTarget|null} rawTarget
-	 * @param {Record<string, *>} catalog
-	 * @returns {HTMLImageElement|null}
-	 */
-	function resolveCatalogImageFromClickTarget(rawTarget, catalog) {
-		var t = rawTarget;
-		if (!t || !t.nodeType) {
-			return null;
-		}
-		if (t.nodeType === 3 && t.parentElement) {
-			t = t.parentElement;
-		}
-		if (!t || !t.closest) {
-			return null;
-		}
-		if (t.closest('.add_to_cart_button, a.add_to_cart_button, button.single_add_to_cart_button')) {
-			return null;
-		}
-		if (t.closest('a[href*="add-to-cart"]')) {
-			return null;
-		}
-		if (t.matches && t.matches('a[href*="add-to-cart"]')) {
-			return null;
-		}
-		if (t.matches && t.matches('button, input, textarea, select')) {
-			return null;
-		}
-		if (t.closest('.footer-product, .content-product-hover, .product-hover')) {
-			return null;
-		}
-		var card = findProductCardElement(t, catalog);
-		if (!card) {
-			return null;
-		}
-		var img = null;
-		if (t.nodeName === 'IMG') {
-			img = t;
-		} else {
-			var pic = t.closest('picture');
-			if (pic) {
-				img = pic.querySelector('img');
-			}
-			if (!img && t.nodeName === 'A') {
-				img = t.querySelector('img');
-			}
-			if (!img) {
-				var loopLink = t.closest('a.woocommerce-LoopProduct-link');
-				if (loopLink) {
-					img = loopLink.querySelector('img');
-				}
-			}
-			if (!img) {
-				var ph = t.closest('.product-image, .product-content-image, .content-product');
-				if (
-					ph &&
-					card.contains(ph) &&
-					!t.closest('.footer-product, .content-product-hover, .product-hover')
-				) {
-					img = ph.querySelector('img');
-				}
-			}
-		}
-		if (!img || img.nodeName !== 'IMG' || !card.contains(img)) {
-			return null;
-		}
-		return img;
-	}
-
-	/**
-	 * @param {HTMLImageElement} img
-	 * @param {Record<string, *>} catalog
-	 * @returns {boolean}
-	 */
-	function catalogImageMatchesConfiguredSelector(img, catalog) {
-		var raw = catalog.imageClickSelector != null ? String(catalog.imageClickSelector).trim() : '';
-		var sel = raw || CATALOG_IMAGE_CLICK_SELECTOR_DEFAULT;
-		try {
-			if (img.matches(sel)) {
-				return true;
-			}
-		} catch (err) {}
-		var card = findProductCardElement(img, catalog);
-		return !!(card && card.contains(img) && resolveCatalogProductId($(card)) > 0);
-	}
-
-	/**
-	 * Shared AJAX path for catalog loop add-to-cart (same endpoint as image-click capture).
-	 *
-	 * @param {JQuery} $card
-	 * @param {number} productId
-	 * @param {JQuery} $triggerForAddedEvent
-	 * @param {Record<string, *>} cat
-	 * @param {Record<string, *>} d mpSccData root
-	 */
-	function executeCatalogLoopAddSimpleAjax($card, productId, $triggerForAddedEvent, cat, d) {
-		setCatalogCardLoading($card, true);
-		$card.removeClass('mp-scc-card--error');
-
-		window.mpScc
-			.postAjax('addSimpleProduct', { product_id: productId, quantity: 1 })
-			.done(function (resp) {
-				if (resp && resp.success && resp.data) {
-					setCatalogCardLoading($card, false);
-					$card.data('mpSccAtcCooldownUntil', Date.now() + CATALOG_ATC_POST_SUCCESS_COOLDOWN_MS);
-					triggerCatalogAddedAnimation($card);
-					$(document.body).trigger('added_to_cart', [{}, '', $triggerForAddedEvent]);
-					return;
-				}
-				setCatalogCardLoading($card, false);
-				$card.addClass('mp-scc-card--error');
-				window.setTimeout(function () {
-					$card.removeClass('mp-scc-card--error');
-				}, 500);
-				var respD = resp && resp.data ? resp.data : {};
-				var code = respD.code ? String(respD.code) : '';
-				var errMsg = respD.message ? String(respD.message) : window.mpScc.label('out_of_stock');
-				var toastOpts = { variant: 'error', assertive: true };
-				if (code === 'out_of_stock') {
-					errMsg = window.mpScc.label('out_of_stock') || errMsg;
-					toastOpts = { variant: 'stock', assertive: true, durationMs: 4500 };
-				}
-				showCatalogToast($card, errMsg, toastOpts);
-			})
-			.fail(function (xhr) {
-				setCatalogCardLoading($card, false);
-				$card.addClass('mp-scc-card--error');
-				window.setTimeout(function () {
-					$card.removeClass('mp-scc-card--error');
-				}, 500);
-				var msg = d.networkErrorMessage ? String(d.networkErrorMessage) : '';
-				if (xhr && xhr.responseJSON && xhr.responseJSON.data && xhr.responseJSON.data.message) {
-					msg = String(xhr.responseJSON.data.message);
-				}
-				showCatalogToast($card, msg, { variant: 'error', assertive: true });
-			});
-	}
-
-	/**
-	 * Invisible stretched theme ATC link ({@see initCatalogAtcHitLayer}): do NOT rely on Woo/theme JS —
-	 * it often never fires; we handle here with the same plugin AJAX as the image capture path.
-	 *
-	 * @returns {boolean} True if the click was consumed (caller must stop propagation).
-	 */
-	function handleCatalogAtcHitLayerClick(e, cat, d) {
-		var t = e.target;
-		if (t && t.nodeType === 3 && t.parentElement) {
-			t = t.parentElement;
-		}
-		if (!t || !t.closest) {
-			return false;
-		}
-		var hit = t.closest('a.mp-scc-catalog-atc-hit');
-		if (!hit) {
-			return false;
-		}
-		if (typeof window.matchMedia === 'function' && !window.matchMedia('(min-width: 769px)').matches) {
-			return false;
-		}
-		var cardEl = findProductCardElement(hit, cat);
-		if (!cardEl) {
-			return false;
-		}
-		var $card = $(cardEl);
-		if ($card.attr('data-mp-scc-atc-busy') === '1') {
-			e.preventDefault();
-			e.stopPropagation();
-			e.stopImmediatePropagation();
-			return true;
-		}
-		if ($(t).closest('[data-mp-scc-overlay], .mp-scc-catalog-overlay').length) {
-			return false;
-		}
-		var coolUntil = $card.data('mpSccAtcCooldownUntil');
-		if (typeof coolUntil === 'number' && Date.now() < coolUntil) {
-			e.preventDefault();
-			e.stopPropagation();
-			e.stopImmediatePropagation();
-			return true;
-		}
-
-		var productId = resolveCatalogProductId($card);
-		if (!productId) {
-			var resolveMsg = cat.resolveErrorMessage ? String(cat.resolveErrorMessage) : '';
-			showCatalogToast($card, resolveMsg, { variant: 'error', assertive: true });
-			e.preventDefault();
-			e.stopPropagation();
-			e.stopImmediatePropagation();
-			return true;
-		}
-
-		if (isCatalogCardOutOfStock($card)) {
-			if (allowCatalogStockToast($card)) {
-				var stockLabel = window.mpScc.label('out_of_stock');
-				showCatalogToast($card, stockLabel, {
-					variant: 'stock',
-					assertive: true,
-					durationMs: 4500
-				});
-				window.mpScc.logClientEvent('catalog_image_out_of_stock', {
-					product_id: productId,
-					context: 'atc_hit'
-				});
-			}
-			e.preventDefault();
-			e.stopPropagation();
-			e.stopImmediatePropagation();
-			return true;
-		}
-
-		e.preventDefault();
-		e.stopPropagation();
-		e.stopImmediatePropagation();
-
-		executeCatalogLoopAddSimpleAjax($card, productId, $(hit), cat, d);
-		return true;
-	}
-
 	function initCatalogImageAddToCart() {
 		var catalog = data().catalog || {};
 		var behavior = catalog.imageClickBehavior || 'add_to_cart';
@@ -1301,115 +614,116 @@
 		if (!window.mpScc.flagEnabled('product_image_add_to_cart')) {
 			return;
 		}
+		var sel = catalog.imageClickSelector || '';
+		var cardClosest = catalog.cardRootSelector || 'li.product';
+		if (!sel) {
+			return;
+		}
 		var cfg = window.mpScc.ajaxConfig();
 		if (!cfg.ajaxUrl || !cfg.actions.addSimpleProduct) {
 			return;
 		}
 
-		if (window.__mpSccCatalogImgCapture) {
-			return;
-		}
-		window.__mpSccCatalogImgCapture = true;
+		$(document.body).on('click.mpSccCatalog', sel, function (e) {
+			var $img = $(this);
+			if (!$img.is('img')) {
+				return;
+			}
+			if (e.button !== 0) {
+				return;
+			}
+			e.preventDefault();
+			e.stopPropagation();
 
-		/**
-		 * Capture on `window` (not `document`) so we run before other capture listeners on `document`
-		 * (Elementor / theme scripts often use `document.addEventListener(..., true)` + stopImmediatePropagation).
-		 * Also registered synchronously at script load (see call site below), not only on jQuery ready.
-		 */
-		window.addEventListener(
-			'click',
-			function mpSccCatalogImageCapture(e) {
-				if (e.button !== 0) {
-					return;
-				}
-				var d = data();
-				var cat = d.catalog || {};
-				var beh = cat.imageClickBehavior || 'add_to_cart';
-				if (beh === 'theme_default') {
-					return;
-				}
-				if (!window.mpScc.flagEnabled('product_image_add_to_cart')) {
-					return;
-				}
-				var cfg2 = window.mpScc.ajaxConfig();
-				if (!cfg2.ajaxUrl || !cfg2.actions.addSimpleProduct) {
-					return;
-				}
+			var $card = $img.closest(cardClosest);
+			if (!$card.length) {
+				return;
+			}
+			if ($card.attr('data-mp-scc-atc-busy') === '1') {
+				return;
+			}
 
-				if (handleCatalogAtcHitLayerClick(e, cat, d)) {
+			var imgTitleSels = catalog.imageTitleBlockSelectors || [];
+			for (var ib = 0; ib < imgTitleSels.length; ib++) {
+				if ($img.closest(imgTitleSels[ib]).length) {
 					return;
 				}
+			}
+			if ($(e.target).closest('[data-mp-scc-overlay], .mp-scc-catalog-overlay').length) {
+				return;
+			}
+			var coolUntil = $card.data('mpSccAtcCooldownUntil');
+			if (typeof coolUntil === 'number' && Date.now() < coolUntil) {
+				return;
+			}
 
-				var imgEl = resolveCatalogImageFromClickTarget(e.target, cat);
-				if (!imgEl) {
-					return;
-				}
-				if (!catalogImageMatchesConfiguredSelector(imgEl, cat)) {
-					return;
-				}
+			var productId = resolveCatalogProductId($card);
+			if (!productId) {
+				var resolveMsg = catalog.resolveErrorMessage ? String(catalog.resolveErrorMessage) : '';
+				showCatalogToast($card, resolveMsg, { variant: 'error', assertive: true });
+				return;
+			}
 
-				var $img = $(imgEl);
-				var cardEl = findProductCardElement(imgEl, cat);
-				if (!cardEl) {
-					return;
+			if (isCatalogCardOutOfStock($card)) {
+				if (allowCatalogStockToast($card)) {
+					var stockLabel = window.mpScc.label('out_of_stock');
+					showCatalogToast($card, stockLabel, {
+						variant: 'stock',
+						assertive: true,
+						durationMs: 4500
+					});
+					window.mpScc.logClientEvent('catalog_image_out_of_stock', {
+						product_id: productId,
+						context: 'dom'
+					});
 				}
-				var $card = $(cardEl);
-				if ($card.attr('data-mp-scc-atc-busy') === '1') {
-					return;
-				}
+				return;
+			}
 
-				var imgTitleSels = cat.imageTitleBlockSelectors || [];
-				var ib;
-				for (ib = 0; ib < imgTitleSels.length; ib++) {
-					if ($img.closest(imgTitleSels[ib]).length) {
+			setCatalogCardLoading($card, true);
+			$card.removeClass('mp-scc-card--error');
+
+			window.mpScc
+				.postAjax('addSimpleProduct', { product_id: productId, quantity: 1 })
+				.done(function (resp) {
+					if (resp && resp.success && resp.data) {
+						setCatalogCardLoading($card, false);
+						$card.data(
+							'mpSccAtcCooldownUntil',
+							Date.now() + CATALOG_ATC_POST_SUCCESS_COOLDOWN_MS
+						);
+						triggerCatalogAddedAnimation($card);
+						$(document.body).trigger('added_to_cart', [{}, '', $img]);
 						return;
 					}
-				}
-				if ($(e.target).closest('[data-mp-scc-overlay], .mp-scc-catalog-overlay').length) {
-					return;
-				}
-				var coolUntil = $card.data('mpSccAtcCooldownUntil');
-				if (typeof coolUntil === 'number' && Date.now() < coolUntil) {
-					return;
-				}
-
-				var productId = resolveCatalogProductId($card);
-				if (!productId) {
-					var resolveMsg = cat.resolveErrorMessage ? String(cat.resolveErrorMessage) : '';
-					showCatalogToast($card, resolveMsg, { variant: 'error', assertive: true });
-					e.preventDefault();
-					e.stopPropagation();
-					e.stopImmediatePropagation();
-					return;
-				}
-
-				if (isCatalogCardOutOfStock($card)) {
-					if (allowCatalogStockToast($card)) {
-						var stockLabel = window.mpScc.label('out_of_stock');
-						showCatalogToast($card, stockLabel, {
-							variant: 'stock',
-							assertive: true,
-							durationMs: 4500
-						});
-						window.mpScc.logClientEvent('catalog_image_out_of_stock', {
-							product_id: productId,
-							context: 'dom'
-						});
+					setCatalogCardLoading($card, false);
+					$card.addClass('mp-scc-card--error');
+					window.setTimeout(function () {
+						$card.removeClass('mp-scc-card--error');
+					}, 500);
+					var d = resp && resp.data ? resp.data : {};
+					var code = d.code ? String(d.code) : '';
+					var errMsg = d.message ? String(d.message) : window.mpScc.label('out_of_stock');
+					var toastOpts = { variant: 'error', assertive: true };
+					if (code === 'out_of_stock') {
+						errMsg = window.mpScc.label('out_of_stock') || errMsg;
+						toastOpts = { variant: 'stock', assertive: true, durationMs: 4500 };
 					}
-					e.preventDefault();
-					e.stopPropagation();
-					e.stopImmediatePropagation();
-					return;
-				}
-
-				e.preventDefault();
-				e.stopPropagation();
-				e.stopImmediatePropagation();
-
-				executeCatalogLoopAddSimpleAjax($card, productId, $img, cat, d);
-			},
-			true
-		);
+					showCatalogToast($card, errMsg, toastOpts);
+				})
+				.fail(function (xhr) {
+					setCatalogCardLoading($card, false);
+					$card.addClass('mp-scc-card--error');
+					window.setTimeout(function () {
+						$card.removeClass('mp-scc-card--error');
+					}, 500);
+					var msg = data().networkErrorMessage ? String(data().networkErrorMessage) : '';
+					if (xhr && xhr.responseJSON && xhr.responseJSON.data && xhr.responseJSON.data.message) {
+						msg = String(xhr.responseJSON.data.message);
+					}
+					showCatalogToast($card, msg, { variant: 'error', assertive: true });
+				});
+		});
 	}
 
 	var SINGLE_ADD_SUCCESS_COOLDOWN_MS = 800;
@@ -2443,24 +1757,13 @@
 	};
 
 	$(function () {
-		initClientDiagnostics();
 		initWishlistIntegrationBodyClass();
 
 		var $root = $('#mp-scc-sticky-root');
 		if ($root.length) {
-			try {
-				var sticky = new StickyCartController($root[0]);
-				sticky.init();
-				window.mpScc.sticky = sticky;
-			} catch (e) {
-				if (window.mpScc.reportStickyError) {
-					window.mpScc.reportStickyError(
-						'sticky_init_failed',
-						e && e.message ? String(e.message) : String(e),
-						e && e.stack ? String(e.stack).slice(0, 500) : ''
-					);
-				}
-			}
+			var sticky = new StickyCartController($root[0]);
+			sticky.init();
+			window.mpScc.sticky = sticky;
 		}
 
 		initVariableProductVariationGuard();
@@ -2469,30 +1772,18 @@
 		initCatalogOverlayPropagation();
 		initCatalogTitleClickHook();
 		initCatalogOverlayKeyboard();
-		scheduleCatalogChromeLayouts();
+		initCatalogMoreInfoOverlay();
+		initCatalogImageAddToCart();
 		runCatalogTitleLinkSanity();
 		warnDuplicateWishlistButtonsInCard();
 
 		$(document.body).on(
 			'wc_fragments_refreshed updated_wc_div etheme_ajax_loaded post-load',
-			scheduleCatalogChromeLayouts
+			scheduleCatalogMoreInfoOverlay
 		);
 
-		var catalogChromeResizeTimer = null;
-		$(window).on('resize.mpSccCatalogChrome orientationchange.mpSccCatalogChrome', function () {
-			if (catalogChromeResizeTimer) {
-				clearTimeout(catalogChromeResizeTimer);
-			}
-			catalogChromeResizeTimer = window.setTimeout(function () {
-				catalogChromeResizeTimer = null;
-				scheduleCatalogChromeLayouts();
-			}, 120);
-		});
-
-		window.mpScc.refreshCatalogOverlay = scheduleCatalogChromeLayouts;
+		window.mpScc.refreshCatalogOverlay = initCatalogMoreInfoOverlay;
 
 		$(window.document).trigger('mpScc:ready');
 	});
-
-	initCatalogImageAddToCart();
 })(window, window.jQuery);

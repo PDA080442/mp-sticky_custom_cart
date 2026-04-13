@@ -33,7 +33,7 @@ final class FrontendFlagResolver {
 		$img_sel          = isset( $catalog_settings['image_click_selector'] ) ? trim( (string) $catalog_settings['image_click_selector'] ) : '';
 		$card_sel         = isset( $catalog_settings['card_root_selector'] ) ? trim( (string) $catalog_settings['card_root_selector'] ) : '';
 		if ( '' === $img_sel ) {
-			$img_sel = '.woocommerce ul.products li.product img';
+			$img_sel = 'ul.products li.product img, ul.products div.product img, .woocommerce ul.products li.product img, .woocommerce ul.products div.product img, .products li.product img, .products div.product img, div.products div.product img';
 		}
 		if ( '' === $card_sel ) {
 			$card_sel = 'li.product';

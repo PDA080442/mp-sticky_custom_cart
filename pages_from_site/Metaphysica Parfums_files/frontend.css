@@ -108,14 +108,14 @@ body.popup-overlay-open .mp-scc-sticky-bar {
 	display: flex;
 	flex-direction: column;
 	align-items: stretch;
-	gap: var(--mp-scc-sticky-inner-gap-mobile, 10px);
+	gap: 10px;
 	width: 100%;
 }
 
 .mp-scc-sticky-summary {
 	display: flex;
 	align-items: center;
-	gap: var(--mp-scc-sticky-summary-gap, 10px);
+	gap: 10px;
 	flex: 1 1 auto;
 	min-width: 0;
 	width: 100%;
@@ -127,21 +127,13 @@ body.popup-overlay-open .mp-scc-sticky-bar {
 	flex-wrap: wrap;
 	align-items: center;
 	justify-content: stretch;
-	gap: var(--mp-scc-sticky-actions-gap, 10px);
+	gap: 10px;
 	width: 100%;
 }
 
 .mp-scc-sticky-actions .mp-scc-btn {
 	flex: 1 1 0;
 	min-width: 0;
-}
-
-.mp-scc-sticky-actions .mp-scc-clear-cart {
-	min-width: var(--mp-scc-sticky-clear-min-width, unset);
-}
-
-.mp-scc-sticky-actions .mp-scc-checkout {
-	min-width: var(--mp-scc-sticky-checkout-min-width, unset);
 }
 
 .mp-scc-clear-cart--loading {
@@ -200,7 +192,7 @@ body.popup-overlay-open .mp-scc-sticky-bar {
 		flex-wrap: nowrap;
 		align-items: center;
 		justify-content: space-between;
-		gap: var(--mp-scc-sticky-inner-gap-desktop-row, 16px) var(--mp-scc-sticky-inner-gap-desktop-col, 24px);
+		gap: 16px 24px;
 	}
 
 	.mp-scc-sticky-summary {
@@ -212,13 +204,17 @@ body.popup-overlay-open .mp-scc-sticky-bar {
 		width: auto;
 		flex: 0 0 auto;
 		flex-wrap: nowrap;
-		gap: var(--mp-scc-sticky-actions-gap, 10px);
+		gap: 10px;
 		justify-content: flex-end;
 	}
 
 	.mp-scc-sticky-actions .mp-scc-btn {
 		flex: 0 0 auto;
 		min-width: auto;
+	}
+
+	.mp-scc-sticky-summary-text {
+		gap: 12px 20px;
 	}
 }
 
@@ -251,8 +247,7 @@ body.popup-overlay-open .mp-scc-sticky-bar {
 	overflow-x: hidden;
 	overflow-y: auto;
 	-webkit-overflow-scrolling: touch;
-	padding: var(--mp-scc-sticky-drawer-padding-y, 12px) var(--mp-scc-sticky-drawer-padding-x, 16px)
-		calc(var(--mp-scc-sticky-drawer-padding-y, 12px) + 2px);
+	padding: 12px 16px 14px;
 	padding-left: calc(16px + env(safe-area-inset-left, 0px));
 	padding-right: calc(16px + env(safe-area-inset-right, 0px));
 	border-radius: var(--mp-scc-sticky-border-radius, 12px) var(--mp-scc-sticky-border-radius, 12px) 0 0;
@@ -408,11 +403,10 @@ body.popup-overlay-open .mp-scc-sticky-bar {
 	display: flex;
 	flex-wrap: wrap;
 	align-items: baseline;
-	gap: var(--mp-scc-sticky-summary-text-gap-row, 12px) var(--mp-scc-sticky-summary-text-gap-column, 20px);
+	gap: 10px 14px;
 	min-width: 0;
 	font-size: var(--mp-scc-sticky-summary-font-size, 15px);
 	font-weight: var(--mp-scc-sticky-summary-font-weight, 600);
-	line-height: var(--mp-scc-sticky-summary-line-height, 1.35);
 }
 
 .mp-scc-cart-count,
@@ -451,7 +445,7 @@ body.popup-overlay-open .mp-scc-sticky-bar {
 	border-radius: 8px;
 	font-size: var(--mp-scc-sticky-button-font-size, 14px);
 	font-weight: var(--mp-scc-sticky-button-font-weight, 600);
-	line-height: var(--mp-scc-sticky-button-line-height, 1.2);
+	line-height: 1.2;
 	text-decoration: none;
 	cursor: pointer;
 	border: 1px solid transparent;
@@ -702,101 +696,20 @@ body.popup-overlay-open .mp-scc-sticky-bar {
 	cursor: not-allowed;
 }
 
-/*
- * Catalog: hide theme “Add to cart” on desktop — image uses plugin AJAX.
- * Home/Elementor pages often have `woocommerce-js` but NOT `body.woocommerce` (see Liquid/Hub themes).
- * Liquid `ld_woo_products_list`: `a.ld-sp-add-to-cart` sits in `figure.ld-sp-img`, not `.footer-product`.
- */
-@media (min-width: 769px) {
-	body:not(.single-product):not(.woocommerce-cart):not(.woocommerce-checkout)
-		ul.products
-		li.product
-		a[href*='add-to-cart'],
-	body:not(.single-product):not(.woocommerce-cart):not(.woocommerce-checkout)
-		ul.products
-		li.product
-		a.ld-sp-add-to-cart,
-	body:not(.single-product):not(.woocommerce-cart):not(.woocommerce-checkout)
-		ul.products
-		li.product
-		a.add_to_cart_button.ajax_add_to_cart,
-	body:not(.single-product):not(.woocommerce-cart):not(.woocommerce-checkout)
-		ul.products.lqd-prods-row
-		li.product
-		figure.ld-sp-img
-		a.ld-sp-add-to-cart,
-	body:not(.single-product):not(.woocommerce-cart):not(.woocommerce-checkout)
-		.products
-		div.product
-		.footer-product
-		.button,
-	body:not(.single-product):not(.woocommerce-cart):not(.woocommerce-checkout)
-		.products
-		div.product
-		.footer-product
-		.add_to_cart_button,
-	body:not(.single-product):not(.woocommerce-cart):not(.woocommerce-checkout)
-		.products
-		li.product
-		.et_product_hover
-		.footer-product
-		.button {
-		display: none !important;
-		visibility: hidden !important;
-		pointer-events: none !important;
-	}
-}
-
-/*
- * Desktop: stretch the theme’s real add-to-cart link invisibly over the first loop image.
- * Bottom strip stays free for «Подробнее» (z-index 4 > 3). Woo `ajax_add_to_cart` handles the click.
- */
-@media (min-width: 769px) {
-	body:not(.single-product):not(.woocommerce-cart):not(.woocommerce-checkout)
-		ul.products
-		li.product.mp-scc-catalog-card--atc-hit
-		a.mp-scc-catalog-atc-hit {
-		display: block !important;
-		visibility: visible !important;
-		opacity: 0 !important;
-		pointer-events: auto !important;
-		position: absolute !important;
-		z-index: 3 !important;
-		box-sizing: border-box !important;
-		margin: 0 !important;
-		padding: 0 !important;
-		border: none !important;
-		overflow: hidden !important;
-		cursor: pointer !important;
-		-webkit-tap-highlight-color: transparent;
-	}
-
-	ul.products li.product.mp-scc-catalog-card--atc-hit a.mp-scc-catalog-atc-hit svg,
-	ul.products li.product.mp-scc-catalog-card--atc-hit a.mp-scc-catalog-atc-hit .icon-ld-cart,
-	ul.products li.product.mp-scc-catalog-card--atc-hit a.mp-scc-catalog-atc-hit span {
-		opacity: 0 !important;
-		pointer-events: none !important;
-	}
-}
-
 /* Catalog: image add-to-cart — toast positioning */
 ul.products li.product,
-ul.products div.product,
-.woocommerce .products li.product,
-.woocommerce .products div.product {
+.woocommerce .products li.product {
 	position: relative;
 }
 
 /* Catalog: image add-to-cart card states */
-li.product.mp-scc-card--loading,
-div.product.mp-scc-card--loading {
+li.product.mp-scc-card--loading {
 	position: relative;
 	opacity: 0.72;
 	pointer-events: none;
 }
 
-li.product.mp-scc-card--loading::after,
-div.product.mp-scc-card--loading::after {
+li.product.mp-scc-card--loading::after {
 	content: '';
 	position: absolute;
 	left: 50%;
@@ -816,8 +729,7 @@ div.product.mp-scc-card--loading::after {
 	}
 }
 
-li.product.mp-scc-card--added,
-div.product.mp-scc-card--added {
+li.product.mp-scc-card--added {
 	animation: mp-scc-card-added var(--mp-scc-catalog-hover-duration-ms, 220ms)
 		var(--mp-scc-catalog-hover-easing, cubic-bezier(0.4, 0, 0.2, 1));
 }
@@ -837,16 +749,13 @@ div.product.mp-scc-card--added {
 	}
 }
 
-li.product.mp-scc-card--error,
-div.product.mp-scc-card--error {
+li.product.mp-scc-card--error {
 	animation: mp-scc-card-shake 0.42s ease;
 }
 
 /* Catalog: «Подробнее» band (Phase 5.1–5.2) — duration/easing/slide/hide-delay from :root vars */
 ul.products li.product .mp-scc-catalog-overlay--floating,
-ul.products div.product .mp-scc-catalog-overlay--floating,
-.woocommerce .products li.product .mp-scc-catalog-overlay--floating,
-.woocommerce .products div.product .mp-scc-catalog-overlay--floating {
+.woocommerce .products li.product .mp-scc-catalog-overlay--floating {
 	position: absolute;
 	z-index: var(--mp-scc-catalog-overlay-z-index, 4);
 	display: flex;
@@ -1062,22 +971,17 @@ body.mp-scc-wishlist-integration-on .woocommerce .products li.product a.mp-scc-c
 	}
 
 	li.product.mp-scc-card--added,
-	div.product.mp-scc-card--added,
-	li.product.mp-scc-card--error,
-	div.product.mp-scc-card--error {
+	li.product.mp-scc-card--error {
 		animation: none;
 	}
 
-	li.product.mp-scc-card--loading::after,
-	div.product.mp-scc-card--loading::after {
+	li.product.mp-scc-card--loading::after {
 		animation: none;
 		border-top-color: rgba(0, 0, 0, 0.25);
 	}
 
 	ul.products li.product .mp-scc-catalog-overlay--floating,
-	ul.products div.product .mp-scc-catalog-overlay--floating,
-	.woocommerce .products li.product .mp-scc-catalog-overlay--floating,
-	.woocommerce .products div.product .mp-scc-catalog-overlay--floating {
+	.woocommerce .products li.product .mp-scc-catalog-overlay--floating {
 		transform: none !important;
 		transition-duration: 0.01ms !important;
 		transition-delay: 0ms !important;
