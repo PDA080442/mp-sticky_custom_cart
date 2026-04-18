@@ -267,6 +267,7 @@ final class SettingsValidationSchema {
 			FeatureFlagsDefaults::KEY_PRODUCT_IMAGE_ADD_TO_CART         => array( 'type' => 'boolean' ),
 			FeatureFlagsDefaults::KEY_STICKY_CART_ENABLED               => array( 'type' => 'boolean' ),
 			FeatureFlagsDefaults::KEY_STICKY_DRAWER_ENABLED             => array( 'type' => 'boolean' ),
+			FeatureFlagsDefaults::KEY_STICKY_TRISTATE_ENABLED           => array( 'type' => 'boolean' ),
 			FeatureFlagsDefaults::KEY_HOVER_MORE_INFO_ENABLED           => array( 'type' => 'boolean' ),
 			FeatureFlagsDefaults::KEY_WISHLIST_ICON_INTEGRATION_ENABLED => array( 'type' => 'boolean' ),
 		);
