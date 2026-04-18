@@ -9,6 +9,7 @@
 .mp-scc-root {
 	--mp-scc-motion-duration: var(--mp-scc-sticky-drawer-toggle-duration-ms, 220ms);
 	--mp-scc-motion-easing: var(--mp-scc-sticky-drawer-toggle-easing, cubic-bezier(0.4, 0, 0.2, 1));
+	font-family: var(--mp-scc-sticky-font-family, inherit);
 	box-sizing: border-box;
 }
 
@@ -187,6 +188,59 @@ body.popup-overlay-open .mp-scc-sticky-bar {
 	transition: outline-color 0.2s ease;
 }
 
+.mp-scc-sticky-stack {
+	position: relative;
+	display: flex;
+	flex-direction: column;
+	width: 100%;
+}
+
+/* Drawer: base = mobile padding; desktop overrides MUST follow in @media below (do not place a second base block after the query). */
+.mp-scc-drawer {
+	position: absolute;
+	bottom: 100%;
+	left: calc(-1 * (var(--mp-scc-sticky-padding-x-mobile, 16px) + env(safe-area-inset-left, 0px)));
+	right: calc(-1 * (var(--mp-scc-sticky-padding-x-mobile, 16px) + env(safe-area-inset-right, 0px)));
+	width: auto;
+	align-self: stretch;
+	box-sizing: border-box;
+	max-width: none;
+	max-height: var(--mp-scc-sticky-drawer-max-height, 55vh);
+	overflow-x: hidden;
+	overflow-y: auto;
+	-webkit-overflow-scrolling: touch;
+	padding-top: var(--mp-scc-sticky-drawer-padding-y, 12px);
+	padding-bottom: calc(var(--mp-scc-sticky-drawer-padding-y, 12px) + 2px);
+	padding-left: calc(
+		var(--mp-scc-sticky-padding-x-mobile, 16px) + env(safe-area-inset-left, 0px) +
+			var(--mp-scc-sticky-drawer-padding-x, 16px)
+	);
+	padding-right: calc(
+		var(--mp-scc-sticky-padding-x-mobile, 16px) + env(safe-area-inset-right, 0px) +
+			var(--mp-scc-sticky-drawer-padding-x, 16px)
+	);
+	border-radius: var(--mp-scc-sticky-border-radius, 12px) var(--mp-scc-sticky-border-radius, 12px) 0 0;
+	backdrop-filter: blur(var(--mp-scc-sticky-backdrop-blur, 12px));
+	-webkit-backdrop-filter: blur(var(--mp-scc-sticky-backdrop-blur, 12px));
+	color: var(--mp-scc-color-text-primary, #1a1a1a);
+	border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+	background-color: rgba(255, 255, 255, var(--mp-scc-sticky-drawer-surface-alpha, 0.94));
+	transition:
+		opacity var(--mp-scc-motion-duration) var(--mp-scc-motion-easing),
+		transform var(--mp-scc-motion-duration) var(--mp-scc-motion-easing);
+}
+
+@supports (background: color-mix(in srgb, red, blue)) {
+	.mp-scc-drawer {
+		background-color: color-mix(
+			in srgb,
+			var(--mp-scc-color-drawer-surface-tint, var(--mp-scc-color-surface-tint, #ffffff))
+				calc(var(--mp-scc-sticky-drawer-surface-alpha, 0.94) * 100%),
+			transparent
+		);
+	}
+}
+
 @media (min-width: 783px) {
 	.mp-scc-sticky-bar {
 		padding-top: var(--mp-scc-sticky-padding-y-desktop, 14px);
@@ -220,6 +274,19 @@ body.popup-overlay-open .mp-scc-sticky-bar {
 		flex: 0 0 auto;
 		min-width: auto;
 	}
+
+	.mp-scc-drawer {
+		left: calc(-1 * (var(--mp-scc-sticky-padding-x-desktop, 24px) + env(safe-area-inset-left, 0px)));
+		right: calc(-1 * (var(--mp-scc-sticky-padding-x-desktop, 24px) + env(safe-area-inset-right, 0px)));
+		padding-left: calc(
+			var(--mp-scc-sticky-padding-x-desktop, 24px) + env(safe-area-inset-left, 0px) +
+				var(--mp-scc-sticky-drawer-padding-x, 16px)
+		);
+		padding-right: calc(
+			var(--mp-scc-sticky-padding-x-desktop, 24px) + env(safe-area-inset-right, 0px) +
+				var(--mp-scc-sticky-drawer-padding-x, 16px)
+		);
+	}
 }
 
 .mp-scc-sr-only {
@@ -232,48 +299,6 @@ body.popup-overlay-open .mp-scc-sticky-bar {
 	clip: rect(0, 0, 0, 0);
 	white-space: nowrap;
 	border: 0;
-}
-
-.mp-scc-sticky-stack {
-	position: relative;
-	display: flex;
-	flex-direction: column;
-	width: 100%;
-}
-
-.mp-scc-drawer {
-	position: absolute;
-	bottom: 100%;
-	left: 0;
-	right: 0;
-	box-sizing: border-box;
-	max-height: var(--mp-scc-sticky-drawer-max-height, 55vh);
-	overflow-x: hidden;
-	overflow-y: auto;
-	-webkit-overflow-scrolling: touch;
-	padding: var(--mp-scc-sticky-drawer-padding-y, 12px) var(--mp-scc-sticky-drawer-padding-x, 16px)
-		calc(var(--mp-scc-sticky-drawer-padding-y, 12px) + 2px);
-	padding-left: calc(16px + env(safe-area-inset-left, 0px));
-	padding-right: calc(16px + env(safe-area-inset-right, 0px));
-	border-radius: var(--mp-scc-sticky-border-radius, 12px) var(--mp-scc-sticky-border-radius, 12px) 0 0;
-	backdrop-filter: blur(var(--mp-scc-sticky-backdrop-blur, 12px));
-	-webkit-backdrop-filter: blur(var(--mp-scc-sticky-backdrop-blur, 12px));
-	color: var(--mp-scc-color-text-primary, #1a1a1a);
-	border-bottom: 1px solid rgba(0, 0, 0, 0.08);
-	background-color: rgba(255, 255, 255, 0.94);
-	transition:
-		opacity var(--mp-scc-motion-duration) var(--mp-scc-motion-easing),
-		transform var(--mp-scc-motion-duration) var(--mp-scc-motion-easing);
-}
-
-@supports (background: color-mix(in srgb, red, blue)) {
-	.mp-scc-drawer {
-		background-color: color-mix(
-			in srgb,
-			var(--mp-scc-color-surface-tint, #ffffff) 94%,
-			transparent
-		);
-	}
 }
 
 .mp-scc-drawer-inner {
@@ -289,6 +314,10 @@ body.popup-overlay-open .mp-scc-sticky-bar {
 	padding: 0;
 }
 
+.mp-scc-drawer-items[hidden] {
+	display: none !important;
+}
+
 .mp-scc-drawer-empty {
 	display: flex;
 	flex-direction: column;
@@ -299,6 +328,43 @@ body.popup-overlay-open .mp-scc-sticky-bar {
 	box-sizing: border-box;
 	padding: 12px 8px 16px;
 	text-align: center;
+}
+
+/* ID-level specificity: themes often target #mp-scc-drawer-empty with display:flex !important */
+#mp-scc-drawer-empty[hidden],
+#mp-scc-drawer-empty.mp-scc-drawer-empty--off {
+	display: none !important;
+	visibility: hidden !important;
+	pointer-events: none !important;
+}
+
+.mp-scc-drawer-empty[hidden] {
+	display: none !important;
+}
+
+/* JS toggles this when the cart has lines; survives themes that override [hidden] or display. */
+.mp-scc-drawer-empty.mp-scc-drawer-empty--off {
+	display: none !important;
+	visibility: hidden !important;
+	pointer-events: none !important;
+}
+
+.mp-scc-drawer.mp-scc-drawer--show-items #mp-scc-drawer-empty,
+.mp-scc-drawer.mp-scc-drawer--show-items .mp-scc-drawer-empty {
+	display: none !important;
+}
+
+.mp-scc-drawer.mp-scc-drawer--show-empty .mp-scc-drawer-items {
+	display: none !important;
+}
+
+.mp-scc-drawer.mp-scc-drawer--show-items .mp-scc-drawer-items {
+	display: block !important;
+}
+
+.mp-scc-drawer.mp-scc-drawer--show-empty #mp-scc-drawer-empty,
+.mp-scc-drawer.mp-scc-drawer--show-empty .mp-scc-drawer-empty {
+	display: flex !important;
 }
 
 .mp-scc-drawer-empty-visual {
@@ -481,15 +547,13 @@ body.popup-overlay-open .mp-scc-sticky-bar {
 }
 
 .mp-scc-btn--primary:hover {
-	filter: brightness(1.08);
+	filter: none;
+	background-color: var(--mp-scc-color-button-primary-hover, #333333);
+	color: var(
+		--mp-scc-color-button-primary-text-hover,
+		var(--mp-scc-color-button-primary-text, #ffffff)
+	);
 	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
-}
-
-@supports (background: color-mix(in srgb, red, blue)) {
-	.mp-scc-btn--primary:hover {
-		filter: none;
-		background-color: color-mix(in srgb, var(--mp-scc-color-button-primary, #111111) 88%, #ffffff);
-	}
 }
 
 .mp-scc-btn--primary:active {
@@ -500,6 +564,64 @@ body.popup-overlay-open .mp-scc-sticky-bar {
 .mp-scc-btn--primary:focus-visible {
 	outline: 2px solid var(--mp-scc-color-button-primary-text, #ffffff);
 	outline-offset: 2px;
+}
+
+/*
+ * «Оформить заказ» — ссылка с классами темы/Woo (.button, .alt и т.д.).
+ * Принудительно применяем токены плагина поверх типичных правил темы.
+ */
+.mp-scc-sticky-bar a.mp-scc-checkout.mp-scc-btn--primary {
+	background-color: var(--mp-scc-color-button-primary, #111111) !important;
+	background-image: none !important;
+	color: var(--mp-scc-color-button-primary-text, #ffffff) !important;
+	border: 1px solid transparent !important;
+	text-decoration: none !important;
+	-webkit-text-fill-color: var(--mp-scc-color-button-primary-text, #ffffff) !important;
+	filter: none !important;
+}
+
+.mp-scc-sticky-bar a.mp-scc-checkout.mp-scc-btn--primary:hover {
+	background-color: var(--mp-scc-color-button-primary-hover, #333333) !important;
+	background-image: none !important;
+	color: var(
+			--mp-scc-color-button-primary-text-hover,
+			var(--mp-scc-color-button-primary-text, #ffffff)
+		) !important;
+	border-color: transparent !important;
+	text-decoration: none !important;
+	-webkit-text-fill-color: var(
+			--mp-scc-color-button-primary-text-hover,
+			var(--mp-scc-color-button-primary-text, #ffffff)
+		) !important;
+	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12) !important;
+	filter: none !important;
+}
+
+.mp-scc-sticky-bar a.mp-scc-checkout.mp-scc-btn--primary:active {
+	color: var(
+			--mp-scc-color-button-primary-text-hover,
+			var(--mp-scc-color-button-primary-text, #ffffff)
+		) !important;
+	-webkit-text-fill-color: var(
+			--mp-scc-color-button-primary-text-hover,
+			var(--mp-scc-color-button-primary-text, #ffffff)
+		) !important;
+	text-decoration: none !important;
+}
+
+.mp-scc-sticky-bar a.mp-scc-checkout.mp-scc-btn--primary:focus-visible {
+	outline: 2px solid var(--mp-scc-color-button-primary-text, #ffffff) !important;
+	outline-offset: 2px !important;
+	color: var(--mp-scc-color-button-primary-text, #ffffff) !important;
+	-webkit-text-fill-color: var(--mp-scc-color-button-primary-text, #ffffff) !important;
+}
+
+.mp-scc-sticky-bar a.mp-scc-checkout.mp-scc-btn--primary.mp-scc-checkout--disabled {
+	background-color: var(--mp-scc-color-button-primary, #111111) !important;
+	background-image: none !important;
+	color: var(--mp-scc-color-button-primary-text, #ffffff) !important;
+	-webkit-text-fill-color: var(--mp-scc-color-button-primary-text, #ffffff) !important;
+	opacity: 0.45 !important;
 }
 
 .mp-scc-btn--ghost {
@@ -519,6 +641,32 @@ body.popup-overlay-open .mp-scc-sticky-bar {
 
 .mp-scc-btn--ghost:focus-visible {
 	background: rgba(0, 0, 0, 0.05);
+}
+
+/* Sticky shell only: «Очистить» (toolbar), distinct from generic ghost elsewhere. */
+.mp-scc-sticky-bar .mp-scc-sticky-actions .mp-scc-btn--ghost {
+	color: var(--mp-scc-color-clear-button-text, inherit);
+	border-color: var(--mp-scc-color-clear-button-border, #cfcfcf);
+	background-color: var(--mp-scc-color-clear-button-bg, #ffffff);
+}
+
+.mp-scc-sticky-bar .mp-scc-sticky-actions .mp-scc-btn--ghost:hover {
+	color: var(--mp-scc-color-clear-button-text-hover, var(--mp-scc-color-clear-button-text, #1a1a1a));
+	border-color: var(
+		--mp-scc-color-clear-button-border-hover,
+		var(--mp-scc-color-clear-button-border, #cfcfcf)
+	);
+	background-color: var(
+		--mp-scc-color-clear-button-bg-hover,
+		var(--mp-scc-color-clear-button-bg, #f0f0f0)
+	);
+}
+
+.mp-scc-sticky-bar .mp-scc-sticky-actions .mp-scc-btn--ghost:focus-visible {
+	background-color: var(
+		--mp-scc-color-clear-button-bg-hover,
+		var(--mp-scc-color-clear-button-bg, #ffffff)
+	);
 }
 
 /* Drawer line items (filled from cart snapshot in JS) */
@@ -594,9 +742,18 @@ body.popup-overlay-open .mp-scc-sticky-bar {
 }
 
 .mp-scc-line__unit {
-	font-size: calc(var(--mp-scc-sticky-summary-font-size, 15px) * 0.88);
+	font-size: var(
+		--mp-scc-sticky-drawer-line-unit-font-size,
+		calc(var(--mp-scc-sticky-summary-font-size, 15px) * 0.88)
+	);
 	line-height: 1.3;
+	color: var(--mp-scc-color-drawer-line-unit, inherit);
 	opacity: 0.88;
+}
+
+.mp-scc-sticky-bar .mp-scc-line__unit {
+	color: var(--mp-scc-color-drawer-line-unit, inherit);
+	opacity: 1;
 }
 
 .mp-scc-line__unit[hidden] {
@@ -612,9 +769,9 @@ body.popup-overlay-open .mp-scc-sticky-bar {
 }
 
 .mp-scc-line__name {
-	font-size: var(--mp-scc-sticky-summary-font-size, 15px);
-	font-weight: 500;
-	color: inherit;
+	font-size: var(--mp-scc-sticky-drawer-line-title-font-size, var(--mp-scc-sticky-summary-font-size, 15px));
+	font-weight: var(--mp-scc-sticky-drawer-line-title-font-weight, 500);
+	color: var(--mp-scc-color-drawer-line-title, inherit);
 	text-decoration: none;
 	display: -webkit-box;
 	-webkit-line-clamp: 3;
@@ -644,6 +801,24 @@ body.popup-overlay-open .mp-scc-sticky-bar {
 	line-height: 1;
 }
 
+.mp-scc-sticky-bar .mp-scc-line__remove.mp-scc-btn--ghost {
+	color: var(--mp-scc-color-qty-button-text, inherit);
+	border-color: var(--mp-scc-color-qty-button-border, rgba(0, 0, 0, 0.2));
+	background-color: var(--mp-scc-color-qty-button-bg, rgba(255, 255, 255, 0.6));
+}
+
+.mp-scc-sticky-bar .mp-scc-line__remove.mp-scc-btn--ghost:hover {
+	color: var(--mp-scc-color-qty-button-text-hover, var(--mp-scc-color-qty-button-text, #1a1a1a));
+	border-color: var(
+		--mp-scc-color-qty-button-border-hover,
+		var(--mp-scc-color-qty-button-border, #cccccc)
+	);
+	background-color: var(
+		--mp-scc-color-qty-button-bg-hover,
+		var(--mp-scc-color-qty-button-bg, #ececec)
+	);
+}
+
 .mp-scc-qty-btn {
 	display: inline-flex;
 	align-items: center;
@@ -665,8 +840,26 @@ body.popup-overlay-open .mp-scc-sticky-bar {
 		border-color var(--mp-scc-motion-duration) var(--mp-scc-motion-easing);
 }
 
+.mp-scc-sticky-bar .mp-scc-qty-btn {
+	border-color: var(--mp-scc-color-qty-button-border, rgba(0, 0, 0, 0.2));
+	background-color: var(--mp-scc-color-qty-button-bg, rgba(255, 255, 255, 0.6));
+	color: var(--mp-scc-color-qty-button-text, inherit);
+}
+
 .mp-scc-qty-btn:hover {
 	background: rgba(0, 0, 0, 0.06);
+}
+
+.mp-scc-sticky-bar .mp-scc-qty-btn:hover {
+	color: var(--mp-scc-color-qty-button-text-hover, var(--mp-scc-color-qty-button-text, #1a1a1a));
+	border-color: var(
+		--mp-scc-color-qty-button-border-hover,
+		var(--mp-scc-color-qty-button-border, #cccccc)
+	);
+	background-color: var(
+		--mp-scc-color-qty-button-bg-hover,
+		var(--mp-scc-color-qty-button-bg, #ececec)
+	);
 }
 
 .mp-scc-qty-btn:focus {
@@ -676,6 +869,10 @@ body.popup-overlay-open .mp-scc-sticky-bar {
 .mp-scc-qty-btn:focus-visible {
 	outline: 2px solid var(--mp-scc-color-button-primary, #111);
 	outline-offset: 2px;
+}
+
+.mp-scc-sticky-bar .mp-scc-qty-btn:focus-visible {
+	outline-color: var(--mp-scc-color-qty-button-border, var(--mp-scc-color-button-primary, #111));
 }
 
 .mp-scc-line__qty-val {
@@ -688,8 +885,9 @@ body.popup-overlay-open .mp-scc-sticky-bar {
 .mp-scc-line__subtotal {
 	flex: 0 0 auto;
 	max-width: 42%;
-	font-size: var(--mp-scc-sticky-summary-font-size, 15px);
-	font-weight: var(--mp-scc-sticky-summary-font-weight, 600);
+	font-size: var(--mp-scc-sticky-drawer-line-price-font-size, var(--mp-scc-sticky-summary-font-size, 15px));
+	font-weight: var(--mp-scc-sticky-drawer-line-price-font-weight, var(--mp-scc-sticky-summary-font-weight, 600));
+	color: var(--mp-scc-color-drawer-line-price, inherit);
 	font-variant-numeric: tabular-nums;
 	text-align: right;
 	line-height: 1.3;
@@ -702,20 +900,124 @@ body.popup-overlay-open .mp-scc-sticky-bar {
 	cursor: not-allowed;
 }
 
+/*
+ * Catalog: hide theme “Add to cart” on desktop — image uses plugin AJAX.
+ * Home/Elementor pages often have `woocommerce-js` but NOT `body.woocommerce` (see Liquid/Hub themes).
+ * Liquid `ld_woo_products_list`: `a.ld-sp-add-to-cart` sits in `figure.ld-sp-img`, not `.footer-product`.
+ */
+@media (min-width: 769px) {
+	body:not(.single-product):not(.woocommerce-cart):not(.woocommerce-checkout)
+		ul.products
+		li.product
+		a[href*='add-to-cart'],
+	body:not(.single-product):not(.woocommerce-cart):not(.woocommerce-checkout)
+		ul.products
+		li.product
+		a.ld-sp-add-to-cart,
+	body:not(.single-product):not(.woocommerce-cart):not(.woocommerce-checkout)
+		ul.products
+		li.product
+		a.add_to_cart_button.ajax_add_to_cart,
+	body:not(.single-product):not(.woocommerce-cart):not(.woocommerce-checkout)
+		ul.products.lqd-prods-row
+		li.product
+		figure.ld-sp-img
+		a.ld-sp-add-to-cart,
+	body:not(.single-product):not(.woocommerce-cart):not(.woocommerce-checkout)
+		.products
+		div.product
+		.footer-product
+		.button,
+	body:not(.single-product):not(.woocommerce-cart):not(.woocommerce-checkout)
+		.products
+		div.product
+		.footer-product
+		.add_to_cart_button,
+	body:not(.single-product):not(.woocommerce-cart):not(.woocommerce-checkout)
+		.products
+		li.product
+		.et_product_hover
+		.footer-product
+		.button {
+		display: none !important;
+		visibility: hidden !important;
+		pointer-events: none !important;
+	}
+}
+
+/*
+ * Desktop: invisible hit layer (theme link or plugin button.mp-scc-catalog-atc-hit--proxy).
+ * Clicks go to plugin AJAX — not theme handlers. «Подробнее» stays above (z-index 4 > 3).
+ */
+@media (min-width: 769px) {
+	body:not(.single-product):not(.woocommerce-cart):not(.woocommerce-checkout)
+		ul.products
+		li.product.mp-scc-catalog-card--atc-hit
+		a.mp-scc-catalog-atc-hit,
+	body:not(.single-product):not(.woocommerce-cart):not(.woocommerce-checkout)
+		ul.products
+		li.product.mp-scc-catalog-card--atc-hit
+		button.mp-scc-catalog-atc-hit {
+		display: block !important;
+		visibility: visible !important;
+		opacity: 0 !important;
+		pointer-events: auto !important;
+		position: absolute !important;
+		z-index: 3 !important;
+		box-sizing: border-box !important;
+		margin: 0 !important;
+		padding: 0 !important;
+		border: none !important;
+		overflow: hidden !important;
+		cursor: pointer !important;
+		-webkit-tap-highlight-color: transparent;
+		appearance: none !important;
+		background: transparent !important;
+		font: inherit !important;
+		line-height: 0 !important;
+	}
+
+	ul.products li.product.mp-scc-catalog-card--atc-hit a.mp-scc-catalog-atc-hit svg,
+	ul.products li.product.mp-scc-catalog-card--atc-hit a.mp-scc-catalog-atc-hit .icon-ld-cart,
+	ul.products li.product.mp-scc-catalog-card--atc-hit a.mp-scc-catalog-atc-hit span {
+		opacity: 0 !important;
+		pointer-events: none !important;
+	}
+}
+
+/*
+ * Single product -> related products: hide theme hover add-to-cart layer (black square in Hub/Liquid).
+ * Keep single product form button intact; this scopes only to related loop cards.
+ */
+@media (min-width: 769px) {
+	body.single-product .related ul.products li.product a[href*='add-to-cart'],
+	body.single-product .related ul.products li.product a.add_to_cart_button,
+	body.single-product .related ul.products li.product a.ld-sp-add-to-cart,
+	body.single-product .related ul.products li.product .ld-sp-btn {
+		display: none !important;
+		visibility: hidden !important;
+		pointer-events: none !important;
+	}
+}
+
 /* Catalog: image add-to-cart — toast positioning */
 ul.products li.product,
-.woocommerce .products li.product {
+ul.products div.product,
+.woocommerce .products li.product,
+.woocommerce .products div.product {
 	position: relative;
 }
 
 /* Catalog: image add-to-cart card states */
-li.product.mp-scc-card--loading {
+li.product.mp-scc-card--loading,
+div.product.mp-scc-card--loading {
 	position: relative;
 	opacity: 0.72;
 	pointer-events: none;
 }
 
-li.product.mp-scc-card--loading::after {
+li.product.mp-scc-card--loading::after,
+div.product.mp-scc-card--loading::after {
 	content: '';
 	position: absolute;
 	left: 50%;
@@ -735,7 +1037,8 @@ li.product.mp-scc-card--loading::after {
 	}
 }
 
-li.product.mp-scc-card--added {
+li.product.mp-scc-card--added,
+div.product.mp-scc-card--added {
 	animation: mp-scc-card-added var(--mp-scc-catalog-hover-duration-ms, 220ms)
 		var(--mp-scc-catalog-hover-easing, cubic-bezier(0.4, 0, 0.2, 1));
 }
@@ -755,13 +1058,16 @@ li.product.mp-scc-card--added {
 	}
 }
 
-li.product.mp-scc-card--error {
+li.product.mp-scc-card--error,
+div.product.mp-scc-card--error {
 	animation: mp-scc-card-shake 0.42s ease;
 }
 
 /* Catalog: «Подробнее» band (Phase 5.1–5.2) — duration/easing/slide/hide-delay from :root vars */
 ul.products li.product .mp-scc-catalog-overlay--floating,
-.woocommerce .products li.product .mp-scc-catalog-overlay--floating {
+ul.products div.product .mp-scc-catalog-overlay--floating,
+.woocommerce .products li.product .mp-scc-catalog-overlay--floating,
+.woocommerce .products div.product .mp-scc-catalog-overlay--floating {
 	position: absolute;
 	z-index: var(--mp-scc-catalog-overlay-z-index, 4);
 	display: flex;
@@ -962,6 +1268,26 @@ body.mp-scc-wishlist-integration-on .woocommerce .products li.product a.mp-scc-c
 	border: 1px solid rgba(255, 80, 80, 0.35);
 }
 
+/*
+ * Optional: {@see ShopLoopAddToCartWrapper} — one anchor in the standard Woo loop (setting «wrap_loop_item_add_to_cart»).
+ * Homepage without body.woocommerce still matches via .mp-scc-shop-loop-wrap-atc.
+ */
+body.mp-scc-shop-loop-wrap-atc ul.products li.product > a.mp-scc-loop-wrap-atc,
+body.mp-scc-shop-loop-wrap-atc ul.products li.product > a.mp-scc-loop-wrap-permalink {
+	display: block;
+	text-decoration: none;
+	color: inherit;
+	background: transparent;
+	padding: 0;
+	margin: 0;
+	border: none;
+	box-shadow: none;
+}
+
+body.mp-scc-shop-loop-wrap-atc ul.products li.product > a.mp-scc-loop-wrap-atc img {
+	pointer-events: none;
+}
+
 /* 8) Reduced motion: keep layout, shorten transitions */
 @media (prefers-reduced-motion: reduce) {
 	.mp-scc-root {
@@ -977,17 +1303,22 @@ body.mp-scc-wishlist-integration-on .woocommerce .products li.product a.mp-scc-c
 	}
 
 	li.product.mp-scc-card--added,
-	li.product.mp-scc-card--error {
+	div.product.mp-scc-card--added,
+	li.product.mp-scc-card--error,
+	div.product.mp-scc-card--error {
 		animation: none;
 	}
 
-	li.product.mp-scc-card--loading::after {
+	li.product.mp-scc-card--loading::after,
+	div.product.mp-scc-card--loading::after {
 		animation: none;
 		border-top-color: rgba(0, 0, 0, 0.25);
 	}
 
 	ul.products li.product .mp-scc-catalog-overlay--floating,
-	.woocommerce .products li.product .mp-scc-catalog-overlay--floating {
+	ul.products div.product .mp-scc-catalog-overlay--floating,
+	.woocommerce .products li.product .mp-scc-catalog-overlay--floating,
+	.woocommerce .products div.product .mp-scc-catalog-overlay--floating {
 		transform: none !important;
 		transition-duration: 0.01ms !important;
 		transition-delay: 0ms !important;

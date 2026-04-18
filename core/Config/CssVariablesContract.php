@@ -262,6 +262,150 @@ final class CssVariablesContract {
 				'format' => 'color',
 			),
 			array(
+				'name'   => self::PREFIX . 'color-button-primary-hover',
+				'path'   => 'styles.color_button_primary_hover',
+				'suffix' => '',
+				'format' => 'color',
+			),
+			array(
+				'name'   => self::PREFIX . 'color-button-primary-text-hover',
+				'path'   => 'styles.color_button_primary_text_hover',
+				'suffix' => '',
+				'format' => 'color',
+			),
+			array(
+				'name'   => self::PREFIX . 'color-drawer-surface-tint',
+				'path'   => 'styles.color_drawer_surface_tint',
+				'suffix' => '',
+				'format' => 'color',
+			),
+			array(
+				'name'   => self::PREFIX . 'sticky-drawer-surface-alpha',
+				'path'   => 'sticky_cart.drawer_surface_background_alpha',
+				'suffix' => '',
+				'format' => 'float',
+			),
+			array(
+				'name'   => self::PREFIX . 'color-clear-button-text',
+				'path'   => 'styles.color_clear_button_text',
+				'suffix' => '',
+				'format' => 'color',
+			),
+			array(
+				'name'   => self::PREFIX . 'color-clear-button-text-hover',
+				'path'   => 'styles.color_clear_button_text_hover',
+				'suffix' => '',
+				'format' => 'color',
+			),
+			array(
+				'name'   => self::PREFIX . 'color-clear-button-border',
+				'path'   => 'styles.color_clear_button_border',
+				'suffix' => '',
+				'format' => 'color',
+			),
+			array(
+				'name'   => self::PREFIX . 'color-clear-button-border-hover',
+				'path'   => 'styles.color_clear_button_border_hover',
+				'suffix' => '',
+				'format' => 'color',
+			),
+			array(
+				'name'   => self::PREFIX . 'color-clear-button-bg',
+				'path'   => 'styles.color_clear_button_bg',
+				'suffix' => '',
+				'format' => 'color',
+			),
+			array(
+				'name'   => self::PREFIX . 'color-clear-button-bg-hover',
+				'path'   => 'styles.color_clear_button_bg_hover',
+				'suffix' => '',
+				'format' => 'color',
+			),
+			array(
+				'name'   => self::PREFIX . 'color-qty-button-bg',
+				'path'   => 'styles.color_qty_button_bg',
+				'suffix' => '',
+				'format' => 'color',
+			),
+			array(
+				'name'   => self::PREFIX . 'color-qty-button-bg-hover',
+				'path'   => 'styles.color_qty_button_bg_hover',
+				'suffix' => '',
+				'format' => 'color',
+			),
+			array(
+				'name'   => self::PREFIX . 'color-qty-button-border',
+				'path'   => 'styles.color_qty_button_border',
+				'suffix' => '',
+				'format' => 'color',
+			),
+			array(
+				'name'   => self::PREFIX . 'color-qty-button-border-hover',
+				'path'   => 'styles.color_qty_button_border_hover',
+				'suffix' => '',
+				'format' => 'color',
+			),
+			array(
+				'name'   => self::PREFIX . 'color-qty-button-text',
+				'path'   => 'styles.color_qty_button_text',
+				'suffix' => '',
+				'format' => 'color',
+			),
+			array(
+				'name'   => self::PREFIX . 'color-qty-button-text-hover',
+				'path'   => 'styles.color_qty_button_text_hover',
+				'suffix' => '',
+				'format' => 'color',
+			),
+			array(
+				'name'   => self::PREFIX . 'color-drawer-line-title',
+				'path'   => 'styles.color_drawer_line_title',
+				'suffix' => '',
+				'format' => 'color',
+			),
+			array(
+				'name'   => self::PREFIX . 'color-drawer-line-unit',
+				'path'   => 'styles.color_drawer_line_unit',
+				'suffix' => '',
+				'format' => 'color',
+			),
+			array(
+				'name'   => self::PREFIX . 'color-drawer-line-price',
+				'path'   => 'styles.color_drawer_line_price',
+				'suffix' => '',
+				'format' => 'color',
+			),
+			array(
+				'name'   => self::PREFIX . 'sticky-drawer-line-title-font-size',
+				'path'   => 'sticky_cart.drawer_line_title_font_size_px',
+				'suffix' => 'px',
+				'format' => 'unit',
+			),
+			array(
+				'name'   => self::PREFIX . 'sticky-drawer-line-title-font-weight',
+				'path'   => 'sticky_cart.drawer_line_title_font_weight',
+				'suffix' => '',
+				'format' => 'integer',
+			),
+			array(
+				'name'   => self::PREFIX . 'sticky-drawer-line-unit-font-size',
+				'path'   => 'sticky_cart.drawer_line_unit_font_size_px',
+				'suffix' => 'px',
+				'format' => 'unit',
+			),
+			array(
+				'name'   => self::PREFIX . 'sticky-drawer-line-price-font-size',
+				'path'   => 'sticky_cart.drawer_line_price_font_size_px',
+				'suffix' => 'px',
+				'format' => 'unit',
+			),
+			array(
+				'name'   => self::PREFIX . 'sticky-drawer-line-price-font-weight',
+				'path'   => 'sticky_cart.drawer_line_price_font_weight',
+				'suffix' => '',
+				'format' => 'integer',
+			),
+			array(
 				'name'   => self::PREFIX . 'wishlist-heart-reserve-top',
 				'path'   => 'wishlist_ui.heart_reserve_top_px',
 				'suffix' => 'px',
@@ -309,6 +453,17 @@ final class CssVariablesContract {
 			$out[ $row['name'] ] = self::format_value( $raw, $row );
 		}
 
+		$out[ self::PREFIX . 'sticky-font-family' ] = self::resolve_sticky_font_family( $merged_settings );
+
+		$scale = (int) OptionResolver::get_by_path( $merged_settings, 'styles.typography_scale_percent', 100 );
+		$scale = max( 70, min( 130, $scale ) );
+		if ( 100 !== $scale ) {
+			$sum = (int) OptionResolver::get_by_path( $merged_settings, 'sticky_cart.summary_font_size_px', 15 );
+			$btn = (int) OptionResolver::get_by_path( $merged_settings, 'sticky_cart.button_font_size_px', 14 );
+			$out[ self::PREFIX . 'sticky-summary-font-size' ]  = (string) max( 8, (int) round( $sum * $scale / 100 ) ) . 'px';
+			$out[ self::PREFIX . 'sticky-button-font-size' ] = (string) max( 8, (int) round( $btn * $scale / 100 ) ) . 'px';
+		}
+
 		$out[ self::PREFIX . 'sticky-layout-reserve' ] = self::format_sticky_layout_reserve_px( $merged_settings );
 
 		return $out;
@@ -317,6 +472,35 @@ final class CssVariablesContract {
 	/**
 	 * Approximate height of the fixed bar (padding + one/two rows) for body scroll padding — reduces CLS.
 	 *
+	 * @param array<string, mixed> $merged_settings Merged settings tree.
+	 */
+	/**
+	 * Font stack for the sticky bar / drawer (styles tab).
+	 *
+	 * @param array<string, mixed> $merged_settings Merged settings tree.
+	 */
+	public static function resolve_sticky_font_family( array $merged_settings ) {
+		$preset = (string) OptionResolver::get_by_path( $merged_settings, 'styles.font_family_preset', 'inherit' );
+		$custom = trim( (string) OptionResolver::get_by_path( $merged_settings, 'styles.font_family_custom', '' ) );
+
+		if ( 'custom' === $preset ) {
+			return '' !== $custom ? $custom : 'inherit';
+		}
+
+		switch ( $preset ) {
+			case 'system':
+				return 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+			case 'serif':
+				return 'Georgia, "Times New Roman", Times, serif';
+			case 'mono':
+				return 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace';
+			case 'inherit':
+			default:
+				return 'inherit';
+		}
+	}
+
+	/**
 	 * @param array<string, mixed> $merged_settings Merged settings tree.
 	 */
 	private static function format_sticky_layout_reserve_px( array $merged_settings ) {

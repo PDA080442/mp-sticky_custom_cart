@@ -126,6 +126,31 @@ final class Constants {
 	public const ADMIN_POST_PURGE_ERROR_LOG = 'mp_scc_purge_error_log';
 
 	/**
+	 * Admin-post: download settings + feature flags as JSON ({@see ConfigImportExportHandler}).
+	 */
+	public const ADMIN_POST_EXPORT_CONFIG = 'mp_scc_export_config';
+
+	/**
+	 * Admin-post: import settings + feature flags from uploaded JSON.
+	 */
+	public const ADMIN_POST_IMPORT_CONFIG = 'mp_scc_import_config';
+
+	/**
+	 * Nonce action for config export URL and import form.
+	 */
+	public const NONCE_CONFIG_IMPORT_EXPORT = 'mp_scc_config_import_export';
+
+	/**
+	 * Max uploaded JSON size (bytes) for config import.
+	 */
+	public const CONFIG_IMPORT_MAX_BYTES = 524288;
+
+	/**
+	 * Supported envelope key for JSON config files.
+	 */
+	public const CONFIG_EXPORT_VERSION = 1;
+
+	/**
 	 * Not instantiable.
 	 */
 	private function __construct() {

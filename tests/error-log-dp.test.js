@@ -45,6 +45,8 @@ assert.ok(errorLoggingHooks.includes("'batch'"), 'ErrorLoggingHooks should accep
 assert.ok(frontendJs.includes('initClientDiagnostics'), 'frontend should register client diagnostics (dp 11.2)');
 assert.ok(frontendJs.includes('unhandledrejection'), 'frontend should listen for unhandledrejection (dp 11.2)');
 assert.ok(frontendJs.includes('queueClientDiagnostic'), 'frontend should buffer client diagnostics (dp 11.2)');
+assert.ok(frontendJs.includes('shouldSuppressClientGlobalErrorMessage'), 'frontend should filter known third-party JS noise from client log');
+assert.ok(frontendJs.includes('inline preloader'), 'frontend should suppress common null.style noise from client log');
 assert.ok(frontendFlagResolver.includes("'clientLogging'"), 'FrontendFlagResolver should expose clientLogging (dp 11.2)');
 
 assert.ok(constants.includes('CAPABILITY_MANAGE_DIAGNOSTICS'), 'Constants should define diagnostics capability (dp 11.3)');

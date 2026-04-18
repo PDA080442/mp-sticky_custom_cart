@@ -2,10 +2,10 @@
 /**
  * Plugin Name:       MP Sticky Custom Cart
  * Description:       Sticky cart, catalog integration, and WooCommerce cart UI.
- * Version:           0.1.0
+ * Version:           0.1.24
  * Requires at least: 6.0
  * Requires PHP:      7.4
- * Author:            MP
+ * Author:            Popravkin Danil
  * License:           GPL-2.0-or-later
  * License URI:       https://www.gnu.org/licenses/gpl-2.0.html
  * Text Domain:       mp-sticky-custom-cart
@@ -17,7 +17,7 @@
 defined( 'ABSPATH' ) || exit;
 
 // Keep in sync with the Version header above.
-define( 'MP_STICKY_CUSTOM_CART_VERSION', '0.1.0' );
+define( 'MP_STICKY_CUSTOM_CART_VERSION', '0.1.24' );
 define( 'MP_STICKY_CUSTOM_CART_ASSET_VERSION', MP_STICKY_CUSTOM_CART_VERSION );
 
 define( 'MP_STICKY_CUSTOM_CART_FILE', __FILE__ );
