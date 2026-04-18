@@ -61,6 +61,14 @@ final class UiSettingsDefaults {
 			'tristate_action_icon_hit_px',
 			'tristate_action_icon_glyph_px',
 			'tristate_panel_c_width_px',
+			'tristate_dock_inset_right_px',
+			'tristate_dock_inset_bottom_px',
+			'tristate_column_backdrop_blur_px',
+			'tristate_column_shadow_blur_px',
+			'tristate_column_shadow_offset_y_px',
+			'tristate_column_shadow_opacity_percent',
+			'tristate_mobile_breakpoint_max_px',
+			'tristate_mobile_layout_preset',
 		);
 	}
 
@@ -208,6 +216,25 @@ final class UiSettingsDefaults {
 				'tristate_action_icon_glyph_px'      => 22,
 				/** Drawer C width (px), expands left from right edge; height matches panel B max-height. */
 				'tristate_panel_c_width_px'          => 400,
+				/** Horizontal inset of tri-state dock (FAB + B/C) from viewport edges (px). */
+				'tristate_dock_inset_right_px'       => 12,
+				/** Bottom inset of tri-state dock above safe-area (px). */
+				'tristate_dock_inset_bottom_px'      => 12,
+				/** Backdrop blur for floating panels B/C (px); 0 disables blur on those surfaces. */
+				'tristate_column_backdrop_blur_px'   => 14,
+				/** Box-shadow blur for B/C elevation (px). */
+				'tristate_column_shadow_blur_px'     => 28,
+				/** Shadow offset upward (px); rendered as negative Y. */
+				'tristate_column_shadow_offset_y_px' => 8,
+				/** Shadow opacity 4–28 → 0.04–0.28 (rgba alpha). */
+				'tristate_column_shadow_opacity_percent' => 12,
+				/** Viewport max-width (px) for mobile preset rules (admin + injected @media). */
+				'tristate_mobile_breakpoint_max_px'  => 782,
+				/**
+				 * right_docked: narrow view keeps column at right (default).
+				 * full_bottom: below breakpoint, B/C span between horizontal insets (bottom-sheet style).
+				 */
+				'tristate_mobile_layout_preset'      => 'right_docked',
 			),
 			'wishlist_ui' => array(
 				'heart_reserve_top_px'       => 10,

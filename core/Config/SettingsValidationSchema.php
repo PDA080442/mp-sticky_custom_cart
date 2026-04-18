@@ -205,6 +205,17 @@ final class SettingsValidationSchema {
 				/** SVG glyph size inside the icon hit target. */
 				'tristate_action_icon_glyph_px'      => array( 'type' => 'integer', 'min' => 14, 'max' => 32 ),
 				'tristate_panel_c_width_px'          => array( 'type' => 'integer', 'min' => 260, 'max' => 560 ),
+				'tristate_dock_inset_right_px'       => array( 'type' => 'integer', 'min' => 0, 'max' => 48 ),
+				'tristate_dock_inset_bottom_px'      => array( 'type' => 'integer', 'min' => 0, 'max' => 48 ),
+				'tristate_column_backdrop_blur_px'   => array( 'type' => 'integer', 'min' => 0, 'max' => 40 ),
+				'tristate_column_shadow_blur_px'     => array( 'type' => 'integer', 'min' => 0, 'max' => 48 ),
+				'tristate_column_shadow_offset_y_px' => array( 'type' => 'integer', 'min' => 0, 'max' => 24 ),
+				'tristate_column_shadow_opacity_percent' => array( 'type' => 'integer', 'min' => 4, 'max' => 28 ),
+				'tristate_mobile_breakpoint_max_px'  => array( 'type' => 'integer', 'min' => 480, 'max' => 900 ),
+				'tristate_mobile_layout_preset'      => array(
+					'type'  => 'text',
+					'oneof' => array( 'right_docked', 'full_bottom' ),
+				),
 			),
 			'wishlist_ui' => array(
 				'heart_reserve_top_px'       => array( 'type' => 'integer', 'min' => 0, 'max' => 200 ),

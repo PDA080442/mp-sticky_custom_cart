@@ -130,9 +130,12 @@ body.mp-scc-sticky-active.mp-scc-sticky-layout-tristate {
 	max-width: none;
 	margin: 0;
 	padding-top: 0;
-	padding-right: max(12px, env(safe-area-inset-right, 0px));
-	padding-bottom: max(12px, env(safe-area-inset-bottom, 0px));
-	padding-left: max(12px, env(safe-area-inset-left, 0px));
+	padding-right: max(var(--mp-scc-tristate-dock-inset-right, 12px), env(safe-area-inset-right, 0px));
+	padding-bottom: max(
+		var(--mp-scc-tristate-dock-inset-bottom, 12px),
+		env(safe-area-inset-bottom, 0px)
+	);
+	padding-left: max(var(--mp-scc-tristate-dock-inset-right, 12px), env(safe-area-inset-left, 0px));
 	border-radius: var(--mp-scc-catalog-cart-icon-border-radius, 12px);
 	isolation: isolate;
 }
@@ -175,12 +178,17 @@ body.mp-scc-sticky-active.mp-scc-sticky-layout-tristate {
 .mp-scc-sticky-bar.mp-scc-sticky--tristate .mp-scc-drawer.mp-scc-drawer--tristate-c {
 	left: auto;
 	right: 0;
-	z-index: 6;
+	z-index: var(--mp-scc-tristate-z-drawer-c, 100056);
 	align-self: flex-end;
 	box-sizing: border-box;
 	width: min(
 		var(--mp-scc-tristate-panel-c-width, 400px),
-		calc(100vw - max(24px, env(safe-area-inset-left, 0px) + env(safe-area-inset-right, 0px)))
+		calc(
+			100vw - max(
+				calc(2 * var(--mp-scc-tristate-dock-inset-right, 12px)),
+				calc(env(safe-area-inset-left, 0px) + env(safe-area-inset-right, 0px))
+			)
+		)
 	);
 	max-width: min(92vw, var(--mp-scc-tristate-panel-c-width, 400px));
 	max-height: var(--mp-scc-tristate-panel-b-max-height, 200px);
@@ -188,9 +196,20 @@ body.mp-scc-sticky-active.mp-scc-sticky-layout-tristate {
 	margin-bottom: var(--mp-scc-tristate-panel-b-gap-bottom, 10px);
 	padding: var(--mp-scc-tristate-panel-b-padding, 12px);
 	overflow: hidden;
+	color: var(--mp-scc-color-text-primary, #1a1a1a);
+	border: 1px solid rgba(0, 0, 0, 0.08);
 	border-radius: var(--mp-scc-tristate-panel-b-border-radius, 12px) var(--mp-scc-tristate-panel-b-border-radius, 12px) 0 0;
+	backdrop-filter: blur(var(--mp-scc-tristate-column-backdrop-blur, 14px));
+	-webkit-backdrop-filter: blur(var(--mp-scc-tristate-column-backdrop-blur, 14px));
+	background-color: rgba(255, 255, 255, var(--mp-scc-sticky-drawer-surface-alpha, 0.94));
+	box-shadow:
+		0 calc(-1 * var(--mp-scc-tristate-column-shadow-offset-y, 8px)) var(--mp-scc-tristate-column-shadow-blur, 28px)
+			rgba(0, 0, 0, var(--mp-scc-tristate-column-shadow-alpha, 0.12));
 	display: flex;
 	flex-direction: column;
+	transition:
+		box-shadow 0.22s var(--mp-scc-motion-easing, cubic-bezier(0.4, 0, 0.2, 1)),
+		background-color 0.22s var(--mp-scc-motion-easing, cubic-bezier(0.4, 0, 0.2, 1));
 }
 
 .mp-scc-sticky-bar.mp-scc-sticky--tristate .mp-scc-drawer.mp-scc-drawer--tristate-c .mp-scc-drawer-inner {
@@ -267,9 +286,9 @@ body.mp-scc-sticky-active.mp-scc-sticky-layout-tristate {
 
 @media (min-width: 783px) {
 	.mp-scc-sticky-bar.mp-scc-sticky--tristate {
-		padding-right: max(16px, env(safe-area-inset-right, 0px));
-		padding-bottom: max(14px, env(safe-area-inset-bottom, 0px));
-		padding-left: max(16px, env(safe-area-inset-left, 0px));
+		padding-right: max(var(--mp-scc-tristate-dock-inset-right, 16px), env(safe-area-inset-right, 0px));
+		padding-bottom: max(var(--mp-scc-tristate-dock-inset-bottom, 14px), env(safe-area-inset-bottom, 0px));
+		padding-left: max(var(--mp-scc-tristate-dock-inset-right, 16px), env(safe-area-inset-left, 0px));
 	}
 }
 
@@ -297,11 +316,16 @@ body.mp-scc-sticky-active.mp-scc-sticky-layout-tristate {
 	position: absolute;
 	right: 0;
 	bottom: 100%;
-	z-index: 5;
+	z-index: var(--mp-scc-tristate-z-panel-b, 100055);
 	box-sizing: border-box;
 	width: min(
 		var(--mp-scc-tristate-panel-b-width, 280px),
-		calc(100vw - max(24px, env(safe-area-inset-left, 0px) + env(safe-area-inset-right, 0px)))
+		calc(
+			100vw - max(
+				calc(2 * var(--mp-scc-tristate-dock-inset-right, 12px)),
+				calc(env(safe-area-inset-left, 0px) + env(safe-area-inset-right, 0px))
+			)
+		)
 	);
 	max-width: min(92vw, var(--mp-scc-tristate-panel-b-width, 280px));
 	max-height: var(--mp-scc-tristate-panel-b-max-height, 200px);
@@ -311,20 +335,40 @@ body.mp-scc-sticky-active.mp-scc-sticky-layout-tristate {
 	overflow: hidden;
 	color: var(--mp-scc-color-text-primary, #1a1a1a);
 	border: 1px solid rgba(0, 0, 0, 0.08);
-	box-shadow: 0 -6px 28px rgba(0, 0, 0, 0.12);
-	backdrop-filter: blur(var(--mp-scc-sticky-backdrop-blur, 12px));
-	-webkit-backdrop-filter: blur(var(--mp-scc-sticky-backdrop-blur, 12px));
+	box-shadow:
+		0 calc(-1 * var(--mp-scc-tristate-column-shadow-offset-y, 8px)) var(--mp-scc-tristate-column-shadow-blur, 28px)
+			rgba(0, 0, 0, var(--mp-scc-tristate-column-shadow-alpha, 0.12));
+	backdrop-filter: blur(var(--mp-scc-tristate-column-backdrop-blur, 14px));
+	-webkit-backdrop-filter: blur(var(--mp-scc-tristate-column-backdrop-blur, 14px));
 	background-color: rgba(255, 255, 255, var(--mp-scc-sticky-drawer-surface-alpha, 0.94));
+	transition:
+		box-shadow 0.22s var(--mp-scc-motion-easing, cubic-bezier(0.4, 0, 0.2, 1)),
+		background-color 0.22s var(--mp-scc-motion-easing, cubic-bezier(0.4, 0, 0.2, 1));
 }
 
 @supports (background: color-mix(in srgb, red, blue)) {
-	.mp-scc-sticky-bar.mp-scc-sticky--tristate .mp-scc-shell-panel-b {
+	.mp-scc-sticky-bar.mp-scc-sticky--tristate .mp-scc-shell-panel-b,
+	.mp-scc-sticky-bar.mp-scc-sticky--tristate .mp-scc-drawer.mp-scc-drawer--tristate-c {
 		background-color: color-mix(
 			in srgb,
 			var(--mp-scc-color-drawer-surface-tint, var(--mp-scc-color-surface-tint, #ffffff))
 				calc(var(--mp-scc-sticky-drawer-surface-alpha, 0.94) * 100%),
 			transparent
 		);
+	}
+}
+
+@supports (color: color-mix(in srgb, red, blue)) {
+	.mp-scc-sticky-bar.mp-scc-sticky--tristate .mp-scc-shell-panel-b,
+	.mp-scc-sticky-bar.mp-scc-sticky--tristate .mp-scc-drawer.mp-scc-drawer--tristate-c {
+		border-color: color-mix(in srgb, var(--mp-scc-color-text-primary, #1a1a1a) 10%, transparent);
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.mp-scc-sticky-bar.mp-scc-sticky--tristate .mp-scc-shell-panel-b,
+	.mp-scc-sticky-bar.mp-scc-sticky--tristate .mp-scc-drawer.mp-scc-drawer--tristate-c {
+		transition: none;
 	}
 }
 
