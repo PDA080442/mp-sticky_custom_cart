@@ -1340,6 +1340,9 @@
 	 * @returns {HTMLImageElement|null}
 	 */
 	function resolveCatalogImageFromClickTarget(rawTarget, catalog) {
+		if ((catalog.catalogAddSurface || 'image_click') === 'cart_icon') {
+			return null;
+		}
 		var t = rawTarget;
 		if (!t || !t.nodeType) {
 			return null;
@@ -1416,6 +1419,9 @@
 	 * @returns {boolean}
 	 */
 	function catalogImageMatchesConfiguredSelector(img, catalog) {
+		if ((catalog.catalogAddSurface || 'image_click') === 'cart_icon') {
+			return false;
+		}
 		var raw = catalog.imageClickSelector != null ? String(catalog.imageClickSelector).trim() : '';
 		var sel = raw || CATALOG_IMAGE_CLICK_SELECTOR_DEFAULT;
 		try {
@@ -1642,6 +1648,11 @@
 		return true;
 	}
 
+	/**
+	 * Registers one `window` capture listener for catalog loop add: image path (v1), icon button (v2),
+	 * or desktop ATC hit layer — all call {@see executeCatalogLoopAddSimpleAjax}. In v2, image clicks
+	 * are never intercepted (handler returns after optional icon handling).
+	 */
 	function initCatalogImageAddToCart() {
 		var catalog = data().catalog || {};
 		var behavior = catalog.imageClickBehavior || 'add_to_cart';
@@ -1688,12 +1699,12 @@
 					return;
 				}
 
-				if (handleCatalogAtcHitLayerClick(e, cat, d)) {
+				if (surf === 'cart_icon') {
+					handleCatalogCartIconClick(e, cat, d);
 					return;
 				}
 
-				if (surf === 'cart_icon') {
-					handleCatalogCartIconClick(e, cat, d);
+				if (handleCatalogAtcHitLayerClick(e, cat, d)) {
 					return;
 				}
 

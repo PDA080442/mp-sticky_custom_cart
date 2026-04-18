@@ -23,6 +23,14 @@ This document fixes **expected behavior** for QA and migrations. Server: WooComm
 | `image_click` | Intercepted when `image_click_behavior === 'add_to_cart'` and flag on (capture on `window`). | N/A | Active when `image_click_behavior === 'add_to_cart'`, flag on, desktop breakpoint. |
 | `cart_icon` | **Not** intercepted by plugin (theme links apply). | Slot + button: standard Woo loop may include a PHP host (`ShopLoopCartIconHost` → `woocommerce_before_shop_loop_item`); otherwise JS injects the slot. Simple products only; same AJAX as image path. | **Disabled** (avoid duplicate add zones). |
 
+### v2 (`cart_icon`) — handler isolation
+
+- The single `window` capture listener runs **first** for `cart_icon`: only `handleCatalogCartIconClick` can consume the event; then it **returns** without running the image path, ATC hit, `resolveCatalogImageFromClickTarget`, or `catalogImageMatchesConfiguredSelector` (those helpers also guard on `catalogAddSurface === 'cart_icon'` for safety).
+- **AJAX**: one implementation — `executeCatalogLoopAddSimpleAjax` → `postAjax('addSimpleProduct', …)` (same as image / ATC hit).
+- **Feedback**: loading / pulse / error / toast are **card-level** classes (`mp-scc-card--loading`, `mp-scc-card--added`, `mp-scc-card--error`, toasts); there is **no** “in cart” badge on the icon button.
+- **Out of stock / errors**: same `showCatalogToast` and `out_of_stock` label as the image path; server messages unchanged.
+- **Title / «Подробнее»**: not handled by this capture path in v2 (no image interception); title analytics hook still ignores clicks originating from `img` (`initCatalogTitleClickHook`); overlay link uses normal navigation (`initCatalogOverlayPropagation` stops bubbling only for the overlay layer, not for add).
+
 ## Cart icon visibility (`catalog_cart_icon_desktop` / `catalog_cart_icon_touch`)
 
 - **Desktop branch** (CSS: `min-width: 769px` and `pointer: fine`): `hover` hides the icon until the card is hovered, focused (`:focus-within`), or has `.mp-scc-card--hover-intent`; `always` keeps it visible.
