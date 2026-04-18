@@ -20,6 +20,8 @@ The AJAX endpoint and server-side validation stay unchanged; only the **storefro
 
 3. When `catalog_add_surface === 'cart_icon'`, **do not** register the invisible desktop ATC hit layer (`initCatalogAtcHitLayer` cleanup), to avoid stacking two add affordances on the same image area.
 
+3b. The storefront `window` capture listener handles `cart_icon` **before** the ATC hit and image-resolution paths; helpers `resolveCatalogImageFromClickTarget` / `catalogImageMatchesConfiguredSelector` also no-op when surface is `cart_icon` (defense in depth).
+
 4. Optional client diagnostics: on successful add, emit `catalog_loop_add_success` with `surface` in the payload (`image` | `cart_icon` | `atc_hit`) when `diagnostics.client_error_logging` is enabled.
 
 ## Consequences

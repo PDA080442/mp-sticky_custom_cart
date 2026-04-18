@@ -37,6 +37,10 @@ assert.ok(hookRegistry.includes('ShopLoopCartIconHost'), 'HookRegistry should re
 assert.ok(js.includes('imageClickBehavior') && js.includes('theme_default'), 'JS should respect imageClickBehavior');
 assert.ok(js.includes('catalogAddSurface') && js.includes('cart_icon'), 'JS should handle catalogAddSurface');
 assert.ok(js.includes('mp-scc-catalog-cart-icon-slot') && js.includes('attachCatalogCartIconPointerGuards'), 'JS should use cart icon slot + pointer guards');
+assert.ok(
+	js.includes('resolveCatalogImageFromClickTarget') && js.includes('cart_icon') && js.includes('return null'),
+	'JS should skip image resolution when cart_icon (defense in depth)'
+);
 assert.ok(css.includes('mp-scc-admin-catalog-preview'), 'Admin CSS should style catalog preview');
 
 console.log('catalog-tab-dp: OK');
