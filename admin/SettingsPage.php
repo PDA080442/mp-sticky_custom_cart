@@ -403,14 +403,30 @@ final class SettingsPage {
 		self::render_catalog_impact_notes();
 
 		$behavior = isset( $c['image_click_behavior'] ) ? (string) $c['image_click_behavior'] : 'add_to_cart';
-		if ( 'add_to_cart' === $behavior && ! $img_atc_on ) {
+		$surface  = isset( $c['catalog_add_surface'] ) ? (string) $c['catalog_add_surface'] : 'image_click';
+		if ( ! in_array( $surface, array( 'image_click', 'cart_icon' ), true ) ) {
+			$surface = 'image_click';
+		}
+		if ( ! $img_atc_on && ( 'cart_icon' === $surface || ( 'add_to_cart' === $behavior && 'image_click' === $surface ) ) ) {
 			echo '<div class="notice notice-warning inline"><p>';
-			echo esc_html__( 'Выбрано добавление в корзину по клику на изображение, но на вкладке «Служебное» выключен feature flag «Клик по изображению добавляет в корзину» — на сайте перехват не сработает.', 'mp-sticky-custom-cart' );
+			echo esc_html__( 'На вкладке «Служебное» выключен feature flag «Клик по изображению добавляет в корзину» — без него не работает AJAX-добавление из каталога (ни по миниатюре, ни по иконке корзины).', 'mp-sticky-custom-cart' );
 			echo '</p></div>';
 		}
 
 		echo '<h3>' . esc_html__( 'Клик по изображению в лупе', 'mp-sticky-custom-cart' ) . '</h3>';
 		echo '<table class="form-table" role="presentation"><tbody>';
+		self::field_select(
+			$opt,
+			'catalog',
+			'catalog_add_surface',
+			__( 'Способ добавления в корзину из карточки', 'mp-sticky-custom-cart' ),
+			$surface,
+			array(
+				'image_click' => __( 'По клику на миниатюру (перехват, как раньше)', 'mp-sticky-custom-cart' ),
+				'cart_icon'   => __( 'Кнопка-иконка корзины на карточке (миниатюра — как в теме)', 'mp-sticky-custom-cart' ),
+			),
+			__( 'Один и тот же AJAX endpoint. В режиме иконки клик по картинке не перехватывается плагином — ведите пользователя на карточку темы или по ссылке.', 'mp-sticky-custom-cart' )
+		);
 		self::field_select(
 			$opt,
 			'catalog',
@@ -497,6 +513,15 @@ final class SettingsPage {
 		echo '<h3>' . esc_html__( 'Тексты интерфейса', 'mp-sticky-custom-cart' ) . '</h3>';
 		echo '<p class="description">' . esc_html__( 'Пустое поле на сайте заменяется стандартной фразой из плагина. HTML удаляется при сохранении; не более 500 символов для полей каталога ниже.', 'mp-sticky-custom-cart' ) . '</p>';
 		echo '<table class="form-table" role="presentation"><tbody>';
+		self::field_text(
+			$opt,
+			'labels',
+			'catalog_cart_icon',
+			__( 'Подпись кнопки-иконки корзины в лупе (aria)', 'mp-sticky-custom-cart' ),
+			isset( $l['catalog_cart_icon'] ) ? (string) $l['catalog_cart_icon'] : '',
+			__( 'Используется при режиме «иконка корзины»; пустое значение — стандартная фраза плагина.', 'mp-sticky-custom-cart' ),
+			array( 'maxlength' => 500 )
+		);
 		self::field_text(
 			$opt,
 			'labels',
@@ -1320,6 +1345,7 @@ final class SettingsPage {
 
 		$labels = OptionResolver::get_labels();
 		$rows   = array(
+			UiLabelsDefaults::KEY_CATALOG_CART_ICON  => __( 'Иконка «в корзину» в лупе (aria)', 'mp-sticky-custom-cart' ),
 			UiLabelsDefaults::KEY_MORE_INFO          => __( 'Текст кнопки «Подробнее о товаре»', 'mp-sticky-custom-cart' ),
 			UiLabelsDefaults::KEY_OUT_OF_STOCK       => __( 'Сообщение «Товара нет в наличии»', 'mp-sticky-custom-cart' ),
 			UiLabelsDefaults::KEY_CLEAR_CART         => __( 'Текст кнопки «Очистить корзину»', 'mp-sticky-custom-cart' ),

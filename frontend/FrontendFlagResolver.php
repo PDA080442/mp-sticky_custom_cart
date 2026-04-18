@@ -111,7 +111,13 @@ final class FrontendFlagResolver {
 			$image_click_behavior = 'add_to_cart';
 		}
 
+		$catalog_add_surface = isset( $catalog_settings['catalog_add_surface'] ) ? (string) $catalog_settings['catalog_add_surface'] : 'image_click';
+		if ( ! in_array( $catalog_add_surface, array( 'image_click', 'cart_icon' ), true ) ) {
+			$catalog_add_surface = 'image_click';
+		}
+
 		$catalog_js = array(
+			'catalogAddSurface'        => $catalog_add_surface,
 			'imageClickBehavior'       => $image_click_behavior,
 			'imageClickSelector'       => $img_sel,
 			'cardRootSelector'         => $card_sel,

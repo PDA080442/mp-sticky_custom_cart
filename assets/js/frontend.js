@@ -304,6 +304,9 @@
 		if (p.message) {
 			row.message = String(p.message).slice(0, 500);
 		}
+		if (p.surface !== undefined) {
+			row.detail = 'surface=' + String(p.surface).slice(0, 32);
+		}
 		window.mpScc.queueClientDiagnostic(row);
 	};
 
@@ -692,6 +695,14 @@
 				height: hitH
 			});
 		}
+
+		var $cartIcon = $card.find('.mp-scc-catalog-cart-icon-btn').first();
+		if ($cartIcon.length) {
+			$cartIcon.css({
+				top: topRel + 8,
+				left: leftRel + 8
+			});
+		}
 	}
 
 	/**
@@ -746,6 +757,11 @@
 		}
 
 		if (!window.mpScc.flagEnabled('product_image_add_to_cart')) {
+			cleanupAtcHitUi();
+			return;
+		}
+
+		if ((catalog.catalogAddSurface || 'image_click') === 'cart_icon') {
 			cleanupAtcHitUi();
 			return;
 		}
@@ -941,9 +957,74 @@
 		}
 		catalogChromeLayoutTimer = window.setTimeout(function () {
 			catalogChromeLayoutTimer = null;
+			initCatalogCartIconLayer();
 			initCatalogAtcHitLayer();
 			initCatalogMoreInfoOverlay();
 		}, 80);
+	}
+
+	/**
+	 * Injects loop «cart» control (catalog_add_surface=cart_icon); layout via {@see syncCatalogCardLayouts}.
+	 */
+	function initCatalogCartIconLayer() {
+		var catalog = data().catalog || {};
+		var cardSel = catalogLoopCardSelector(catalog);
+		var surface = catalog.catalogAddSurface || 'image_click';
+
+		function cleanupCartIconUi() {
+			$(cardSel).each(function () {
+				var $c = $(this);
+				$c.removeClass('mp-scc-catalog-card--cart-icon');
+				$c.find('.mp-scc-catalog-cart-icon-btn').remove();
+			});
+		}
+
+		if (surface !== 'cart_icon' || !window.mpScc.flagEnabled('product_image_add_to_cart')) {
+			cleanupCartIconUi();
+			return;
+		}
+
+		var cfg = window.mpScc.ajaxConfig();
+		if (!cfg.ajaxUrl || !cfg.actions.addSimpleProduct) {
+			cleanupCartIconUi();
+			return;
+		}
+
+		var label = window.mpScc.label('catalog_cart_icon');
+		if (!String(label || '').trim()) {
+			label = 'Добавить в корзину';
+		}
+
+		var cartIconSvg =
+			'<svg class="mp-scc-catalog-cart-icon-btn__svg" width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false"><path d="M7 18c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-.9-2-2-2zm10 0c-1.1 0-1.99.9-1.99 2S15.9 22 17 22s2-.9 2-2-.9-2-2-2zM7.2 16h9.45c.75 0 1.41-.42 1.75-1.09l3.24-6.03a1 1 0 00-.88-1.47H7.42L6.87 4.5A1 1 0 006 3.75H3v1.5h2.62l1.24 7.26z" fill="currentColor"/></svg>';
+
+		$(cardSel).each(function () {
+			var $card = $(this);
+			if (!$card.find('img').length) {
+				return;
+			}
+			var $existing = $card.find('.mp-scc-catalog-cart-icon-btn').first();
+			if ($existing.length) {
+				$existing.attr('aria-label', label);
+				$card.addClass('mp-scc-catalog-card--cart-icon');
+				attachCatalogCardResizeSync($card);
+				return;
+			}
+			var pid = resolveCatalogProductId($card);
+			if (!pid || !$card.hasClass('product-type-simple')) {
+				return;
+			}
+			var $btn = $(
+				'<button type="button" class="mp-scc-catalog-cart-icon-btn" data-mp-scc-cart-icon="1" />'
+			);
+			$btn.attr('aria-label', label);
+			$btn.append(
+				$('<span class="mp-scc-catalog-cart-icon-btn__icon" aria-hidden="true" />').html(cartIconSvg)
+			);
+			$card.append($btn);
+			$card.addClass('mp-scc-catalog-card--cart-icon');
+			attachCatalogCardResizeSync($card);
+		});
 	}
 
 	/**
@@ -1229,8 +1310,9 @@
 	 * @param {JQuery} $triggerForAddedEvent
 	 * @param {Record<string, *>} cat
 	 * @param {Record<string, *>} d mpSccData root
+	 * @param {string} [telemetrySurface] Optional: image | cart_icon | atc_hit (client diagnostics).
 	 */
-	function executeCatalogLoopAddSimpleAjax($card, productId, $triggerForAddedEvent, cat, d) {
+	function executeCatalogLoopAddSimpleAjax($card, productId, $triggerForAddedEvent, cat, d, telemetrySurface) {
 		setCatalogCardLoading($card, true);
 		$card.removeClass('mp-scc-card--error');
 
@@ -1242,6 +1324,12 @@
 					$card.data('mpSccAtcCooldownUntil', Date.now() + CATALOG_ATC_POST_SUCCESS_COOLDOWN_MS);
 					triggerCatalogAddedAnimation($card);
 					$(document.body).trigger('added_to_cart', [{}, '', $triggerForAddedEvent]);
+					if (telemetrySurface && window.mpScc.logClientEvent) {
+						window.mpScc.logClientEvent('catalog_loop_add_success', {
+							product_id: productId,
+							surface: telemetrySurface
+						});
+					}
 					return;
 				}
 				setCatalogCardLoading($card, false);
@@ -1349,14 +1437,91 @@
 		e.stopPropagation();
 		e.stopImmediatePropagation();
 
-		executeCatalogLoopAddSimpleAjax($card, productId, $(hit), cat, d);
+		executeCatalogLoopAddSimpleAjax($card, productId, $(hit), cat, d, 'atc_hit');
+		return true;
+	}
+
+	/**
+	 * Cart icon on loop card (catalog_add_surface=cart_icon): same AJAX as image / atc hit.
+	 *
+	 * @returns {boolean} True if the click was consumed.
+	 */
+	function handleCatalogCartIconClick(e, cat, d) {
+		var t = e.target;
+		if (t && t.nodeType === 3 && t.parentElement) {
+			t = t.parentElement;
+		}
+		if (!t || !t.closest) {
+			return false;
+		}
+		var btn = t.closest('.mp-scc-catalog-cart-icon-btn');
+		if (!btn) {
+			return false;
+		}
+		var cardEl = findProductCardElement(btn, cat);
+		if (!cardEl) {
+			return false;
+		}
+		var $card = $(cardEl);
+		if ($card.attr('data-mp-scc-atc-busy') === '1') {
+			e.preventDefault();
+			e.stopPropagation();
+			e.stopImmediatePropagation();
+			return true;
+		}
+		if ($(t).closest('[data-mp-scc-overlay], .mp-scc-catalog-overlay').length) {
+			return false;
+		}
+		var coolUntil = $card.data('mpSccAtcCooldownUntil');
+		if (typeof coolUntil === 'number' && Date.now() < coolUntil) {
+			e.preventDefault();
+			e.stopPropagation();
+			e.stopImmediatePropagation();
+			return true;
+		}
+
+		var productId = resolveCatalogProductId($card);
+		if (!productId) {
+			var resolveMsg = cat.resolveErrorMessage ? String(cat.resolveErrorMessage) : '';
+			showCatalogToast($card, resolveMsg, { variant: 'error', assertive: true });
+			e.preventDefault();
+			e.stopPropagation();
+			e.stopImmediatePropagation();
+			return true;
+		}
+
+		if (isCatalogCardOutOfStock($card)) {
+			if (allowCatalogStockToast($card)) {
+				var stockLabel = window.mpScc.label('out_of_stock');
+				showCatalogToast($card, stockLabel, {
+					variant: 'stock',
+					assertive: true,
+					durationMs: 4500
+				});
+				window.mpScc.logClientEvent('catalog_image_out_of_stock', {
+					product_id: productId,
+					context: 'cart_icon'
+				});
+			}
+			e.preventDefault();
+			e.stopPropagation();
+			e.stopImmediatePropagation();
+			return true;
+		}
+
+		e.preventDefault();
+		e.stopPropagation();
+		e.stopImmediatePropagation();
+
+		executeCatalogLoopAddSimpleAjax($card, productId, $(btn), cat, d, 'cart_icon');
 		return true;
 	}
 
 	function initCatalogImageAddToCart() {
 		var catalog = data().catalog || {};
 		var behavior = catalog.imageClickBehavior || 'add_to_cart';
-		if (behavior === 'theme_default') {
+		var surface = catalog.catalogAddSurface || 'image_click';
+		if (surface !== 'cart_icon' && behavior === 'theme_default') {
 			return;
 		}
 		if (!window.mpScc.flagEnabled('product_image_add_to_cart')) {
@@ -1386,7 +1551,8 @@
 				var d = data();
 				var cat = d.catalog || {};
 				var beh = cat.imageClickBehavior || 'add_to_cart';
-				if (beh === 'theme_default') {
+				var surf = cat.catalogAddSurface || 'image_click';
+				if (surf !== 'cart_icon' && beh === 'theme_default') {
 					return;
 				}
 				if (!window.mpScc.flagEnabled('product_image_add_to_cart')) {
@@ -1398,6 +1564,11 @@
 				}
 
 				if (handleCatalogAtcHitLayerClick(e, cat, d)) {
+					return;
+				}
+
+				if (surf === 'cart_icon') {
+					handleCatalogCartIconClick(e, cat, d);
 					return;
 				}
 
@@ -1476,7 +1647,7 @@
 				e.stopPropagation();
 				e.stopImmediatePropagation();
 
-				executeCatalogLoopAddSimpleAjax($card, productId, $img, cat, d);
+				executeCatalogLoopAddSimpleAjax($card, productId, $img, cat, d, 'image');
 			},
 			true
 		);

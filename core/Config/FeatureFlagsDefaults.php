@@ -13,7 +13,7 @@ defined( 'ABSPATH' ) || exit;
  * All keys must stay stable for migrations and JS localization.
  *
  * Registry (dp.md / feature rollout):
- * - ProductImageAddToCart — клик по изображению добавляет в корзину
+ * - ProductImageAddToCart — AJAX-добавление из лупы (миниатюра или иконка корзины; см. catalog.catalog_add_surface)
  * - StickyCartEnabled — sticky-панель
  * - StickyDrawerEnabled — drawer корзины
  * - HoverMoreInfoEnabled — hover «подробнее»

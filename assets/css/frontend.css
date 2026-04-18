@@ -1008,6 +1008,53 @@ ul.products div.product,
 	position: relative;
 }
 
+/*
+ * Loop: explicit cart icon (catalog_add_surface=cart_icon). Top-left over first image box; below wishlist z-index.
+ */
+button.mp-scc-catalog-cart-icon-btn {
+	position: absolute;
+	z-index: 5;
+	margin: 0;
+	padding: 0;
+	width: 36px;
+	height: 36px;
+	border: none;
+	border-radius: 10px;
+	cursor: pointer;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	color: var(--mp-scc-color-text-primary, #1a1a1a);
+	background-color: rgba(255, 255, 255, 0.92);
+	box-shadow: 0 1px 4px rgba(0, 0, 0, 0.12);
+	-webkit-tap-highlight-color: transparent;
+	appearance: none;
+	transition:
+		background-color 0.15s ease,
+		box-shadow 0.15s ease,
+		transform 0.15s ease;
+}
+
+button.mp-scc-catalog-cart-icon-btn:hover {
+	background-color: rgba(255, 255, 255, 1);
+	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.14);
+}
+
+button.mp-scc-catalog-cart-icon-btn:focus-visible {
+	outline: 2px solid var(--mp-scc-color-text-primary, #1a1a1a);
+	outline-offset: 2px;
+}
+
+button.mp-scc-catalog-cart-icon-btn .mp-scc-catalog-cart-icon-btn__svg {
+	display: block;
+}
+
+li.product.mp-scc-card--loading .mp-scc-catalog-cart-icon-btn,
+div.product.mp-scc-card--loading .mp-scc-catalog-cart-icon-btn {
+	pointer-events: none;
+	opacity: 0.55;
+}
+
 /* Catalog: image add-to-cart card states */
 li.product.mp-scc-card--loading,
 div.product.mp-scc-card--loading {
