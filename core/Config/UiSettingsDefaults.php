@@ -66,6 +66,11 @@ final class UiSettingsDefaults {
 				 * theme_default: не вешать обработчик — тема и ссылки Woo ведут себя как обычно.
 				 */
 				'image_click_behavior'        => 'add_to_cart',
+				/**
+				 * image_click: добавление по клику на миниатюру (legacy).
+				 * cart_icon: кнопка-иконка корзины на карточке (тот же AJAX endpoint).
+				 */
+				'catalog_add_surface'         => 'image_click',
 				'hover_overlay_mobile_always' => true,
 				'hover_animation_duration_ms'  => 220,
 				'hover_animation_easing'       => 'cubic-bezier(0.4, 0, 0.2, 1)',
