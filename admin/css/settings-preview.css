@@ -123,7 +123,7 @@
 	align-items: center;
 	justify-content: center;
 	box-sizing: border-box;
-	border-radius: 10px;
+	border-radius: var(--mp-scc-catalog-cart-icon-border-radius, 10px);
 	background: var(--mp-scc-catalog-cart-icon-background, rgba(255, 255, 255, 0.94));
 	box-shadow: 0 1px 4px rgba(0, 0, 0, 0.12);
 	pointer-events: none;
@@ -134,6 +134,8 @@
 	display: flex;
 	align-items: center;
 	justify-content: center;
+	box-sizing: border-box;
+	padding: var(--mp-scc-catalog-cart-icon-inner-padding, 0px);
 	color: var(--mp-scc-catalog-cart-icon-color, #1a1a1a);
 }
 

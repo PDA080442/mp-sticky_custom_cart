@@ -81,6 +81,18 @@ final class CssVariablesContract {
 				'format' => 'unit',
 			),
 			array(
+				'name'   => self::PREFIX . 'catalog-cart-icon-border-radius',
+				'path'   => 'catalog.catalog_cart_icon_bg_border_radius_px',
+				'suffix' => 'px',
+				'format' => 'unit',
+			),
+			array(
+				'name'   => self::PREFIX . 'catalog-cart-icon-inner-padding',
+				'path'   => 'catalog.catalog_cart_icon_inner_padding_px',
+				'suffix' => 'px',
+				'format' => 'unit',
+			),
+			array(
 				'name'   => self::PREFIX . 'sticky-z-index',
 				'path'   => 'sticky_cart.z_index',
 				'suffix' => '',
@@ -509,10 +521,28 @@ final class CssVariablesContract {
 		foreach ( self::build_catalog_cart_icon_background_from_hex_alpha( $r['bg_hex'], $r['bg_alpha_percent'] ) as $name => $value ) {
 			$out[ $name ] = $value;
 		}
+
+		// Hover: invert face vs glyph (same idea as wishlist heart: dark/light swap).
+		$tri = self::parse_hex_rgb_triplet( $r['glyph_hex'] );
+		if ( null !== $tri ) {
+			$out[ self::PREFIX . 'catalog-cart-icon-background-hover' ] = sprintf(
+				'rgba(%d,%d,%d,1)',
+				$tri[0],
+				$tri[1],
+				$tri[2]
+			);
+		} else {
+			$out[ self::PREFIX . 'catalog-cart-icon-background-hover' ] = 'rgba(26,26,26,1)';
+		}
+		$icon_hover = sanitize_hex_color( $r['bg_hex'] );
+		$out[ self::PREFIX . 'catalog-cart-icon-color-hover' ] = self::format_value(
+			$icon_hover ? $icon_hover : '#ffffff',
+			$row
+		);
 	}
 
 	/**
-	 * rgba() for button face + slightly lighter hover.
+	 * rgba() for default button face (hover uses inverted solid colors in {@see self::apply_catalog_cart_icon_appearance_tokens}).
 	 *
 	 * @param string $bg_hex          #rrggbb
 	 * @param int    $bg_alpha_percent 0–100
@@ -540,23 +570,38 @@ final class CssVariablesContract {
 			$b = hexdec( substr( $stripped, 4, 2 ) );
 		}
 
-		$hover_a = min( 1.0, $a + 0.06 );
-
 		return array(
-			self::PREFIX . 'catalog-cart-icon-background'       => sprintf(
+			self::PREFIX . 'catalog-cart-icon-background' => sprintf(
 				'rgba(%d,%d,%d,%s)',
 				$r,
 				$g,
 				$b,
 				self::format_css_alpha_string( $a )
 			),
-			self::PREFIX . 'catalog-cart-icon-background-hover' => sprintf(
-				'rgba(%d,%d,%d,%s)',
-				$r,
-				$g,
-				$b,
-				self::format_css_alpha_string( $hover_a )
-			),
+		);
+	}
+
+	/**
+	 * @param string $hex #rrggbb (or #rgb expanded by sanitize_hex_color).
+	 * @return array{0:int,1:int,2:int}|null
+	 */
+	private static function parse_hex_rgb_triplet( $hex ) {
+		$hex = sanitize_hex_color( (string) $hex );
+		if ( ! is_string( $hex ) || '' === $hex ) {
+			return null;
+		}
+		$stripped = strtolower( ltrim( $hex, '#' ) );
+		if ( 3 === strlen( $stripped ) && ctype_xdigit( $stripped ) ) {
+			$stripped = $stripped[0] . $stripped[0] . $stripped[1] . $stripped[1] . $stripped[2] . $stripped[2];
+		}
+		if ( 6 !== strlen( $stripped ) || ! ctype_xdigit( $stripped ) ) {
+			return null;
+		}
+
+		return array(
+			(int) hexdec( substr( $stripped, 0, 2 ) ),
+			(int) hexdec( substr( $stripped, 2, 2 ) ),
+			(int) hexdec( substr( $stripped, 4, 2 ) ),
 		);
 	}
 

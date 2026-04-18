@@ -539,6 +539,14 @@ final class SettingsPage {
 			if ( $icon_stroke < 1.0 || $icon_stroke > 3.0 ) {
 				$icon_stroke = 1.75;
 			}
+			$bg_radius = isset( $c['catalog_cart_icon_bg_border_radius_px'] ) ? (int) $c['catalog_cart_icon_bg_border_radius_px'] : 10;
+			if ( $bg_radius < 0 || $bg_radius > 28 ) {
+				$bg_radius = 10;
+			}
+			$inner_pad = isset( $c['catalog_cart_icon_inner_padding_px'] ) ? (int) $c['catalog_cart_icon_inner_padding_px'] : 0;
+			if ( $inner_pad < 0 || $inner_pad > 12 ) {
+				$inner_pad = 0;
+			}
 			$delay_ms = isset( $c['catalog_cart_icon_transition_delay_ms'] ) ? (int) $c['catalog_cart_icon_transition_delay_ms'] : 0;
 
 			echo '<tr><td colspan="2"><p class="description"><strong>' . esc_html__( 'Геометрия и задержка иконки', 'mp-sticky-custom-cart' ) . '</strong> — ';
@@ -588,6 +596,32 @@ final class SettingsPage {
 					'min'  => 1,
 					'max'  => 3,
 					'step' => '0.05',
+				)
+			);
+			self::field_number(
+				$opt,
+				'catalog',
+				'catalog_cart_icon_bg_border_radius_px',
+				__( 'Скругление фона кнопки (px)', 'mp-sticky-custom-cart' ),
+				$bg_radius,
+				__( 'Радиус углов подложки иконки (квадрат клика). 0 — без скругления; по умолчанию 10.', 'mp-sticky-custom-cart' ),
+				array(
+					'min'  => 0,
+					'max'  => 28,
+					'step' => 1,
+				)
+			);
+			self::field_number(
+				$opt,
+				'catalog',
+				'catalog_cart_icon_inner_padding_px',
+				__( 'Внутренний отступ значка (px)', 'mp-sticky-custom-cart' ),
+				$inner_pad,
+				__( 'Одинаковый отступ глифа от краёв кнопки со всех сторон (0–12). Увеличивает «воздух» вокруг SVG внутри фона.', 'mp-sticky-custom-cart' ),
+				array(
+					'min'  => 0,
+					'max'  => 12,
+					'step' => 1,
 				)
 			);
 			self::field_number(

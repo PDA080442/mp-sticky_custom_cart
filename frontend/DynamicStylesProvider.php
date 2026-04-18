@@ -96,7 +96,7 @@ final class DynamicStylesProvider implements DynamicStylesProviderInterface {
 		$root = CssVariablesContract::DEFAULT_ROOT_SELECTOR . '{' . implode( '', $parts ) . '}';
 		$sel  = 'button.mp-scc-catalog-cart-icon-btn[data-mp-scc-cart-icon="1"]';
 		$btn  = $sel . '{color:var(--mp-scc-catalog-cart-icon-color)!important;background-color:var(--mp-scc-catalog-cart-icon-background)!important;background-image:none!important}';
-		$hov  = $sel . ':hover{background-color:var(--mp-scc-catalog-cart-icon-background-hover)!important;background-image:none!important}';
+		$hov  = $sel . ':hover{background-color:var(--mp-scc-catalog-cart-icon-background-hover)!important;color:var(--mp-scc-catalog-cart-icon-color-hover)!important;background-image:none!important}';
 
 		echo '<style id="mp-scc-catalog-cart-icon-late" type="text/css">' . "\n";
 		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- inline CSS from plugin contract (sanitized upstream).

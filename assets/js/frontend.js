@@ -48,12 +48,23 @@
 		}
 		var col = v['--mp-scc-catalog-cart-icon-color'];
 		var bg = v['--mp-scc-catalog-cart-icon-background'];
+		var br = v['--mp-scc-catalog-cart-icon-border-radius'];
+		var padKey = '--mp-scc-catalog-cart-icon-inner-padding';
+		var hasPad = Object.prototype.hasOwnProperty.call(v, padKey);
+		var pad = hasPad ? String(v[padKey]) : '';
 		try {
 			if (col) {
 				btn.style.setProperty('color', String(col), 'important');
 			}
 			if (bg) {
 				btn.style.setProperty('background-color', String(bg), 'important');
+			}
+			if (br) {
+				btn.style.setProperty('border-radius', String(br), 'important');
+			}
+			if (hasPad) {
+				btn.style.setProperty('padding', pad, 'important');
+				btn.style.setProperty('box-sizing', 'border-box', 'important');
 			}
 			btn.style.setProperty('background-image', 'none', 'important');
 		} catch (err) {
@@ -62,6 +73,13 @@
 			}
 			if (bg) {
 				btn.style.backgroundColor = String(bg);
+			}
+			if (br) {
+				btn.style.borderRadius = String(br);
+			}
+			if (hasPad) {
+				btn.style.padding = pad;
+				btn.style.boxSizing = 'border-box';
 			}
 		}
 	}
@@ -88,11 +106,19 @@
 					return;
 				}
 				var h = v['--mp-scc-catalog-cart-icon-background-hover'];
+				var ch = v['--mp-scc-catalog-cart-icon-color-hover'];
 				if (h) {
 					try {
 						this.style.setProperty('background-color', String(h), 'important');
 					} catch (e2) {
 						this.style.backgroundColor = String(h);
+					}
+				}
+				if (ch) {
+					try {
+						this.style.setProperty('color', String(ch), 'important');
+					} catch (e3) {
+						this.style.color = String(ch);
 					}
 				}
 			})

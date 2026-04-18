@@ -85,6 +85,16 @@ final class SettingsValidationSchema {
 					'min'  => 0,
 					'max'  => 100,
 				),
+				'catalog_cart_icon_bg_border_radius_px' => array(
+					'type' => 'integer',
+					'min'  => 0,
+					'max'  => 28,
+				),
+				'catalog_cart_icon_inner_padding_px' => array(
+					'type' => 'integer',
+					'min'  => 0,
+					'max'  => 12,
+				),
 				'catalog_cart_icon_preset'         => array(
 					'type'  => 'text',
 					'oneof' => CatalogCartIconPresets::IDS,

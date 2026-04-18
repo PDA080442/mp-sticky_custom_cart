@@ -102,6 +102,10 @@ final class UiSettingsDefaults {
 				'catalog_cart_icon_bg_color'         => '#ffffff',
 				/** 0–100, opacity of the background (100 = solid). */
 				'catalog_cart_icon_bg_alpha_percent' => 94,
+				/** Border radius of the cart icon button face (px); see --mp-scc-catalog-cart-icon-border-radius. */
+				'catalog_cart_icon_bg_border_radius_px' => 10,
+				/** Symmetric padding between button edge and glyph (px); see --mp-scc-catalog-cart-icon-inner-padding. */
+				'catalog_cart_icon_inner_padding_px' => 0,
 				/** Preset id from {@see \MpStickyCustomCart\Core\CatalogCartIconPresets::IDS}. */
 				'catalog_cart_icon_preset'           => 'classic',
 				'hover_overlay_mobile_always' => true,
