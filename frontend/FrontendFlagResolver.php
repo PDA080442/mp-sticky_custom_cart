@@ -116,8 +116,19 @@ final class FrontendFlagResolver {
 			$catalog_add_surface = 'image_click';
 		}
 
+		$catalog_cart_icon_desktop = isset( $catalog_settings['catalog_cart_icon_desktop'] ) ? (string) $catalog_settings['catalog_cart_icon_desktop'] : 'hover';
+		if ( ! in_array( $catalog_cart_icon_desktop, array( 'hover', 'always' ), true ) ) {
+			$catalog_cart_icon_desktop = 'hover';
+		}
+		$catalog_cart_icon_touch = isset( $catalog_settings['catalog_cart_icon_touch'] ) ? (string) $catalog_settings['catalog_cart_icon_touch'] : 'always';
+		if ( ! in_array( $catalog_cart_icon_touch, array( 'always', 'tap_reveal' ), true ) ) {
+			$catalog_cart_icon_touch = 'always';
+		}
+
 		$catalog_js = array(
 			'catalogAddSurface'        => $catalog_add_surface,
+			'catalogCartIconDesktop'   => $catalog_cart_icon_desktop,
+			'catalogCartIconTouch'     => $catalog_cart_icon_touch,
 			'imageClickBehavior'       => $image_click_behavior,
 			'imageClickSelector'       => $img_sel,
 			'cardRootSelector'         => $card_sel,

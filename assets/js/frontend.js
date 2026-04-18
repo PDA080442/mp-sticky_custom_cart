@@ -696,9 +696,9 @@
 			});
 		}
 
-		var $cartIcon = $card.find('.mp-scc-catalog-cart-icon-btn').first();
-		if ($cartIcon.length) {
-			$cartIcon.css({
+		var $cartSlot = $card.find('.mp-scc-catalog-cart-icon-slot').first();
+		if ($cartSlot.length) {
+			$cartSlot.css({
 				top: topRel + 8,
 				left: leftRel + 8
 			});
@@ -950,6 +950,90 @@
 		});
 	}
 
+	/**
+	 * Coarse pointer / narrow viewport — touch UI rules for catalog cart icon.
+	 *
+	 * @returns {boolean}
+	 */
+	function isCatalogCartIconTouchUi() {
+		if (typeof window.matchMedia !== 'function') {
+			return window.innerWidth <= 768;
+		}
+		if (window.matchMedia('(max-width: 768px)').matches) {
+			return true;
+		}
+		return window.matchMedia('(pointer: coarse)').matches;
+	}
+
+	/**
+	 * Prevent theme/link handlers from seeing icon presses (mousedown/touchstart bubble).
+	 *
+	 * @param {HTMLElement} el
+	 */
+	function attachCatalogCartIconPointerGuards(el) {
+		if (!el || el.getAttribute('data-mp-scc-cart-pointer-guards')) {
+			return;
+		}
+		el.setAttribute('data-mp-scc-cart-pointer-guards', '1');
+		el.addEventListener(
+			'mousedown',
+			function (e) {
+				e.stopPropagation();
+			},
+			true
+		);
+		el.addEventListener(
+			'touchstart',
+			function (e) {
+				e.stopPropagation();
+			},
+			{ capture: true, passive: true }
+		);
+	}
+
+	/**
+	 * Touch: optional first tap on card (not on link/button) reveals the icon.
+	 */
+	function initCatalogCartIconTouchReveal() {
+		if (window.__mpSccCatalogCartIconTouchReveal) {
+			return;
+		}
+		window.__mpSccCatalogCartIconTouchReveal = true;
+		document.addEventListener(
+			'pointerup',
+			function (e) {
+				var d = data();
+				var cat = d.catalog || {};
+				if ((cat.catalogAddSurface || 'image_click') !== 'cart_icon') {
+					return;
+				}
+				if ((cat.catalogCartIconTouch || 'always') !== 'tap_reveal') {
+					return;
+				}
+				if (!isCatalogCartIconTouchUi()) {
+					return;
+				}
+				var t = e.target;
+				if (!t || typeof t.closest !== 'function') {
+					return;
+				}
+				var card = t.closest('.mp-scc-catalog-card--cart-icon');
+				if (!card) {
+					return;
+				}
+				if (
+					t.closest(
+						'a, button, input, select, textarea, [data-mp-scc-overlay], .mp-scc-catalog-overlay, .mp-scc-catalog-cart-icon-btn'
+					)
+				) {
+					return;
+				}
+				card.classList.add('mp-scc-catalog-cart-icon--revealed-touch');
+			},
+			true
+		);
+	}
+
 	var catalogChromeLayoutTimer = null;
 	function scheduleCatalogChromeLayouts() {
 		if (catalogChromeLayoutTimer) {
@@ -964,7 +1048,8 @@
 	}
 
 	/**
-	 * Injects loop «cart» control (catalog_add_surface=cart_icon); layout via {@see syncCatalogCardLayouts}.
+	 * Injects loop «cart» control (catalog_add_surface=cart_icon). Slot: PHP {@see ShopLoopCartIconHost} or JS fallback.
+	 * Layout: {@see syncCatalogCardLayouts} positions `.mp-scc-catalog-cart-icon-slot` over the first image box.
 	 */
 	function initCatalogCartIconLayer() {
 		var catalog = data().catalog || {};
@@ -974,8 +1059,13 @@
 		function cleanupCartIconUi() {
 			$(cardSel).each(function () {
 				var $c = $(this);
-				$c.removeClass('mp-scc-catalog-card--cart-icon');
+				$c.removeClass(
+					'mp-scc-catalog-card--cart-icon mp-scc-catalog-cart-icon--revealed-touch mp-scc-card--hover-intent'
+				);
+				$c.removeAttr('data-mp-scc-cart-icon-desktop');
+				$c.removeAttr('data-mp-scc-cart-icon-touch');
 				$c.find('.mp-scc-catalog-cart-icon-btn').remove();
+				$c.find('.mp-scc-catalog-cart-icon-slot').remove();
 			});
 		}
 
@@ -995,36 +1085,71 @@
 			label = 'Добавить в корзину';
 		}
 
+		var desk = catalog.catalogCartIconDesktop || 'hover';
+		var touch = catalog.catalogCartIconTouch || 'always';
+
 		var cartIconSvg =
-			'<svg class="mp-scc-catalog-cart-icon-btn__svg" width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false"><path d="M7 18c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-.9-2-2-2zm10 0c-1.1 0-1.99.9-1.99 2S15.9 22 17 22s2-.9 2-2-.9-2-2-2zM7.2 16h9.45c.75 0 1.41-.42 1.75-1.09l3.24-6.03a1 1 0 00-.88-1.47H7.42L6.87 4.5A1 1 0 006 3.75H3v1.5h2.62l1.24 7.26z" fill="currentColor"/></svg>';
+			'<svg class="mp-scc-catalog-cart-icon-btn__svg" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false"><circle cx="9" cy="21" r="1" fill="currentColor"/><circle cx="20" cy="21" r="1" fill="currentColor"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 
 		$(cardSel).each(function () {
 			var $card = $(this);
 			if (!$card.find('img').length) {
 				return;
 			}
-			var $existing = $card.find('.mp-scc-catalog-cart-icon-btn').first();
-			if ($existing.length) {
-				$existing.attr('aria-label', label);
-				$card.addClass('mp-scc-catalog-card--cart-icon');
-				attachCatalogCardResizeSync($card);
-				return;
-			}
 			var pid = resolveCatalogProductId($card);
-			if (!pid || !$card.hasClass('product-type-simple')) {
+			var isSimple = $card.hasClass('product-type-simple');
+			if (!pid || !isSimple) {
+				$card.find('.mp-scc-catalog-cart-icon-slot').remove();
+				$card.find('.mp-scc-catalog-cart-icon-btn').remove();
+				$card.removeClass('mp-scc-catalog-card--cart-icon');
 				return;
 			}
-			var $btn = $(
-				'<button type="button" class="mp-scc-catalog-cart-icon-btn" data-mp-scc-cart-icon="1" />'
-			);
-			$btn.attr('aria-label', label);
-			$btn.append(
-				$('<span class="mp-scc-catalog-cart-icon-btn__icon" aria-hidden="true" />').html(cartIconSvg)
-			);
-			$card.append($btn);
+
+			$card.attr('data-mp-scc-cart-icon-desktop', desk);
+			$card.attr('data-mp-scc-cart-icon-touch', touch);
+
+			var $slot = $card.find('.mp-scc-catalog-cart-icon-slot').first();
+			if (!$slot.length) {
+				$slot = $(
+					'<div class="mp-scc-catalog-cart-icon-slot mp-scc-catalog-cart-icon-slot--js" data-mp-scc-cart-icon-slot="1" aria-hidden="true"></div>'
+				);
+				$card.append($slot);
+			}
+
+			var $btn = $slot.find('.mp-scc-catalog-cart-icon-btn').first();
+			if (!$btn.length) {
+				$btn = $('<button type="button" class="mp-scc-catalog-cart-icon-btn" data-mp-scc-cart-icon="1" />');
+				$btn.attr('aria-label', label);
+				$btn.append(
+					$('<span class="mp-scc-catalog-cart-icon-btn__icon" aria-hidden="true" />').html(cartIconSvg)
+				);
+				$slot.append($btn);
+			} else {
+				$btn.attr('aria-label', label);
+			}
+
+			var btnEl = $btn.get(0);
+			if (btnEl) {
+				attachCatalogCartIconPointerGuards(btnEl);
+			}
+
 			$card.addClass('mp-scc-catalog-card--cart-icon');
 			attachCatalogCardResizeSync($card);
 		});
+	}
+
+	function initCatalogCartIconHoverIntent() {
+		if (window.__mpSccCatalogCartIconHoverIntent) {
+			return;
+		}
+		window.__mpSccCatalogCartIconHoverIntent = true;
+		$(document.body)
+			.on('mouseenter.mpSccCartIcon', '.mp-scc-catalog-card--cart-icon', function () {
+				$(this).addClass('mp-scc-card--hover-intent');
+			})
+			.on('mouseleave.mpSccCartIcon', '.mp-scc-catalog-card--cart-icon', function () {
+				$(this).removeClass('mp-scc-card--hover-intent');
+			});
 	}
 
 	/**
@@ -2715,6 +2840,8 @@
 	$(function () {
 		initClientDiagnostics();
 		initWishlistIntegrationBodyClass();
+		initCatalogCartIconTouchReveal();
+		initCatalogCartIconHoverIntent();
 
 		var $root = $('#mp-scc-sticky-root');
 		if ($root.length) {
