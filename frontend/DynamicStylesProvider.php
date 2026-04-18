@@ -8,6 +8,7 @@
 namespace MpStickyCustomCart\Frontend;
 
 use MpStickyCustomCart\Core\Config\CssVariablesContract;
+use MpStickyCustomCart\Core\Config\FeatureFlagsDefaults;
 use MpStickyCustomCart\Core\Contracts\DynamicStylesProviderInterface;
 use MpStickyCustomCart\Core\OptionResolver;
 
@@ -64,8 +65,49 @@ final class DynamicStylesProvider implements DynamicStylesProviderInterface {
 		 * optimizers / edge cases where the src-less `mp-scc-runtime-vars` inline is dropped.
 		 */
 		add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_catalog_cart_icon_vars_on_main_stylesheet' ), 27 );
+		/** Tri-state mobile preset (phase 17.6 / 20): breakpoint is numeric → safe injected @media. */
+		add_action( 'wp_footer', array( $this, 'print_footer_tristate_responsive_layer_css' ), 998 );
 		/** Last-resort :root + rules at end of body (after theme CSS / late bundles). */
 		add_action( 'wp_footer', array( $this, 'print_footer_catalog_cart_icon_late_style' ), 999 );
+	}
+
+	/**
+	 * Narrow-viewport overrides when `tristate_mobile_layout_preset` is `full_bottom` (dp §17.6 / §20.2).
+	 */
+	public function print_footer_tristate_responsive_layer_css() {
+		if ( is_admin() || wp_doing_ajax() ) {
+			return;
+		}
+		if ( ! wp_style_is( FrontendAssetsHooks::HANDLE_STYLE, 'enqueued' ) && ! wp_style_is( FrontendAssetsHooks::HANDLE_STYLE, 'done' ) ) {
+			return;
+		}
+		if ( ! OptionResolver::get_flag( FeatureFlagsDefaults::KEY_STICKY_TRISTATE_ENABLED, false ) ) {
+			return;
+		}
+		$settings = OptionResolver::get_settings();
+		$preset   = OptionResolver::get_by_path( $settings, 'sticky_cart.tristate_mobile_layout_preset', 'right_docked' );
+		if ( 'full_bottom' !== $preset ) {
+			return;
+		}
+		$bp = (int) OptionResolver::get_by_path( $settings, 'sticky_cart.tristate_mobile_breakpoint_max_px', 782 );
+		$bp = max( 480, min( 900, $bp ) );
+
+		$sel_stack = 'body.mp-scc-sticky-layout-tristate.mp-scc-tristate-preset--full-bottom .mp-scc-sticky-bar.mp-scc-sticky--tristate .mp-scc-sticky-stack';
+		$sel_inner = 'body.mp-scc-sticky-layout-tristate.mp-scc-tristate-preset--full-bottom .mp-scc-sticky-bar.mp-scc-sticky--tristate .mp-scc-sticky-inner';
+		$sel_b     = 'body.mp-scc-sticky-layout-tristate.mp-scc-tristate-preset--full-bottom .mp-scc-sticky-bar.mp-scc-sticky--tristate .mp-scc-shell-panel-b';
+		$sel_c     = 'body.mp-scc-sticky-layout-tristate.mp-scc-tristate-preset--full-bottom .mp-scc-sticky-bar.mp-scc-sticky--tristate .mp-scc-drawer.mp-scc-drawer--tristate-c';
+
+		$css  = '@media (max-width: ' . (string) $bp . "px) {\n";
+		$css .= $sel_stack . "{align-items:stretch;width:100%;max-width:100%;}\n";
+		$css .= $sel_inner . "{justify-content:center;width:100%;}\n";
+		$css .= $sel_b . "{left:max(var(--mp-scc-tristate-dock-inset-right,12px),env(safe-area-inset-left,0));right:max(var(--mp-scc-tristate-dock-inset-right,12px),env(safe-area-inset-right,0));width:auto;max-width:none;margin-left:auto;margin-right:auto;}\n";
+		$css .= $sel_c . "{left:max(var(--mp-scc-tristate-dock-inset-right,12px),env(safe-area-inset-left,0));right:max(var(--mp-scc-tristate-dock-inset-right,12px),env(safe-area-inset-right,0));width:auto;max-width:none;}\n";
+		$css .= "}\n";
+
+		echo '<style id="mp-scc-tristate-responsive" type="text/css">' . "\n";
+		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- numeric breakpoint + fixed selectors.
+		echo $css;
+		echo '</style>' . "\n";
 	}
 
 	/**
