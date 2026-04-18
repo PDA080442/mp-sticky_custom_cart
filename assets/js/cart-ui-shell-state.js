@@ -323,6 +323,35 @@
 		}
 	};
 
+	CartUiShellStateMachine.prototype._tristateFabLayout = function () {
+		try {
+			return !!(
+				window.mpScc &&
+				typeof window.mpScc.flagEnabled === 'function' &&
+				window.mpScc.flagEnabled('sticky_tristate_enabled')
+			);
+		} catch (e) {
+			return false;
+		}
+	};
+
+	/**
+	 * Legacy bar: aria-expanded tracks drawer. Tristate: expanded in B or C (panel above icon-only A).
+	 */
+	CartUiShellStateMachine.prototype._syncToggleAriaExpanded = function () {
+		var toggle = this.rootEl ? this.rootEl.querySelector('[data-mp-scc-drawer-toggle]') : null;
+		if (!toggle) {
+			return;
+		}
+		var expanded;
+		if (this._tristateFabLayout()) {
+			expanded = this._state === STATES.B || this._state === STATES.C;
+		} else {
+			expanded = !!(this.sticky && this.sticky.isDrawerOpen && this.sticky.isDrawerOpen());
+		}
+		toggle.setAttribute('aria-expanded', expanded ? 'true' : 'false');
+	};
+
 	CartUiShellStateMachine.prototype._applyVisualLayer = function () {
 		var elevated = this._state === STATES.B || this._state === STATES.C;
 		this._setElevated(elevated);
@@ -347,6 +376,7 @@
 		this._setDomStateAttr();
 		this._syncPanelBPlaceholder();
 		this._syncDrawerDom();
+		this._syncToggleAriaExpanded();
 		this._applyVisualLayer();
 		this._emit(prev, next);
 		return this._state;
@@ -364,6 +394,7 @@
 		this._state = next;
 		this._setDomStateAttr();
 		this._syncDrawerDom();
+		this._syncToggleAriaExpanded();
 		this._applyVisualLayer();
 	};
 

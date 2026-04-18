@@ -51,7 +51,9 @@ final class StickyCartRenderer implements StickyCartRendererInterface {
 		$line_count  = $empty ? 0 : count( $cart->get_cart() );
 		$total       = $empty ? wc_price( 0 ) : $cart->get_cart_subtotal();
 		$total       = is_string( $total ) ? $total : wc_price( 0 );
-		$drawer = OptionResolver::get_flag( FeatureFlagsDefaults::KEY_STICKY_DRAWER_ENABLED, true );
+		$drawer    = OptionResolver::get_flag( FeatureFlagsDefaults::KEY_STICKY_DRAWER_ENABLED, true );
+		$tristate  = OptionResolver::get_flag( FeatureFlagsDefaults::KEY_STICKY_TRISTATE_ENABLED, false );
+		$root_mods = trim( ( $empty ? ' mp-scc-sticky--empty' : '' ) . ( $tristate ? ' mp-scc-sticky--tristate' : '' ) );
 
 		$checkout_base = function_exists( 'wc_get_checkout_url' ) ? (string) wc_get_checkout_url() : '';
 		$checkout_url  = CheckoutQueryPreserve::merge_request_into_url( $checkout_base );
@@ -73,7 +75,7 @@ final class StickyCartRenderer implements StickyCartRendererInterface {
 
 		ob_start();
 		?>
-<div id="mp-scc-sticky-root" class="mp-scc-root mp-scc-sticky-bar<?php echo $empty ? ' mp-scc-sticky--empty' : ''; ?>" role="region" aria-label="<?php esc_attr_e( 'Shopping cart', 'mp-sticky-custom-cart' ); ?>" data-mp-scc-sticky-root data-mp-scc-cart-empty="<?php echo $empty ? '1' : '0'; ?>">
+<div id="mp-scc-sticky-root" class="mp-scc-root mp-scc-sticky-bar<?php echo esc_attr( $root_mods ); ?>" role="region" aria-label="<?php esc_attr_e( 'Shopping cart', 'mp-sticky-custom-cart' ); ?>" data-mp-scc-sticky-root data-mp-scc-cart-empty="<?php echo $empty ? '1' : '0'; ?>" data-mp-scc-sticky-tristate="<?php echo $tristate ? '1' : '0'; ?>">
 	<div class="mp-scc-sticky-stack">
 		<?php if ( $drawer ) : ?>
 		<div id="mp-scc-drawer" class="mp-scc-drawer<?php echo $empty ? ' mp-scc-drawer--empty' : ''; ?>" role="region" aria-labelledby="mp-scc-drawer-toggle" hidden data-mp-scc-drawer>
@@ -92,7 +94,7 @@ final class StickyCartRenderer implements StickyCartRendererInterface {
 		<div class="mp-scc-sticky-inner">
 			<section class="mp-scc-sticky-summary" aria-label="<?php esc_attr_e( 'Cart summary', 'mp-sticky-custom-cart' ); ?>" aria-live="polite" aria-atomic="true">
 				<?php if ( $drawer ) : ?>
-				<button type="button" id="mp-scc-drawer-toggle" class="mp-scc-drawer-toggle" aria-expanded="false" aria-controls="mp-scc-drawer" data-mp-scc-drawer-toggle>
+				<button type="button" id="mp-scc-drawer-toggle" class="mp-scc-drawer-toggle<?php echo $tristate ? ' mp-scc-drawer-toggle--fab' : ''; ?>" aria-expanded="false" aria-controls="mp-scc-drawer" data-mp-scc-drawer-toggle<?php echo $tristate ? ' aria-haspopup="dialog"' : ''; ?>>
 					<span class="mp-scc-sr-only"><?php echo esc_html__( 'Show or hide cart details', 'mp-sticky-custom-cart' ); ?></span>
 					<span class="mp-scc-drawer-toggle-icon" aria-hidden="true"></span>
 				</button>
@@ -138,10 +140,11 @@ final class StickyCartRenderer implements StickyCartRendererInterface {
 		 * @param array<string, mixed> $context Cart snapshot (count, empty, drawer flag).
 		 */
 		$context = array(
-			'cart_empty'     => $empty,
-			'cart_count'     => $qty_total,
-			'line_count'     => $line_count,
-			'drawer_enabled' => $drawer,
+			'cart_empty'        => $empty,
+			'cart_count'        => $qty_total,
+			'line_count'        => $line_count,
+			'drawer_enabled'    => $drawer,
+			'tristate_enabled'  => $tristate,
 		);
 
 		return (string) apply_filters( 'mp_sticky_custom_cart_sticky_cart_html', $html, $context );

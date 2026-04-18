@@ -107,6 +107,113 @@ body.popup-overlay-open .mp-scc-sticky-bar {
 }
 
 /* -------------------------------------------------------------------------
+   Phase 17.2 — Tristate A: floating FAB bottom-right, icon-only (no bar chrome)
+   ------------------------------------------------------------------------- */
+body.mp-scc-sticky-active.mp-scc-sticky-layout-tristate {
+	padding-bottom: calc(var(--mp-scc-sticky-fab-layout-reserve, 72px) + env(safe-area-inset-bottom, 0px));
+}
+
+@media (orientation: landscape) and (max-height: 500px) {
+	body.mp-scc-sticky-active.mp-scc-sticky-layout-tristate {
+		padding-bottom: calc(
+			var(--mp-scc-sticky-fab-layout-reserve, 72px) + env(safe-area-inset-bottom, 0px) +
+				min(12px, max(env(safe-area-inset-left, 0px), env(safe-area-inset-right, 0px)))
+		);
+	}
+}
+
+.mp-scc-sticky-bar.mp-scc-sticky--tristate {
+	left: auto;
+	right: 0;
+	bottom: 0;
+	width: auto;
+	max-width: none;
+	margin: 0;
+	padding-top: 0;
+	padding-right: max(12px, env(safe-area-inset-right, 0px));
+	padding-bottom: max(12px, env(safe-area-inset-bottom, 0px));
+	padding-left: max(12px, env(safe-area-inset-left, 0px));
+	border-radius: var(--mp-scc-catalog-cart-icon-border-radius, 12px);
+	isolation: isolate;
+}
+
+.mp-scc-sticky-bar.mp-scc-sticky--tristate .mp-scc-sticky-stack {
+	width: auto;
+	align-items: flex-end;
+}
+
+.mp-scc-sticky-bar.mp-scc-sticky--tristate .mp-scc-sticky-inner {
+	width: auto;
+	flex-direction: row;
+	flex-wrap: nowrap;
+	align-items: center;
+	justify-content: flex-end;
+	gap: 0;
+}
+
+.mp-scc-sticky-bar.mp-scc-sticky--tristate .mp-scc-sticky-summary {
+	width: auto;
+	flex: 0 0 auto;
+	min-width: 0;
+}
+
+.mp-scc-sticky-bar.mp-scc-sticky--tristate .mp-scc-sticky-summary-text,
+.mp-scc-sticky-bar.mp-scc-sticky--tristate .mp-scc-sticky-actions {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	padding: 0;
+	margin: -1px;
+	overflow: hidden;
+	clip: rect(0, 0, 0, 0);
+	white-space: nowrap;
+	border: 0;
+}
+
+.mp-scc-sticky-bar.mp-scc-sticky--tristate .mp-scc-drawer {
+	left: auto;
+	right: 0;
+	width: min(
+		calc(100vw - max(24px, env(safe-area-inset-left, 0px) + env(safe-area-inset-right, 0px))),
+		420px
+	);
+	max-width: min(92vw, 420px);
+	align-self: flex-end;
+}
+
+@media (min-width: 783px) {
+	.mp-scc-sticky-bar.mp-scc-sticky--tristate {
+		padding-right: max(16px, env(safe-area-inset-right, 0px));
+		padding-bottom: max(14px, env(safe-area-inset-bottom, 0px));
+		padding-left: max(16px, env(safe-area-inset-left, 0px));
+	}
+
+	.mp-scc-sticky-bar.mp-scc-sticky--tristate .mp-scc-drawer {
+		padding-left: var(--mp-scc-sticky-drawer-padding-x, 16px);
+		padding-right: var(--mp-scc-sticky-drawer-padding-x, 16px);
+	}
+}
+
+.mp-scc-sticky-bar.mp-scc-sticky--tristate .mp-scc-drawer-toggle--fab {
+	width: max(44px, var(--mp-scc-catalog-cart-icon-hit-size, 48px));
+	height: max(44px, var(--mp-scc-catalog-cart-icon-hit-size, 48px));
+	border-radius: var(--mp-scc-catalog-cart-icon-border-radius, 12px);
+	background: var(--mp-scc-catalog-cart-icon-background, rgba(255, 255, 255, 0.94));
+	color: var(--mp-scc-catalog-cart-icon-color, #1a1a1a);
+	box-shadow: 0 4px 18px rgba(0, 0, 0, 0.12);
+}
+
+.mp-scc-sticky-bar.mp-scc-sticky--tristate .mp-scc-drawer-toggle--fab:hover {
+	background: var(--mp-scc-catalog-cart-icon-background-hover, rgba(26, 26, 26, 1));
+	color: var(--mp-scc-catalog-cart-icon-color-hover, #ffffff);
+}
+
+.mp-scc-sticky-bar.mp-scc-sticky--tristate .mp-scc-drawer-toggle--fab:focus-visible {
+	outline: 2px solid var(--mp-scc-color-button-primary, #111);
+	outline-offset: 2px;
+}
+
+/* -------------------------------------------------------------------------
    5–6) Mobile-first row group: column + full-width actions; desktop = one row
    ------------------------------------------------------------------------- */
 .mp-scc-sticky-inner {

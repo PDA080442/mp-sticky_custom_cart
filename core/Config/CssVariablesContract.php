@@ -497,6 +497,9 @@ final class CssVariablesContract {
 
 		$out[ self::PREFIX . 'sticky-layout-reserve' ] = self::format_sticky_layout_reserve_px( $merged_settings );
 
+		// Reserve under floating FAB (phase 17.2); body uses it only with .mp-scc-sticky-layout-tristate.
+		$out[ self::PREFIX . 'sticky-fab-layout-reserve' ] = '72px';
+
 		self::apply_catalog_cart_icon_appearance_tokens( $merged_settings, $out );
 
 		return $out;

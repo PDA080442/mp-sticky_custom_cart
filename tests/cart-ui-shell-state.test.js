@@ -20,6 +20,8 @@ assert.ok(shell.includes('onStickyPayloadApplied'), 'Shell should notify on snap
 assert.ok(shell.includes('pagehide'), 'Shell should reset on pagehide (no cross-page persistence)');
 assert.ok(shell.includes('mpSccCartUiShell'), 'Shell should attach global API');
 assert.ok(shell.includes('modal-open'), 'Shell Escape should defer when theme modal is open');
+assert.ok(shell.includes('_syncToggleAriaExpanded'), 'Shell should sync aria-expanded on drawer toggle');
+assert.ok(shell.includes('sticky_tristate_enabled'), 'Shell should branch aria-expanded for tristate flag');
 
 assert.ok(frontend.includes('mpSccCartUiShell.attachSticky'), 'Frontend should attach cart UI shell');
 assert.ok(frontend.includes('ACTION.TOGGLE_C'), 'Drawer toggle should route through shell when present');

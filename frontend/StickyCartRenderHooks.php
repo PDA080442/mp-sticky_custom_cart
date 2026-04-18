@@ -7,6 +7,9 @@
 
 namespace MpStickyCustomCart\Frontend;
 
+use MpStickyCustomCart\Core\Config\FeatureFlagsDefaults;
+use MpStickyCustomCart\Core\OptionResolver;
+
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -33,6 +36,9 @@ final class StickyCartRenderHooks {
 	public static function body_class( array $classes ) {
 		if ( StickyCartVisibility::should_render_sticky() ) {
 			$classes[] = 'mp-scc-sticky-active';
+			if ( OptionResolver::get_flag( FeatureFlagsDefaults::KEY_STICKY_TRISTATE_ENABLED, false ) ) {
+				$classes[] = 'mp-scc-sticky-layout-tristate';
+			}
 		}
 		return $classes;
 	}
