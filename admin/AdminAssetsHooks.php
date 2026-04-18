@@ -45,6 +45,7 @@ final class AdminAssetsHooks {
 		}
 
 		wp_enqueue_style( 'wp-color-picker' );
+		wp_enqueue_media();
 
 		wp_enqueue_style(
 			self::HANDLE_SETTINGS_SHELL,
@@ -63,7 +64,7 @@ final class AdminAssetsHooks {
 		wp_enqueue_script(
 			self::HANDLE_SETTINGS_PAGE,
 			PluginPaths::url( 'admin/js/settings-page.js' ),
-			array( 'jquery', 'wp-color-picker' ),
+			array( 'jquery', 'wp-color-picker', 'media-editor' ),
 			MP_STICKY_CUSTOM_CART_ASSET_VERSION,
 			true
 		);
@@ -88,6 +89,10 @@ final class AdminAssetsHooks {
 			'mpSccAdmin',
 			array(
 				'beforeUnload' => __( 'Есть несохранённые изменения. Покинуть страницу?', 'mp-sticky-custom-cart' ),
+				'mediaPicker'  => array(
+					'title'  => __( 'Файл иконки корзины в каталоге', 'mp-sticky-custom-cart' ),
+					'button' => __( 'Использовать этот файл', 'mp-sticky-custom-cart' ),
+				),
 				'stylePreview' => array(
 					'previewId'  => 'mp-scc-style-live-preview',
 					'throttleMs' => 100,

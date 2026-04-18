@@ -7,6 +7,8 @@
 
 namespace MpStickyCustomCart\Core\Config;
 
+use MpStickyCustomCart\Core\CatalogCartIconPresets;
+
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -58,6 +60,11 @@ final class SettingsValidationSchema {
 					'min'  => 14,
 					'max'  => 28,
 				),
+				'catalog_cart_icon_stroke_width'   => array(
+					'type' => 'float',
+					'min'  => 1,
+					'max'  => 3,
+				),
 				'catalog_cart_icon_transition_delay_ms' => array(
 					'type' => 'integer',
 					'min'  => 0,
@@ -66,6 +73,21 @@ final class SettingsValidationSchema {
 				'catalog_cart_icon_mobile_mode'    => array(
 					'type'  => 'text',
 					'oneof' => array( 'inherit', 'force_visible' ),
+				),
+				'catalog_cart_icon_appearance_preset' => array(
+					'type'  => 'text',
+					'oneof' => array( 'black_cart_white_bg', 'white_cart_black_bg' ),
+				),
+				'catalog_cart_icon_color'          => array( 'type' => 'color' ),
+				'catalog_cart_icon_bg_color'       => array( 'type' => 'color' ),
+				'catalog_cart_icon_bg_alpha_percent' => array(
+					'type' => 'integer',
+					'min'  => 0,
+					'max'  => 100,
+				),
+				'catalog_cart_icon_preset'         => array(
+					'type'  => 'text',
+					'oneof' => CatalogCartIconPresets::IDS,
 				),
 				'hover_overlay_mobile_always' => array(
 					'type' => 'boolean',

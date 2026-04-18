@@ -10,6 +10,8 @@ namespace MpStickyCustomCart\Admin;
 use MpStickyCustomCart\Core\Config\CssVariablesContract;
 use MpStickyCustomCart\Core\Config\FeatureFlagDefinitions;
 use MpStickyCustomCart\Core\Config\FeatureFlagsDefaults;
+use MpStickyCustomCart\Core\CatalogCartIconAppearance;
+use MpStickyCustomCart\Core\CatalogCartIconPresets;
 use MpStickyCustomCart\Core\Config\UiLabelsDefaults;
 use MpStickyCustomCart\Core\Constants;
 use MpStickyCustomCart\Core\ErrorLogService;
@@ -328,7 +330,7 @@ final class SettingsPage {
 		echo '<div class="mp-scc-catalog-impact-notes">';
 		echo '<p><strong>' . esc_html__( 'Как это влияет на витрину', 'mp-sticky-custom-cart' ) . '</strong></p>';
 		echo '<ul class="ul-disc">';
-		echo '<li>' . esc_html__( 'Режим «иконка корзины» / «клик по миниатюре», смещения и размеры иконки задают внешний вид и зону нажатия; числа попадают в CSS-переменные и в расчёт позиции на витрине.', 'mp-sticky-custom-cart' ) . '</li>';
+		echo '<li>' . esc_html__( 'Режим «иконка корзины» / «клик по миниатюре»: выбор одного из встроенных SVG-значков, смещения и размеры, толщина линии; числа попадают в CSS-переменные и в расчёт позиции на витрине.', 'mp-sticky-custom-cart' ) . '</li>';
 		echo '<li>' . esc_html__( 'Поведение клика по миниатюре и селекторы задают, будет ли изображение добавлять simple-товар в корзину без перехода на страницу товара (только в режиме «по миниатюре»).', 'mp-sticky-custom-cart' ) . '</li>';
 		echo '<li>' . esc_html__( 'Блок «Подробнее» и анимация: длительность, easing и пресет попадают в CSS-переменные (--mp-scc-catalog-*) и управляют появлением полосы с текстом «Подробнее».', 'mp-sticky-custom-cart' ) . '</li>';
 		echo '<li>' . esc_html__( 'Тексты «Подробнее» и «Нет в наличии» подставляются в overlay и в тосты на карточке; пустые значения заменяются дефолтами плагина.', 'mp-sticky-custom-cart' ) . '</li>';
@@ -354,6 +356,13 @@ final class SettingsPage {
 		$icon_off_left = isset( $c['catalog_cart_icon_offset_left_px'] ) ? max( 0, min( 64, (int) $c['catalog_cart_icon_offset_left_px'] ) ) : 8;
 		$icon_hit = isset( $c['catalog_cart_icon_hit_size_px'] ) ? max( 28, min( 56, (int) $c['catalog_cart_icon_hit_size_px'] ) ) : 36;
 		$icon_glyph = isset( $c['catalog_cart_icon_glyph_size_px'] ) ? max( 14, min( 28, (int) $c['catalog_cart_icon_glyph_size_px'] ) ) : 20;
+		$icon_stroke_prev = isset( $c['catalog_cart_icon_stroke_width'] ) ? (float) $c['catalog_cart_icon_stroke_width'] : 1.75;
+		if ( $icon_stroke_prev < 1.0 || $icon_stroke_prev > 3.0 ) {
+			$icon_stroke_prev = 1.75;
+		}
+		$icon_preset_prev = CatalogCartIconPresets::normalize(
+			isset( $c['catalog_cart_icon_preset'] ) ? (string) $c['catalog_cart_icon_preset'] : CatalogCartIconPresets::DEFAULT
+		);
 
 		$motion = isset( $c['hover_motion_preset'] ) ? (string) $c['hover_motion_preset'] : 'fade_slide';
 		if ( ! in_array( $motion, array( 'fade_slide', 'fade', 'slide' ), true ) ) {
@@ -400,7 +409,10 @@ final class SettingsPage {
 			);
 			$glyph_style = sprintf( 'width:%dpx;height:%dpx;', $icon_glyph, $icon_glyph );
 			echo '<span class="mp-scc-admin-catalog-preview__cart-slot" style="' . esc_attr( $slot_style ) . '" aria-hidden="true">';
-			echo '<span class="mp-scc-admin-catalog-preview__cart-glyph" style="' . esc_attr( $glyph_style ) . '"></span>';
+			echo '<span class="mp-scc-admin-catalog-preview__cart-svg-wrap" style="' . esc_attr( $glyph_style ) . '">';
+			// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- static trusted SVG from plugin presets.
+			echo CatalogCartIconPresets::svg_markup( $icon_preset_prev, $icon_glyph, $icon_glyph, $icon_stroke_prev );
+			echo '</span>';
 			echo '</span>';
 		}
 		printf(
@@ -501,10 +513,32 @@ final class SettingsPage {
 				__( 'Удобно, если включён «тап для показа», но нужно всегда видеть кнопку на телефоне.', 'mp-sticky-custom-cart' )
 			);
 
+			$appearance = isset( $c['catalog_cart_icon_appearance_preset'] ) ? (string) $c['catalog_cart_icon_appearance_preset'] : CatalogCartIconAppearance::PRESET_BLACK_CART_WHITE_BG;
+			$appearance = CatalogCartIconAppearance::normalize_preset( $appearance );
+			self::field_select(
+				$opt,
+				'catalog',
+				'catalog_cart_icon_appearance_preset',
+				__( 'Стиль кнопки с иконкой', 'mp-sticky-custom-cart' ),
+				$appearance,
+				array(
+					CatalogCartIconAppearance::PRESET_BLACK_CART_WHITE_BG => __( 'Тёмная корзина, светлая кнопка (классика)', 'mp-sticky-custom-cart' ),
+					CatalogCartIconAppearance::PRESET_WHITE_CART_BLACK_BG => __( 'Светлая корзина, тёмная кнопка', 'mp-sticky-custom-cart' ),
+				),
+				__( 'Два готовых сочетания цвета значка и подложки. Сохраните настройки и обновите витрину (кэш темы/плагина при необходимости).', 'mp-sticky-custom-cart' )
+			);
+
+			$icon_preset = isset( $c['catalog_cart_icon_preset'] ) ? (string) $c['catalog_cart_icon_preset'] : CatalogCartIconPresets::DEFAULT;
+			self::field_catalog_cart_icon_preset_grid( $opt, $icon_preset );
+
 			$o_top = isset( $c['catalog_cart_icon_offset_top_px'] ) ? (int) $c['catalog_cart_icon_offset_top_px'] : 8;
 			$o_left = isset( $c['catalog_cart_icon_offset_left_px'] ) ? (int) $c['catalog_cart_icon_offset_left_px'] : 8;
 			$hit_sz = isset( $c['catalog_cart_icon_hit_size_px'] ) ? (int) $c['catalog_cart_icon_hit_size_px'] : 36;
 			$glyph_sz = isset( $c['catalog_cart_icon_glyph_size_px'] ) ? (int) $c['catalog_cart_icon_glyph_size_px'] : 20;
+			$icon_stroke = isset( $c['catalog_cart_icon_stroke_width'] ) ? (float) $c['catalog_cart_icon_stroke_width'] : 1.75;
+			if ( $icon_stroke < 1.0 || $icon_stroke > 3.0 ) {
+				$icon_stroke = 1.75;
+			}
 			$delay_ms = isset( $c['catalog_cart_icon_transition_delay_ms'] ) ? (int) $c['catalog_cart_icon_transition_delay_ms'] : 0;
 
 			echo '<tr><td colspan="2"><p class="description"><strong>' . esc_html__( 'Геометрия и задержка иконки', 'mp-sticky-custom-cart' ) . '</strong> — ';
@@ -542,6 +576,19 @@ final class SettingsPage {
 				__( 'Размер значка корзины (px)', 'mp-sticky-custom-cart' ),
 				$glyph_sz,
 				__( 'Ширина/высота SVG внутри кнопки (14–28).', 'mp-sticky-custom-cart' )
+			);
+			self::field_number(
+				$opt,
+				'catalog',
+				'catalog_cart_icon_stroke_width',
+				__( 'Толщина линии значка', 'mp-sticky-custom-cart' ),
+				$icon_stroke,
+				__( 'Толщина обводки для контурных элементов (1–3; по умолчанию 1.75). У залитых кругов-колёс масштаб не меняется.', 'mp-sticky-custom-cart' ),
+				array(
+					'min'  => 1,
+					'max'  => 3,
+					'step' => '0.05',
+				)
 			);
 			self::field_number(
 				$opt,
@@ -1368,11 +1415,24 @@ final class SettingsPage {
 		$name = sprintf( '%s[%s][%s]', $opt, $section, $field );
 		echo '<tr><th scope="row"><label for="' . esc_attr( $name ) . '">' . esc_html( $label ) . '</label>' . self::help_tip_button( $help ) . '</th><td>';
 		$pv = is_array( $preview_meta ) ? self::preview_data_attr( $preview_meta ) : '';
+		$num_attrs = '';
+		if ( is_array( $preview_meta ) ) {
+			if ( isset( $preview_meta['min'] ) && is_numeric( $preview_meta['min'] ) ) {
+				$num_attrs .= ' min="' . esc_attr( (string) $preview_meta['min'] ) . '"';
+			}
+			if ( isset( $preview_meta['max'] ) && is_numeric( $preview_meta['max'] ) ) {
+				$num_attrs .= ' max="' . esc_attr( (string) $preview_meta['max'] ) . '"';
+			}
+			if ( array_key_exists( 'step', $preview_meta ) && ( is_numeric( $preview_meta['step'] ) || ( is_string( $preview_meta['step'] ) && '' !== $preview_meta['step'] ) ) ) {
+				$num_attrs .= ' step="' . esc_attr( (string) $preview_meta['step'] ) . '"';
+			}
+		}
 		printf(
-			'<input type="number" class="small-text" id="%1$s" name="%1$s" value="%2$s"%3$s />',
+			'<input type="number" class="small-text" id="%1$s" name="%1$s" value="%2$s"%3$s%4$s />',
 			esc_attr( $name ),
 			esc_attr( (string) $value ),
-			$pv // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped in preview_data_attr
+			$pv, // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped in preview_data_attr
+			$num_attrs // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- built from esc_attr
 		);
 		echo '</td></tr>';
 	}
@@ -1400,6 +1460,46 @@ final class SettingsPage {
 			$attrs, // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- maxlength is int, attribute name fixed
 			esc_attr( $input_cls )
 		);
+		echo '</td></tr>';
+	}
+
+	/**
+	 * Radio grid of built-in SVG cart icon presets (10 variants).
+	 *
+	 * @param string $opt         Settings option name.
+	 * @param string $current_id  Selected preset slug.
+	 */
+	private static function field_catalog_cart_icon_preset_grid( $opt, $current_id ) {
+		$current = CatalogCartIconPresets::normalize( $current_id );
+		$name    = sprintf( '%s[catalog][catalog_cart_icon_preset]', $opt );
+		$labels  = CatalogCartIconPresets::labels();
+
+		echo '<tr class="mp-scc-cart-icon-preset-row"><th scope="row">' . esc_html__( 'Вид значка корзины', 'mp-sticky-custom-cart' ) . '</th><td>';
+		echo '<fieldset class="mp-scc-cart-icon-preset-grid"><legend class="screen-reader-text">' . esc_html__( 'Вид значка корзины', 'mp-sticky-custom-cart' ) . '</legend>';
+
+		foreach ( CatalogCartIconPresets::IDS as $id ) {
+			$label_text = isset( $labels[ $id ] ) ? $labels[ $id ] : $id;
+			$rid        = 'mp-scc-cart-preset-' . $id;
+			echo '<div class="mp-scc-cart-icon-preset-item">';
+			printf(
+				'<input type="radio" class="mp-scc-cart-icon-preset-input" id="%1$s" name="%2$s" value="%3$s"%4$s />',
+				esc_attr( $rid ),
+				esc_attr( $name ),
+				esc_attr( $id ),
+				checked( $current, $id, false )
+			);
+			echo '<label class="mp-scc-cart-icon-preset-card" for="' . esc_attr( $rid ) . '">';
+			echo '<span class="mp-scc-cart-icon-preset-preview" aria-hidden="true">';
+			// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- trusted SVG from plugin presets.
+			echo CatalogCartIconPresets::svg_markup( $id, 40, 40, 1.75 );
+			echo '</span>';
+			echo '<span class="mp-scc-cart-icon-preset-name">' . esc_html( $label_text ) . '</span>';
+			echo '</label>';
+			echo '</div>';
+		}
+
+		echo '</fieldset>';
+		echo '<p class="description">' . esc_html__( 'Десять векторных (SVG) значков в стиле currentColor на витрине. Ниже задаётся толщина линии для контуров.', 'mp-sticky-custom-cart' ) . '</p>';
 		echo '</td></tr>';
 	}
 

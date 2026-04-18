@@ -46,13 +46,20 @@ assert.ok(
 	css.includes('--mp-scc-catalog-cart-icon-hit-size') &&
 		css.includes('--mp-scc-catalog-cart-icon-glyph-size') &&
 		css.includes('--mp-scc-catalog-cart-icon-transition-delay') &&
-		css.includes('data-mp-scc-cart-icon-mobile-mode'),
+		css.includes('--mp-scc-catalog-cart-icon-color') &&
+		css.includes('--mp-scc-catalog-cart-icon-background') &&
+		css.includes('--mp-scc-catalog-cart-icon-background-hover') &&
+		css.includes('data-mp-scc-cart-icon-mobile-mode') &&
+		css.includes('!important') &&
+		css.includes('data-mp-scc-cart-icon'),
 	'frontend.css should wire cart icon geometry vars + mobile mode'
 );
 assert.ok(
-	contract.includes('catalog.catalog_cart_icon_hit_size_px') &&
+		contract.includes('catalog.catalog_cart_icon_hit_size_px') &&
 		contract.includes('catalog.catalog_cart_icon_glyph_size_px') &&
-		contract.includes('catalog.catalog_cart_icon_transition_delay_ms'),
+		contract.includes('catalog.catalog_cart_icon_transition_delay_ms') &&
+		contract.includes('apply_catalog_cart_icon_appearance_tokens') &&
+		contract.includes('CatalogCartIconAppearance'),
 	'CssVariablesContract should map cart icon geometry to CSS variables'
 );
 

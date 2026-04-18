@@ -7,6 +7,7 @@
 
 namespace MpStickyCustomCart\Frontend;
 
+use MpStickyCustomCart\Core\CatalogCartIconPresets;
 use MpStickyCustomCart\Core\CheckoutQueryPreserve;
 use MpStickyCustomCart\Core\Constants;
 use MpStickyCustomCart\Core\FeatureFlagProvider;
@@ -141,6 +142,10 @@ final class FrontendFlagResolver {
 		if ( $cart_icon_glyph < 14 || $cart_icon_glyph > 28 ) {
 			$cart_icon_glyph = 20;
 		}
+		$cart_icon_stroke = isset( $catalog_settings['catalog_cart_icon_stroke_width'] ) ? (float) $catalog_settings['catalog_cart_icon_stroke_width'] : 1.75;
+		if ( $cart_icon_stroke < 1.0 || $cart_icon_stroke > 3.0 ) {
+			$cart_icon_stroke = 1.75;
+		}
 		$cart_icon_delay = isset( $catalog_settings['catalog_cart_icon_transition_delay_ms'] ) ? (int) $catalog_settings['catalog_cart_icon_transition_delay_ms'] : 0;
 		if ( $cart_icon_delay < 0 || $cart_icon_delay > 2000 ) {
 			$cart_icon_delay = 0;
@@ -150,6 +155,17 @@ final class FrontendFlagResolver {
 			$cart_icon_mobile_mode = 'inherit';
 		}
 
+		$cart_icon_preset = CatalogCartIconPresets::normalize(
+			isset( $catalog_settings['catalog_cart_icon_preset'] ) ? (string) $catalog_settings['catalog_cart_icon_preset'] : CatalogCartIconPresets::DEFAULT
+		);
+
+		/**
+		 * Filters the catalog loop cart icon preset slug (built-in SVG variant).
+		 *
+		 * @param string $cart_icon_preset Normalized id from {@see CatalogCartIconPresets::IDS}.
+		 */
+		$cart_icon_preset = (string) apply_filters( 'mp_sticky_custom_cart_catalog_cart_icon_preset', $cart_icon_preset );
+
 		$catalog_js = array(
 			'catalogAddSurface'        => $catalog_add_surface,
 			'catalogCartIconDesktop'   => $catalog_cart_icon_desktop,
@@ -158,8 +174,11 @@ final class FrontendFlagResolver {
 			'catalogCartIconOffsetLeftPx' => $cart_icon_off_left,
 			'catalogCartIconHitSizePx'    => $cart_icon_hit,
 			'catalogCartIconGlyphSizePx'  => $cart_icon_glyph,
+			'catalogCartIconStrokeWidth'  => $cart_icon_stroke,
 			'catalogCartIconTransitionDelayMs' => $cart_icon_delay,
 			'catalogCartIconMobileMode'   => $cart_icon_mobile_mode,
+			'catalogCartIconPreset'       => $cart_icon_preset,
+			'catalogCartIconPresetInners' => CatalogCartIconPresets::inner_templates_for_js(),
 			'imageClickBehavior'       => $image_click_behavior,
 			'imageClickSelector'       => $img_sel,
 			'cardRootSelector'         => $card_sel,

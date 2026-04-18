@@ -82,6 +82,8 @@ final class UiSettingsDefaults {
 				'catalog_cart_icon_hit_size_px'      => 36,
 				/** SVG glyph size inside the button (px). */
 				'catalog_cart_icon_glyph_size_px'    => 20,
+				/** Built-in SVG cart path stroke width (1–3, default matches previous hard-coded look). */
+				'catalog_cart_icon_stroke_width'     => 1.75,
 				/** Delay before opacity/visibility transition starts (ms). */
 				'catalog_cart_icon_transition_delay_ms' => 0,
 				/**
@@ -89,6 +91,19 @@ final class UiSettingsDefaults {
 				 * force_visible: on touch/narrow viewport always show the icon (overrides tap_reveal).
 				 */
 				'catalog_cart_icon_mobile_mode'      => 'inherit',
+				/**
+				 * Two curated looks: dark glyph on light button, or light glyph on dark button.
+				 * Legacy per-channel color keys remain for import; storefront CSS uses the preset.
+				 */
+				'catalog_cart_icon_appearance_preset' => 'black_cart_white_bg',
+				/** Fill/stroke color for the loop cart icon (SVG uses currentColor). */
+				'catalog_cart_icon_color'            => '#1a1a1a',
+				/** Button face behind the glyph (combined with alpha into rgba() on the storefront). */
+				'catalog_cart_icon_bg_color'         => '#ffffff',
+				/** 0–100, opacity of the background (100 = solid). */
+				'catalog_cart_icon_bg_alpha_percent' => 94,
+				/** Preset id from {@see \MpStickyCustomCart\Core\CatalogCartIconPresets::IDS}. */
+				'catalog_cart_icon_preset'           => 'classic',
 				'hover_overlay_mobile_always' => true,
 				'hover_animation_duration_ms'  => 220,
 				'hover_animation_easing'       => 'cubic-bezier(0.4, 0, 0.2, 1)',

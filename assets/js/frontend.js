@@ -11,6 +11,97 @@
 	};
 
 	/**
+	 * Ensures catalog cart icon CSS variables apply (missing :root block, theme CSS, cache optimizers).
+	 * Values mirror {@see mpSccData.cssVars} (same source as admin preview).
+	 */
+	function applyCatalogCartIconCssVarsFromPayload() {
+		var d = window.mpSccData;
+		if (!d || !d.cssVars || typeof d.cssVars !== 'object') {
+			return;
+		}
+		var root = document.documentElement;
+		var p = '--mp-scc-catalog-cart-icon-';
+		var k;
+		for (k in d.cssVars) {
+			if (!Object.prototype.hasOwnProperty.call(d.cssVars, k)) {
+				continue;
+			}
+			if (String(k).indexOf(p) !== 0) {
+				continue;
+			}
+			try {
+				root.style.setProperty(String(k), String(d.cssVars[k]), 'important');
+			} catch (e) {
+				root.style.setProperty(String(k), String(d.cssVars[k]));
+			}
+		}
+		stampAllCatalogCartIconButtonsFromCssVars();
+	}
+
+	function stampOneCatalogCartIconButton(btn) {
+		if (!btn || !btn.style) {
+			return;
+		}
+		var v = data().cssVars;
+		if (!v || typeof v !== 'object') {
+			return;
+		}
+		var col = v['--mp-scc-catalog-cart-icon-color'];
+		var bg = v['--mp-scc-catalog-cart-icon-background'];
+		try {
+			if (col) {
+				btn.style.setProperty('color', String(col), 'important');
+			}
+			if (bg) {
+				btn.style.setProperty('background-color', String(bg), 'important');
+			}
+			btn.style.setProperty('background-image', 'none', 'important');
+		} catch (err) {
+			if (col) {
+				btn.style.color = String(col);
+			}
+			if (bg) {
+				btn.style.backgroundColor = String(bg);
+			}
+		}
+	}
+
+	function stampAllCatalogCartIconButtonsFromCssVars() {
+		var nodes = document.querySelectorAll('button.mp-scc-catalog-cart-icon-btn');
+		var i;
+		for (i = 0; i < nodes.length; i++) {
+			stampOneCatalogCartIconButton(nodes[i]);
+		}
+	}
+
+	var __mpSccCartIconPaintHoverBound = false;
+
+	function initCatalogCartIconPaintHammer() {
+		if (__mpSccCartIconPaintHoverBound) {
+			return;
+		}
+		__mpSccCartIconPaintHoverBound = true;
+		$(document.body)
+			.on('mouseenter.mpSccCiPaint', '.mp-scc-catalog-cart-icon-btn', function () {
+				var v = data().cssVars;
+				if (!v) {
+					return;
+				}
+				var h = v['--mp-scc-catalog-cart-icon-background-hover'];
+				if (h) {
+					try {
+						this.style.setProperty('background-color', String(h), 'important');
+					} catch (e2) {
+						this.style.backgroundColor = String(h);
+					}
+				}
+			})
+			.on('mouseleave.mpSccCiPaint', '.mp-scc-catalog-cart-icon-btn', function () {
+				stampOneCatalogCartIconButton(this);
+			});
+	}
+
+	/**
 	 * @param {string} key Flag key from persisted flags / mpSccData.flags.
 	 * @returns {boolean}
 	 */
@@ -1128,12 +1219,40 @@
 			glyphPx = 28;
 		}
 
+		var presetKey = String(catalog.catalogCartIconPreset || 'classic')
+			.trim()
+			.replace(/[^a-z0-9_-]/gi, '');
+		if (!presetKey) {
+			presetKey = 'classic';
+		}
+		var presetInners = catalog.catalogCartIconPresetInners;
+		if (!presetInners || typeof presetInners !== 'object') {
+			presetInners = {};
+		}
+		var innerTpl = presetInners[presetKey] || presetInners.classic || '';
+		if (!innerTpl) {
+			innerTpl =
+				'<circle cx="9" cy="21" r="1" fill="currentColor"/><circle cx="20" cy="21" r="1" fill="currentColor"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" fill="none" stroke="currentColor" stroke-width="__MP_SCC_SW__" stroke-linecap="round" stroke-linejoin="round"/>';
+		}
+
+		var strokePx = parseFloat(catalog.catalogCartIconStrokeWidth);
+		if (isNaN(strokePx) || strokePx < 1) {
+			strokePx = 1.75;
+		}
+		if (strokePx > 3) {
+			strokePx = 3;
+		}
+		strokePx = Math.round(strokePx * 100) / 100;
+		innerTpl = String(innerTpl).split('__MP_SCC_SW__').join(String(strokePx));
+
 		var cartIconSvg =
 			'<svg class="mp-scc-catalog-cart-icon-btn__svg" xmlns="http://www.w3.org/2000/svg" width="' +
 			glyphPx +
 			'" height="' +
 			glyphPx +
-			'" viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false"><circle cx="9" cy="21" r="1" fill="currentColor"/><circle cx="20" cy="21" r="1" fill="currentColor"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+			'" viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false">' +
+			innerTpl +
+			'</svg>';
 
 		$(cardSel).each(function () {
 			var $card = $(this);
@@ -1164,14 +1283,20 @@
 			if (!$btn.length) {
 				$btn = $('<button type="button" class="mp-scc-catalog-cart-icon-btn" data-mp-scc-cart-icon="1" />');
 				$btn.attr('aria-label', label);
-				$btn.append(
-					$('<span class="mp-scc-catalog-cart-icon-btn__icon" aria-hidden="true" />').html(cartIconSvg)
-				);
+				$btn.append($('<span class="mp-scc-catalog-cart-icon-btn__icon" aria-hidden="true" />'));
 				$slot.append($btn);
 			} else {
 				$btn.attr('aria-label', label);
 			}
 
+			var $iconWrap = $btn.find('.mp-scc-catalog-cart-icon-btn__icon').first();
+			if (!$iconWrap.length) {
+				$iconWrap = $('<span class="mp-scc-catalog-cart-icon-btn__icon" aria-hidden="true" />');
+				$btn.append($iconWrap);
+			}
+			$iconWrap.empty();
+			$iconWrap.html(cartIconSvg);
+			$btn.toggleClass('mp-scc-catalog-cart-icon-btn--custom-img', false);
 			var $svg = $btn.find('.mp-scc-catalog-cart-icon-btn__svg');
 			if ($svg.length) {
 				$svg.attr({ width: glyphPx, height: glyphPx });
@@ -1180,11 +1305,14 @@
 			var btnEl = $btn.get(0);
 			if (btnEl) {
 				attachCatalogCartIconPointerGuards(btnEl);
+				stampOneCatalogCartIconButton(btnEl);
 			}
 
 			$card.addClass('mp-scc-catalog-card--cart-icon');
 			attachCatalogCardResizeSync($card);
 		});
+
+		stampAllCatalogCartIconButtonsFromCssVars();
 	}
 
 	function initCatalogCartIconHoverIntent() {
@@ -2898,6 +3026,8 @@
 	};
 
 	$(function () {
+		applyCatalogCartIconCssVarsFromPayload();
+		initCatalogCartIconPaintHammer();
 		initClientDiagnostics();
 		initWishlistIntegrationBodyClass();
 		applyCatalogCartIconMobileModeAttr();

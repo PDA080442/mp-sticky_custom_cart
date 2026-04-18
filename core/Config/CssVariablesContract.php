@@ -7,6 +7,7 @@
 
 namespace MpStickyCustomCart\Core\Config;
 
+use MpStickyCustomCart\Core\CatalogCartIconAppearance;
 use MpStickyCustomCart\Core\OptionResolver;
 
 defined( 'ABSPATH' ) || exit;
@@ -484,7 +485,95 @@ final class CssVariablesContract {
 
 		$out[ self::PREFIX . 'sticky-layout-reserve' ] = self::format_sticky_layout_reserve_px( $merged_settings );
 
+		self::apply_catalog_cart_icon_appearance_tokens( $merged_settings, $out );
+
 		return $out;
+	}
+
+	/**
+	 * Glyph color + button background from {@see CatalogCartIconAppearance} (two admin presets).
+	 *
+	 * @param array<string, mixed>    $merged_settings Merged settings tree.
+	 * @param array<string, string> $out               Output map (by ref).
+	 */
+	private static function apply_catalog_cart_icon_appearance_tokens( array $merged_settings, array &$out ) {
+		$catalog = OptionResolver::get_by_path( $merged_settings, 'catalog', array() );
+		if ( ! is_array( $catalog ) ) {
+			$catalog = array();
+		}
+		$r       = CatalogCartIconAppearance::resolve( $catalog );
+		$row     = array( 'format' => 'color' );
+		$glyph   = sanitize_hex_color( $r['glyph_hex'] );
+		$out[ self::PREFIX . 'catalog-cart-icon-color' ] = self::format_value( $glyph ? $glyph : $r['glyph_hex'], $row );
+
+		foreach ( self::build_catalog_cart_icon_background_from_hex_alpha( $r['bg_hex'], $r['bg_alpha_percent'] ) as $name => $value ) {
+			$out[ $name ] = $value;
+		}
+	}
+
+	/**
+	 * rgba() for button face + slightly lighter hover.
+	 *
+	 * @param string $bg_hex          #rrggbb
+	 * @param int    $bg_alpha_percent 0–100
+	 * @return array<string, string>
+	 */
+	private static function build_catalog_cart_icon_background_from_hex_alpha( $bg_hex, $bg_alpha_percent ) {
+		$hex = sanitize_hex_color( (string) $bg_hex );
+		if ( ! is_string( $hex ) || '' === $hex ) {
+			$hex = '#ffffff';
+		}
+		$pct = (int) $bg_alpha_percent;
+		$pct = max( 0, min( 100, $pct ) );
+		$a   = $pct / 100.0;
+
+		$stripped = strtolower( ltrim( $hex, '#' ) );
+		if ( 3 === strlen( $stripped ) && ctype_xdigit( $stripped ) ) {
+			$stripped = $stripped[0] . $stripped[0] . $stripped[1] . $stripped[1] . $stripped[2] . $stripped[2];
+		}
+		$r = 255;
+		$g = 255;
+		$b = 255;
+		if ( 6 === strlen( $stripped ) && ctype_xdigit( $stripped ) ) {
+			$r = hexdec( substr( $stripped, 0, 2 ) );
+			$g = hexdec( substr( $stripped, 2, 2 ) );
+			$b = hexdec( substr( $stripped, 4, 2 ) );
+		}
+
+		$hover_a = min( 1.0, $a + 0.06 );
+
+		return array(
+			self::PREFIX . 'catalog-cart-icon-background'       => sprintf(
+				'rgba(%d,%d,%d,%s)',
+				$r,
+				$g,
+				$b,
+				self::format_css_alpha_string( $a )
+			),
+			self::PREFIX . 'catalog-cart-icon-background-hover' => sprintf(
+				'rgba(%d,%d,%d,%s)',
+				$r,
+				$g,
+				$b,
+				self::format_css_alpha_string( $hover_a )
+			),
+		);
+	}
+
+	/**
+	 * @param float $a 0..1
+	 */
+	private static function format_css_alpha_string( $a ) {
+		$a = (float) $a;
+		if ( $a >= 1.0 ) {
+			return '1';
+		}
+		if ( $a <= 0.0 ) {
+			return '0';
+		}
+		$s = rtrim( rtrim( sprintf( '%.4f', $a ), '0' ), '.' );
+
+		return '' === $s ? '0' : $s;
 	}
 
 	/**
