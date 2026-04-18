@@ -1,0 +1,200 @@
+<?php
+/**
+ * Default values for UI-related plugin settings (admin-editable later).
+ *
+ * @package MpStickyCustomCart
+ */
+
+namespace MpStickyCustomCart\Core\Config;
+
+defined( 'ABSPATH' ) || exit;
+
+/**
+ * Shape mirrors persisted option structure under {@see \MpStickyCustomCart\Core\Constants::OPTION_SETTINGS}.
+ */
+final class UiSettingsDefaults {
+
+	/**
+	 * Sticky cart keys that belong to appearance (Styles tab). Not reset alone when resetting Cart tab behavior — Cart reset still replaces full sticky_cart.
+	 *
+	 * @return list<string>
+	 */
+	public static function get_sticky_cart_visual_keys() {
+		return array(
+			'surface_backdrop_blur_px',
+			'surface_background_alpha',
+			'border_radius_px',
+			'padding_x_desktop_px',
+			'padding_y_desktop_px',
+			'padding_x_mobile_px',
+			'padding_y_mobile_px',
+			'sticky_inner_gap_mobile_px',
+			'sticky_inner_gap_desktop_row_px',
+			'sticky_inner_gap_desktop_col_px',
+			'summary_font_size_px',
+			'summary_font_weight',
+			'summary_line_height',
+			'summary_gap_px',
+			'summary_text_gap_row_px',
+			'summary_text_gap_column_px',
+			'button_font_size_px',
+			'button_font_weight',
+			'button_line_height',
+			'actions_gap_px',
+			'clear_button_min_width_px',
+			'checkout_button_min_width_px',
+			'drawer_max_height_vh',
+			'drawer_padding_x_px',
+			'drawer_padding_y_px',
+			'drawer_surface_background_alpha',
+			'drawer_line_title_font_size_px',
+			'drawer_line_title_font_weight',
+			'drawer_line_unit_font_size_px',
+			'drawer_line_price_font_size_px',
+			'drawer_line_price_font_weight',
+		);
+	}
+
+	/**
+	 * @return array<string, mixed> Nested defaults for catalog, sticky cart, wishlist integration, motion.
+	 */
+	public static function get() {
+		return array(
+			'catalog'    => array(
+				/**
+				 * add_to_cart: перехват клика по миниатюре и AJAX (при включённом feature flag).
+				 * theme_default: не вешать обработчик — тема и ссылки Woo ведут себя как обычно.
+				 */
+				'image_click_behavior'        => 'add_to_cart',
+				'hover_overlay_mobile_always' => true,
+				'hover_animation_duration_ms'  => 220,
+				'hover_animation_easing'       => 'cubic-bezier(0.4, 0, 0.2, 1)',
+				'hover_motion_preset'          => 'fade_slide',
+				/** Vertical slide distance (px) for overlay enter/leave motion. */
+				'hover_slide_offset_px'        => 8,
+				/** Extra delay before fade-out when pointer leaves the card (reduces flicker). */
+				'hover_hide_delay_ms'          => 50,
+				/** CSS selector for delegated image clicks (shop loop); empty = built-in default. */
+				'image_click_selector'         => '',
+				/** Closest ancestor for loading/added/error states (jQuery selector). */
+				'card_root_selector'           => 'li.product',
+				/**
+				 * Standard Woo loop only: replace the default thumbnail link with one wrapper
+				 * ({@see \MpStickyCustomCart\Frontend\ShopLoopAddToCartWrapper}). Ignored by Elementor/Liquid.
+				 */
+				'wrap_loop_item_add_to_cart'   => false,
+				/** Open «Подробнее» product URL in a new browser tab (adds target + rel). */
+				'more_info_new_tab'            => false,
+				/** Stacking: «Подробнее» overlay (keep below wishlist heart). */
+				'catalog_overlay_z_index'      => 4,
+			),
+			'cart_route'  => array(
+				/** When true, requests to the WooCommerce cart page redirect to the site front (sticky-only UX). */
+				'redirect_to_home'     => false,
+				/** HTTP status for the redirect (301 permanent, 302/303/307 temporary). */
+				'redirect_status_code' => 302,
+				/** Write redirect lines to the PHP debug log (wp-content/debug.log when WP_DEBUG_LOG). */
+				'log_redirect_events'  => false,
+				/** Append UTM / click ids from the current cart URL onto the redirect target (not add-to-cart params). */
+				'preserve_marketing_params_on_redirect' => true,
+				/** Increment {@see Constants::OPTION_EXTERNAL_CART_LINK_HITS} when cart URL contained add-to-cart. */
+				'track_external_cart_link_hits'         => false,
+			),
+			'sticky_cart' => array(
+				'z_index'                    => 100050,
+				'surface_backdrop_blur_px'   => 14,
+				'surface_background_alpha'   => 0.78,
+				'border_radius_px'           => 14,
+				'padding_x_desktop_px'       => 20,
+				'padding_y_desktop_px'       => 14,
+				'padding_x_mobile_px'        => 14,
+				'padding_y_mobile_px'        => 12,
+				'drawer_max_height_vh'       => 55,
+				'drawer_padding_x_px'        => 16,
+				'drawer_padding_y_px'        => 12,
+				/** Drawer panel surface (independent from bottom bar when customized). */
+				'drawer_surface_background_alpha' => 0.94,
+				'drawer_line_title_font_size_px'   => 15,
+				'drawer_line_title_font_weight'    => 500,
+				'drawer_line_unit_font_size_px'    => 13,
+				'drawer_line_price_font_size_px'   => 15,
+				'drawer_line_price_font_weight'    => 600,
+				'drawer_toggle_duration_ms'  => 260,
+				'drawer_toggle_easing'       => 'cubic-bezier(0.4, 0, 0.2, 1)',
+				'quantity_debounce_ms'       => 320,
+				'summary_font_size_px'       => 15,
+				'summary_font_weight'        => 600,
+				/** Unitless line-height for summary (count + total). */
+				'summary_line_height'        => 1.35,
+				'summary_gap_px'             => 10,
+				'summary_text_gap_row_px'    => 12,
+				'summary_text_gap_column_px' => 20,
+				'button_font_size_px'        => 14,
+				'button_font_weight'         => 600,
+				/** Unitless line-height for sticky action buttons. */
+				'button_line_height'         => 1.2,
+				'actions_gap_px'             => 10,
+				'clear_button_min_width_px'  => 0,
+				'checkout_button_min_width_px' => 0,
+				'sticky_inner_gap_mobile_px' => 10,
+				'sticky_inner_gap_desktop_row_px' => 16,
+				'sticky_inner_gap_desktop_col_px' => 24,
+			),
+			'wishlist_ui' => array(
+				'heart_reserve_top_px'       => 10,
+				'heart_reserve_right_px'     => 10,
+				'overlay_clearance_heart_px' => 8,
+				/** Stacking: wishlist control above catalog overlay. */
+				'heart_icon_z_index'         => 6,
+			),
+			'styles'      => array(
+				'color_text_primary'        => '#1a1a1a',
+				'color_surface_tint'        => '#ffffff',
+				'color_drawer_surface_tint' => '#ffffff',
+				'color_clear_button_text'   => '#1a1a1a',
+				'color_clear_button_text_hover' => '#1a1a1a',
+				'color_clear_button_border' => '#cfcfcf',
+				'color_clear_button_border_hover' => '#b0b0b0',
+				'color_clear_button_bg'     => '#ffffff',
+				'color_clear_button_bg_hover' => '#f0f0f0',
+				'color_qty_button_bg'       => '#ffffff',
+				'color_qty_button_bg_hover' => '#ececec',
+				'color_qty_button_border'   => '#cccccc',
+				'color_qty_button_border_hover' => '#9a9a9a',
+				'color_qty_button_text'     => '#1a1a1a',
+				'color_qty_button_text_hover' => '#1a1a1a',
+				'color_drawer_line_title'   => '#1a1a1a',
+				'color_drawer_line_unit'    => '#5c5c5c',
+				'color_drawer_line_price'   => '#1a1a1a',
+				'color_button_primary'      => '#111111',
+				'color_button_primary_text' => '#ffffff',
+				'color_button_primary_hover' => '#333333',
+				'color_button_primary_text_hover' => '#ffffff',
+				/** inherit | system | serif | mono | custom */
+				'font_family_preset'        => 'inherit',
+				/** Used when preset is custom; CSS font-family stack. */
+				'font_family_custom'        => '',
+				/** Scales summary + button font sizes on the sticky bar (70–130%). */
+				'typography_scale_percent'  => 100,
+			),
+			'diagnostics' => array(
+				'client_error_logging' => true,
+				'log_retention_days'   => 14,
+				/** Max rows kept after time-based prune (cap). */
+				'log_max_entries'      => 300,
+				/** Max serialized size of the log option (bytes); oldest rows dropped first. */
+				'log_max_bytes'        => 262144,
+			),
+			'notices'     => array(
+				/** Strip the "View cart" anchor from WooCommerce add-to-cart success HTML (sticky replaces cart UX). */
+				'remove_view_cart_link' => true,
+			),
+		);
+	}
+
+	/**
+	 * Not instantiable.
+	 */
+	private function __construct() {
+	}
+}

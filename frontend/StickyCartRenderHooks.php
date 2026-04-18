@@ -1,0 +1,55 @@
+<?php
+/**
+ * Output hooks for the sticky cart markup.
+ *
+ * @package MpStickyCustomCart
+ */
+
+namespace MpStickyCustomCart\Frontend;
+
+defined( 'ABSPATH' ) || exit;
+
+/**
+ * Registers footer/body hooks for the sticky shell (markup added in renderer task).
+ */
+final class StickyCartRenderHooks {
+
+	public static function register() {
+		add_filter( 'body_class', array( self::class, 'body_class' ), 20 );
+		add_action( 'wp_footer', array( self::class, 'render_placeholder' ), 50 );
+
+		/**
+		 * Fires when sticky cart render hooks are registered.
+		 */
+		do_action( 'mp_sticky_custom_cart_sticky_render_hooks_registered' );
+	}
+
+	/**
+	 * Marks the document when the sticky bar is active (layout reserve, QA hooks).
+	 *
+	 * @param string[] $classes Body classes.
+	 * @return string[]
+	 */
+	public static function body_class( array $classes ) {
+		if ( StickyCartVisibility::should_render_sticky() ) {
+			$classes[] = 'mp-scc-sticky-active';
+		}
+		return $classes;
+	}
+
+	/**
+	 * Stub output location; replaced by {@see StickyCartRendererInterface} implementation.
+	 */
+	public static function render_placeholder() {
+		/**
+		 * Fires where the sticky cart root should be printed.
+		 */
+		do_action( 'mp_sticky_custom_cart_render_sticky_cart' );
+	}
+
+	/**
+	 * Not instantiable.
+	 */
+	private function __construct() {
+	}
+}
