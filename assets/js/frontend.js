@@ -164,6 +164,27 @@
 		return false;
 	}
 
+	/**
+	 * Errors from other scripts on the page (often WooCommerce Blocks) — not actionable for this plugin.
+	 * @param {string} message
+	 * @returns {boolean}
+	 */
+	function shouldSuppressClientGlobalErrorMessage(message) {
+		var m = String(message || '');
+		if (!m) {
+			return false;
+		}
+		// WooCommerce: wcSettings / data store not ready — common, usually harmless.
+		if (m.indexOf("reading 'setSettings'") !== -1 || m.indexOf('reading "setSettings"') !== -1) {
+			return true;
+		}
+		// Theme / inline preloader: missing DOM node (e.g. hidePreloader) — not from this plugin.
+		if (/Cannot read properties of null \(reading ['"]style['"]\)/.test(m)) {
+			return true;
+		}
+		return false;
+	}
+
 	window.mpScc.queueClientDiagnostic = function (row) {
 		if (!data().clientLogging) {
 			return;
@@ -305,6 +326,10 @@
 			if (!data().clientLogging || clientDiagReporting) {
 				return false;
 			}
+			var msgStr = String(message || '');
+			if (shouldSuppressClientGlobalErrorMessage(msgStr)) {
+				return false;
+			}
 			var detail =
 				String(source || '') +
 				':' +
@@ -317,7 +342,7 @@
 			window.mpScc.queueClientDiagnostic({
 				event: 'js_error',
 				level: 'error',
-				message: String(message || '').slice(0, 500),
+				message: msgStr.slice(0, 500),
 				detail: detail.slice(0, 500)
 			});
 			return false;
@@ -334,6 +359,9 @@
 					r && typeof r === 'object' && r.message
 						? String(r.message)
 						: String(r);
+				if (shouldSuppressClientGlobalErrorMessage(msg)) {
+					return;
+				}
 				window.mpScc.queueClientDiagnostic({
 					event: 'unhandledrejection',
 					level: 'error',
