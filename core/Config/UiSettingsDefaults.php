@@ -71,6 +71,10 @@ final class UiSettingsDefaults {
 				 * cart_icon: кнопка-иконка корзины на карточке (тот же AJAX endpoint).
 				 */
 				'catalog_add_surface'         => 'image_click',
+				/** Desktop: hover = show icon on card hover; always = always visible. */
+				'catalog_cart_icon_desktop'   => 'hover',
+				/** Touch: always = visible; tap_reveal = show after first tap on card (non-link). */
+				'catalog_cart_icon_touch'     => 'always',
 				'hover_overlay_mobile_always' => true,
 				'hover_animation_duration_ms'  => 220,
 				'hover_animation_easing'       => 'cubic-bezier(0.4, 0, 0.2, 1)',

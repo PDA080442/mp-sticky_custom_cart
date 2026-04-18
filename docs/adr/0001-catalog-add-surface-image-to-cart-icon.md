@@ -31,5 +31,6 @@ The AJAX endpoint and server-side validation stay unchanged; only the **storefro
 ## References
 
 - `assets/js/frontend.js` — `initCatalogCartIconLayer`, `handleCatalogCartIconClick`, `initCatalogImageAddToCart`, `executeCatalogLoopAddSimpleAjax`
-- `frontend/FrontendFlagResolver.php` — `catalogAddSurface`
+- `frontend/ShopLoopCartIconHost.php` — optional empty slot in the standard Woo loop (`woocommerce_before_shop_loop_item`, filter `mp_sticky_custom_cart_print_catalog_cart_icon_host`)
+- `frontend/FrontendFlagResolver.php` — `catalogAddSurface`, `catalogCartIconDesktop`, `catalogCartIconTouch`
 - `docs/catalog-loop-add-baseline.md` — behavior matrix

@@ -427,6 +427,40 @@ final class SettingsPage {
 			),
 			__( 'Один и тот же AJAX endpoint. В режиме иконки клик по картинке не перехватывается плагином — ведите пользователя на карточку темы или по ссылке.', 'mp-sticky-custom-cart' )
 		);
+		if ( 'cart_icon' === $surface ) {
+			$icon_desk = isset( $c['catalog_cart_icon_desktop'] ) ? (string) $c['catalog_cart_icon_desktop'] : 'hover';
+			if ( ! in_array( $icon_desk, array( 'hover', 'always' ), true ) ) {
+				$icon_desk = 'hover';
+			}
+			$icon_touch = isset( $c['catalog_cart_icon_touch'] ) ? (string) $c['catalog_cart_icon_touch'] : 'always';
+			if ( ! in_array( $icon_touch, array( 'always', 'tap_reveal' ), true ) ) {
+				$icon_touch = 'always';
+			}
+			self::field_select(
+				$opt,
+				'catalog',
+				'catalog_cart_icon_desktop',
+				__( 'Иконка корзины: десктоп', 'mp-sticky-custom-cart' ),
+				$icon_desk,
+				array(
+					'hover'   => __( 'Показывать при наведении на карточку', 'mp-sticky-custom-cart' ),
+					'always'  => __( 'Всегда видна', 'mp-sticky-custom-cart' ),
+				),
+				__( 'На широкой витрине без coarse pointer. Фокус клавиатуры на карточке тоже открывает иконку (focus-within).', 'mp-sticky-custom-cart' )
+			);
+			self::field_select(
+				$opt,
+				'catalog',
+				'catalog_cart_icon_touch',
+				__( 'Иконка корзины: тач / узкий экран', 'mp-sticky-custom-cart' ),
+				$icon_touch,
+				array(
+					'always'     => __( 'Всегда видна', 'mp-sticky-custom-cart' ),
+					'tap_reveal' => __( 'Показать после тапа по карточке (не по ссылке/кнопке)', 'mp-sticky-custom-cart' ),
+				),
+				__( 'Срабатывает при max-width 768px или pointer: coarse. Тап по ссылке на товар не открывает иконку.', 'mp-sticky-custom-cart' )
+			);
+		}
 		self::field_select(
 			$opt,
 			'catalog',

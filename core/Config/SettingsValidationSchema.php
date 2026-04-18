@@ -30,6 +30,14 @@ final class SettingsValidationSchema {
 					'type'  => 'text',
 					'oneof' => array( 'image_click', 'cart_icon' ),
 				),
+				'catalog_cart_icon_desktop'   => array(
+					'type'  => 'text',
+					'oneof' => array( 'hover', 'always' ),
+				),
+				'catalog_cart_icon_touch'     => array(
+					'type'  => 'text',
+					'oneof' => array( 'always', 'tap_reveal' ),
+				),
 				'hover_overlay_mobile_always' => array(
 					'type' => 'boolean',
 				),
