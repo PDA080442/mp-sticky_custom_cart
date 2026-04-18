@@ -95,42 +95,49 @@ final class StickyCartRenderer implements StickyCartRendererInterface {
 						<span class="mp-scc-cart-total mp-scc-shell-panel-b__subtotal" data-mp-scc-cart-total><?php echo wp_kses_post( $total ); ?></span>
 					</div>
 				</div>
-				<div class="mp-scc-shell-panel-b__actions" role="toolbar" aria-orientation="horizontal" aria-label="<?php esc_attr_e( 'Cart actions', 'mp-sticky-custom-cart' ); ?>">
-					<button type="button" class="mp-scc-btn mp-scc-btn--ghost mp-scc-shell-panel-b__icon-btn mp-scc-clear-cart<?php echo $empty ? ' mp-scc-clear-cart--disabled' : ''; ?>"
-						data-mp-scc-clear-cart
-						data-mp-scc-clear-aria-disabled="<?php echo esc_attr( $clear_aria_unavailable ); ?>"
-						<?php if ( $empty ) : ?>
-						disabled
-						aria-disabled="true"
-						aria-label="<?php echo esc_attr( $clear_aria_unavailable ); ?>"
-						<?php else : ?>
-						aria-label="<?php echo esc_attr( $clear_label ); ?>"
-						<?php endif; ?>
-					>
-						<span class="mp-scc-shell-panel-b__icon-svg" aria-hidden="true"><?php echo self::inline_svg_trash_icon(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></span>
-					</button>
-					<a class="mp-scc-btn mp-scc-btn--primary mp-scc-shell-panel-b__icon-btn mp-scc-checkout<?php echo $empty ? ' mp-scc-checkout--disabled' : ''; ?>"
-						href="<?php echo $empty ? '#' : esc_url( $checkout_url ); ?>"
-						data-mp-scc-checkout
-						data-mp-scc-checkout-base="<?php echo esc_url( $checkout_base ); ?>"
-						data-mp-scc-checkout-aria-disabled="<?php echo esc_attr( $checkout_aria_unavailable ); ?>"
-						<?php if ( $empty ) : ?>
-						aria-disabled="true"
-						tabindex="-1"
-						aria-label="<?php echo esc_attr( $checkout_aria_unavailable ); ?>"
-						<?php else : ?>
-						aria-label="<?php echo esc_attr( $checkout_label ); ?>"
-						<?php endif; ?>
-					>
-						<span class="mp-scc-shell-panel-b__icon-svg" aria-hidden="true"><?php echo self::inline_svg_cart_icon(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></span>
-					</a>
-				</div>
+				<?php
+				echo self::tristate_icon_actions_toolbar_markup( // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+					$empty,
+					$checkout_url,
+					$checkout_base,
+					$clear_label,
+					$clear_aria_unavailable,
+					$checkout_label,
+					$checkout_aria_unavailable
+				);
+				?>
 			</div>
 		</div>
 		<?php endif; ?>
 		<?php if ( $drawer ) : ?>
-		<div id="mp-scc-drawer" class="mp-scc-drawer<?php echo $empty ? ' mp-scc-drawer--empty' : ''; ?>" role="region" aria-labelledby="mp-scc-drawer-toggle" hidden data-mp-scc-drawer>
+		<div id="mp-scc-drawer" class="mp-scc-drawer<?php echo $empty ? ' mp-scc-drawer--empty' : ''; ?><?php echo $tristate ? ' mp-scc-drawer--tristate-c' : ''; ?>" role="region" aria-labelledby="mp-scc-drawer-toggle" hidden data-mp-scc-drawer>
 			<div class="mp-scc-drawer-inner<?php echo $empty ? ' mp-scc-drawer-inner--empty' : ''; ?>">
+				<?php if ( $tristate ) : ?>
+				<div class="mp-scc-drawer-c" data-mp-scc-drawer-tristate-c>
+					<?php echo self::tristate_drawer_c_metrics_markup( $line_count, $total ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+					<div class="mp-scc-drawer-c__scroll" data-mp-scc-drawer-lines-scroll>
+						<ul id="mp-scc-drawer-items" class="mp-scc-drawer-items" aria-label="<?php esc_attr_e( 'Products in cart', 'mp-sticky-custom-cart' ); ?>" data-mp-scc-drawer-items<?php echo $empty ? ' hidden aria-hidden="true"' : ''; ?>></ul>
+						<div id="mp-scc-drawer-empty" class="mp-scc-drawer-empty" role="status"<?php echo $empty ? '' : ' hidden'; ?> data-mp-scc-drawer-empty>
+							<div class="mp-scc-drawer-empty-visual" aria-hidden="true">
+								<span class="mp-scc-drawer-empty-icon"></span>
+							</div>
+							<p class="mp-scc-drawer-empty-title"><?php echo esc_html( OptionResolver::get_label( UiLabelsDefaults::KEY_DRAWER_EMPTY ) ); ?></p>
+							<p class="mp-scc-drawer-empty-hint"<?php echo '' === $drawer_empty_hint_trim ? ' hidden' : ''; ?>><?php echo esc_html( $drawer_empty_hint ); ?></p>
+						</div>
+					</div>
+					<?php
+					echo self::tristate_icon_actions_toolbar_markup( // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+						$empty,
+						$checkout_url,
+						$checkout_base,
+						$clear_label,
+						$clear_aria_unavailable,
+						$checkout_label,
+						$checkout_aria_unavailable
+					);
+					?>
+				</div>
+				<?php else : ?>
 				<ul id="mp-scc-drawer-items" class="mp-scc-drawer-items" aria-label="<?php esc_attr_e( 'Products in cart', 'mp-sticky-custom-cart' ); ?>" data-mp-scc-drawer-items<?php echo $empty ? ' hidden aria-hidden="true"' : ''; ?>></ul>
 				<div id="mp-scc-drawer-empty" class="mp-scc-drawer-empty" role="status"<?php echo $empty ? '' : ' hidden'; ?> data-mp-scc-drawer-empty>
 					<div class="mp-scc-drawer-empty-visual" aria-hidden="true">
@@ -139,6 +146,7 @@ final class StickyCartRenderer implements StickyCartRendererInterface {
 					<p class="mp-scc-drawer-empty-title"><?php echo esc_html( OptionResolver::get_label( UiLabelsDefaults::KEY_DRAWER_EMPTY ) ); ?></p>
 					<p class="mp-scc-drawer-empty-hint"<?php echo '' === $drawer_empty_hint_trim ? ' hidden' : ''; ?>><?php echo esc_html( $drawer_empty_hint ); ?></p>
 				</div>
+				<?php endif; ?>
 			</div>
 		</div>
 		<?php endif; ?>
@@ -199,6 +207,87 @@ final class StickyCartRenderer implements StickyCartRendererInterface {
 		);
 
 		return (string) apply_filters( 'mp_sticky_custom_cart_sticky_cart_html', $html, $context );
+	}
+
+	/**
+	 * Metrics header for tri-state drawer C (same figures as panel B; dp §17.4).
+	 *
+	 * @param int    $line_count Number of cart lines.
+	 * @param string $total      Subtotal HTML.
+	 */
+	private static function tristate_drawer_c_metrics_markup( $line_count, $total ) {
+		ob_start();
+		?>
+		<div class="mp-scc-drawer-c__metrics" aria-live="polite" aria-atomic="true">
+			<div class="mp-scc-drawer-c__row mp-scc-drawer-c__row--lines">
+				<span class="mp-scc-drawer-c__label"><?php esc_html_e( 'Позиций', 'mp-sticky-custom-cart' ); ?></span>
+				<span class="mp-scc-cart-count mp-scc-drawer-c__value" data-mp-scc-cart-count><?php echo esc_html( (string) $line_count ); ?></span>
+			</div>
+			<div class="mp-scc-drawer-c__row mp-scc-drawer-c__row--total">
+				<span class="mp-scc-drawer-c__label"><?php esc_html_e( 'Сумма', 'mp-sticky-custom-cart' ); ?></span>
+				<span class="mp-scc-cart-total mp-scc-drawer-c__subtotal" data-mp-scc-cart-total><?php echo wp_kses_post( $total ); ?></span>
+			</div>
+		</div>
+		<?php
+		return (string) ob_get_clean();
+	}
+
+	/**
+	 * Icon-only clear + checkout toolbar (shared by panel B and drawer C; same title/aria-label, dp §17.4).
+	 *
+	 * @param bool   $empty                   Whether cart is empty.
+	 * @param string $checkout_url            Checkout URL or #.
+	 * @param string $checkout_base           Base checkout URL.
+	 * @param string $clear_label             Clear button label.
+	 * @param string $clear_aria_unavailable  Aria when clear disabled.
+	 * @param string $checkout_label          Checkout label.
+	 * @param string $checkout_aria_unavailable Aria when checkout disabled.
+	 */
+	private static function tristate_icon_actions_toolbar_markup(
+		$empty,
+		$checkout_url,
+		$checkout_base,
+		$clear_label,
+		$clear_aria_unavailable,
+		$checkout_label,
+		$checkout_aria_unavailable
+	) {
+		ob_start();
+		?>
+		<div class="mp-scc-shell-panel-b__actions" role="toolbar" aria-orientation="horizontal" aria-label="<?php esc_attr_e( 'Cart actions', 'mp-sticky-custom-cart' ); ?>">
+			<button type="button" class="mp-scc-btn mp-scc-btn--ghost mp-scc-shell-panel-b__icon-btn mp-scc-clear-cart<?php echo $empty ? ' mp-scc-clear-cart--disabled' : ''; ?>"
+				data-mp-scc-clear-cart
+				data-mp-scc-clear-aria-disabled="<?php echo esc_attr( $clear_aria_unavailable ); ?>"
+				title="<?php echo esc_attr( $empty ? $clear_aria_unavailable : $clear_label ); ?>"
+				<?php if ( $empty ) : ?>
+				disabled
+				aria-disabled="true"
+				aria-label="<?php echo esc_attr( $clear_aria_unavailable ); ?>"
+				<?php else : ?>
+				aria-label="<?php echo esc_attr( $clear_label ); ?>"
+				<?php endif; ?>
+			>
+				<span class="mp-scc-shell-panel-b__icon-svg" aria-hidden="true"><?php echo self::inline_svg_trash_icon(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></span>
+			</button>
+			<a class="mp-scc-btn mp-scc-btn--primary mp-scc-shell-panel-b__icon-btn mp-scc-checkout<?php echo $empty ? ' mp-scc-checkout--disabled' : ''; ?>"
+				href="<?php echo $empty ? '#' : esc_url( $checkout_url ); ?>"
+				data-mp-scc-checkout
+				data-mp-scc-checkout-base="<?php echo esc_url( $checkout_base ); ?>"
+				data-mp-scc-checkout-aria-disabled="<?php echo esc_attr( $checkout_aria_unavailable ); ?>"
+				title="<?php echo esc_attr( $empty ? $checkout_aria_unavailable : $checkout_label ); ?>"
+				<?php if ( $empty ) : ?>
+				aria-disabled="true"
+				tabindex="-1"
+				aria-label="<?php echo esc_attr( $checkout_aria_unavailable ); ?>"
+				<?php else : ?>
+				aria-label="<?php echo esc_attr( $checkout_label ); ?>"
+				<?php endif; ?>
+			>
+				<span class="mp-scc-shell-panel-b__icon-svg" aria-hidden="true"><?php echo self::inline_svg_cart_icon(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></span>
+			</a>
+		</div>
+		<?php
+		return (string) ob_get_clean();
 	}
 
 	/**

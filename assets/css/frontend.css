@@ -171,16 +171,98 @@ body.mp-scc-sticky-active.mp-scc-sticky-layout-tristate {
 	border: 0;
 }
 
-.mp-scc-sticky-bar.mp-scc-sticky--tristate .mp-scc-drawer {
+/* Drawer C (tri-state): same vertical budget as panel B, wider column expanding leftward (dp §17.4). */
+.mp-scc-sticky-bar.mp-scc-sticky--tristate .mp-scc-drawer.mp-scc-drawer--tristate-c {
 	left: auto;
 	right: 0;
 	z-index: 6;
-	width: min(
-		calc(100vw - max(24px, env(safe-area-inset-left, 0px) + env(safe-area-inset-right, 0px))),
-		420px
-	);
-	max-width: min(92vw, 420px);
 	align-self: flex-end;
+	box-sizing: border-box;
+	width: min(
+		var(--mp-scc-tristate-panel-c-width, 400px),
+		calc(100vw - max(24px, env(safe-area-inset-left, 0px) + env(safe-area-inset-right, 0px)))
+	);
+	max-width: min(92vw, var(--mp-scc-tristate-panel-c-width, 400px));
+	max-height: var(--mp-scc-tristate-panel-b-max-height, 200px);
+	height: var(--mp-scc-tristate-panel-b-max-height, 200px);
+	margin-bottom: var(--mp-scc-tristate-panel-b-gap-bottom, 10px);
+	padding: var(--mp-scc-tristate-panel-b-padding, 12px);
+	overflow: hidden;
+	border-radius: var(--mp-scc-tristate-panel-b-border-radius, 12px) var(--mp-scc-tristate-panel-b-border-radius, 12px) 0 0;
+	display: flex;
+	flex-direction: column;
+}
+
+.mp-scc-sticky-bar.mp-scc-sticky--tristate .mp-scc-drawer.mp-scc-drawer--tristate-c .mp-scc-drawer-inner {
+	flex: 1 1 auto;
+	min-height: 0;
+	max-height: 100%;
+	height: 100%;
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+}
+
+.mp-scc-drawer-c {
+	display: flex;
+	flex-direction: column;
+	flex: 1 1 auto;
+	min-height: 0;
+	max-height: 100%;
+	gap: 8px;
+}
+
+.mp-scc-drawer-c__metrics {
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+	flex: 0 0 auto;
+	min-width: 0;
+}
+
+.mp-scc-drawer-c__row {
+	display: flex;
+	align-items: baseline;
+	justify-content: space-between;
+	gap: 8px;
+	min-width: 0;
+}
+
+.mp-scc-drawer-c__label {
+	flex: 0 0 auto;
+	font-size: calc(var(--mp-scc-sticky-summary-font-size, 15px) * 0.88);
+	font-weight: 500;
+	opacity: 0.88;
+}
+
+.mp-scc-drawer-c__value {
+	font-size: var(--mp-scc-sticky-summary-font-size, 15px);
+	font-weight: var(--mp-scc-sticky-summary-font-weight, 600);
+	font-variant-numeric: tabular-nums;
+}
+
+.mp-scc-drawer-c__row--total .mp-scc-drawer-c__subtotal {
+	flex: 1 1 auto;
+	min-width: 0;
+	text-align: right;
+	font-size: var(--mp-scc-sticky-summary-font-size, 15px);
+	font-weight: var(--mp-scc-sticky-summary-font-weight, 600);
+	font-variant-numeric: tabular-nums;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.mp-scc-drawer-c__subtotal .woocommerce-Price-amount {
+	white-space: nowrap;
+}
+
+.mp-scc-drawer-c__scroll {
+	flex: 1 1 auto;
+	min-height: 0;
+	overflow-x: hidden;
+	overflow-y: auto;
+	-webkit-overflow-scrolling: touch;
 }
 
 @media (min-width: 783px) {
@@ -188,11 +270,6 @@ body.mp-scc-sticky-active.mp-scc-sticky-layout-tristate {
 		padding-right: max(16px, env(safe-area-inset-right, 0px));
 		padding-bottom: max(14px, env(safe-area-inset-bottom, 0px));
 		padding-left: max(16px, env(safe-area-inset-left, 0px));
-	}
-
-	.mp-scc-sticky-bar.mp-scc-sticky--tristate .mp-scc-drawer {
-		padding-left: var(--mp-scc-sticky-drawer-padding-x, 16px);
-		padding-right: var(--mp-scc-sticky-drawer-padding-x, 16px);
 	}
 }
 
