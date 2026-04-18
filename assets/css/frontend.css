@@ -22,6 +22,10 @@
 /* -------------------------------------------------------------------------
    1) Fixed bottom shell + 2) safe-area (iOS notch / home indicator)
    ------------------------------------------------------------------------- */
+html[data-mp-scc-cart-shell-elevated="1"] .mp-scc-sticky-bar {
+	z-index: calc(var(--mp-scc-sticky-z-index, 99999) + var(--mp-scc-cart-shell-z-boost, 0));
+}
+
 .mp-scc-sticky-bar {
 	position: fixed;
 	z-index: var(--mp-scc-sticky-z-index, 99999);

@@ -2244,9 +2244,11 @@
 		}
 		if (open) {
 			drawer.removeAttribute('hidden');
+			drawer.setAttribute('aria-modal', 'true');
 			toggle.setAttribute('aria-expanded', 'true');
 		} else {
 			drawer.setAttribute('hidden', '');
+			drawer.removeAttribute('aria-modal');
 			toggle.setAttribute('aria-expanded', 'false');
 		}
 	};
@@ -2481,6 +2483,10 @@
 		this.$root.toggleClass('mp-scc-sticky--empty', !!empty);
 
 		this.syncStickyActions(empty);
+
+		if (this.cartUiShell && typeof this.cartUiShell.onStickyPayloadApplied === 'function') {
+			this.cartUiShell.onStickyPayloadApplied({ empty: empty });
+		}
 	};
 
 	/**
@@ -2916,6 +2922,10 @@
 		var self = this;
 
 		this.$toggle.on('click', function () {
+			if (self.cartUiShell && window.mpSccCartUiShell && window.mpSccCartUiShell.ACTION) {
+				self.cartUiShell.dispatch(window.mpSccCartUiShell.ACTION.TOGGLE_C);
+				return;
+			}
 			self.toggleDrawer();
 		});
 
@@ -3064,6 +3074,9 @@
 		if ($root.length) {
 			try {
 				var sticky = new StickyCartController($root[0]);
+				if (window.mpSccCartUiShell && typeof window.mpSccCartUiShell.attachSticky === 'function') {
+					window.mpSccCartUiShell.attachSticky(sticky);
+				}
 				sticky.init();
 				window.mpScc.sticky = sticky;
 			} catch (e) {
