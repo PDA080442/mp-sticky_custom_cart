@@ -38,6 +38,22 @@ This document fixes **expected behavior** for QA and migrations. Server: WooComm
 - **Stacking**: slot `z-index` is `catalog_overlay_z_index + 1`; with wishlist integration, `wishlist_icon_z_index - 1` so the heart stays above.
 - **Pointer guards**: `mousedown` / `touchstart` on the icon use capture `stopPropagation` so the click is not handled as a thumbnail/navigation hit.
 
+## Cart icon geometry (offsets, hit zone, glyph, delay)
+
+| Setting | Effect |
+|---------|--------|
+| `catalog_cart_icon_offset_top_px` / `catalog_cart_icon_offset_left_px` | Inline `top` / `left` on the icon slot (px, clamped in PHP). |
+| `catalog_cart_icon_hit_size_px` | Slot width/height (clickable zone); exposed as `--mp-scc-catalog-cart-icon-hit-size`. |
+| `catalog_cart_icon_glyph_size_px` | SVG glyph size; `--mp-scc-catalog-cart-icon-glyph-size`. |
+| `catalog_cart_icon_transition_delay_ms` | `transition-delay` on the slot; `--mp-scc-catalog-cart-icon-transition-delay`. |
+
+## Mobile mode (`catalog_cart_icon_mobile_mode`)
+
+| Value | Effect |
+|-------|--------|
+| `inherit` | Touch/narrow rules follow `catalog_cart_icon_touch` (e.g. `tap_reveal`) as usual. |
+| `force_visible` | On narrow viewports / coarse pointer, the icon slot stays visible regardless of `tap_reveal` (attribute `data-mp-scc-cart-icon-mobile-mode` on `<html>`). |
+
 ## Telemetry (optional)
 
 When **Diagnostics → client logging** is enabled, successful loop adds may log `catalog_loop_add_success` with `detail` containing `surface=image|cart_icon|atc_hit`. Stock guardrails may log `catalog_image_out_of_stock` with `context` describing the path.

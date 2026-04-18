@@ -125,10 +125,41 @@ final class FrontendFlagResolver {
 			$catalog_cart_icon_touch = 'always';
 		}
 
+		$cart_icon_off_top = isset( $catalog_settings['catalog_cart_icon_offset_top_px'] ) ? (int) $catalog_settings['catalog_cart_icon_offset_top_px'] : 8;
+		if ( $cart_icon_off_top < 0 || $cart_icon_off_top > 64 ) {
+			$cart_icon_off_top = 8;
+		}
+		$cart_icon_off_left = isset( $catalog_settings['catalog_cart_icon_offset_left_px'] ) ? (int) $catalog_settings['catalog_cart_icon_offset_left_px'] : 8;
+		if ( $cart_icon_off_left < 0 || $cart_icon_off_left > 64 ) {
+			$cart_icon_off_left = 8;
+		}
+		$cart_icon_hit = isset( $catalog_settings['catalog_cart_icon_hit_size_px'] ) ? (int) $catalog_settings['catalog_cart_icon_hit_size_px'] : 36;
+		if ( $cart_icon_hit < 28 || $cart_icon_hit > 56 ) {
+			$cart_icon_hit = 36;
+		}
+		$cart_icon_glyph = isset( $catalog_settings['catalog_cart_icon_glyph_size_px'] ) ? (int) $catalog_settings['catalog_cart_icon_glyph_size_px'] : 20;
+		if ( $cart_icon_glyph < 14 || $cart_icon_glyph > 28 ) {
+			$cart_icon_glyph = 20;
+		}
+		$cart_icon_delay = isset( $catalog_settings['catalog_cart_icon_transition_delay_ms'] ) ? (int) $catalog_settings['catalog_cart_icon_transition_delay_ms'] : 0;
+		if ( $cart_icon_delay < 0 || $cart_icon_delay > 2000 ) {
+			$cart_icon_delay = 0;
+		}
+		$cart_icon_mobile_mode = isset( $catalog_settings['catalog_cart_icon_mobile_mode'] ) ? (string) $catalog_settings['catalog_cart_icon_mobile_mode'] : 'inherit';
+		if ( ! in_array( $cart_icon_mobile_mode, array( 'inherit', 'force_visible' ), true ) ) {
+			$cart_icon_mobile_mode = 'inherit';
+		}
+
 		$catalog_js = array(
 			'catalogAddSurface'        => $catalog_add_surface,
 			'catalogCartIconDesktop'   => $catalog_cart_icon_desktop,
 			'catalogCartIconTouch'     => $catalog_cart_icon_touch,
+			'catalogCartIconOffsetTopPx'  => $cart_icon_off_top,
+			'catalogCartIconOffsetLeftPx' => $cart_icon_off_left,
+			'catalogCartIconHitSizePx'    => $cart_icon_hit,
+			'catalogCartIconGlyphSizePx'  => $cart_icon_glyph,
+			'catalogCartIconTransitionDelayMs' => $cart_icon_delay,
+			'catalogCartIconMobileMode'   => $cart_icon_mobile_mode,
 			'imageClickBehavior'       => $image_click_behavior,
 			'imageClickSelector'       => $img_sel,
 			'cardRootSelector'         => $card_sel,
