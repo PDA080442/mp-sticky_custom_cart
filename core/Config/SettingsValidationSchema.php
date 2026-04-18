@@ -194,6 +194,12 @@ final class SettingsValidationSchema {
 				'sticky_inner_gap_mobile_px' => array( 'type' => 'integer', 'min' => 0, 'max' => 48 ),
 				'sticky_inner_gap_desktop_row_px' => array( 'type' => 'integer', 'min' => 0, 'max' => 64 ),
 				'sticky_inner_gap_desktop_col_px' => array( 'type' => 'integer', 'min' => 0, 'max' => 96 ),
+				'tristate_panel_b_max_height_px'     => array( 'type' => 'integer', 'min' => 120, 'max' => 480 ),
+				'tristate_panel_b_width_px'          => array( 'type' => 'integer', 'min' => 200, 'max' => 480 ),
+				'tristate_panel_b_gap_bottom_px'     => array( 'type' => 'integer', 'min' => 4, 'max' => 40 ),
+				'tristate_panel_b_padding_px'        => array( 'type' => 'integer', 'min' => 8, 'max' => 32 ),
+				'tristate_panel_b_border_radius_px'  => array( 'type' => 'integer', 'min' => 0, 'max' => 28 ),
+				'tristate_panel_b_actions_gap_px'    => array( 'type' => 'integer', 'min' => 4, 'max' => 24 ),
 			),
 			'wishlist_ui' => array(
 				'heart_reserve_top_px'       => array( 'type' => 'integer', 'min' => 0, 'max' => 200 ),

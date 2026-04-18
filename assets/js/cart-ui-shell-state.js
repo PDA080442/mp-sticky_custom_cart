@@ -4,7 +4,7 @@
  * - Single transition table + dispatch(); cart UI syncs via attachSticky().
  * - Escape: C → B (if panel B exists) → A; B → A.
  * - No session persistence: reset on pagehide; hydrate from DOM on load / pageshow.
- * - Elevated z-index + focus trap while C (drawer open).
+ * - Elevated z-index + focus trap while B or C; pointer-dismiss closes B.
  *
  * @package MpStickyCustomCart
  */
@@ -108,7 +108,13 @@
 				if (state === STATES.C) {
 					return ctx.hasPanelB ? STATES.B : STATES.A;
 				}
-				if (state === STATES.A || state === STATES.B) {
+				if (state === STATES.B) {
+					return STATES.C;
+				}
+				if (state === STATES.A) {
+					if (ctx.hasPanelB) {
+						return STATES.B;
+					}
 					return STATES.C;
 				}
 				return null;
@@ -141,6 +147,8 @@
 		this._trapBound = false;
 		this._preFocus = null;
 		this._elevated = false;
+		this._pointerBound = false;
+		this._onPointerDownCapture = this._onPointerDownCapture.bind(this);
 	}
 
 	CartUiShellStateMachine.prototype._ctx = function () {
@@ -193,8 +201,19 @@
 		}
 	};
 
-	CartUiShellStateMachine.prototype._syncPanelBPlaceholder = function () {
-		/* Phase 17.3: mount B panel; until then hasPanelB is false. */
+	CartUiShellStateMachine.prototype._syncPanelBDom = function () {
+		var panel = this.rootEl ? this.rootEl.querySelector('[data-mp-scc-shell-panel-b]') : null;
+		if (!panel) {
+			return;
+		}
+		var show = this._state === STATES.B;
+		if (show) {
+			panel.removeAttribute('hidden');
+			panel.setAttribute('aria-hidden', 'false');
+		} else {
+			panel.setAttribute('hidden', 'hidden');
+			panel.setAttribute('aria-hidden', 'true');
+		}
 	};
 
 	CartUiShellStateMachine.prototype._setElevated = function (on) {
@@ -223,16 +242,34 @@
 		}
 	};
 
+	CartUiShellStateMachine.prototype._focusTrapContainer = function () {
+		if (this._state === STATES.C) {
+			var drawer = this.rootEl ? this.rootEl.querySelector('[data-mp-scc-drawer]') : null;
+			if (!drawer || drawer.hasAttribute('hidden')) {
+				return null;
+			}
+			return drawer;
+		}
+		if (this._state === STATES.B) {
+			var panel = this.rootEl ? this.rootEl.querySelector('[data-mp-scc-shell-panel-b]') : null;
+			if (!panel || panel.hasAttribute('hidden')) {
+				return null;
+			}
+			return panel;
+		}
+		return null;
+	};
+
 	CartUiShellStateMachine.prototype._focusTrapStart = function () {
-		var drawer = this.rootEl ? this.rootEl.querySelector('[data-mp-scc-drawer]') : null;
-		if (!drawer || drawer.hasAttribute('hidden')) {
+		var shell = this._focusTrapContainer();
+		if (!shell) {
 			return;
 		}
 		this._preFocus = document.activeElement;
 		var nodes = [];
 		try {
 			nodes = Array.prototype.slice.call(
-				drawer.querySelectorAll(
+				shell.querySelectorAll(
 					'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
 				)
 			);
@@ -272,55 +309,77 @@
 	};
 
 	CartUiShellStateMachine.prototype._onDocKey = function (e) {
-		if (this._state !== STATES.C) {
-			return;
-		}
-		var drawer = this.rootEl ? this.rootEl.querySelector('[data-mp-scc-drawer]') : null;
-		if (!drawer || drawer.hasAttribute('hidden')) {
+		var shell = this._focusTrapContainer();
+		if (!shell || e.key !== 'Tab') {
 			return;
 		}
 		var active = document.activeElement;
-		if (!drawer.contains(active)) {
+		if (!shell.contains(active)) {
 			return;
 		}
-		if (e.key === 'Tab') {
-			var nodes = [];
-			try {
-				nodes = Array.prototype.slice.call(
-					drawer.querySelectorAll(
-						'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
-					)
-				);
-			} catch (err) {
-				nodes = [];
-			}
-			nodes = nodes.filter(function (el) {
-				return el && el.offsetParent !== null && el.getAttribute('aria-hidden') !== 'true';
-			});
-			if (nodes.length < 1) {
-				return;
-			}
-			var first = nodes[0];
-			var last = nodes[nodes.length - 1];
-			var active = document.activeElement;
-			if (e.shiftKey) {
-				if (active === first || !drawer.contains(active)) {
-					e.preventDefault();
-					try {
-						last.focus();
-					} catch (e2) {
-						/* ignore */
-					}
-				}
-			} else if (active === last) {
+		var nodes = [];
+		try {
+			nodes = Array.prototype.slice.call(
+				shell.querySelectorAll(
+					'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+				)
+			);
+		} catch (err) {
+			nodes = [];
+		}
+		nodes = nodes.filter(function (el) {
+			return el && el.offsetParent !== null && el.getAttribute('aria-hidden') !== 'true';
+		});
+		if (nodes.length < 1) {
+			return;
+		}
+		var first = nodes[0];
+		var last = nodes[nodes.length - 1];
+		var activeEl = document.activeElement;
+		if (e.shiftKey) {
+			if (activeEl === first || !shell.contains(activeEl)) {
 				e.preventDefault();
 				try {
-					first.focus();
-				} catch (e3) {
+					last.focus();
+				} catch (e2) {
 					/* ignore */
 				}
 			}
+		} else if (activeEl === last) {
+			e.preventDefault();
+			try {
+				first.focus();
+			} catch (e3) {
+				/* ignore */
+			}
 		}
+	};
+
+	CartUiShellStateMachine.prototype._syncPointerDismiss = function () {
+		var want = this._state === STATES.B;
+		if (want === this._pointerBound) {
+			return;
+		}
+		this._pointerBound = want;
+		if (want) {
+			document.addEventListener('pointerdown', this._onPointerDownCapture, true);
+		} else {
+			document.removeEventListener('pointerdown', this._onPointerDownCapture, true);
+		}
+	};
+
+	CartUiShellStateMachine.prototype._onPointerDownCapture = function (e) {
+		if (this._state !== STATES.B) {
+			return;
+		}
+		var t = e.target;
+		if (!t || !this.rootEl) {
+			return;
+		}
+		if (this.rootEl.contains(t)) {
+			return;
+		}
+		this.dispatch(ACTION.CLOSE_B);
 	};
 
 	CartUiShellStateMachine.prototype._tristateFabLayout = function () {
@@ -355,11 +414,11 @@
 	CartUiShellStateMachine.prototype._applyVisualLayer = function () {
 		var elevated = this._state === STATES.B || this._state === STATES.C;
 		this._setElevated(elevated);
-		if (this._state === STATES.C) {
+		this._focusTrapStop();
+		if (this._state === STATES.C || this._state === STATES.B) {
 			this._focusTrapStart();
-		} else {
-			this._focusTrapStop();
 		}
+		this._syncPointerDismiss();
 	};
 
 	CartUiShellStateMachine.prototype.dispatch = function (actionType) {
@@ -374,7 +433,7 @@
 		var prev = this._state;
 		this._state = next;
 		this._setDomStateAttr();
-		this._syncPanelBPlaceholder();
+		this._syncPanelBDom();
 		this._syncDrawerDom();
 		this._syncToggleAriaExpanded();
 		this._applyVisualLayer();
@@ -393,6 +452,7 @@
 		}
 		this._state = next;
 		this._setDomStateAttr();
+		this._syncPanelBDom();
 		this._syncDrawerDom();
 		this._syncToggleAriaExpanded();
 		this._applyVisualLayer();
@@ -411,6 +471,8 @@
 		if (this.rootEl) {
 			this.rootEl.removeAttribute('data-mp-scc-shell-state');
 		}
+		this._syncPanelBDom();
+		this._syncPointerDismiss();
 	};
 
 	CartUiShellStateMachine.prototype._onPageShow = function () {
@@ -446,6 +508,10 @@
 		document.removeEventListener('keydown', this._onEscape, false);
 		window.removeEventListener('pagehide', this._onPageHide, false);
 		window.removeEventListener('pageshow', this._onPageShow, false);
+		if (this._pointerBound) {
+			this._pointerBound = false;
+			document.removeEventListener('pointerdown', this._onPointerDownCapture, true);
+		}
 		this._focusTrapStop();
 		this._setElevated(false);
 	};

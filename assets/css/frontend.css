@@ -138,6 +138,7 @@ body.mp-scc-sticky-active.mp-scc-sticky-layout-tristate {
 }
 
 .mp-scc-sticky-bar.mp-scc-sticky--tristate .mp-scc-sticky-stack {
+	position: relative;
 	width: auto;
 	align-items: flex-end;
 }
@@ -173,6 +174,7 @@ body.mp-scc-sticky-active.mp-scc-sticky-layout-tristate {
 .mp-scc-sticky-bar.mp-scc-sticky--tristate .mp-scc-drawer {
 	left: auto;
 	right: 0;
+	z-index: 6;
 	width: min(
 		calc(100vw - max(24px, env(safe-area-inset-left, 0px) + env(safe-area-inset-right, 0px))),
 		420px
@@ -211,6 +213,133 @@ body.mp-scc-sticky-active.mp-scc-sticky-layout-tristate {
 .mp-scc-sticky-bar.mp-scc-sticky--tristate .mp-scc-drawer-toggle--fab:focus-visible {
 	outline: 2px solid var(--mp-scc-color-button-primary, #111);
 	outline-offset: 2px;
+}
+
+/* Tri-state panel B: right-docked, grows upward (dp §17.3) */
+.mp-scc-sticky-bar.mp-scc-sticky--tristate .mp-scc-shell-panel-b {
+	position: absolute;
+	right: 0;
+	bottom: 100%;
+	z-index: 5;
+	box-sizing: border-box;
+	width: min(
+		var(--mp-scc-tristate-panel-b-width, 280px),
+		calc(100vw - max(24px, env(safe-area-inset-left, 0px) + env(safe-area-inset-right, 0px)))
+	);
+	max-width: min(92vw, var(--mp-scc-tristate-panel-b-width, 280px));
+	max-height: var(--mp-scc-tristate-panel-b-max-height, 200px);
+	margin-bottom: var(--mp-scc-tristate-panel-b-gap-bottom, 10px);
+	padding: var(--mp-scc-tristate-panel-b-padding, 12px);
+	border-radius: var(--mp-scc-tristate-panel-b-border-radius, 12px);
+	overflow: hidden;
+	color: var(--mp-scc-color-text-primary, #1a1a1a);
+	border: 1px solid rgba(0, 0, 0, 0.08);
+	box-shadow: 0 -6px 28px rgba(0, 0, 0, 0.12);
+	backdrop-filter: blur(var(--mp-scc-sticky-backdrop-blur, 12px));
+	-webkit-backdrop-filter: blur(var(--mp-scc-sticky-backdrop-blur, 12px));
+	background-color: rgba(255, 255, 255, var(--mp-scc-sticky-drawer-surface-alpha, 0.94));
+}
+
+@supports (background: color-mix(in srgb, red, blue)) {
+	.mp-scc-sticky-bar.mp-scc-sticky--tristate .mp-scc-shell-panel-b {
+		background-color: color-mix(
+			in srgb,
+			var(--mp-scc-color-drawer-surface-tint, var(--mp-scc-color-surface-tint, #ffffff))
+				calc(var(--mp-scc-sticky-drawer-surface-alpha, 0.94) * 100%),
+			transparent
+		);
+	}
+}
+
+.mp-scc-shell-panel-b__body {
+	display: flex;
+	flex-direction: column;
+	justify-content: flex-start;
+	gap: 12px;
+	min-height: 0;
+	max-height: 100%;
+}
+
+.mp-scc-shell-panel-b__metrics {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+	min-width: 0;
+	flex: 0 1 auto;
+}
+
+.mp-scc-shell-panel-b__row {
+	display: flex;
+	align-items: baseline;
+	justify-content: space-between;
+	gap: 10px;
+	min-width: 0;
+}
+
+.mp-scc-shell-panel-b__label {
+	flex: 0 0 auto;
+	font-size: calc(var(--mp-scc-sticky-summary-font-size, 15px) * 0.88);
+	font-weight: 500;
+	opacity: 0.88;
+}
+
+.mp-scc-shell-panel-b__value {
+	font-size: var(--mp-scc-sticky-summary-font-size, 15px);
+	font-weight: var(--mp-scc-sticky-summary-font-weight, 600);
+	font-variant-numeric: tabular-nums;
+}
+
+.mp-scc-shell-panel-b__row--total .mp-scc-shell-panel-b__subtotal {
+	flex: 1 1 auto;
+	min-width: 0;
+	text-align: right;
+	font-size: var(--mp-scc-sticky-summary-font-size, 15px);
+	font-weight: var(--mp-scc-sticky-summary-font-weight, 600);
+	font-variant-numeric: tabular-nums;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.mp-scc-shell-panel-b__subtotal .woocommerce-Price-amount {
+	white-space: nowrap;
+}
+
+.mp-scc-shell-panel-b__actions {
+	display: flex;
+	flex-direction: row;
+	flex-wrap: nowrap;
+	align-items: center;
+	justify-content: flex-end;
+	gap: var(--mp-scc-tristate-panel-b-actions-gap, 8px);
+	flex: 0 0 auto;
+}
+
+.mp-scc-shell-panel-b__icon-btn {
+	width: 44px;
+	height: 44px;
+	min-width: 44px;
+	min-height: 44px;
+	padding: 0;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	box-sizing: border-box;
+}
+
+.mp-scc-shell-panel-b__icon-btn.mp-scc-checkout {
+	text-decoration: none;
+}
+
+.mp-scc-shell-panel-b__icon-svg {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	line-height: 0;
+}
+
+.mp-scc-shell-panel-b__icon-svg svg {
+	display: block;
 }
 
 /* -------------------------------------------------------------------------
