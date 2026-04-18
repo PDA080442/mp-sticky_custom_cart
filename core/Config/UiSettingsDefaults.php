@@ -58,6 +58,8 @@ final class UiSettingsDefaults {
 			'tristate_panel_b_padding_px',
 			'tristate_panel_b_border_radius_px',
 			'tristate_panel_b_actions_gap_px',
+			'tristate_action_icon_hit_px',
+			'tristate_action_icon_glyph_px',
 			'tristate_panel_c_width_px',
 		);
 	}
@@ -200,6 +202,10 @@ final class UiSettingsDefaults {
 				'tristate_panel_b_border_radius_px'  => 12,
 				/** Gap between icon action buttons in panel B (px). */
 				'tristate_panel_b_actions_gap_px'    => 8,
+				/** Icon-only clear/checkout control outer size (px), tri-state panel B + drawer C. */
+				'tristate_action_icon_hit_px'        => 44,
+				/** Glyph (SVG) size inside {@see tristate_action_icon_hit_px} (px). */
+				'tristate_action_icon_glyph_px'      => 22,
 				/** Drawer C width (px), expands left from right edge; height matches panel B max-height. */
 				'tristate_panel_c_width_px'          => 400,
 			),

@@ -257,6 +257,7 @@ final class StickyCartRenderer implements StickyCartRendererInterface {
 		<div class="mp-scc-shell-panel-b__actions" role="toolbar" aria-orientation="horizontal" aria-label="<?php esc_attr_e( 'Cart actions', 'mp-sticky-custom-cart' ); ?>">
 			<button type="button" class="mp-scc-btn mp-scc-btn--ghost mp-scc-shell-panel-b__icon-btn mp-scc-clear-cart<?php echo $empty ? ' mp-scc-clear-cart--disabled' : ''; ?>"
 				data-mp-scc-clear-cart
+				data-mp-scc-clear-label="<?php echo esc_attr( $clear_label ); ?>"
 				data-mp-scc-clear-aria-disabled="<?php echo esc_attr( $clear_aria_unavailable ); ?>"
 				title="<?php echo esc_attr( $empty ? $clear_aria_unavailable : $clear_label ); ?>"
 				<?php if ( $empty ) : ?>
@@ -272,6 +273,7 @@ final class StickyCartRenderer implements StickyCartRendererInterface {
 			<a class="mp-scc-btn mp-scc-btn--primary mp-scc-shell-panel-b__icon-btn mp-scc-checkout<?php echo $empty ? ' mp-scc-checkout--disabled' : ''; ?>"
 				href="<?php echo $empty ? '#' : esc_url( $checkout_url ); ?>"
 				data-mp-scc-checkout
+				data-mp-scc-checkout-label="<?php echo esc_attr( $checkout_label ); ?>"
 				data-mp-scc-checkout-base="<?php echo esc_url( $checkout_base ); ?>"
 				data-mp-scc-checkout-aria-disabled="<?php echo esc_attr( $checkout_aria_unavailable ); ?>"
 				title="<?php echo esc_attr( $empty ? $checkout_aria_unavailable : $checkout_label ); ?>"
@@ -294,13 +296,13 @@ final class StickyCartRenderer implements StickyCartRendererInterface {
 	 * Inline SVG for panel B clear action (currentColor).
 	 */
 	private static function inline_svg_trash_icon() {
-		return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20" fill="currentColor" aria-hidden="true"><path d="M9 3h6a1 1 0 011 1v1h5a1 1 0 010 2H4a1 1 0 010-2h5V4a1 1 0 011-1zm-3 6h12l-1.05 12.15A2 2 0 0115.96 23H8.04a2 2 0 01-1.99-1.85L6 9z"/></svg>';
+		return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" class="mp-scc-tristate-action-svg mp-scc-tristate-action-svg--trash"><path d="M9 3h6a1 1 0 011 1v1h5a1 1 0 010 2H4a1 1 0 010-2h5V4a1 1 0 011-1zm-3 6h12l-1.05 12.15A2 2 0 0115.96 23H8.04a2 2 0 01-1.99-1.85L6 9z"/></svg>';
 	}
 
 	/**
 	 * Inline SVG for panel B checkout action (fill currentColor).
 	 */
 	private static function inline_svg_cart_icon() {
-		return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20" fill="currentColor" aria-hidden="true"><path d="M7 18c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zM1 2v2h2l3.6 7.59-1.35 2.45c-.15.28-.25.61-.25.96 0 1.1.9 2 2 2h12v-2H7.42c-.14 0-.25-.11-.25-.25l.03-.12L8.1 13h7.45c.75 0 1.41-.41 1.75-1.03L21.7 4H5.21l-.94-2H1zm16 16c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/></svg>';
+		return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" class="mp-scc-tristate-action-svg mp-scc-tristate-action-svg--cart"><path d="M7 18c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zM1 2v2h2l3.6 7.59-1.35 2.45c-.15.28-.25.61-.25.96 0 1.1.9 2 2 2h12v-2H7.42c-.14 0-.25-.11-.25-.25l.03-.12L8.1 13h7.45c.75 0 1.41-.41 1.75-1.03L21.7 4H5.21l-.94-2H1zm16 16c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/></svg>';
 	}
 }

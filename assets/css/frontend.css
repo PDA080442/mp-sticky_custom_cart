@@ -393,15 +393,23 @@ body.mp-scc-sticky-active.mp-scc-sticky-layout-tristate {
 }
 
 .mp-scc-shell-panel-b__icon-btn {
-	width: 44px;
-	height: 44px;
-	min-width: 44px;
-	min-height: 44px;
+	width: var(--mp-scc-tristate-action-icon-hit, 44px);
+	height: var(--mp-scc-tristate-action-icon-hit, 44px);
+	min-width: var(--mp-scc-tristate-action-icon-hit, 44px);
+	min-height: var(--mp-scc-tristate-action-icon-hit, 44px);
 	padding: 0;
 	display: inline-flex;
 	align-items: center;
 	justify-content: center;
 	box-sizing: border-box;
+	border-radius: min(14px, calc(var(--mp-scc-tristate-action-icon-hit, 44px) * 0.32));
+	transition:
+		background-color 0.16s ease,
+		border-color 0.16s ease,
+		color 0.16s ease,
+		box-shadow 0.16s ease,
+		opacity 0.16s ease,
+		transform 0.08s ease;
 }
 
 .mp-scc-shell-panel-b__icon-btn.mp-scc-checkout {
@@ -413,10 +421,79 @@ body.mp-scc-sticky-active.mp-scc-sticky-layout-tristate {
 	align-items: center;
 	justify-content: center;
 	line-height: 0;
+	width: var(--mp-scc-tristate-action-icon-glyph, 22px);
+	height: var(--mp-scc-tristate-action-icon-glyph, 22px);
+	flex: 0 0 auto;
 }
 
 .mp-scc-shell-panel-b__icon-svg svg {
 	display: block;
+}
+
+.mp-scc-tristate-action-svg {
+	width: 100%;
+	height: 100%;
+	display: block;
+}
+
+/* Tri-state icon clear: same token semantics as sticky bar ghost «Очистить». */
+.mp-scc-shell-panel-b__actions .mp-scc-shell-panel-b__icon-btn.mp-scc-btn--ghost {
+	color: var(--mp-scc-color-clear-button-text, inherit);
+	border-color: var(--mp-scc-color-clear-button-border, rgba(0, 0, 0, 0.2));
+	background-color: var(--mp-scc-color-clear-button-bg, #ffffff);
+}
+
+.mp-scc-shell-panel-b__actions .mp-scc-shell-panel-b__icon-btn.mp-scc-btn--ghost:hover:not(:disabled):not(.mp-scc-clear-cart--disabled) {
+	color: var(--mp-scc-color-clear-button-text-hover, var(--mp-scc-color-clear-button-text, #1a1a1a));
+	border-color: var(
+		--mp-scc-color-clear-button-border-hover,
+		var(--mp-scc-color-clear-button-border, #cfcfcf)
+	);
+	background-color: var(
+		--mp-scc-color-clear-button-bg-hover,
+		var(--mp-scc-color-clear-button-bg, #f0f0f0)
+	);
+}
+
+.mp-scc-shell-panel-b__actions .mp-scc-shell-panel-b__icon-btn.mp-scc-btn--ghost:active:not(:disabled):not(.mp-scc-clear-cart--disabled) {
+	transform: translateY(1px);
+}
+
+.mp-scc-shell-panel-b__actions .mp-scc-shell-panel-b__icon-btn.mp-scc-btn--ghost:focus-visible {
+	outline: 2px solid var(--mp-scc-color-clear-button-border-hover, #9a9a9a);
+	outline-offset: 2px;
+}
+
+/* Tri-state icon checkout: square primary control (panel B + drawer C). */
+.mp-scc-shell-panel-b__actions .mp-scc-shell-panel-b__icon-btn.mp-scc-btn--primary.mp-scc-checkout {
+	background-color: var(--mp-scc-color-button-primary, #111111);
+	color: var(--mp-scc-color-button-primary-text, #ffffff);
+	border-color: transparent;
+	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+}
+
+.mp-scc-shell-panel-b__actions .mp-scc-shell-panel-b__icon-btn.mp-scc-btn--primary.mp-scc-checkout:hover:not(.mp-scc-checkout--disabled) {
+	background-color: var(--mp-scc-color-button-primary-hover, #333333);
+	color: var(
+		--mp-scc-color-button-primary-text-hover,
+		var(--mp-scc-color-button-primary-text, #ffffff)
+	);
+	box-shadow: 0 3px 12px rgba(0, 0, 0, 0.14);
+}
+
+.mp-scc-shell-panel-b__actions .mp-scc-shell-panel-b__icon-btn.mp-scc-btn--primary.mp-scc-checkout:active:not(.mp-scc-checkout--disabled) {
+	transform: translateY(1px);
+}
+
+.mp-scc-shell-panel-b__actions .mp-scc-shell-panel-b__icon-btn.mp-scc-btn--primary.mp-scc-checkout:focus-visible {
+	outline: 2px solid var(--mp-scc-color-button-primary-text, #ffffff);
+	outline-offset: 2px;
+}
+
+.mp-scc-shell-panel-b__actions .mp-scc-shell-panel-b__icon-btn.mp-scc-clear-cart--loading,
+.mp-scc-shell-panel-b__actions .mp-scc-shell-panel-b__icon-btn.mp-scc-clear-cart--disabled,
+.mp-scc-shell-panel-b__actions .mp-scc-shell-panel-b__icon-btn.mp-scc-checkout.mp-scc-checkout--disabled {
+	cursor: not-allowed;
 }
 
 /* -------------------------------------------------------------------------

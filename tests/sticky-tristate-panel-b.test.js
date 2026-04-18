@@ -23,6 +23,9 @@ assert.ok(renderer.includes('mp-scc-shell-panel-b__icon-btn'), 'Panel B should e
 assert.ok(renderer.includes('mp-scc-drawer--tristate-c'), 'Renderer should flag tri-state drawer C layout');
 assert.ok(renderer.includes('mp-scc-drawer-c__scroll'), 'Renderer should wrap line items in scroll host');
 assert.ok(renderer.includes('tristate_icon_actions_toolbar_markup'), 'Renderer should share B/C icon toolbar');
+assert.ok(renderer.includes('data-mp-scc-clear-label'), 'Icon clear should expose label for a11y restore');
+assert.ok(renderer.includes('data-mp-scc-checkout-label'), 'Icon checkout should expose label for a11y restore');
+assert.ok(renderer.includes('mp-scc-tristate-action-svg'), 'Inline SVGs should use shared tristate glyph class');
 
 assert.ok(shell.includes('return STATES.B') && shell.includes('ACTION.TOGGLE_C'), 'Shell reducer should open B from A when panel exists');
 assert.ok(shell.includes('_syncPanelBDom'), 'Shell should sync panel B visibility');
@@ -31,16 +34,24 @@ assert.ok(shell.includes('_onPointerDownCapture'), 'Shell should dismiss panel B
 assert.ok(css.includes('mp-scc-shell-panel-b'), 'CSS should style panel B');
 assert.ok(css.includes('--mp-scc-tristate-panel-b-max-height'), 'CSS should consume B max-height token');
 assert.ok(css.includes('--mp-scc-tristate-panel-c-width'), 'CSS should consume drawer C width token');
+assert.ok(css.includes('--mp-scc-tristate-action-icon-hit'), 'CSS should consume tri-state icon hit token');
+assert.ok(css.includes('--mp-scc-tristate-action-icon-glyph'), 'CSS should consume tri-state icon glyph token');
 assert.ok(css.includes('mp-scc-drawer-c__scroll'), 'CSS should style scrollable lines region');
 
 assert.ok(defaults.includes('tristate_panel_b_max_height_px'), 'Defaults should define panel B metrics');
 assert.ok(defaults.includes('tristate_panel_c_width_px'), 'Defaults should define panel C width');
+assert.ok(defaults.includes('tristate_action_icon_hit_px'), 'Defaults should define tri-state icon hit size');
+assert.ok(defaults.includes('tristate_action_icon_glyph_px'), 'Defaults should define tri-state icon glyph size');
 assert.ok(schema.includes('tristate_panel_b_max_height_px'), 'Schema should validate panel B metrics');
 assert.ok(schema.includes('tristate_panel_c_width_px'), 'Schema should validate panel C width');
+assert.ok(schema.includes('tristate_action_icon_hit_px'), 'Schema should validate tri-state icon hit');
+assert.ok(schema.includes('clear_cart_in_progress'), 'Schema should allow clear_cart_in_progress label');
 assert.ok(contract.includes('tristate-panel-b-max-height'), 'CssVariablesContract should map panel B vars');
 assert.ok(contract.includes('tristate-panel-c-width'), 'CssVariablesContract should map panel C width');
+assert.ok(contract.includes('tristate-action-icon-hit'), 'CssVariablesContract should map tri-state icon hit var');
 
 assert.ok(admin.includes('tristate_panel_b_max_height_px'), 'Settings UI should expose panel B fields');
 assert.ok(admin.includes('tristate_panel_c_width_px'), 'Settings UI should expose drawer C width');
+assert.ok(admin.includes('tristate_action_icon_hit_px'), 'Settings UI should expose tri-state icon hit');
 
 console.log('sticky-tristate-panel-b: OK');

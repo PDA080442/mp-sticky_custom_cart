@@ -200,6 +200,10 @@ final class SettingsValidationSchema {
 				'tristate_panel_b_padding_px'        => array( 'type' => 'integer', 'min' => 8, 'max' => 32 ),
 				'tristate_panel_b_border_radius_px'  => array( 'type' => 'integer', 'min' => 0, 'max' => 28 ),
 				'tristate_panel_b_actions_gap_px'    => array( 'type' => 'integer', 'min' => 4, 'max' => 24 ),
+				/** Square hit target for tri-state clear/checkout icon buttons (panel B + drawer C). */
+				'tristate_action_icon_hit_px'        => array( 'type' => 'integer', 'min' => 36, 'max' => 56 ),
+				/** SVG glyph size inside the icon hit target. */
+				'tristate_action_icon_glyph_px'      => array( 'type' => 'integer', 'min' => 14, 'max' => 32 ),
 				'tristate_panel_c_width_px'          => array( 'type' => 'integer', 'min' => 260, 'max' => 560 ),
 			),
 			'wishlist_ui' => array(
@@ -252,6 +256,7 @@ final class SettingsValidationSchema {
 				'more_info'          => array( 'type' => 'text', 'max_length' => 500 ),
 				'out_of_stock'       => array( 'type' => 'text', 'max_length' => 500 ),
 				'clear_cart'         => array( 'type' => 'text', 'max_length' => 500 ),
+				'clear_cart_in_progress' => array( 'type' => 'text', 'max_length' => 500 ),
 				'cart_cleared'       => array( 'type' => 'text', 'max_length' => 500 ),
 				'checkout'           => array( 'type' => 'text', 'max_length' => 500 ),
 				'variation_required' => array( 'type' => 'text', 'max_length' => 500 ),
