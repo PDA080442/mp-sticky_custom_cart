@@ -328,7 +328,8 @@ final class SettingsPage {
 		echo '<div class="mp-scc-catalog-impact-notes">';
 		echo '<p><strong>' . esc_html__( 'Как это влияет на витрину', 'mp-sticky-custom-cart' ) . '</strong></p>';
 		echo '<ul class="ul-disc">';
-		echo '<li>' . esc_html__( 'Поведение клика по миниатюре и селекторы задают, будет ли изображение добавлять simple-товар в корзину без перехода на страницу товара.', 'mp-sticky-custom-cart' ) . '</li>';
+		echo '<li>' . esc_html__( 'Режим «иконка корзины» / «клик по миниатюре», смещения и размеры иконки задают внешний вид и зону нажатия; числа попадают в CSS-переменные и в расчёт позиции на витрине.', 'mp-sticky-custom-cart' ) . '</li>';
+		echo '<li>' . esc_html__( 'Поведение клика по миниатюре и селекторы задают, будет ли изображение добавлять simple-товар в корзину без перехода на страницу товара (только в режиме «по миниатюре»).', 'mp-sticky-custom-cart' ) . '</li>';
 		echo '<li>' . esc_html__( 'Блок «Подробнее» и анимация: длительность, easing и пресет попадают в CSS-переменные (--mp-scc-catalog-*) и управляют появлением полосы с текстом «Подробнее».', 'mp-sticky-custom-cart' ) . '</li>';
 		echo '<li>' . esc_html__( 'Тексты «Подробнее» и «Нет в наличии» подставляются в overlay и в тосты на карточке; пустые значения заменяются дефолтами плагина.', 'mp-sticky-custom-cart' ) . '</li>';
 		echo '<li>' . esc_html__( 'Остальные подписи в таблице ниже используются в sticky-корзине и на странице товара, а не только в каталоге.', 'mp-sticky-custom-cart' ) . '</li>';
@@ -344,6 +345,15 @@ final class SettingsPage {
 	private static function render_catalog_card_preview( array $s, array $c ) {
 		$labels = OptionResolver::get_labels();
 		$label  = isset( $labels[ UiLabelsDefaults::KEY_MORE_INFO ] ) ? (string) $labels[ UiLabelsDefaults::KEY_MORE_INFO ] : '';
+
+		$surface = isset( $c['catalog_add_surface'] ) ? (string) $c['catalog_add_surface'] : 'image_click';
+		if ( ! in_array( $surface, array( 'image_click', 'cart_icon' ), true ) ) {
+			$surface = 'image_click';
+		}
+		$icon_off_top = isset( $c['catalog_cart_icon_offset_top_px'] ) ? max( 0, min( 64, (int) $c['catalog_cart_icon_offset_top_px'] ) ) : 8;
+		$icon_off_left = isset( $c['catalog_cart_icon_offset_left_px'] ) ? max( 0, min( 64, (int) $c['catalog_cart_icon_offset_left_px'] ) ) : 8;
+		$icon_hit = isset( $c['catalog_cart_icon_hit_size_px'] ) ? max( 28, min( 56, (int) $c['catalog_cart_icon_hit_size_px'] ) ) : 36;
+		$icon_glyph = isset( $c['catalog_cart_icon_glyph_size_px'] ) ? max( 14, min( 28, (int) $c['catalog_cart_icon_glyph_size_px'] ) ) : 20;
 
 		$motion = isset( $c['hover_motion_preset'] ) ? (string) $c['hover_motion_preset'] : 'fade_slide';
 		if ( ! in_array( $motion, array( 'fade_slide', 'fade', 'slide' ), true ) ) {
@@ -375,11 +385,24 @@ final class SettingsPage {
 		}
 
 		echo '<h3>' . esc_html__( 'Предпросмотр кнопки на карточке', 'mp-sticky-custom-cart' ) . '</h3>';
-		echo '<p class="description">' . esc_html__( 'Упрощённый макет: на сайте вид зависит от темы и ширины колонки. Ниже — подпись и стили с учётом текущих чисел и CSS-переменных каталога.', 'mp-sticky-custom-cart' ) . '</p>';
+		echo '<p class="description">' . esc_html__( 'Упрощённый макет: на сайте вид зависит от темы и ширины колонки. Ниже — подпись «Подробнее», при режиме «иконка корзины» — квадрат зоны нажатия и значок в углу (по текущим отступам и размерам).', 'mp-sticky-custom-cart' ) . '</p>';
 		echo '<div class="mp-scc-admin-catalog-preview" style="' . esc_attr( $style ) . '">';
 		echo '<div class="mp-scc-admin-catalog-preview__card" role="presentation">';
 		echo '<div class="mp-scc-admin-catalog-preview__thumb">';
 		echo '<div class="mp-scc-admin-catalog-preview__fake-img" aria-hidden="true"></div>';
+		if ( 'cart_icon' === $surface ) {
+			$slot_style = sprintf(
+				'top:%dpx;left:%dpx;width:%dpx;height:%dpx;',
+				$icon_off_top,
+				$icon_off_left,
+				$icon_hit,
+				$icon_hit
+			);
+			$glyph_style = sprintf( 'width:%dpx;height:%dpx;', $icon_glyph, $icon_glyph );
+			echo '<span class="mp-scc-admin-catalog-preview__cart-slot" style="' . esc_attr( $slot_style ) . '" aria-hidden="true">';
+			echo '<span class="mp-scc-admin-catalog-preview__cart-glyph" style="' . esc_attr( $glyph_style ) . '"></span>';
+			echo '</span>';
+		}
 		printf(
 			'<a href="#" class="%s" onclick="return false;">',
 			esc_attr( $cls )
@@ -403,14 +426,132 @@ final class SettingsPage {
 		self::render_catalog_impact_notes();
 
 		$behavior = isset( $c['image_click_behavior'] ) ? (string) $c['image_click_behavior'] : 'add_to_cart';
-		if ( 'add_to_cart' === $behavior && ! $img_atc_on ) {
+		$surface  = isset( $c['catalog_add_surface'] ) ? (string) $c['catalog_add_surface'] : 'image_click';
+		if ( ! in_array( $surface, array( 'image_click', 'cart_icon' ), true ) ) {
+			$surface = 'image_click';
+		}
+		if ( ! $img_atc_on && ( 'cart_icon' === $surface || ( 'add_to_cart' === $behavior && 'image_click' === $surface ) ) ) {
 			echo '<div class="notice notice-warning inline"><p>';
-			echo esc_html__( 'Выбрано добавление в корзину по клику на изображение, но на вкладке «Служебное» выключен feature flag «Клик по изображению добавляет в корзину» — на сайте перехват не сработает.', 'mp-sticky-custom-cart' );
+			echo esc_html__( 'На вкладке «Служебное» выключен feature flag «Клик по изображению добавляет в корзину» — без него не работает AJAX-добавление из каталога (ни по миниатюре, ни по иконке корзины).', 'mp-sticky-custom-cart' );
 			echo '</p></div>';
 		}
 
-		echo '<h3>' . esc_html__( 'Клик по изображению в лупе', 'mp-sticky-custom-cart' ) . '</h3>';
+		echo '<h3>' . esc_html__( 'Режим добавления в каталоге', 'mp-sticky-custom-cart' ) . '</h3>';
+		echo '<p class="description">' . esc_html__( 'Мягкая миграция: переключатель ниже меняет только способ добавления из карточки лупы. Старый сценарий — клик по миниатюре; новый — отдельная иконка (картинка ведёт на страницу товара, как в теме).', 'mp-sticky-custom-cart' ) . '</p>';
 		echo '<table class="form-table" role="presentation"><tbody>';
+		self::field_select(
+			$opt,
+			'catalog',
+			'catalog_add_surface',
+			__( 'Способ добавления в корзину из карточки', 'mp-sticky-custom-cart' ),
+			$surface,
+			array(
+				'image_click' => __( 'Устар.: по клику на миниатюру (перехват изображения)', 'mp-sticky-custom-cart' ),
+				'cart_icon'   => __( 'Иконка корзины (рекомендуется)', 'mp-sticky-custom-cart' ),
+			),
+			__( 'Один и тот же AJAX. В режиме иконки клик по фото не добавляет в корзину — переход по ссылке темы / Woo.', 'mp-sticky-custom-cart' )
+		);
+		if ( 'cart_icon' === $surface ) {
+			$icon_desk = isset( $c['catalog_cart_icon_desktop'] ) ? (string) $c['catalog_cart_icon_desktop'] : 'hover';
+			if ( ! in_array( $icon_desk, array( 'hover', 'always' ), true ) ) {
+				$icon_desk = 'hover';
+			}
+			$icon_touch = isset( $c['catalog_cart_icon_touch'] ) ? (string) $c['catalog_cart_icon_touch'] : 'always';
+			if ( ! in_array( $icon_touch, array( 'always', 'tap_reveal' ), true ) ) {
+				$icon_touch = 'always';
+			}
+			self::field_select(
+				$opt,
+				'catalog',
+				'catalog_cart_icon_desktop',
+				__( 'Иконка корзины: десктоп', 'mp-sticky-custom-cart' ),
+				$icon_desk,
+				array(
+					'hover'   => __( 'Показывать при наведении на карточку', 'mp-sticky-custom-cart' ),
+					'always'  => __( 'Всегда видна', 'mp-sticky-custom-cart' ),
+				),
+				__( 'На широкой витрине без coarse pointer. Фокус клавиатуры на карточке тоже открывает иконку (focus-within).', 'mp-sticky-custom-cart' )
+			);
+			self::field_select(
+				$opt,
+				'catalog',
+				'catalog_cart_icon_touch',
+				__( 'Иконка корзины: тач / узкий экран', 'mp-sticky-custom-cart' ),
+				$icon_touch,
+				array(
+					'always'     => __( 'Всегда видна', 'mp-sticky-custom-cart' ),
+					'tap_reveal' => __( 'Показать после тапа по карточке (не по ссылке/кнопке)', 'mp-sticky-custom-cart' ),
+				),
+				__( 'Срабатывает при max-width 768px или pointer: coarse. Тап по ссылке на товар не открывает иконку.', 'mp-sticky-custom-cart' )
+			);
+			$icon_mobile = isset( $c['catalog_cart_icon_mobile_mode'] ) ? (string) $c['catalog_cart_icon_mobile_mode'] : 'inherit';
+			if ( ! in_array( $icon_mobile, array( 'inherit', 'force_visible' ), true ) ) {
+				$icon_mobile = 'inherit';
+			}
+			self::field_select(
+				$opt,
+				'catalog',
+				'catalog_cart_icon_mobile_mode',
+				__( 'Мобильный режим иконки', 'mp-sticky-custom-cart' ),
+				$icon_mobile,
+				array(
+					'inherit'        => __( 'Как настройки «тач / узкий экран» выше', 'mp-sticky-custom-cart' ),
+					'force_visible'  => __( 'Всегда показывать иконку на таче/узком экране (игнор «тап для показа»)', 'mp-sticky-custom-cart' ),
+				),
+				__( 'Удобно, если включён «тап для показа», но нужно всегда видеть кнопку на телефоне.', 'mp-sticky-custom-cart' )
+			);
+
+			$o_top = isset( $c['catalog_cart_icon_offset_top_px'] ) ? (int) $c['catalog_cart_icon_offset_top_px'] : 8;
+			$o_left = isset( $c['catalog_cart_icon_offset_left_px'] ) ? (int) $c['catalog_cart_icon_offset_left_px'] : 8;
+			$hit_sz = isset( $c['catalog_cart_icon_hit_size_px'] ) ? (int) $c['catalog_cart_icon_hit_size_px'] : 36;
+			$glyph_sz = isset( $c['catalog_cart_icon_glyph_size_px'] ) ? (int) $c['catalog_cart_icon_glyph_size_px'] : 20;
+			$delay_ms = isset( $c['catalog_cart_icon_transition_delay_ms'] ) ? (int) $c['catalog_cart_icon_transition_delay_ms'] : 0;
+
+			echo '<tr><td colspan="2"><p class="description"><strong>' . esc_html__( 'Геометрия и задержка иконки', 'mp-sticky-custom-cart' ) . '</strong> — ';
+			echo esc_html__( 'отступы от угла первой миниатюры в карточке, размер кнопки и глифа, задержка перед анимацией появления. Попадают в CSS-переменные --mp-scc-catalog-cart-icon-* и в JS-позиционирование.', 'mp-sticky-custom-cart' );
+			echo '</p></td></tr>';
+
+			self::field_number(
+				$opt,
+				'catalog',
+				'catalog_cart_icon_offset_top_px',
+				__( 'Отступ иконки сверху (px)', 'mp-sticky-custom-cart' ),
+				$o_top,
+				__( 'От верхнего края области изображения товара в лупе (0–64).', 'mp-sticky-custom-cart' )
+			);
+			self::field_number(
+				$opt,
+				'catalog',
+				'catalog_cart_icon_offset_left_px',
+				__( 'Отступ иконки слева (px)', 'mp-sticky-custom-cart' ),
+				$o_left,
+				__( 'От левого края области изображения (0–64).', 'mp-sticky-custom-cart' )
+			);
+			self::field_number(
+				$opt,
+				'catalog',
+				'catalog_cart_icon_hit_size_px',
+				__( 'Размер кликабельной зоны (px)', 'mp-sticky-custom-cart' ),
+				$hit_sz,
+				__( 'Квадратная кнопка: 28–56 px (удобство нажатия).', 'mp-sticky-custom-cart' )
+			);
+			self::field_number(
+				$opt,
+				'catalog',
+				'catalog_cart_icon_glyph_size_px',
+				__( 'Размер значка корзины (px)', 'mp-sticky-custom-cart' ),
+				$glyph_sz,
+				__( 'Ширина/высота SVG внутри кнопки (14–28).', 'mp-sticky-custom-cart' )
+			);
+			self::field_number(
+				$opt,
+				'catalog',
+				'catalog_cart_icon_transition_delay_ms',
+				__( 'Задержка появления (мс)', 'mp-sticky-custom-cart' ),
+				$delay_ms,
+				__( 'Пауза перед transition opacity/visibility слота (0–2000). Полезно вместе с режимом «по наведению».', 'mp-sticky-custom-cart' )
+			);
+		}
 		self::field_select(
 			$opt,
 			'catalog',
@@ -497,6 +638,15 @@ final class SettingsPage {
 		echo '<h3>' . esc_html__( 'Тексты интерфейса', 'mp-sticky-custom-cart' ) . '</h3>';
 		echo '<p class="description">' . esc_html__( 'Пустое поле на сайте заменяется стандартной фразой из плагина. HTML удаляется при сохранении; не более 500 символов для полей каталога ниже.', 'mp-sticky-custom-cart' ) . '</p>';
 		echo '<table class="form-table" role="presentation"><tbody>';
+		self::field_text(
+			$opt,
+			'labels',
+			'catalog_cart_icon',
+			__( 'Подпись кнопки-иконки корзины в лупе (aria)', 'mp-sticky-custom-cart' ),
+			isset( $l['catalog_cart_icon'] ) ? (string) $l['catalog_cart_icon'] : '',
+			__( 'Используется при режиме «иконка корзины»; пустое значение — стандартная фраза плагина.', 'mp-sticky-custom-cart' ),
+			array( 'maxlength' => 500 )
+		);
 		self::field_text(
 			$opt,
 			'labels',
@@ -1320,6 +1470,7 @@ final class SettingsPage {
 
 		$labels = OptionResolver::get_labels();
 		$rows   = array(
+			UiLabelsDefaults::KEY_CATALOG_CART_ICON  => __( 'Иконка «в корзину» в лупе (aria)', 'mp-sticky-custom-cart' ),
 			UiLabelsDefaults::KEY_MORE_INFO          => __( 'Текст кнопки «Подробнее о товаре»', 'mp-sticky-custom-cart' ),
 			UiLabelsDefaults::KEY_OUT_OF_STOCK       => __( 'Сообщение «Товара нет в наличии»', 'mp-sticky-custom-cart' ),
 			UiLabelsDefaults::KEY_CLEAR_CART         => __( 'Текст кнопки «Очистить корзину»', 'mp-sticky-custom-cart' ),

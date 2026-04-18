@@ -62,6 +62,24 @@ final class CssVariablesContract {
 				'format' => 'integer',
 			),
 			array(
+				'name'   => self::PREFIX . 'catalog-cart-icon-hit-size',
+				'path'   => 'catalog.catalog_cart_icon_hit_size_px',
+				'suffix' => 'px',
+				'format' => 'unit',
+			),
+			array(
+				'name'   => self::PREFIX . 'catalog-cart-icon-glyph-size',
+				'path'   => 'catalog.catalog_cart_icon_glyph_size_px',
+				'suffix' => 'px',
+				'format' => 'unit',
+			),
+			array(
+				'name'   => self::PREFIX . 'catalog-cart-icon-transition-delay',
+				'path'   => 'catalog.catalog_cart_icon_transition_delay_ms',
+				'suffix' => 'ms',
+				'format' => 'unit',
+			),
+			array(
 				'name'   => self::PREFIX . 'sticky-z-index',
 				'path'   => 'sticky_cart.z_index',
 				'suffix' => '',

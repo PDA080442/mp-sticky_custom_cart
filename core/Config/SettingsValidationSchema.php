@@ -26,6 +26,47 @@ final class SettingsValidationSchema {
 					'type'  => 'text',
 					'oneof' => array( 'add_to_cart', 'theme_default' ),
 				),
+				'catalog_add_surface'         => array(
+					'type'  => 'text',
+					'oneof' => array( 'image_click', 'cart_icon' ),
+				),
+				'catalog_cart_icon_desktop'   => array(
+					'type'  => 'text',
+					'oneof' => array( 'hover', 'always' ),
+				),
+				'catalog_cart_icon_touch'     => array(
+					'type'  => 'text',
+					'oneof' => array( 'always', 'tap_reveal' ),
+				),
+				'catalog_cart_icon_offset_top_px'  => array(
+					'type' => 'integer',
+					'min'  => 0,
+					'max'  => 64,
+				),
+				'catalog_cart_icon_offset_left_px' => array(
+					'type' => 'integer',
+					'min'  => 0,
+					'max'  => 64,
+				),
+				'catalog_cart_icon_hit_size_px'    => array(
+					'type' => 'integer',
+					'min'  => 28,
+					'max'  => 56,
+				),
+				'catalog_cart_icon_glyph_size_px'  => array(
+					'type' => 'integer',
+					'min'  => 14,
+					'max'  => 28,
+				),
+				'catalog_cart_icon_transition_delay_ms' => array(
+					'type' => 'integer',
+					'min'  => 0,
+					'max'  => 2000,
+				),
+				'catalog_cart_icon_mobile_mode'    => array(
+					'type'  => 'text',
+					'oneof' => array( 'inherit', 'force_visible' ),
+				),
 				'hover_overlay_mobile_always' => array(
 					'type' => 'boolean',
 				),
@@ -168,6 +209,7 @@ final class SettingsValidationSchema {
 				'remove_view_cart_link' => array( 'type' => 'boolean' ),
 			),
 			'labels'      => array(
+				'catalog_cart_icon'  => array( 'type' => 'text', 'max_length' => 500 ),
 				'more_info'          => array( 'type' => 'text', 'max_length' => 500 ),
 				'out_of_stock'       => array( 'type' => 'text', 'max_length' => 500 ),
 				'clear_cart'         => array( 'type' => 'text', 'max_length' => 500 ),
