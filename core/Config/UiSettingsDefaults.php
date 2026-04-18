@@ -75,6 +75,20 @@ final class UiSettingsDefaults {
 				'catalog_cart_icon_desktop'   => 'hover',
 				/** Touch: always = visible; tap_reveal = show after first tap on card (non-link). */
 				'catalog_cart_icon_touch'     => 'always',
+				/** Offset of the icon slot from the top-left of the first loop image (px). */
+				'catalog_cart_icon_offset_top_px'  => 8,
+				'catalog_cart_icon_offset_left_px'   => 8,
+				/** Square hit target (button outer size, px). */
+				'catalog_cart_icon_hit_size_px'      => 36,
+				/** SVG glyph size inside the button (px). */
+				'catalog_cart_icon_glyph_size_px'    => 20,
+				/** Delay before opacity/visibility transition starts (ms). */
+				'catalog_cart_icon_transition_delay_ms' => 0,
+				/**
+				 * inherit: follow «тач / узкий экран» above.
+				 * force_visible: on touch/narrow viewport always show the icon (overrides tap_reveal).
+				 */
+				'catalog_cart_icon_mobile_mode'      => 'inherit',
 				'hover_overlay_mobile_always' => true,
 				'hover_animation_duration_ms'  => 220,
 				'hover_animation_easing'       => 'cubic-bezier(0.4, 0, 0.2, 1)',

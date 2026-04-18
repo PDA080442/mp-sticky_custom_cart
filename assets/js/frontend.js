@@ -664,6 +664,7 @@
 		if (!$img.length) {
 			return;
 		}
+		var cat = data().catalog || {};
 		var io = $img.offset();
 		var co = $card.offset();
 		if (!io || !co) {
@@ -674,6 +675,23 @@
 		var band = Math.max(40, Math.min(56, Math.round(ih * 0.26)));
 		var topRel = io.top - co.top;
 		var leftRel = io.left - co.left;
+
+		var offTop = parseInt(cat.catalogCartIconOffsetTopPx, 10);
+		if (isNaN(offTop) || offTop < 0) {
+			offTop = 8;
+		}
+		var offLeft = parseInt(cat.catalogCartIconOffsetLeftPx, 10);
+		if (isNaN(offLeft) || offLeft < 0) {
+			offLeft = 8;
+		}
+		var hitSz = parseInt(cat.catalogCartIconHitSizePx, 10);
+		if (isNaN(hitSz) || hitSz < 28) {
+			hitSz = 36;
+		}
+		var delayMs = parseInt(cat.catalogCartIconTransitionDelayMs, 10);
+		if (isNaN(delayMs) || delayMs < 0) {
+			delayMs = 0;
+		}
 
 		var $overlay = $card.find('.mp-scc-catalog-overlay').first();
 		if ($overlay.length) {
@@ -699,8 +717,11 @@
 		var $cartSlot = $card.find('.mp-scc-catalog-cart-icon-slot').first();
 		if ($cartSlot.length) {
 			$cartSlot.css({
-				top: topRel + 8,
-				left: leftRel + 8
+				top: topRel + offTop,
+				left: leftRel + offLeft,
+				width: hitSz,
+				height: hitSz,
+				transitionDelay: delayMs + 'ms'
 			});
 		}
 	}
@@ -966,6 +987,17 @@
 	}
 
 	/**
+	 * Mobile visibility override: `force_visible` shows the icon on touch/narrow regardless of tap_reveal.
+	 */
+	function applyCatalogCartIconMobileModeAttr() {
+		var cat = data().catalog || {};
+		var mode = cat.catalogCartIconMobileMode || 'inherit';
+		if (document.documentElement) {
+			document.documentElement.setAttribute('data-mp-scc-cart-icon-mobile-mode', mode);
+		}
+	}
+
+	/**
 	 * Prevent theme/link handlers from seeing icon presses (mousedown/touchstart bubble).
 	 *
 	 * @param {HTMLElement} el
@@ -1088,8 +1120,20 @@
 		var desk = catalog.catalogCartIconDesktop || 'hover';
 		var touch = catalog.catalogCartIconTouch || 'always';
 
+		var glyphPx = parseInt(catalog.catalogCartIconGlyphSizePx, 10);
+		if (isNaN(glyphPx) || glyphPx < 14) {
+			glyphPx = 20;
+		}
+		if (glyphPx > 28) {
+			glyphPx = 28;
+		}
+
 		var cartIconSvg =
-			'<svg class="mp-scc-catalog-cart-icon-btn__svg" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false"><circle cx="9" cy="21" r="1" fill="currentColor"/><circle cx="20" cy="21" r="1" fill="currentColor"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+			'<svg class="mp-scc-catalog-cart-icon-btn__svg" xmlns="http://www.w3.org/2000/svg" width="' +
+			glyphPx +
+			'" height="' +
+			glyphPx +
+			'" viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false"><circle cx="9" cy="21" r="1" fill="currentColor"/><circle cx="20" cy="21" r="1" fill="currentColor"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 
 		$(cardSel).each(function () {
 			var $card = $(this);
@@ -1126,6 +1170,11 @@
 				$slot.append($btn);
 			} else {
 				$btn.attr('aria-label', label);
+			}
+
+			var $svg = $btn.find('.mp-scc-catalog-cart-icon-btn__svg');
+			if ($svg.length) {
+				$svg.attr({ width: glyphPx, height: glyphPx });
 			}
 
 			var btnEl = $btn.get(0);
@@ -2851,6 +2900,7 @@
 	$(function () {
 		initClientDiagnostics();
 		initWishlistIntegrationBodyClass();
+		applyCatalogCartIconMobileModeAttr();
 		initCatalogCartIconTouchReveal();
 		initCatalogCartIconHoverIntent();
 

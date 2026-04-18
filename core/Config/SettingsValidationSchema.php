@@ -38,6 +38,35 @@ final class SettingsValidationSchema {
 					'type'  => 'text',
 					'oneof' => array( 'always', 'tap_reveal' ),
 				),
+				'catalog_cart_icon_offset_top_px'  => array(
+					'type' => 'integer',
+					'min'  => 0,
+					'max'  => 64,
+				),
+				'catalog_cart_icon_offset_left_px' => array(
+					'type' => 'integer',
+					'min'  => 0,
+					'max'  => 64,
+				),
+				'catalog_cart_icon_hit_size_px'    => array(
+					'type' => 'integer',
+					'min'  => 28,
+					'max'  => 56,
+				),
+				'catalog_cart_icon_glyph_size_px'  => array(
+					'type' => 'integer',
+					'min'  => 14,
+					'max'  => 28,
+				),
+				'catalog_cart_icon_transition_delay_ms' => array(
+					'type' => 'integer',
+					'min'  => 0,
+					'max'  => 2000,
+				),
+				'catalog_cart_icon_mobile_mode'    => array(
+					'type'  => 'text',
+					'oneof' => array( 'inherit', 'force_visible' ),
+				),
 				'hover_overlay_mobile_always' => array(
 					'type' => 'boolean',
 				),
