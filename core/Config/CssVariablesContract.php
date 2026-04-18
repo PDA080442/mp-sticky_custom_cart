@@ -305,6 +305,18 @@ final class CssVariablesContract {
 				'format' => 'unit',
 			),
 			array(
+				'name'   => self::PREFIX . 'tristate-action-icon-hit',
+				'path'   => 'sticky_cart.tristate_action_icon_hit_px',
+				'suffix' => 'px',
+				'format' => 'unit',
+			),
+			array(
+				'name'   => self::PREFIX . 'tristate-action-icon-glyph',
+				'path'   => 'sticky_cart.tristate_action_icon_glyph_px',
+				'suffix' => 'px',
+				'format' => 'unit',
+			),
+			array(
 				'name'   => self::PREFIX . 'tristate-panel-c-width',
 				'path'   => 'sticky_cart.tristate_panel_c_width_px',
 				'suffix' => 'px',

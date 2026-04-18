@@ -21,6 +21,8 @@ final class UiLabelsDefaults {
 	public const KEY_MORE_INFO           = 'more_info';
 	public const KEY_OUT_OF_STOCK        = 'out_of_stock';
 	public const KEY_CLEAR_CART          = 'clear_cart';
+	/** Aria/title while clear-cart AJAX is in flight (icon toolbar + all clear controls). */
+	public const KEY_CLEAR_CART_IN_PROGRESS = 'clear_cart_in_progress';
 	public const KEY_CART_CLEARED        = 'cart_cleared';
 	public const KEY_CHECKOUT            = 'checkout';
 	public const KEY_VARIATION_REQUIRED  = 'variation_required';
@@ -39,6 +41,7 @@ final class UiLabelsDefaults {
 			self::KEY_MORE_INFO          => __( 'Подробнее о товаре', 'mp-sticky-custom-cart' ),
 			self::KEY_OUT_OF_STOCK       => __( 'Товара нет в наличии', 'mp-sticky-custom-cart' ),
 			self::KEY_CLEAR_CART         => __( 'Очистить корзину', 'mp-sticky-custom-cart' ),
+			self::KEY_CLEAR_CART_IN_PROGRESS => __( 'Очистка корзины…', 'mp-sticky-custom-cart' ),
 			self::KEY_CART_CLEARED       => __( 'Корзина очищена', 'mp-sticky-custom-cart' ),
 			self::KEY_CHECKOUT            => __( 'Оформить заказ', 'mp-sticky-custom-cart' ),
 			self::KEY_VARIATION_REQUIRED => __( 'Выберите вариацию товара', 'mp-sticky-custom-cart' ),
@@ -61,6 +64,7 @@ final class UiLabelsDefaults {
 			self::KEY_MORE_INFO          => 'Подробнее о товаре',
 			self::KEY_OUT_OF_STOCK       => 'Товара нет в наличии',
 			self::KEY_CLEAR_CART         => 'Очистить корзину',
+			self::KEY_CLEAR_CART_IN_PROGRESS => 'Очистка корзины…',
 			self::KEY_CART_CLEARED       => 'Корзина очищена',
 			self::KEY_CHECKOUT            => 'Оформить заказ',
 			self::KEY_VARIATION_REQUIRED => 'Выберите вариацию товара',

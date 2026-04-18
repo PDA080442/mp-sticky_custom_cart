@@ -2496,15 +2496,26 @@
 		this.syncCheckoutState(empty);
 		var $clear = this.$root.find('[data-mp-scc-clear-cart]');
 		if ($clear.length) {
-			var clearAria = $clear.attr('data-mp-scc-clear-aria-disabled') || '';
 			if (empty) {
-				$clear.addClass('mp-scc-clear-cart--disabled').prop('disabled', true).attr('aria-disabled', 'true');
-				if (clearAria) {
-					$clear.attr('aria-label', clearAria);
-				}
+				$clear.each(function () {
+					var $b = $(this);
+					var clearAria = $b.attr('data-mp-scc-clear-aria-disabled') || '';
+					$b.addClass('mp-scc-clear-cart--disabled').prop('disabled', true).attr('aria-disabled', 'true');
+					if (clearAria) {
+						$b.attr('aria-label', clearAria).attr('title', clearAria);
+					}
+				});
 			} else {
-				$clear.removeClass('mp-scc-clear-cart--disabled').prop('disabled', false).removeAttr('aria-disabled');
-				$clear.removeAttr('aria-label');
+				$clear.each(function () {
+					var $b = $(this);
+					$b.removeClass('mp-scc-clear-cart--disabled').prop('disabled', false).removeAttr('aria-disabled');
+					var lbl = $b.attr('data-mp-scc-clear-label');
+					if (lbl) {
+						$b.attr('aria-label', lbl).attr('title', lbl);
+					} else {
+						$b.removeAttr('aria-label').removeAttr('title');
+					}
+				});
 			}
 		}
 		if (this.$drawer.length) {
@@ -2524,25 +2535,36 @@
 		if (!$a.length) {
 			return;
 		}
-		var base = $a.attr('data-mp-scc-checkout-base') || '';
-		var disabledAria = $a.attr('data-mp-scc-checkout-aria-disabled') || '';
 		if (empty) {
-			$a.addClass('mp-scc-checkout--disabled');
-			$a.attr('href', '#');
-			$a.attr('aria-disabled', 'true');
-			$a.attr('tabindex', '-1');
-			if (disabledAria) {
-				$a.attr('aria-label', disabledAria);
-			}
+			$a.each(function () {
+				var $el = $(this);
+				var disabledAria = $el.attr('data-mp-scc-checkout-aria-disabled') || '';
+				$el.addClass('mp-scc-checkout--disabled');
+				$el.attr('href', '#');
+				$el.attr('aria-disabled', 'true');
+				$el.attr('tabindex', '-1');
+				if (disabledAria) {
+					$el.attr('aria-label', disabledAria).attr('title', disabledAria);
+				}
+			});
 		} else {
-			$a.removeClass('mp-scc-checkout--disabled');
-			$a.removeAttr('aria-disabled');
-			$a.removeAttr('tabindex');
-			$a.removeAttr('aria-label');
-			if (base) {
-				var merged = window.mpScc.mergeUrlWithLocationQuery(base);
-				$a.attr('href', merged);
-			}
+			$a.each(function () {
+				var $el = $(this);
+				var base = $el.attr('data-mp-scc-checkout-base') || '';
+				$el.removeClass('mp-scc-checkout--disabled');
+				$el.removeAttr('aria-disabled');
+				$el.removeAttr('tabindex');
+				if (base) {
+					var merged = window.mpScc.mergeUrlWithLocationQuery(base);
+					$el.attr('href', merged);
+				}
+				var lbl = $el.attr('data-mp-scc-checkout-label');
+				if (lbl) {
+					$el.attr('aria-label', lbl).attr('title', lbl);
+				} else {
+					$el.removeAttr('aria-label').removeAttr('title');
+				}
+			});
 		}
 	};
 
@@ -2998,8 +3020,23 @@
 			if (self.clearCartLocked || self.snapshotLocked || self.mutationInFlight) {
 				return;
 			}
+			var $allClear = self.$root.find('[data-mp-scc-clear-cart]').filter(function () {
+				var $b = $(this);
+				return !$b.hasClass('mp-scc-clear-cart--disabled') && !$b.prop('disabled');
+			});
+			if (!$allClear.length) {
+				return;
+			}
 			self.clearCartLocked = true;
-			$btn.prop('disabled', true).attr('aria-busy', 'true').addClass('mp-scc-clear-cart--loading');
+			var loadingMsg =
+				(typeof window.mpScc.label === 'function' && window.mpScc.label('clear_cart_in_progress')) ||
+				'Очистка корзины…';
+			$allClear
+				.prop('disabled', true)
+				.attr('aria-busy', 'true')
+				.addClass('mp-scc-clear-cart--loading')
+				.attr('aria-label', loadingMsg)
+				.attr('title', loadingMsg);
 			window.mpScc
 				.postAjax('clearCart', {})
 				.done(function (resp) {
@@ -3022,14 +3059,12 @@
 				})
 				.always(function () {
 					self.clearCartLocked = false;
-					$btn.removeAttr('aria-busy').removeClass('mp-scc-clear-cart--loading');
+					self.$root.find('[data-mp-scc-clear-cart]').each(function () {
+						var $b = $(this);
+						$b.removeAttr('aria-busy').removeClass('mp-scc-clear-cart--loading');
+					});
 					var isEmpty = self.$root.attr('data-mp-scc-cart-empty') === '1';
-					if (isEmpty) {
-						self.syncStickyActions(true);
-					} else {
-						$btn.prop('disabled', false).removeAttr('aria-disabled').removeClass('mp-scc-clear-cart--disabled');
-						$btn.removeAttr('aria-label');
-					}
+					self.syncStickyActions(isEmpty);
 				});
 		});
 
