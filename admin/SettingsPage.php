@@ -1224,6 +1224,17 @@ final class SettingsPage {
 		self::field_number( $opt, 'sticky_cart', 'drawer_padding_x_px', __( 'Внутренний отступ drawer по горизонтали (px)', 'mp-sticky-custom-cart' ), isset( $c['drawer_padding_x_px'] ) ? (int) $c['drawer_padding_x_px'] : 16, '', array( 'var' => $p . 'sticky-drawer-padding-x', 'fmt' => 'unit', 'suffix' => 'px' ) );
 		self::field_number( $opt, 'sticky_cart', 'drawer_padding_y_px', __( 'Внутренний отступ drawer по вертикали (px)', 'mp-sticky-custom-cart' ), isset( $c['drawer_padding_y_px'] ) ? (int) $c['drawer_padding_y_px'] : 12, '', array( 'var' => $p . 'sticky-drawer-padding-y', 'fmt' => 'unit', 'suffix' => 'px' ) );
 		echo '</tbody></table>';
+
+		echo '<h3>' . esc_html__( 'Три состояния: панель B (краткая сводка)', 'mp-sticky-custom-cart' ) . '</h3>';
+		echo '<p class="description">' . esc_html__( 'Видна при включённом режиме «иконка» и флаге три состояния: панель над FAB, рост вверх. Без внутреннего скролла при типовой высоте.', 'mp-sticky-custom-cart' ) . '</p>';
+		echo '<table class="form-table" role="presentation"><tbody>';
+		self::field_number( $opt, 'sticky_cart', 'tristate_panel_b_max_height_px', __( 'Макс. высота панели B (px)', 'mp-sticky-custom-cart' ), isset( $c['tristate_panel_b_max_height_px'] ) ? (int) $c['tristate_panel_b_max_height_px'] : 200, __( 'Ограничивает блок; при превышении контент обрезается по краю (без скролла внутри панели).', 'mp-sticky-custom-cart' ), array( 'var' => $p . 'tristate-panel-b-max-height', 'fmt' => 'unit', 'suffix' => 'px' ) );
+		self::field_number( $opt, 'sticky_cart', 'tristate_panel_b_width_px', __( 'Ширина панели B (px)', 'mp-sticky-custom-cart' ), isset( $c['tristate_panel_b_width_px'] ) ? (int) $c['tristate_panel_b_width_px'] : 280, '', array( 'var' => $p . 'tristate-panel-b-width', 'fmt' => 'unit', 'suffix' => 'px' ) );
+		self::field_number( $opt, 'sticky_cart', 'tristate_panel_b_gap_bottom_px', __( 'Зазор между FAB и панелью B (px)', 'mp-sticky-custom-cart' ), isset( $c['tristate_panel_b_gap_bottom_px'] ) ? (int) $c['tristate_panel_b_gap_bottom_px'] : 10, '', array( 'var' => $p . 'tristate-panel-b-gap-bottom', 'fmt' => 'unit', 'suffix' => 'px' ) );
+		self::field_number( $opt, 'sticky_cart', 'tristate_panel_b_padding_px', __( 'Внутренний отступ панели B (px)', 'mp-sticky-custom-cart' ), isset( $c['tristate_panel_b_padding_px'] ) ? (int) $c['tristate_panel_b_padding_px'] : 12, '', array( 'var' => $p . 'tristate-panel-b-padding', 'fmt' => 'unit', 'suffix' => 'px' ) );
+		self::field_number( $opt, 'sticky_cart', 'tristate_panel_b_border_radius_px', __( 'Скругление панели B (px)', 'mp-sticky-custom-cart' ), isset( $c['tristate_panel_b_border_radius_px'] ) ? (int) $c['tristate_panel_b_border_radius_px'] : 12, '', array( 'var' => $p . 'tristate-panel-b-border-radius', 'fmt' => 'unit', 'suffix' => 'px' ) );
+		self::field_number( $opt, 'sticky_cart', 'tristate_panel_b_actions_gap_px', __( 'Зазор между иконками в панели B (px)', 'mp-sticky-custom-cart' ), isset( $c['tristate_panel_b_actions_gap_px'] ) ? (int) $c['tristate_panel_b_actions_gap_px'] : 8, '', array( 'var' => $p . 'tristate-panel-b-actions-gap', 'fmt' => 'unit', 'suffix' => 'px' ) );
+		echo '</tbody></table>';
 	}
 
 	/**

@@ -52,6 +52,12 @@ final class UiSettingsDefaults {
 			'drawer_line_unit_font_size_px',
 			'drawer_line_price_font_size_px',
 			'drawer_line_price_font_weight',
+			'tristate_panel_b_max_height_px',
+			'tristate_panel_b_width_px',
+			'tristate_panel_b_gap_bottom_px',
+			'tristate_panel_b_padding_px',
+			'tristate_panel_b_border_radius_px',
+			'tristate_panel_b_actions_gap_px',
 		);
 	}
 
@@ -181,6 +187,18 @@ final class UiSettingsDefaults {
 				'sticky_inner_gap_mobile_px' => 10,
 				'sticky_inner_gap_desktop_row_px' => 16,
 				'sticky_inner_gap_desktop_col_px' => 24,
+				/** Max height of tri-state summary panel B (px); typical content should fit without inner scroll. */
+				'tristate_panel_b_max_height_px'     => 200,
+				/** Width of panel B (px). */
+				'tristate_panel_b_width_px'          => 280,
+				/** Gap between FAB and bottom edge of panel B (px). */
+				'tristate_panel_b_gap_bottom_px'     => 10,
+				/** Inner padding of panel B (px). */
+				'tristate_panel_b_padding_px'        => 12,
+				/** Corner radius of panel B (px). */
+				'tristate_panel_b_border_radius_px'  => 12,
+				/** Gap between icon action buttons in panel B (px). */
+				'tristate_panel_b_actions_gap_px'    => 8,
 			),
 			'wishlist_ui' => array(
 				'heart_reserve_top_px'       => 10,

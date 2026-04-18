@@ -269,6 +269,42 @@ final class CssVariablesContract {
 				'omit_if_zero' => true,
 			),
 			array(
+				'name'   => self::PREFIX . 'tristate-panel-b-max-height',
+				'path'   => 'sticky_cart.tristate_panel_b_max_height_px',
+				'suffix' => 'px',
+				'format' => 'unit',
+			),
+			array(
+				'name'   => self::PREFIX . 'tristate-panel-b-width',
+				'path'   => 'sticky_cart.tristate_panel_b_width_px',
+				'suffix' => 'px',
+				'format' => 'unit',
+			),
+			array(
+				'name'   => self::PREFIX . 'tristate-panel-b-gap-bottom',
+				'path'   => 'sticky_cart.tristate_panel_b_gap_bottom_px',
+				'suffix' => 'px',
+				'format' => 'unit',
+			),
+			array(
+				'name'   => self::PREFIX . 'tristate-panel-b-padding',
+				'path'   => 'sticky_cart.tristate_panel_b_padding_px',
+				'suffix' => 'px',
+				'format' => 'unit',
+			),
+			array(
+				'name'   => self::PREFIX . 'tristate-panel-b-border-radius',
+				'path'   => 'sticky_cart.tristate_panel_b_border_radius_px',
+				'suffix' => 'px',
+				'format' => 'unit',
+			),
+			array(
+				'name'   => self::PREFIX . 'tristate-panel-b-actions-gap',
+				'path'   => 'sticky_cart.tristate_panel_b_actions_gap_px',
+				'suffix' => 'px',
+				'format' => 'unit',
+			),
+			array(
 				'name'   => self::PREFIX . 'color-text-primary',
 				'path'   => 'styles.color_text_primary',
 				'suffix' => '',
