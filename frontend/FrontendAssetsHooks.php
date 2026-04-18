@@ -16,8 +16,9 @@ defined( 'ABSPATH' ) || exit;
  */
 final class FrontendAssetsHooks {
 
-	public const HANDLE_SCRIPT = 'mp-scc-frontend';
-	public const HANDLE_STYLE  = 'mp-scc-frontend';
+	public const HANDLE_SCRIPT      = 'mp-scc-frontend';
+	public const HANDLE_CART_SHELL  = 'mp-scc-cart-ui-shell';
+	public const HANDLE_STYLE       = 'mp-scc-frontend';
 
 	public static function register() {
 		add_action( 'wp_enqueue_scripts', array( self::class, 'enqueue' ), 20 );
@@ -32,7 +33,15 @@ final class FrontendAssetsHooks {
 	 * Enqueue or register storefront assets.
 	 */
 	public static function enqueue() {
-		$script_deps = array( 'jquery' );
+		wp_enqueue_script(
+			self::HANDLE_CART_SHELL,
+			PluginPaths::url( 'assets/js/cart-ui-shell-state.js' ),
+			array(),
+			MP_STICKY_CUSTOM_CART_ASSET_VERSION,
+			true
+		);
+
+		$script_deps = array( 'jquery', self::HANDLE_CART_SHELL );
 		if ( wp_script_is( 'wc-cart-fragments', 'registered' ) ) {
 			$script_deps[] = 'wc-cart-fragments';
 		}
