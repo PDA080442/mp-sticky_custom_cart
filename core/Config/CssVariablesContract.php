@@ -305,6 +305,12 @@ final class CssVariablesContract {
 				'format' => 'unit',
 			),
 			array(
+				'name'   => self::PREFIX . 'tristate-panel-c-width',
+				'path'   => 'sticky_cart.tristate_panel_c_width_px',
+				'suffix' => 'px',
+				'format' => 'unit',
+			),
+			array(
 				'name'   => self::PREFIX . 'color-text-primary',
 				'path'   => 'styles.color_text_primary',
 				'suffix' => '',

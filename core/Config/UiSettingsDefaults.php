@@ -58,6 +58,7 @@ final class UiSettingsDefaults {
 			'tristate_panel_b_padding_px',
 			'tristate_panel_b_border_radius_px',
 			'tristate_panel_b_actions_gap_px',
+			'tristate_panel_c_width_px',
 		);
 	}
 
@@ -199,6 +200,8 @@ final class UiSettingsDefaults {
 				'tristate_panel_b_border_radius_px'  => 12,
 				/** Gap between icon action buttons in panel B (px). */
 				'tristate_panel_b_actions_gap_px'    => 8,
+				/** Drawer C width (px), expands left from right edge; height matches panel B max-height. */
+				'tristate_panel_c_width_px'          => 400,
 			),
 			'wishlist_ui' => array(
 				'heart_reserve_top_px'       => 10,

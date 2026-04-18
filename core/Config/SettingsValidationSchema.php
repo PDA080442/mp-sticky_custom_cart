@@ -200,6 +200,7 @@ final class SettingsValidationSchema {
 				'tristate_panel_b_padding_px'        => array( 'type' => 'integer', 'min' => 8, 'max' => 32 ),
 				'tristate_panel_b_border_radius_px'  => array( 'type' => 'integer', 'min' => 0, 'max' => 28 ),
 				'tristate_panel_b_actions_gap_px'    => array( 'type' => 'integer', 'min' => 4, 'max' => 24 ),
+				'tristate_panel_c_width_px'          => array( 'type' => 'integer', 'min' => 260, 'max' => 560 ),
 			),
 			'wishlist_ui' => array(
 				'heart_reserve_top_px'       => array( 'type' => 'integer', 'min' => 0, 'max' => 200 ),
