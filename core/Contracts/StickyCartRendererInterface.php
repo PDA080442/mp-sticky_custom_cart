@@ -20,7 +20,7 @@ interface StickyCartRendererInterface {
 	public function should_render();
 
 	/**
-	 * Full HTML fragment for the sticky root (placed before `wp_footer` or similar).
+	 * Full HTML fragment for the sticky root (typically via {@see wp_body_open}, else `wp_footer` fallback).
 	 *
 	 * @return string Safe HTML.
 	 */

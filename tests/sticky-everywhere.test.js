@@ -21,7 +21,10 @@ assert.ok(
 assert.ok(!vis.includes('is_checkout()'), 'Visibility should not hard-exclude checkout (use filter if needed)');
 assert.ok(!vis.includes('is_product()'), 'Visibility should not gate on product template');
 assert.ok(!vis.includes('is_shop()'), 'Visibility should not gate on shop template');
-assert.ok(hooks.includes('mp_sticky_custom_cart_render_sticky_cart'), 'Footer hook should fire sticky render action');
+assert.ok(
+	hooks.includes('wp_body_open') && hooks.includes('wp_footer') && hooks.includes('sticky_root_printed'),
+	'Sticky should print from wp_body_open with wp_footer fallback (fixed cart vs viewport, not trapped in footer)'
+);
 assert.ok(qaEverywhere.includes('is_checkout'), 'qa-sticky-everywhere should document checkout case');
 assert.ok(qaEverywhere.includes('is_account'), 'qa-sticky-everywhere should document account case');
 assert.ok(qaEverywhere.includes('is_product') || qaEverywhere.includes('Single product'), 'qa-sticky-everywhere should cover single product');

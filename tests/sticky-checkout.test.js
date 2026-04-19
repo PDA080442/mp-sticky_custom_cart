@@ -14,6 +14,7 @@ var renderer = fs.readFileSync(path.join(__dirname, '..', 'frontend', 'StickyCar
 var localize = fs.readFileSync(path.join(__dirname, '..', 'frontend', 'FrontendFlagResolver.php'), 'utf8');
 var preserve = fs.readFileSync(path.join(__dirname, '..', 'core', 'CheckoutQueryPreserve.php'), 'utf8');
 
+assert.ok(renderer.includes('position:fixed'), 'Renderer should inline fixed positioning so early-body output is not top-left in flow');
 assert.ok(renderer.includes('wc_get_checkout_url'), 'Renderer should use WooCommerce checkout URL');
 assert.ok(renderer.includes('data-mp-scc-checkout-base'), 'Renderer should expose base checkout URL for JS');
 assert.ok(renderer.includes('mp-scc-checkout--disabled'), 'Renderer should mark disabled state when cart empty');

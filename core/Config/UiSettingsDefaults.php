@@ -217,9 +217,9 @@ final class UiSettingsDefaults {
 				/** Drawer C width (px), expands left from right edge; height matches panel B max-height. */
 				'tristate_panel_c_width_px'          => 400,
 				/** Horizontal inset of tri-state dock (FAB + B/C) from viewport edges (px). */
-				'tristate_dock_inset_right_px'       => 12,
+				'tristate_dock_inset_right_px'       => 32,
 				/** Bottom inset of tri-state dock above safe-area (px). */
-				'tristate_dock_inset_bottom_px'      => 12,
+				'tristate_dock_inset_bottom_px'      => 32,
 				/** Backdrop blur for floating panels B/C (px); 0 disables blur on those surfaces. */
 				'tristate_column_backdrop_blur_px'   => 14,
 				/** Box-shadow blur for B/C elevation (px). */

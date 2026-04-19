@@ -79,9 +79,25 @@ final class StickyCartRenderer implements StickyCartRendererInterface {
 			$aria_controls = 'mp-scc-shell-panel-b mp-scc-drawer';
 		}
 
+		$z = (int) OptionResolver::get_setting( 'sticky_cart.z_index', 100050 );
+		$z = max( 1, min( 9999999, $z ) );
+		// Critical layout when root prints from wp_body_open before themed wrappers: without fixed+bottom,
+		// the shell sits in normal flow (top-left). CSS still owns glass, padding, tristate metrics.
+		if ( $tristate ) {
+			$root_style = sprintf(
+				'position:fixed;z-index:%d;left:auto;right:0;bottom:0;top:auto;width:auto;max-width:none;margin:0;pointer-events:auto;',
+				$z
+			);
+		} else {
+			$root_style = sprintf(
+				'position:fixed;z-index:%d;inset:auto 0 0 0;width:100%%;max-width:100%%;margin:0;pointer-events:auto;',
+				$z
+			);
+		}
+
 		ob_start();
 		?>
-<div id="mp-scc-sticky-root" class="mp-scc-root mp-scc-sticky-bar<?php echo esc_attr( $root_mods ); ?>" role="region" aria-label="<?php esc_attr_e( 'Shopping cart', 'mp-sticky-custom-cart' ); ?>" data-mp-scc-sticky-root data-mp-scc-cart-empty="<?php echo $empty ? '1' : '0'; ?>" data-mp-scc-sticky-tristate="<?php echo $tristate ? '1' : '0'; ?>">
+<div id="mp-scc-sticky-root" class="mp-scc-root mp-scc-sticky-bar<?php echo esc_attr( $root_mods ); ?>" style="<?php echo esc_attr( $root_style ); ?>" role="region" aria-label="<?php esc_attr_e( 'Shopping cart', 'mp-sticky-custom-cart' ); ?>" data-mp-scc-sticky-root data-mp-scc-cart-empty="<?php echo $empty ? '1' : '0'; ?>" data-mp-scc-sticky-tristate="<?php echo $tristate ? '1' : '0'; ?>">
 	<div class="mp-scc-sticky-stack">
 		<?php if ( $tristate && $drawer ) : ?>
 		<div id="mp-scc-shell-panel-b" class="mp-scc-shell-panel-b" data-mp-scc-shell-panel-b role="region" aria-label="<?php esc_attr_e( 'Cart summary', 'mp-sticky-custom-cart' ); ?>" hidden aria-hidden="true">

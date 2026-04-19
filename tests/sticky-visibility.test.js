@@ -19,6 +19,7 @@ var qa = fs.readFileSync(path.join(__dirname, '..', 'docs', 'qa-sticky-visibilit
 
 assert.ok(vis.includes('should_render_sticky'), 'StickyCartVisibility should expose should_render_sticky');
 assert.ok(!vis.includes('$cart->is_empty'), 'Visibility must not call cart->is_empty()');
+assert.ok(hooks.includes('wp_body_open'), 'Sticky root should prefer wp_body_open so fixed positioning is viewport-anchored');
 assert.ok(hooks.includes('mp-scc-sticky-active'), 'body_class should add mp-scc-sticky-active');
 assert.ok(hooks.includes('mp-scc-sticky-layout-tristate'), 'body_class should add tristate layout when flag on');
 assert.ok(hooks.includes('KEY_STICKY_TRISTATE_ENABLED'), 'body_class should consult tristate flag');

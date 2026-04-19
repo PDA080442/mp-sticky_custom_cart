@@ -130,12 +130,12 @@ body.mp-scc-sticky-active.mp-scc-sticky-layout-tristate {
 	max-width: none;
 	margin: 0;
 	padding-top: 0;
-	padding-right: max(var(--mp-scc-tristate-dock-inset-right, 12px), env(safe-area-inset-right, 0px));
+	padding-right: max(var(--mp-scc-tristate-dock-inset-right, 32px), env(safe-area-inset-right, 0px));
 	padding-bottom: max(
-		var(--mp-scc-tristate-dock-inset-bottom, 12px),
+		var(--mp-scc-tristate-dock-inset-bottom, 32px),
 		env(safe-area-inset-bottom, 0px)
 	);
-	padding-left: max(var(--mp-scc-tristate-dock-inset-right, 12px), env(safe-area-inset-left, 0px));
+	padding-left: max(var(--mp-scc-tristate-dock-inset-right, 32px), env(safe-area-inset-left, 0px));
 	border-radius: var(--mp-scc-catalog-cart-icon-border-radius, 12px);
 	isolation: isolate;
 }
@@ -144,21 +144,26 @@ body.mp-scc-sticky-active.mp-scc-sticky-layout-tristate {
 	position: relative;
 	width: auto;
 	align-items: flex-end;
+	overflow: visible;
 }
 
 .mp-scc-sticky-bar.mp-scc-sticky--tristate .mp-scc-sticky-inner {
 	width: auto;
+	min-width: min-content;
 	flex-direction: row;
 	flex-wrap: nowrap;
 	align-items: center;
 	justify-content: flex-end;
 	gap: 0;
+	overflow: visible;
 }
 
 .mp-scc-sticky-bar.mp-scc-sticky--tristate .mp-scc-sticky-summary {
 	width: auto;
 	flex: 0 0 auto;
-	min-width: 0;
+	flex-shrink: 0;
+	min-width: min-content;
+	overflow: visible;
 }
 
 .mp-scc-sticky-bar.mp-scc-sticky--tristate .mp-scc-sticky-summary-text,
@@ -185,7 +190,7 @@ body.mp-scc-sticky-active.mp-scc-sticky-layout-tristate {
 		var(--mp-scc-tristate-panel-c-width, 400px),
 		calc(
 			100vw - max(
-				calc(2 * var(--mp-scc-tristate-dock-inset-right, 12px)),
+				calc(2 * var(--mp-scc-tristate-dock-inset-right, 32px)),
 				calc(env(safe-area-inset-left, 0px) + env(safe-area-inset-right, 0px))
 			)
 		)
@@ -286,9 +291,9 @@ body.mp-scc-sticky-active.mp-scc-sticky-layout-tristate {
 
 @media (min-width: 783px) {
 	.mp-scc-sticky-bar.mp-scc-sticky--tristate {
-		padding-right: max(var(--mp-scc-tristate-dock-inset-right, 16px), env(safe-area-inset-right, 0px));
-		padding-bottom: max(var(--mp-scc-tristate-dock-inset-bottom, 14px), env(safe-area-inset-bottom, 0px));
-		padding-left: max(var(--mp-scc-tristate-dock-inset-right, 16px), env(safe-area-inset-left, 0px));
+		padding-right: max(var(--mp-scc-tristate-dock-inset-right, 32px), env(safe-area-inset-right, 0px));
+		padding-bottom: max(var(--mp-scc-tristate-dock-inset-bottom, 32px), env(safe-area-inset-bottom, 0px));
+		padding-left: max(var(--mp-scc-tristate-dock-inset-right, 32px), env(safe-area-inset-left, 0px));
 	}
 }
 
@@ -299,6 +304,7 @@ body.mp-scc-sticky-active.mp-scc-sticky-layout-tristate {
 	background: var(--mp-scc-catalog-cart-icon-background, rgba(255, 255, 255, 0.94));
 	color: var(--mp-scc-catalog-cart-icon-color, #1a1a1a);
 	box-shadow: 0 4px 18px rgba(0, 0, 0, 0.12);
+	overflow: visible;
 }
 
 .mp-scc-sticky-bar.mp-scc-sticky--tristate .mp-scc-drawer-toggle--fab:hover {
@@ -309,6 +315,27 @@ body.mp-scc-sticky-active.mp-scc-sticky-layout-tristate {
 .mp-scc-sticky-bar.mp-scc-sticky--tristate .mp-scc-drawer-toggle--fab:focus-visible {
 	outline: 2px solid var(--mp-scc-color-button-primary, #111);
 	outline-offset: 2px;
+}
+
+/* State A: visible cart glyph (chevron triangle is 0×0 box — some flex themes clip it; bag reads as «корзина»). */
+.mp-scc-sticky-bar.mp-scc-sticky--tristate .mp-scc-drawer-toggle--fab .mp-scc-drawer-toggle-icon {
+	display: block;
+	width: 26px;
+	height: 26px;
+	margin: 0 auto;
+	border: none;
+	border-radius: 0;
+	background-color: currentColor;
+	-webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%23000' d='M7 18c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zM1 2v2h2l3.6 7.59-1.35 2.45c-.15.28-.25.61-.25.96 0 1.1.9 2 2 2h12v-2H7.42c-.14 0-.25-.11-.25-.25l.03-.12L8.1 13h7.45c.75 0 1.41-.41 1.75-1.03L21.7 4H5.21l-.94-2H1zm16 16c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z'/%3E%3C/svg%3E");
+	mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%23000' d='M7 18c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zM1 2v2h2l3.6 7.59-1.35 2.45c-.15.28-.25.61-.25.96 0 1.1.9 2 2 2h12v-2H7.42c-.14 0-.25-.11-.25-.25l.03-.12L8.1 13h7.45c.75 0 1.41-.41 1.75-1.03L21.7 4H5.21l-.94-2H1zm16 16c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z'/%3E%3C/svg%3E");
+	-webkit-mask-size: contain;
+	mask-size: contain;
+	-webkit-mask-repeat: no-repeat;
+	mask-repeat: no-repeat;
+	-webkit-mask-position: center;
+	mask-position: center;
+	transform: none;
+	transition: opacity var(--mp-scc-motion-duration) var(--mp-scc-motion-easing);
 }
 
 /* Tri-state panel B: right-docked, grows upward (dp §17.3) */
@@ -322,7 +349,7 @@ body.mp-scc-sticky-active.mp-scc-sticky-layout-tristate {
 		var(--mp-scc-tristate-panel-b-width, 280px),
 		calc(
 			100vw - max(
-				calc(2 * var(--mp-scc-tristate-dock-inset-right, 12px)),
+				calc(2 * var(--mp-scc-tristate-dock-inset-right, 32px)),
 				calc(env(safe-area-inset-left, 0px) + env(safe-area-inset-right, 0px))
 			)
 		)
