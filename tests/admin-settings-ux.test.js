@@ -31,6 +31,12 @@ assert.ok(settingsPage.includes('mp-scc-settings-form'), 'Main form should have 
 assert.ok(settingsPage.includes('mp-scc-style-live-preview'), 'Styles tab should render live preview anchor');
 assert.ok(settingsPage.includes('data-mp-scc-preview-baseline'), 'Sticky preview should store baseline for revert');
 assert.ok(settingsPage.includes('mp-scc-reset-tab-form'), 'Reset form should be separate from options form');
+	assert.ok(
+		settingsPage.includes('ERROR_LOG_PURGE_FORM_ID') &&
+			settingsPage.includes("'form'") &&
+			settingsPage.includes('self::ERROR_LOG_PURGE_FORM_ID'),
+		'Error log purge must use external form + form= on submit (no nested form inside options.php)'
+	);
 assert.ok(settingsPage.includes('help_tip_button'), 'Settings should support contextual help tooltips');
 assert.ok(resetHandler.includes("admin_post_' . self::ACTION") && resetHandler.includes('mp_scc_reset_settings_tab'), 'Reset handler should use admin-post action');
 assert.ok(resetHandler.includes('reset_styles_tab_appearance'), 'Reset handler should reset styles tab appearance keys');

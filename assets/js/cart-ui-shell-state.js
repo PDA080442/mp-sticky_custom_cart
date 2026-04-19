@@ -383,6 +383,16 @@
 	};
 
 	CartUiShellStateMachine.prototype._tristateFabLayout = function () {
+		var el = this.rootEl;
+		if (el && el.getAttribute) {
+			var dom = el.getAttribute('data-mp-scc-sticky-tristate');
+			if (dom === '1' || dom === 'true') {
+				return true;
+			}
+			if (dom === '0' || dom === 'false') {
+				return false;
+			}
+		}
 		try {
 			return !!(
 				window.mpScc &&

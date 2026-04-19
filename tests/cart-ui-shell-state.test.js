@@ -23,6 +23,10 @@ assert.ok(shell.includes('modal-open'), 'Shell Escape should defer when theme mo
 assert.ok(shell.includes('_syncToggleAriaExpanded'), 'Shell should sync aria-expanded on drawer toggle');
 assert.ok(shell.includes('_syncPanelBDom'), 'Shell should sync panel B DOM visibility');
 assert.ok(shell.includes('sticky_tristate_enabled'), 'Shell should branch aria-expanded for tristate flag');
+assert.ok(
+	shell.includes('data-mp-scc-sticky-tristate'),
+	'Shell should read tristate mode from sticky root data attribute (cache-safe vs mpSccData)'
+);
 
 assert.ok(frontend.includes('mpSccCartUiShell.attachSticky'), 'Frontend should attach cart UI shell');
 assert.ok(frontend.includes('ACTION.TOGGLE_C'), 'Drawer toggle should route through shell when present');

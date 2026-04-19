@@ -54,6 +54,7 @@ final class StickyCartRenderer implements StickyCartRendererInterface {
 		$drawer    = OptionResolver::get_flag( FeatureFlagsDefaults::KEY_STICKY_DRAWER_ENABLED, true );
 		$tristate  = OptionResolver::get_flag( FeatureFlagsDefaults::KEY_STICKY_TRISTATE_ENABLED, false );
 		$root_mods = trim( ( $empty ? ' mp-scc-sticky--empty' : '' ) . ( $tristate ? ' mp-scc-sticky--tristate' : '' ) );
+		$show_sticky_bar_summary = ! $tristate || ! $drawer;
 
 		$checkout_base = function_exists( 'wc_get_checkout_url' ) ? (string) wc_get_checkout_url() : '';
 		$checkout_url  = CheckoutQueryPreserve::merge_request_into_url( $checkout_base );
@@ -158,12 +159,15 @@ final class StickyCartRenderer implements StickyCartRendererInterface {
 					<span class="mp-scc-drawer-toggle-icon" aria-hidden="true"></span>
 				</button>
 				<?php endif; ?>
+				<?php if ( $show_sticky_bar_summary ) : ?>
 				<div class="mp-scc-sticky-summary-text">
 					<span class="mp-scc-cart-count" data-mp-scc-cart-count><?php echo esc_html( (string) $line_count ); ?></span>
 					<span class="mp-scc-sr-only" data-mp-scc-cart-qty-total><?php echo esc_html( sprintf( /* translators: %d: total quantity of all line items */ __( 'Total quantity in cart: %d', 'mp-sticky-custom-cart' ), $qty_total ) ); ?></span>
 					<span class="mp-scc-cart-total" data-mp-scc-cart-total><?php echo wp_kses_post( $total ); ?></span>
 				</div>
+				<?php endif; ?>
 			</section>
+			<?php if ( $show_sticky_bar_summary ) : ?>
 			<div class="mp-scc-sticky-actions" role="toolbar" aria-orientation="horizontal" aria-label="<?php esc_attr_e( 'Cart actions', 'mp-sticky-custom-cart' ); ?>" data-mp-scc-actions>
 				<button type="button" class="mp-scc-btn mp-scc-btn--ghost mp-scc-clear-cart<?php echo $empty ? ' mp-scc-clear-cart--disabled' : ''; ?>"
 					data-mp-scc-clear-cart
@@ -186,6 +190,7 @@ final class StickyCartRenderer implements StickyCartRendererInterface {
 					<?php endif; ?>
 				><?php echo esc_html( $checkout_label ); ?></a>
 			</div>
+			<?php endif; ?>
 		</div>
 	</div>
 </div>

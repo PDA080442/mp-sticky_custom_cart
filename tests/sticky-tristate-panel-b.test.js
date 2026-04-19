@@ -28,10 +28,12 @@ assert.ok(renderer.includes('tristate_icon_actions_toolbar_markup'), 'Renderer s
 assert.ok(renderer.includes('data-mp-scc-clear-label'), 'Icon clear should expose label for a11y restore');
 assert.ok(renderer.includes('data-mp-scc-checkout-label'), 'Icon checkout should expose label for a11y restore');
 assert.ok(renderer.includes('mp-scc-tristate-action-svg'), 'Inline SVGs should use shared tristate glyph class');
+assert.ok(renderer.includes('show_sticky_bar_summary'), 'Renderer should gate legacy bar strip when tristate+drawer');
 
 assert.ok(shell.includes('return STATES.B') && shell.includes('ACTION.TOGGLE_C'), 'Shell reducer should open B from A when panel exists');
 assert.ok(shell.includes('_syncPanelBDom'), 'Shell should sync panel B visibility');
 assert.ok(shell.includes('_onPointerDownCapture'), 'Shell should dismiss panel B on outside pointer');
+assert.ok(shell.includes('data-mp-scc-sticky-tristate'), 'Shell should honor PHP tristate data attribute on root');
 
 assert.ok(css.includes('mp-scc-shell-panel-b'), 'CSS should style panel B');
 assert.ok(css.includes('--mp-scc-tristate-panel-b-max-height'), 'CSS should consume B max-height token');

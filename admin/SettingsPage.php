@@ -25,6 +25,11 @@ defined( 'ABSPATH' ) || exit;
 final class SettingsPage {
 
 	/**
+	 * Standalone admin-post form id for error log purge (must never be nested inside the options.php form).
+	 */
+	private const ERROR_LOG_PURGE_FORM_ID = 'mp-scc-purge-error-log-form';
+
+	/**
 	 * Hook suffix returned by add_menu_page.
 	 *
 	 * @var string
@@ -170,6 +175,21 @@ final class SettingsPage {
 				);
 				?>
 			</form>
+
+			<?php if ( 'diagnostics' === $tab ) : ?>
+			<form
+				id="<?php echo esc_attr( self::ERROR_LOG_PURGE_FORM_ID ); ?>"
+				class="mp-scc-hidden-post-form"
+				method="post"
+				action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>"
+				hidden
+				aria-hidden="true"
+			>
+				<?php wp_nonce_field( Constants::ADMIN_POST_PURGE_ERROR_LOG ); ?>
+				<input type="hidden" name="action" value="<?php echo esc_attr( Constants::ADMIN_POST_PURGE_ERROR_LOG ); ?>" />
+				<input type="hidden" name="mp_scc_return_tab" value="diagnostics" />
+			</form>
+			<?php endif; ?>
 
 			<form action="options.php" method="post" class="mp-scc-settings-form" id="mp-scc-settings-form">
 				<?php settings_fields( Constants::SLUG . '_settings' ); ?>
@@ -1227,7 +1247,7 @@ final class SettingsPage {
 		echo '</tbody></table>';
 
 		echo '<h3>' . esc_html__( 'Три состояния: панель B (краткая сводка)', 'mp-sticky-custom-cart' ) . '</h3>';
-		echo '<p class="description">' . esc_html__( 'Видна при включённом режиме «иконка» и флаге три состояния: панель над FAB, рост вверх. Без внутреннего скролла при типовой высоте.', 'mp-sticky-custom-cart' ) . '</p>';
+		echo '<p class="description">' . esc_html__( 'Важно: нижняя полоса с текстовыми кнопками «Очистить» / «Оформить» остаётся, пока на вкладке «Служебное» в блоке Feature flags не включён пункт «Корзина: режим «иконка» (три состояния)» (и включён drawer). Поля ниже задают внешний вид уже режима FAB + панелей B/C.', 'mp-sticky-custom-cart' ) . '</p>';
 		echo '<table class="form-table" role="presentation"><tbody>';
 		self::field_number( $opt, 'sticky_cart', 'tristate_panel_b_max_height_px', __( 'Макс. высота панели B (px)', 'mp-sticky-custom-cart' ), isset( $c['tristate_panel_b_max_height_px'] ) ? (int) $c['tristate_panel_b_max_height_px'] : 200, __( 'Ограничивает блок; при превышении контент обрезается по краю (без скролла внутри панели).', 'mp-sticky-custom-cart' ), array( 'var' => $p . 'tristate-panel-b-max-height', 'fmt' => 'unit', 'suffix' => 'px' ) );
 		self::field_number( $opt, 'sticky_cart', 'tristate_panel_b_width_px', __( 'Ширина панели B (px)', 'mp-sticky-custom-cart' ), isset( $c['tristate_panel_b_width_px'] ) ? (int) $c['tristate_panel_b_width_px'] : 280, '', array( 'var' => $p . 'tristate-panel-b-width', 'fmt' => 'unit', 'suffix' => 'px' ) );
@@ -1401,20 +1421,17 @@ final class SettingsPage {
 		echo '<p class="mp-scc-error-log-actions">';
 		echo '<button type="button" class="button" id="mp-scc-log-export-csv">' . esc_html__( 'Экспорт CSV', 'mp-sticky-custom-cart' ) . '</button> ';
 		echo '<button type="button" class="button" id="mp-scc-log-export-json">' . esc_html__( 'Экспорт JSON', 'mp-sticky-custom-cart' ) . '</button> ';
-		echo '<form method="post" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '" style="display:inline-block;margin-left:8px;">';
-		wp_nonce_field( Constants::ADMIN_POST_PURGE_ERROR_LOG );
-		echo '<input type="hidden" name="action" value="' . esc_attr( Constants::ADMIN_POST_PURGE_ERROR_LOG ) . '" />';
-		echo '<input type="hidden" name="mp_scc_return_tab" value="diagnostics" />';
 		submit_button(
 			__( 'Очистить журнал', 'mp-sticky-custom-cart' ),
 			'delete small',
 			'submit',
 			false,
 			array(
+				'form'    => self::ERROR_LOG_PURGE_FORM_ID,
+				'style'   => 'margin-left:8px;',
 				'onclick' => 'return confirm(' . wp_json_encode( __( 'Удалить все записи журнала?', 'mp-sticky-custom-cart' ) ) . ');',
 			)
 		);
-		echo '</form>';
 		echo '</p>';
 
 		echo '<div id="mp-scc-error-log-drawer" class="mp-scc-error-log-drawer" aria-hidden="true">';
