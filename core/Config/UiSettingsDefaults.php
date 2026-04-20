@@ -52,6 +52,29 @@ final class UiSettingsDefaults {
 			'drawer_line_unit_font_size_px',
 			'drawer_line_price_font_size_px',
 			'drawer_line_price_font_weight',
+			'tristate_panel_b_max_height_px',
+			'tristate_panel_b_width_px',
+			'tristate_panel_b_gap_bottom_px',
+			'tristate_panel_b_padding_px',
+			'tristate_panel_b_border_radius_px',
+			'tristate_panel_b_actions_gap_px',
+			'tristate_action_icon_hit_px',
+			'tristate_action_icon_glyph_px',
+			'tristate_panel_c_width_px',
+			'tristate_state_a_dock_inset_top_px',
+			'tristate_state_a_dock_inset_right_px',
+			'tristate_state_a_dock_inset_bottom_px',
+			'tristate_state_a_dock_inset_left_px',
+			'tristate_dock_inset_top_px',
+			'tristate_dock_inset_right_px',
+			'tristate_dock_inset_bottom_px',
+			'tristate_dock_inset_left_px',
+			'tristate_column_backdrop_blur_px',
+			'tristate_column_shadow_blur_px',
+			'tristate_column_shadow_offset_y_px',
+			'tristate_column_shadow_opacity_percent',
+			'tristate_mobile_breakpoint_max_px',
+			'tristate_mobile_layout_preset',
 		);
 	}
 
@@ -181,6 +204,55 @@ final class UiSettingsDefaults {
 				'sticky_inner_gap_mobile_px' => 10,
 				'sticky_inner_gap_desktop_row_px' => 16,
 				'sticky_inner_gap_desktop_col_px' => 24,
+				/** Max height of tri-state summary panel B (px); typical content should fit without inner scroll. */
+				'tristate_panel_b_max_height_px'     => 200,
+				/** Width of panel B (px). */
+				'tristate_panel_b_width_px'          => 280,
+				/** Gap between FAB and bottom edge of panel B (px). */
+				'tristate_panel_b_gap_bottom_px'     => 10,
+				/** Inner padding of panel B (px). */
+				'tristate_panel_b_padding_px'        => 12,
+				/** Corner radius of panel B (px). */
+				'tristate_panel_b_border_radius_px'  => 12,
+				/** Gap between icon action buttons in panel B (px). */
+				'tristate_panel_b_actions_gap_px'    => 8,
+				/** Icon-only clear/checkout control outer size (px), tri-state panel B + drawer C. */
+				'tristate_action_icon_hit_px'        => 44,
+				/** Glyph (SVG) size inside {@see tristate_action_icon_hit_px} (px). */
+				'tristate_action_icon_glyph_px'      => 22,
+				/** Drawer C width (px), expands left from right edge; height matches panel B max-height. */
+				'tristate_panel_c_width_px'          => 400,
+				/** State A (FAB only): top inset from viewport (px). */
+				'tristate_state_a_dock_inset_top_px'    => 0,
+				/** State A: right inset (px). */
+				'tristate_state_a_dock_inset_right_px'  => 32,
+				/** State A: bottom inset above safe-area (px). */
+				'tristate_state_a_dock_inset_bottom_px' => 32,
+				/** State A: left inset (px). */
+				'tristate_state_a_dock_inset_left_px'   => 32,
+				/** Top inset of tri-state dock (FAB + B/C) from viewport (px). */
+				'tristate_dock_inset_top_px'         => 0,
+				/** Right inset of tri-state dock from viewport (px). */
+				'tristate_dock_inset_right_px'       => 32,
+				/** Bottom inset of tri-state dock above safe-area (px). */
+				'tristate_dock_inset_bottom_px'      => 32,
+				/** Left inset of tri-state dock from viewport (px). */
+				'tristate_dock_inset_left_px'        => 32,
+				/** Backdrop blur for floating panels B/C (px); 0 disables blur on those surfaces. */
+				'tristate_column_backdrop_blur_px'   => 14,
+				/** Box-shadow blur for B/C elevation (px). */
+				'tristate_column_shadow_blur_px'     => 28,
+				/** Shadow offset upward (px); rendered as negative Y. */
+				'tristate_column_shadow_offset_y_px' => 8,
+				/** Shadow opacity 4–28 → 0.04–0.28 (rgba alpha). */
+				'tristate_column_shadow_opacity_percent' => 12,
+				/** Viewport max-width (px) for mobile preset rules (admin + injected @media). */
+				'tristate_mobile_breakpoint_max_px'  => 782,
+				/**
+				 * right_docked: narrow view keeps column at right (default).
+				 * full_bottom: below breakpoint, B/C span between horizontal insets (bottom-sheet style).
+				 */
+				'tristate_mobile_layout_preset'      => 'right_docked',
 			),
 			'wishlist_ui' => array(
 				'heart_reserve_top_px'       => 10,

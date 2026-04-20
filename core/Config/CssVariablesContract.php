@@ -269,6 +269,126 @@ final class CssVariablesContract {
 				'omit_if_zero' => true,
 			),
 			array(
+				'name'   => self::PREFIX . 'tristate-panel-b-max-height',
+				'path'   => 'sticky_cart.tristate_panel_b_max_height_px',
+				'suffix' => 'px',
+				'format' => 'unit',
+			),
+			array(
+				'name'   => self::PREFIX . 'tristate-panel-b-width',
+				'path'   => 'sticky_cart.tristate_panel_b_width_px',
+				'suffix' => 'px',
+				'format' => 'unit',
+			),
+			array(
+				'name'   => self::PREFIX . 'tristate-panel-b-gap-bottom',
+				'path'   => 'sticky_cart.tristate_panel_b_gap_bottom_px',
+				'suffix' => 'px',
+				'format' => 'unit',
+			),
+			array(
+				'name'   => self::PREFIX . 'tristate-panel-b-padding',
+				'path'   => 'sticky_cart.tristate_panel_b_padding_px',
+				'suffix' => 'px',
+				'format' => 'unit',
+			),
+			array(
+				'name'   => self::PREFIX . 'tristate-panel-b-border-radius',
+				'path'   => 'sticky_cart.tristate_panel_b_border_radius_px',
+				'suffix' => 'px',
+				'format' => 'unit',
+			),
+			array(
+				'name'   => self::PREFIX . 'tristate-panel-b-actions-gap',
+				'path'   => 'sticky_cart.tristate_panel_b_actions_gap_px',
+				'suffix' => 'px',
+				'format' => 'unit',
+			),
+			array(
+				'name'   => self::PREFIX . 'tristate-action-icon-hit',
+				'path'   => 'sticky_cart.tristate_action_icon_hit_px',
+				'suffix' => 'px',
+				'format' => 'unit',
+			),
+			array(
+				'name'   => self::PREFIX . 'tristate-action-icon-glyph',
+				'path'   => 'sticky_cart.tristate_action_icon_glyph_px',
+				'suffix' => 'px',
+				'format' => 'unit',
+			),
+			array(
+				'name'   => self::PREFIX . 'tristate-panel-c-width',
+				'path'   => 'sticky_cart.tristate_panel_c_width_px',
+				'suffix' => 'px',
+				'format' => 'unit',
+			),
+			array(
+				'name'   => self::PREFIX . 'tristate-state-a-dock-inset-top',
+				'path'   => 'sticky_cart.tristate_state_a_dock_inset_top_px',
+				'suffix' => 'px',
+				'format' => 'unit',
+			),
+			array(
+				'name'   => self::PREFIX . 'tristate-state-a-dock-inset-right',
+				'path'   => 'sticky_cart.tristate_state_a_dock_inset_right_px',
+				'suffix' => 'px',
+				'format' => 'unit',
+			),
+			array(
+				'name'   => self::PREFIX . 'tristate-state-a-dock-inset-bottom',
+				'path'   => 'sticky_cart.tristate_state_a_dock_inset_bottom_px',
+				'suffix' => 'px',
+				'format' => 'unit',
+			),
+			array(
+				'name'   => self::PREFIX . 'tristate-state-a-dock-inset-left',
+				'path'   => 'sticky_cart.tristate_state_a_dock_inset_left_px',
+				'suffix' => 'px',
+				'format' => 'unit',
+			),
+			array(
+				'name'   => self::PREFIX . 'tristate-dock-inset-top',
+				'path'   => 'sticky_cart.tristate_dock_inset_top_px',
+				'suffix' => 'px',
+				'format' => 'unit',
+			),
+			array(
+				'name'   => self::PREFIX . 'tristate-dock-inset-right',
+				'path'   => 'sticky_cart.tristate_dock_inset_right_px',
+				'suffix' => 'px',
+				'format' => 'unit',
+			),
+			array(
+				'name'   => self::PREFIX . 'tristate-dock-inset-bottom',
+				'path'   => 'sticky_cart.tristate_dock_inset_bottom_px',
+				'suffix' => 'px',
+				'format' => 'unit',
+			),
+			array(
+				'name'   => self::PREFIX . 'tristate-dock-inset-left',
+				'path'   => 'sticky_cart.tristate_dock_inset_left_px',
+				'suffix' => 'px',
+				'format' => 'unit',
+			),
+			array(
+				'name'   => self::PREFIX . 'tristate-column-backdrop-blur',
+				'path'   => 'sticky_cart.tristate_column_backdrop_blur_px',
+				'suffix' => 'px',
+				'format' => 'unit',
+			),
+			array(
+				'name'   => self::PREFIX . 'tristate-column-shadow-blur',
+				'path'   => 'sticky_cart.tristate_column_shadow_blur_px',
+				'suffix' => 'px',
+				'format' => 'unit',
+			),
+			array(
+				'name'   => self::PREFIX . 'tristate-column-shadow-offset-y',
+				'path'   => 'sticky_cart.tristate_column_shadow_offset_y_px',
+				'suffix' => 'px',
+				'format' => 'unit',
+			),
+			array(
 				'name'   => self::PREFIX . 'color-text-primary',
 				'path'   => 'styles.color_text_primary',
 				'suffix' => '',
@@ -496,6 +616,18 @@ final class CssVariablesContract {
 		}
 
 		$out[ self::PREFIX . 'sticky-layout-reserve' ] = self::format_sticky_layout_reserve_px( $merged_settings );
+
+		// Reserve under floating FAB (phase 17.2); body uses it only with .mp-scc-sticky-layout-tristate.
+		$out[ self::PREFIX . 'sticky-fab-layout-reserve' ] = '72px';
+
+		$z = (int) OptionResolver::get_by_path( $merged_settings, 'sticky_cart.z_index', 100050 );
+		$z = max( 1, min( 9999999, $z ) );
+		$out[ self::PREFIX . 'tristate-z-panel-b' ]   = (string) ( $z + 5 );
+		$out[ self::PREFIX . 'tristate-z-drawer-c' ] = (string) ( $z + 6 );
+
+		$shadow_pct = (int) OptionResolver::get_by_path( $merged_settings, 'sticky_cart.tristate_column_shadow_opacity_percent', 12 );
+		$shadow_pct = max( 4, min( 28, $shadow_pct ) );
+		$out[ self::PREFIX . 'tristate-column-shadow-alpha' ] = (string) round( $shadow_pct / 100, 4 );
 
 		self::apply_catalog_cart_icon_appearance_tokens( $merged_settings, $out );
 
