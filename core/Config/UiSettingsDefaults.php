@@ -75,6 +75,12 @@ final class UiSettingsDefaults {
 			'tristate_column_shadow_opacity_percent',
 			'tristate_mobile_breakpoint_max_px',
 			'tristate_mobile_layout_preset',
+			'tristate_fab_badge_size_px',
+			'tristate_fab_badge_offset_top_px',
+			'tristate_fab_badge_offset_right_px',
+			'tristate_fab_badge_font_size_px',
+			'tristate_fab_badge_bg_color',
+			'tristate_fab_badge_text_color',
 		);
 	}
 
@@ -248,6 +254,18 @@ final class UiSettingsDefaults {
 				'tristate_column_shadow_opacity_percent' => 12,
 				/** Viewport max-width (px) for mobile preset rules (admin + injected @media). */
 				'tristate_mobile_breakpoint_max_px'  => 782,
+				/** Cart count badge on FAB (state A): circle size in px. */
+				'tristate_fab_badge_size_px'         => 20,
+				/** FAB badge offset from top edge (negative lifts outside button). */
+				'tristate_fab_badge_offset_top_px'   => -8,
+				/** FAB badge offset from right edge (negative shifts outside button). */
+				'tristate_fab_badge_offset_right_px' => -8,
+				/** FAB badge font size (px). */
+				'tristate_fab_badge_font_size_px'    => 11,
+				/** FAB badge background color. */
+				'tristate_fab_badge_bg_color'        => '#e53935',
+				/** FAB badge text color. */
+				'tristate_fab_badge_text_color'      => '#ffffff',
 				/**
 				 * Show sticky cart shell on all frontend templates when cart has items.
 				 * When false, sticky is limited to Woo templates/endpoints only.

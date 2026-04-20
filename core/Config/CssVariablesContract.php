@@ -347,6 +347,42 @@ final class CssVariablesContract {
 				'format' => 'unit',
 			),
 			array(
+				'name'   => self::PREFIX . 'tristate-fab-badge-size',
+				'path'   => 'sticky_cart.tristate_fab_badge_size_px',
+				'suffix' => 'px',
+				'format' => 'unit',
+			),
+			array(
+				'name'   => self::PREFIX . 'tristate-fab-badge-offset-top',
+				'path'   => 'sticky_cart.tristate_fab_badge_offset_top_px',
+				'suffix' => 'px',
+				'format' => 'unit',
+			),
+			array(
+				'name'   => self::PREFIX . 'tristate-fab-badge-offset-right',
+				'path'   => 'sticky_cart.tristate_fab_badge_offset_right_px',
+				'suffix' => 'px',
+				'format' => 'unit',
+			),
+			array(
+				'name'   => self::PREFIX . 'tristate-fab-badge-font-size',
+				'path'   => 'sticky_cart.tristate_fab_badge_font_size_px',
+				'suffix' => 'px',
+				'format' => 'unit',
+			),
+			array(
+				'name'   => self::PREFIX . 'tristate-fab-badge-bg',
+				'path'   => 'sticky_cart.tristate_fab_badge_bg_color',
+				'suffix' => '',
+				'format' => 'color',
+			),
+			array(
+				'name'   => self::PREFIX . 'tristate-fab-badge-text',
+				'path'   => 'sticky_cart.tristate_fab_badge_text_color',
+				'suffix' => '',
+				'format' => 'color',
+			),
+			array(
 				'name'   => self::PREFIX . 'tristate-dock-inset-top',
 				'path'   => 'sticky_cart.tristate_dock_inset_top_px',
 				'suffix' => 'px',

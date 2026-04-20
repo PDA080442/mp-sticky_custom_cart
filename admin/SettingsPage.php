@@ -1302,6 +1302,64 @@ final class SettingsPage {
 		self::field_number( $opt, 'sticky_cart', 'tristate_state_a_dock_inset_left_px', __( 'A: отступ слева (px)', 'mp-sticky-custom-cart' ), $a_l, '', array( 'var' => $p . 'tristate-state-a-dock-inset-left', 'fmt' => 'unit', 'suffix' => 'px' ) );
 		echo '</tbody></table>';
 
+		echo '<h4 class="title">' . esc_html__( 'A: бейдж количества на FAB', 'mp-sticky-custom-cart' ) . '</h4>';
+		echo '<table class="form-table" role="presentation"><tbody>';
+		self::field_number(
+			$opt,
+			'sticky_cart',
+			'tristate_fab_badge_size_px',
+			__( 'Размер бейджа (px)', 'mp-sticky-custom-cart' ),
+			isset( $c['tristate_fab_badge_size_px'] ) ? (int) $c['tristate_fab_badge_size_px'] : 20,
+			__( 'Диаметр красного кружка на FAB (14–36).', 'mp-sticky-custom-cart' ),
+			array( 'var' => $p . 'tristate-fab-badge-size', 'fmt' => 'unit', 'suffix' => 'px' )
+		);
+		self::field_number(
+			$opt,
+			'sticky_cart',
+			'tristate_fab_badge_offset_top_px',
+			__( 'Смещение бейджа сверху (px)', 'mp-sticky-custom-cart' ),
+			isset( $c['tristate_fab_badge_offset_top_px'] ) ? (int) $c['tristate_fab_badge_offset_top_px'] : -8,
+			__( 'Относительно правого верхнего угла FAB. Отрицательное значение выводит кружок наружу.', 'mp-sticky-custom-cart' ),
+			array( 'var' => $p . 'tristate-fab-badge-offset-top', 'fmt' => 'unit', 'suffix' => 'px' )
+		);
+		self::field_number(
+			$opt,
+			'sticky_cart',
+			'tristate_fab_badge_offset_right_px',
+			__( 'Смещение бейджа справа (px)', 'mp-sticky-custom-cart' ),
+			isset( $c['tristate_fab_badge_offset_right_px'] ) ? (int) $c['tristate_fab_badge_offset_right_px'] : -8,
+			'',
+			array( 'var' => $p . 'tristate-fab-badge-offset-right', 'fmt' => 'unit', 'suffix' => 'px' )
+		);
+		self::field_number(
+			$opt,
+			'sticky_cart',
+			'tristate_fab_badge_font_size_px',
+			__( 'Размер цифры в бейдже (px)', 'mp-sticky-custom-cart' ),
+			isset( $c['tristate_fab_badge_font_size_px'] ) ? (int) $c['tristate_fab_badge_font_size_px'] : 11,
+			'',
+			array( 'var' => $p . 'tristate-fab-badge-font-size', 'fmt' => 'unit', 'suffix' => 'px' )
+		);
+		self::field_color(
+			$opt,
+			'sticky_cart',
+			'tristate_fab_badge_bg_color',
+			__( 'Цвет фона бейджа', 'mp-sticky-custom-cart' ),
+			isset( $c['tristate_fab_badge_bg_color'] ) ? (string) $c['tristate_fab_badge_bg_color'] : '#e53935',
+			'',
+			array( 'var' => $p . 'tristate-fab-badge-bg', 'fmt' => 'color' )
+		);
+		self::field_color(
+			$opt,
+			'sticky_cart',
+			'tristate_fab_badge_text_color',
+			__( 'Цвет цифры в бейдже', 'mp-sticky-custom-cart' ),
+			isset( $c['tristate_fab_badge_text_color'] ) ? (string) $c['tristate_fab_badge_text_color'] : '#ffffff',
+			'',
+			array( 'var' => $p . 'tristate-fab-badge-text', 'fmt' => 'color' )
+		);
+		echo '</tbody></table>';
+
 		echo '<h3>' . esc_html__( 'Три состояния: пристыковка, стекло и тень (B/C)', 'mp-sticky-custom-cart' ) . '</h3>';
 		echo '<p class="description">' . esc_html__( 'Отступы колонки (панель B и drawer C) от краёв viewport, blur и тень. Цвет заливки и альфа — из «Стили» / drawer (как у основного drawer). Z-index панелей привязан к z-index корзины.', 'mp-sticky-custom-cart' ) . '</p>';
 		echo '<table class="form-table" role="presentation"><tbody>';

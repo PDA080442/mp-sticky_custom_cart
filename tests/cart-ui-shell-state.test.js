@@ -30,6 +30,12 @@ assert.ok(
 
 assert.ok(frontend.includes('mpSccCartUiShell.attachSticky'), 'Frontend should attach cart UI shell');
 assert.ok(frontend.includes('ACTION.TOGGLE_C'), 'Drawer toggle should route through shell when present');
+assert.ok(
+	frontend.includes('[data-mp-scc-toggle-c]') &&
+		frontend.includes('ACTION.OPEN_C') &&
+		frontend.includes('ACTION.CLOSE_C'),
+	'Panel B/C arrow controls should dispatch OPEN_C/CLOSE_C via shell action'
+);
 assert.ok(frontend.includes('onStickyPayloadApplied'), 'applyPayload should notify shell');
 
 assert.ok(hooks.includes('HANDLE_CART_SHELL'), 'PHP should register cart shell script handle');

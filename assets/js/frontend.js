@@ -3224,6 +3224,20 @@
 			self.removeLine(key);
 		});
 
+		this.$root.on('click', '[data-mp-scc-toggle-c]', function (e) {
+			e.preventDefault();
+			if (self.cartUiShell && window.mpSccCartUiShell && window.mpSccCartUiShell.ACTION) {
+				var mode = $(e.currentTarget).attr('data-mp-scc-toggle-c-mode') || '';
+				if (mode === 'close') {
+					self.cartUiShell.dispatch(window.mpSccCartUiShell.ACTION.CLOSE_C);
+				} else if (mode === 'open') {
+					self.cartUiShell.dispatch(window.mpSccCartUiShell.ACTION.OPEN_C);
+				} else {
+					self.cartUiShell.dispatch(window.mpSccCartUiShell.ACTION.TOGGLE_C);
+				}
+			}
+		});
+
 		this.$root.on('click', '[data-mp-scc-clear-cart]', function (e) {
 			e.preventDefault();
 			var cfg = window.mpScc.ajaxConfig();

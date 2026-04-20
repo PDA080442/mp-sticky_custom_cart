@@ -109,7 +109,7 @@
 					return ctx.hasPanelB ? STATES.B : STATES.A;
 				}
 				if (state === STATES.B) {
-					return STATES.C;
+					return STATES.A;
 				}
 				if (state === STATES.A) {
 					if (ctx.hasPanelB) {
