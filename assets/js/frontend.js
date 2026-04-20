@@ -240,6 +240,129 @@
 		});
 	};
 
+	var __mpSccStickyDeferredTimer = null;
+	var __mpSccStickyDeferredMounting = false;
+
+	function mpSccStickyHideWhenEmptyEnabled() {
+		return !!(window.mpScc.flagEnabled && window.mpScc.flagEnabled('sticky_hide_when_empty_enabled'));
+	}
+
+	function mpSccScheduleDeferredFloatingStickySnapshot() {
+		if (__mpSccStickyDeferredTimer) {
+			clearTimeout(__mpSccStickyDeferredTimer);
+		}
+		__mpSccStickyDeferredTimer = setTimeout(function () {
+			__mpSccStickyDeferredTimer = null;
+			mpSccRunDeferredFloatingStickySnapshot();
+		}, 90);
+	}
+
+	function mpSccRegisterDeferredFloatingStickyListener() {
+		if (!mpSccStickyHideWhenEmptyEnabled() || !window.mpScc.flagEnabled('sticky_cart_enabled')) {
+			return;
+		}
+		if ($('#mp-scc-sticky-root').length) {
+			return;
+		}
+		$(document.body).off('.mpSccStickyDeferred');
+		$(document.body).on(
+			'added_to_cart.mpSccStickyDeferred removed_from_cart.mpSccStickyDeferred wc_fragments_refreshed.mpSccStickyDeferred updated_cart_totals.mpSccStickyDeferred wc_fragments_loaded.mpSccStickyDeferred updated_wc_div.mpSccStickyDeferred',
+			function () {
+				mpSccScheduleDeferredFloatingStickySnapshot();
+			}
+		);
+	}
+
+	function mpSccRunDeferredFloatingStickySnapshot() {
+		if ($('#mp-scc-sticky-root').length || !mpSccStickyHideWhenEmptyEnabled()) {
+			return;
+		}
+		if (__mpSccStickyDeferredMounting) {
+			return;
+		}
+		__mpSccStickyDeferredMounting = true;
+		window.mpScc
+			.postAjax('cartSnapshot', { include_sticky_shell: 1 })
+			.done(function (resp) {
+				if (!resp || !resp.success || !resp.data) {
+					return;
+				}
+				var td = resp.data;
+				if (td.is_empty || !td.sticky_shell_html) {
+					return;
+				}
+				$(document.body).off('.mpSccStickyDeferred');
+				$(document.body).append(td.sticky_shell_html);
+				var $root = $('#mp-scc-sticky-root');
+				if (!$root.length) {
+					mpSccRegisterDeferredFloatingStickyListener();
+					return;
+				}
+				var bcls = Array.isArray(td.sticky_body_classes) ? td.sticky_body_classes : [];
+				window.mpScc.__stickyShellBodyClassesApplied = bcls.slice();
+				var bi;
+				for (bi = 0; bi < bcls.length; bi++) {
+					document.body.classList.add(String(bcls[bi]));
+				}
+				var stickyLocal = null;
+				try {
+					stickyLocal = new StickyCartController($root[0]);
+					if (window.mpSccCartUiShell && typeof window.mpSccCartUiShell.attachSticky === 'function') {
+						window.mpSccCartUiShell.attachSticky(stickyLocal);
+					}
+					stickyLocal.bind();
+					stickyLocal.applyPayload(td);
+					window.mpScc.sticky = stickyLocal;
+				} catch (e2) {
+					try {
+						if (stickyLocal && typeof stickyLocal.destroy === 'function') {
+							stickyLocal.destroy();
+						}
+					} catch (e3) {
+						/* ignore nested teardown errors */
+					}
+					window.mpScc.sticky = null;
+					if (typeof window.mpScc.teardownFloatingStickyShell === 'function') {
+						window.mpScc.teardownFloatingStickyShell();
+					}
+					if (window.mpScc.reportStickyError) {
+						window.mpScc.reportStickyError(
+							'sticky_deferred_mount_failed',
+							e2 && e2.message ? String(e2.message) : String(e2),
+							e2 && e2.stack ? String(e2.stack).slice(0, 500) : ''
+						);
+					}
+					mpSccRegisterDeferredFloatingStickyListener();
+				}
+			})
+			.fail(function () {
+				mpSccRegisterDeferredFloatingStickyListener();
+			})
+			.always(function () {
+				__mpSccStickyDeferredMounting = false;
+			});
+	}
+
+	window.mpScc.teardownFloatingStickyShell = function () {
+		var cls = window.mpScc.__stickyShellBodyClassesApplied;
+		var i;
+		if (window.mpScc.sticky && typeof window.mpScc.sticky.destroy === 'function') {
+			window.mpScc.sticky.destroy();
+		}
+		window.mpScc.sticky = null;
+		var r = document.getElementById('mp-scc-sticky-root');
+		if (r && r.parentNode) {
+			r.parentNode.removeChild(r);
+		}
+		if (cls && cls.length) {
+			for (i = 0; i < cls.length; i++) {
+				document.body.classList.remove(String(cls[i]));
+			}
+		}
+		window.mpScc.__stickyShellBodyClassesApplied = [];
+		mpSccRegisterDeferredFloatingStickyListener();
+	};
+
 	var clientDiagBuffer = [];
 	var clientDiagFlushTimer = null;
 	var clientDiagReporting = false;
@@ -2158,6 +2281,10 @@
 			var sticky = window.mpScc.sticky;
 			if (sticky && typeof sticky.scheduleRefreshFromWooEvent === 'function') {
 				sticky.scheduleRefreshFromWooEvent(e.type || 'yith_added_to_cart');
+				return;
+			}
+			if (!$('#mp-scc-sticky-root').length && mpSccStickyHideWhenEmptyEnabled()) {
+				mpSccScheduleDeferredFloatingStickySnapshot();
 			}
 		});
 	}
@@ -2229,6 +2356,7 @@
 		this.clearCartLocked = false;
 		/** Last successful snapshot quantities per cart line key (for optimistic +/- rollback). */
 		this.serverQty = {};
+		this._mpSccDestroyed = false;
 	}
 
 	StickyCartController.prototype.isDrawerOpen = function () {
@@ -2321,6 +2449,9 @@
 	};
 
 	StickyCartController.prototype.scheduleReconcile = function () {
+		if (this._mpSccDestroyed) {
+			return;
+		}
 		var self = this;
 		if (this.reconcileTimer) {
 			clearTimeout(this.reconcileTimer);
@@ -2363,6 +2494,9 @@
 	 * @param {string} [eventType] Woo event name (for future diagnostics).
 	 */
 	StickyCartController.prototype.scheduleRefreshFromWooEvent = function (eventType) {
+		if (this._mpSccDestroyed) {
+			return;
+		}
 		var self = this;
 		if (this.wooEventDebounceTimer) {
 			clearTimeout(this.wooEventDebounceTimer);
@@ -2377,6 +2511,9 @@
 	 * @param {string} [eventType]
 	 */
 	StickyCartController.prototype._onWooCartEventRefresh = function (eventType) {
+		if (this._mpSccDestroyed) {
+			return;
+		}
 		var scheduledAt = Date.now();
 		this.refresh();
 		this._armWooSyncFallback(scheduledAt);
@@ -2393,6 +2530,9 @@
 		}
 		this.wooFallbackTimer = window.setTimeout(function () {
 			self.wooFallbackTimer = null;
+			if (self._mpSccDestroyed) {
+				return;
+			}
 			if (self._lastSnapshotAppliedAt >= scheduledAt) {
 				return;
 			}
@@ -2401,6 +2541,9 @@
 	};
 
 	StickyCartController.prototype.applyPayload = function (p) {
+		if (this._mpSccDestroyed) {
+			return;
+		}
 		if (!p || typeof p !== 'object') {
 			this.scheduleReconcile();
 			return;
@@ -2486,6 +2629,10 @@
 
 		if (this.cartUiShell && typeof this.cartUiShell.onStickyPayloadApplied === 'function') {
 			this.cartUiShell.onStickyPayloadApplied({ empty: empty });
+		}
+
+		if (mpSccStickyHideWhenEmptyEnabled() && empty && typeof window.mpScc.teardownFloatingStickyShell === 'function') {
+			window.mpScc.teardownFloatingStickyShell();
 		}
 	};
 
@@ -2589,6 +2736,10 @@
 	};
 
 	StickyCartController.prototype.drainMutationQueue = function () {
+		if (this._mpSccDestroyed) {
+			this.mutationQueue = [];
+			return;
+		}
 		if (!this.mutationQueue.length) {
 			return;
 		}
@@ -2601,6 +2752,9 @@
 	};
 
 	StickyCartController.prototype.commitRemoveLine = function (cartItemKey) {
+		if (this._mpSccDestroyed) {
+			return;
+		}
 		var self = this;
 		var cfg = window.mpScc.ajaxConfig();
 		var action = cfg.actions.removeCartLine;
@@ -2645,10 +2799,17 @@
 		})
 			.done(function (resp) {
 				if (resp && resp.success && resp.data) {
-					self.applyPayload(resp.data);
-					$(document.body).trigger('removed_from_cart');
+					var d = resp.data;
+					var hideEmpty = mpSccStickyHideWhenEmptyEnabled();
 					var okMsg = window.mpScc.label('line_removed') || 'Позиция удалена';
-					self.showStickyInlineFeedback(okMsg, 'success');
+					if (d.is_empty && hideEmpty) {
+						self.showStickyInlineFeedback(okMsg, 'success');
+					}
+					self.applyPayload(d);
+					$(document.body).trigger('removed_from_cart');
+					if (!d.is_empty || !hideEmpty) {
+						self.showStickyInlineFeedback(okMsg, 'success');
+					}
 					return;
 				}
 				self.clearLineRemovingState(keyStr);
@@ -2668,7 +2829,9 @@
 			})
 			.always(function () {
 				self.mutationInFlight = false;
-				self.drainMutationQueue();
+				if (!self._mpSccDestroyed) {
+					self.drainMutationQueue();
+				}
 			});
 	};
 
@@ -2809,6 +2972,10 @@
 		}
 		this.qtyTimers[cartItemKey] = setTimeout(function () {
 			delete self.qtyTimers[cartItemKey];
+			if (self._mpSccDestroyed) {
+				delete self.pendingQty[cartItemKey];
+				return;
+			}
 			var q = self.pendingQty[cartItemKey];
 			delete self.pendingQty[cartItemKey];
 			self.commitQuantity(cartItemKey, q);
@@ -2816,6 +2983,9 @@
 	};
 
 	StickyCartController.prototype.commitQuantity = function (cartItemKey, quantity) {
+		if (this._mpSccDestroyed) {
+			return;
+		}
 		var self = this;
 		var cfg = window.mpScc.ajaxConfig();
 		var action = cfg.actions.setLineQuantity;
@@ -2872,7 +3042,9 @@
 			})
 			.always(function () {
 				self.mutationInFlight = false;
-				self.drainMutationQueue();
+				if (!self._mpSccDestroyed) {
+					self.drainMutationQueue();
+				}
 			});
 	};
 
@@ -2888,6 +3060,9 @@
 	 * @param {'success'|'error'} variant
 	 */
 	StickyCartController.prototype.showStickyInlineFeedback = function (message, variant) {
+		if (this._mpSccDestroyed) {
+			return;
+		}
 		var text = message ? String(message) : '';
 		if (!text) {
 			return;
@@ -2906,6 +3081,9 @@
 	};
 
 	StickyCartController.prototype.refresh = function () {
+		if (this._mpSccDestroyed) {
+			return;
+		}
 		var self = this;
 		if (this.snapshotLocked) {
 			this.pendingRefresh = true;
@@ -2931,6 +3109,11 @@
 				self.scheduleReconcile();
 			})
 			.always(function () {
+				if (self._mpSccDestroyed) {
+					self.snapshotLocked = false;
+					self.pendingRefresh = false;
+					return;
+				}
 				self.$summary.removeClass('mp-scc-sticky-summary--loading');
 				self.snapshotLocked = false;
 				if (self.pendingRefresh) {
@@ -2938,6 +3121,40 @@
 					self.refresh();
 				}
 			});
+	};
+
+	StickyCartController.prototype.destroy = function () {
+		this._mpSccDestroyed = true;
+		if (this.reconcileTimer) {
+			clearTimeout(this.reconcileTimer);
+			this.reconcileTimer = null;
+		}
+		if (this.wooEventDebounceTimer) {
+			clearTimeout(this.wooEventDebounceTimer);
+			this.wooEventDebounceTimer = null;
+		}
+		if (this.wooFallbackTimer) {
+			clearTimeout(this.wooFallbackTimer);
+			this.wooFallbackTimer = null;
+		}
+		var qk;
+		for (qk in this.qtyTimers) {
+			if (Object.prototype.hasOwnProperty.call(this.qtyTimers, qk)) {
+				clearTimeout(this.qtyTimers[qk]);
+			}
+		}
+		this.qtyTimers = {};
+		if (this.cartUiShell && typeof this.cartUiShell.destroy === 'function') {
+			this.cartUiShell.destroy();
+			this.cartUiShell = null;
+		}
+		$(document.body).off('.mpSccStickyWoo');
+		if (this.$toggle && this.$toggle.length) {
+			this.$toggle.off();
+		}
+		if (this.$root && this.$root.length) {
+			this.$root.off();
+		}
 	};
 
 	StickyCartController.prototype.bind = function () {
@@ -3041,10 +3258,17 @@
 				.postAjax('clearCart', {})
 				.done(function (resp) {
 					if (resp && resp.success && resp.data) {
-						self.applyPayload(resp.data);
-						$(document.body).trigger('removed_from_cart');
+						var d = resp.data;
+						var hideEmpty = mpSccStickyHideWhenEmptyEnabled();
 						var okMsg = window.mpScc.label('cart_cleared') || 'Корзина очищена';
-						self.showStickyInlineFeedback(okMsg, 'success');
+						if (d.is_empty && hideEmpty) {
+							self.showStickyInlineFeedback(okMsg, 'success');
+						}
+						self.applyPayload(d);
+						$(document.body).trigger('removed_from_cart');
+						if (!d.is_empty || !hideEmpty) {
+							self.showStickyInlineFeedback(okMsg, 'success');
+						}
 					} else {
 						self.scheduleReconcile();
 					}
@@ -3059,6 +3283,9 @@
 				})
 				.always(function () {
 					self.clearCartLocked = false;
+					if (self._mpSccDestroyed) {
+						return;
+					}
 					self.$root.find('[data-mp-scc-clear-cart]').each(function () {
 						var $b = $(this);
 						$b.removeAttr('aria-busy').removeClass('mp-scc-clear-cart--loading');
@@ -3084,7 +3311,7 @@
 		});
 
 		$(document.body).on(
-			'added_to_cart removed_from_cart wc_fragments_refreshed updated_cart_totals wc_fragments_loaded updated_wc_div',
+			'added_to_cart.mpSccStickyWoo removed_from_cart.mpSccStickyWoo wc_fragments_refreshed.mpSccStickyWoo updated_cart_totals.mpSccStickyWoo wc_fragments_loaded.mpSccStickyWoo updated_wc_div.mpSccStickyWoo',
 			function (e) {
 				self.scheduleRefreshFromWooEvent(e && e.type ? e.type : 'woo');
 			}
@@ -3154,6 +3381,8 @@
 		window.mpScc.refreshCatalogOverlay = scheduleCatalogChromeLayouts;
 
 		$(window.document).trigger('mpScc:ready');
+
+		mpSccRegisterDeferredFloatingStickyListener();
 	});
 
 	initCatalogImageAddToCart();

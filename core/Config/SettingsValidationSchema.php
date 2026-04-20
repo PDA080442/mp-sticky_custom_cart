@@ -218,6 +218,11 @@ final class SettingsValidationSchema {
 				'tristate_column_shadow_offset_y_px' => array( 'type' => 'integer', 'min' => 0, 'max' => 24 ),
 				'tristate_column_shadow_opacity_percent' => array( 'type' => 'integer', 'min' => 4, 'max' => 28 ),
 				'tristate_mobile_breakpoint_max_px'  => array( 'type' => 'integer', 'min' => 480, 'max' => 900 ),
+				'visibility_show_on_all_templates'   => array( 'type' => 'boolean' ),
+				'visibility_excluded_urls'           => array(
+					'type'       => 'text',
+					'max_length' => 4000,
+				),
 				'tristate_mobile_layout_preset'      => array(
 					'type'  => 'text',
 					'oneof' => array( 'right_docked', 'full_bottom' ),
@@ -297,6 +302,7 @@ final class SettingsValidationSchema {
 			FeatureFlagsDefaults::KEY_STICKY_CART_ENABLED               => array( 'type' => 'boolean' ),
 			FeatureFlagsDefaults::KEY_STICKY_DRAWER_ENABLED             => array( 'type' => 'boolean' ),
 			FeatureFlagsDefaults::KEY_STICKY_TRISTATE_ENABLED           => array( 'type' => 'boolean' ),
+			FeatureFlagsDefaults::KEY_STICKY_HIDE_WHEN_EMPTY_ENABLED   => array( 'type' => 'boolean' ),
 			FeatureFlagsDefaults::KEY_HOVER_MORE_INFO_ENABLED           => array( 'type' => 'boolean' ),
 			FeatureFlagsDefaults::KEY_WISHLIST_ICON_INTEGRATION_ENABLED => array( 'type' => 'boolean' ),
 		);

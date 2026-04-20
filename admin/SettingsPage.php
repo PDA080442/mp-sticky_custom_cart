@@ -914,6 +914,34 @@ final class SettingsPage {
 		self::field_number( $opt, 'sticky_cart', 'quantity_debounce_ms', __( 'Debounce изменения количества в списке (мс)', 'mp-sticky-custom-cart' ), isset( $c['quantity_debounce_ms'] ) ? (int) $c['quantity_debounce_ms'] : 320 );
 		echo '</tbody></table>';
 
+		echo '<h3>' . esc_html__( 'Видимость плавающей корзины', 'mp-sticky-custom-cart' ) . '</h3>';
+		echo '<p class="description">' . esc_html__( 'CQ 91–93: политика показа состояния A (FAB) при непустой корзине и список URL-исключений. По умолчанию корзина показывается на всех шаблонах витрины.', 'mp-sticky-custom-cart' ) . '</p>';
+		echo '<table class="form-table" role="presentation"><tbody>';
+		self::field_checkbox(
+			$opt,
+			'sticky_cart',
+			'visibility_show_on_all_templates',
+			__( 'Показывать на всех шаблонах при непустой корзине', 'mp-sticky-custom-cart' ),
+			! isset( $c['visibility_show_on_all_templates'] ) || ! empty( $c['visibility_show_on_all_templates'] ),
+			__( 'Если выключить, sticky будет выводиться только на Woo-шаблонах (shop/product/cart/checkout/account и связанных endpoint).', 'mp-sticky-custom-cart' )
+		);
+		self::field_textarea(
+			$opt,
+			'sticky_cart',
+			'visibility_excluded_urls',
+			__( 'URL-исключения (по одному на строку)', 'mp-sticky-custom-cart' ),
+			isset( $c['visibility_excluded_urls'] ) ? (string) $c['visibility_excluded_urls'] : '',
+			__(
+				"Примеры: /checkout/*, /cart/*, /my-account/orders/*, https://example.com/landing. Поддерживается '*' как wildcard; строки с # в начале игнорируются.",
+				'mp-sticky-custom-cart'
+			),
+			array(
+				'rows'      => 6,
+				'maxlength' => 4000,
+			)
+		);
+		echo '</tbody></table>';
+
 		echo '<h3>' . esc_html__( 'Маршрут страницы корзины WooCommerce', 'mp-sticky-custom-cart' ) . '</h3>';
 		echo '<p class="description">' . esc_html__( 'Редирект URL страницы корзины (например /cart/) на главную сайта. Не включайте, если страница корзины задана как главная или нужны ссылки с параметрами удаления позиций.', 'mp-sticky-custom-cart' ) . '</p>';
 		echo '<table class="form-table" role="presentation"><tbody>';
@@ -1569,6 +1597,30 @@ final class SettingsPage {
 			esc_attr( $value ),
 			$attrs, // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- maxlength is int, attribute name fixed
 			esc_attr( $input_cls )
+		);
+		echo '</td></tr>';
+	}
+
+	/**
+	 * @param string $opt Option array name.
+	 * @param string $section Section key.
+	 * @param string $field Field key.
+	 * @param array<string, mixed> $extra Extra attrs: rows, maxlength.
+	 */
+	private static function field_textarea( $opt, $section, $field, $label, $value, $help = '', array $extra = array() ) {
+		$name = sprintf( '%s[%s][%s]', $opt, $section, $field );
+		$rows = isset( $extra['rows'] ) && is_numeric( $extra['rows'] ) ? max( 2, (int) $extra['rows'] ) : 5;
+		$attrs = '';
+		if ( isset( $extra['maxlength'] ) && is_numeric( $extra['maxlength'] ) ) {
+			$attrs .= ' maxlength="' . (int) $extra['maxlength'] . '"';
+		}
+		echo '<tr><th scope="row"><label for="' . esc_attr( $name ) . '">' . esc_html( $label ) . '</label>' . self::help_tip_button( $help ) . '</th><td>';
+		printf(
+			'<textarea class="large-text code" id="%1$s" name="%1$s" rows="%2$d"%3$s>%4$s</textarea>',
+			esc_attr( $name ),
+			(int) $rows,
+			$attrs, // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- maxlength is numeric
+			esc_textarea( (string) $value )
 		);
 		echo '</td></tr>';
 	}

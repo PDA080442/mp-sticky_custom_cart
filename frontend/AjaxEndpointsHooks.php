@@ -7,6 +7,7 @@
 
 namespace MpStickyCustomCart\Frontend;
 
+use MpStickyCustomCart\Core\Config\FeatureFlagsDefaults;
 use MpStickyCustomCart\Core\Constants;
 use MpStickyCustomCart\Core\Contracts\LoggingServiceInterface;
 use MpStickyCustomCart\Core\ErrorLogService;
@@ -172,7 +173,16 @@ final class AjaxEndpointsHooks {
 	 */
 	public static function handle_cart_snapshot() {
 		self::verify_nonce();
-		$payload = self::build_cart_snapshot_payload();
+		$include_shell = false;
+		if ( isset( $_POST['include_sticky_shell'] ) ) {
+			$raw = wp_unslash( $_POST['include_sticky_shell'] );
+			$include_shell = ( true === $raw || 1 === $raw || '1' === (string) $raw || 'true' === strtolower( (string) $raw ) );
+		}
+		$payload = self::build_cart_snapshot_payload(
+			array(
+				'include_sticky_shell' => $include_shell,
+			)
+		);
 		if ( is_wp_error( $payload ) ) {
 			self::log_snapshot_failure( $payload->get_error_code(), $payload->get_error_message() );
 			wp_send_json_error(
@@ -557,9 +567,10 @@ final class AjaxEndpointsHooks {
 	}
 
 	/**
+	 * @param array<string, mixed> $opts Optional. `include_sticky_shell` (bool): append server-rendered sticky HTML for deferred mount (dp §18.1).
 	 * @return array<string, mixed>|\WP_Error
 	 */
-	private static function build_cart_snapshot_payload() {
+	private static function build_cart_snapshot_payload( array $opts = array() ) {
 		if ( ! function_exists( 'WC' ) || ! WC()->cart ) {
 			return new \WP_Error( 'mp_scc_no_cart', 'Cart unavailable.' );
 		}
@@ -664,14 +675,36 @@ final class AjaxEndpointsHooks {
 		$subtotal_html  = $empty ? wc_price( 0 ) : $cart->get_cart_subtotal();
 		$subtotal_html  = is_string( $subtotal_html ) ? $subtotal_html : wc_price( 0 );
 
-		return array(
-			'is_empty'            => (bool) $empty,
-			'cart_contents_count' => (int) $cart->get_cart_contents_count(),
-			'line_count'          => count( $items ),
-			'subtotal_html'       => $subtotal_html,
-			'items'               => $items,
-			'snapshot_ts'         => time(),
+		$out = array(
+			'is_empty'              => (bool) $empty,
+			'cart_contents_count'   => (int) $cart->get_cart_contents_count(),
+			'line_count'            => count( $items ),
+			'subtotal_html'         => $subtotal_html,
+			'items'                 => $items,
+			'snapshot_ts'           => time(),
 		);
+
+		$include_shell = ! empty( $opts['include_sticky_shell'] )
+			&& ! $empty
+			&& OptionResolver::get_flag( FeatureFlagsDefaults::KEY_STICKY_CART_ENABLED, true )
+			&& OptionResolver::get_flag( FeatureFlagsDefaults::KEY_STICKY_HIDE_WHEN_EMPTY_ENABLED, true );
+
+		/**
+		 * Filters whether cart snapshot may embed sticky shell HTML (deferred mount after first add).
+		 *
+		 * @param bool                 $include_shell Whether shell HTML will be appended.
+		 * @param bool                 $empty         Whether Woo cart is empty.
+		 * @param array<string, mixed> $opts          Options passed to {@see build_cart_snapshot_payload()}.
+		 */
+		$include_shell = (bool) apply_filters( 'mp_sticky_custom_cart_include_sticky_shell_in_snapshot', $include_shell, $empty, $opts );
+
+		if ( $include_shell && StickyCartVisibility::should_render_sticky() ) {
+			$renderer = new StickyCartRenderer();
+			$out['sticky_shell_html']     = $renderer->render();
+			$out['sticky_body_classes']   = StickyCartRenderHooks::collect_sticky_body_classes();
+		}
+
+		return $out;
 	}
 
 	/**
