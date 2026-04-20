@@ -218,6 +218,11 @@ final class SettingsValidationSchema {
 				'tristate_column_shadow_offset_y_px' => array( 'type' => 'integer', 'min' => 0, 'max' => 24 ),
 				'tristate_column_shadow_opacity_percent' => array( 'type' => 'integer', 'min' => 4, 'max' => 28 ),
 				'tristate_mobile_breakpoint_max_px'  => array( 'type' => 'integer', 'min' => 480, 'max' => 900 ),
+				'visibility_show_on_all_templates'   => array( 'type' => 'boolean' ),
+				'visibility_excluded_urls'           => array(
+					'type'       => 'text',
+					'max_length' => 4000,
+				),
 				'tristate_mobile_layout_preset'      => array(
 					'type'  => 'text',
 					'oneof' => array( 'right_docked', 'full_bottom' ),

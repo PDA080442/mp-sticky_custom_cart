@@ -35,6 +35,10 @@ assert.ok(ajax.includes('sticky_shell_html'), 'Cart snapshot payload may embed s
 assert.ok(flags.includes('KEY_STICKY_HIDE_WHEN_EMPTY_ENABLED'), 'Defaults should define hide-when-empty flag');
 assert.ok(contract.includes('sticky-layout-reserve'), 'CssVariablesContract should emit sticky-layout-reserve');
 assert.ok(contract.includes('sticky-fab-layout-reserve'), 'CssVariablesContract should emit FAB layout reserve');
+assert.ok(
+	vis.includes('visibility_show_on_all_templates') && vis.includes('visibility_excluded_urls'),
+	'Sticky visibility should apply admin visibility policy + URL exclusions (dp §18.3)'
+);
 assert.ok(css.includes('body.mp-scc-sticky-active'), 'CSS should reserve space for fixed bar');
 assert.ok(css.includes('mp-scc-sticky-layout-tristate'), 'CSS should reserve space for tristate FAB');
 assert.ok(css.includes('mp-scc-sticky--tristate'), 'CSS should style tristate floating bar');
