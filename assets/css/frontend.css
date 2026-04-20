@@ -341,6 +341,7 @@ body.mp-scc-sticky-active.mp-scc-sticky-layout-tristate {
 }
 
 .mp-scc-sticky-bar.mp-scc-sticky--tristate .mp-scc-drawer-toggle--fab {
+	position: relative;
 	width: max(44px, var(--mp-scc-catalog-cart-icon-hit-size, 48px));
 	height: max(44px, var(--mp-scc-catalog-cart-icon-hit-size, 48px));
 	border-radius: var(--mp-scc-catalog-cart-icon-border-radius, 12px);
@@ -348,6 +349,31 @@ body.mp-scc-sticky-active.mp-scc-sticky-layout-tristate {
 	color: var(--mp-scc-catalog-cart-icon-color, #1a1a1a);
 	box-shadow: 0 4px 18px rgba(0, 0, 0, 0.12);
 	overflow: visible;
+}
+
+.mp-scc-sticky-bar.mp-scc-sticky--tristate .mp-scc-drawer-toggle-badge {
+	position: absolute;
+	top: var(--mp-scc-tristate-fab-badge-offset-top, -8px);
+	right: var(--mp-scc-tristate-fab-badge-offset-right, -8px);
+	min-width: var(--mp-scc-tristate-fab-badge-size, 20px);
+	height: var(--mp-scc-tristate-fab-badge-size, 20px);
+	padding: 0 6px;
+	border-radius: 999px;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	background: var(--mp-scc-tristate-fab-badge-bg, #e53935);
+	color: var(--mp-scc-tristate-fab-badge-text, #ffffff);
+	font-size: var(--mp-scc-tristate-fab-badge-font-size, 11px);
+	font-weight: 700;
+	line-height: 1;
+	font-variant-numeric: tabular-nums;
+	box-shadow: 0 2px 6px rgba(0, 0, 0, 0.28);
+	pointer-events: none;
+}
+
+.mp-scc-sticky-bar.mp-scc-sticky--tristate[data-mp-scc-cart-empty="1"] .mp-scc-drawer-toggle-badge {
+	display: none;
 }
 
 .mp-scc-sticky-bar.mp-scc-sticky--tristate .mp-scc-drawer-toggle--fab:hover {

@@ -218,6 +218,12 @@ final class SettingsValidationSchema {
 				'tristate_column_shadow_offset_y_px' => array( 'type' => 'integer', 'min' => 0, 'max' => 24 ),
 				'tristate_column_shadow_opacity_percent' => array( 'type' => 'integer', 'min' => 4, 'max' => 28 ),
 				'tristate_mobile_breakpoint_max_px'  => array( 'type' => 'integer', 'min' => 480, 'max' => 900 ),
+				'tristate_fab_badge_size_px'         => array( 'type' => 'integer', 'min' => 14, 'max' => 36 ),
+				'tristate_fab_badge_offset_top_px'   => array( 'type' => 'integer', 'min' => -24, 'max' => 24 ),
+				'tristate_fab_badge_offset_right_px' => array( 'type' => 'integer', 'min' => -24, 'max' => 24 ),
+				'tristate_fab_badge_font_size_px'    => array( 'type' => 'integer', 'min' => 9, 'max' => 18 ),
+				'tristate_fab_badge_bg_color'        => array( 'type' => 'color' ),
+				'tristate_fab_badge_text_color'      => array( 'type' => 'color' ),
 				'visibility_show_on_all_templates'   => array( 'type' => 'boolean' ),
 				'visibility_excluded_urls'           => array(
 					'type'       => 'text',

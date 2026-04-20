@@ -173,6 +173,9 @@ final class StickyCartRenderer implements StickyCartRendererInterface {
 				<button type="button" id="mp-scc-drawer-toggle" class="mp-scc-drawer-toggle<?php echo $tristate ? ' mp-scc-drawer-toggle--fab' : ''; ?>" aria-expanded="false" aria-controls="<?php echo esc_attr( $aria_controls ); ?>" data-mp-scc-drawer-toggle<?php echo $tristate ? ' aria-haspopup="dialog"' : ''; ?>>
 					<span class="mp-scc-sr-only"><?php echo esc_html__( 'Show or hide cart details', 'mp-sticky-custom-cart' ); ?></span>
 					<span class="mp-scc-drawer-toggle-icon" aria-hidden="true"></span>
+					<?php if ( $tristate ) : ?>
+					<span class="mp-scc-drawer-toggle-badge" data-mp-scc-cart-count aria-hidden="true"><?php echo esc_html( (string) $line_count ); ?></span>
+					<?php endif; ?>
 				</button>
 				<?php endif; ?>
 				<?php if ( $show_sticky_bar_summary ) : ?>

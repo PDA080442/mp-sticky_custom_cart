@@ -28,6 +28,7 @@ assert.ok(renderer.includes('tristate_icon_actions_toolbar_markup'), 'Renderer s
 assert.ok(renderer.includes('data-mp-scc-clear-label'), 'Icon clear should expose label for a11y restore');
 assert.ok(renderer.includes('data-mp-scc-checkout-label'), 'Icon checkout should expose label for a11y restore');
 assert.ok(renderer.includes('mp-scc-tristate-action-svg'), 'Inline SVGs should use shared tristate glyph class');
+assert.ok(renderer.includes('mp-scc-drawer-toggle-badge'), 'State A FAB should render cart-count badge');
 assert.ok(renderer.includes('show_sticky_bar_summary'), 'Renderer should gate legacy bar strip when tristate+drawer');
 
 assert.ok(shell.includes('return STATES.B') && shell.includes('ACTION.TOGGLE_C'), 'Shell reducer should open B from A when panel exists');
@@ -49,6 +50,10 @@ assert.ok(css.includes('--mp-scc-tristate-state-a-dock-inset-right'), 'CSS shoul
 assert.ok(css.includes('--mp-scc-tristate-z-panel-b'), 'CSS should layer panel B via z-index token');
 assert.ok(css.includes('--mp-scc-tristate-column-shadow-alpha'), 'CSS should consume tri-state shadow alpha token');
 assert.ok(css.includes('mp-scc-drawer-c__scroll'), 'CSS should style scrollable lines region');
+assert.ok(css.includes('mp-scc-drawer-toggle-badge') && css.includes('#e53935'), 'CSS should style FAB count badge (red with white text)');
+assert.ok(css.includes('--mp-scc-tristate-fab-badge-size'), 'CSS should consume FAB badge size token');
+assert.ok(css.includes('--mp-scc-tristate-fab-badge-bg'), 'CSS should consume FAB badge bg color token');
+assert.ok(css.includes('--mp-scc-tristate-fab-badge-text'), 'CSS should consume FAB badge text color token');
 
 assert.ok(defaults.includes('tristate_panel_b_max_height_px'), 'Defaults should define panel B metrics');
 assert.ok(defaults.includes('tristate_panel_c_width_px'), 'Defaults should define panel C width');
@@ -58,6 +63,8 @@ assert.ok(defaults.includes('tristate_dock_inset_right_px'), 'Defaults should de
 assert.ok(defaults.includes('tristate_dock_inset_left_px'), 'Defaults should define tri-state dock inset-left');
 assert.ok(defaults.includes('tristate_dock_inset_top_px'), 'Defaults should define tri-state dock inset-top');
 assert.ok(defaults.includes('tristate_state_a_dock_inset_right_px'), 'Defaults should define tri-state state A dock inset');
+assert.ok(defaults.includes('tristate_fab_badge_size_px'), 'Defaults should define FAB badge size');
+assert.ok(defaults.includes('tristate_fab_badge_bg_color'), 'Defaults should define FAB badge background color');
 assert.ok(defaults.includes('tristate_mobile_layout_preset'), 'Defaults should define tri-state mobile preset');
 assert.ok(schema.includes('tristate_panel_b_max_height_px'), 'Schema should validate panel B metrics');
 assert.ok(schema.includes('tristate_panel_c_width_px'), 'Schema should validate panel C width');
@@ -66,6 +73,8 @@ assert.ok(schema.includes('tristate_mobile_layout_preset'), 'Schema should valid
 assert.ok(schema.includes('tristate_dock_inset_left_px'), 'Schema should validate tri-state dock inset-left');
 assert.ok(schema.includes('tristate_dock_inset_top_px'), 'Schema should validate tri-state dock inset-top');
 assert.ok(schema.includes('tristate_state_a_dock_inset_right_px'), 'Schema should validate tri-state state A dock inset');
+assert.ok(schema.includes('tristate_fab_badge_size_px'), 'Schema should validate FAB badge size');
+assert.ok(schema.includes('tristate_fab_badge_bg_color'), 'Schema should validate FAB badge colors');
 assert.ok(schema.includes('clear_cart_in_progress'), 'Schema should allow clear_cart_in_progress label');
 assert.ok(contract.includes('tristate-panel-b-max-height'), 'CssVariablesContract should map panel B vars');
 assert.ok(contract.includes('tristate-panel-c-width'), 'CssVariablesContract should map panel C width');
@@ -74,6 +83,8 @@ assert.ok(contract.includes('tristate-dock-inset-right'), 'CssVariablesContract 
 assert.ok(contract.includes('tristate-dock-inset-left'), 'CssVariablesContract should map tri-state dock inset-left');
 assert.ok(contract.includes('tristate-dock-inset-top'), 'CssVariablesContract should map tri-state dock inset-top');
 assert.ok(contract.includes('tristate-state-a-dock-inset-right'), 'CssVariablesContract should map state A dock inset');
+assert.ok(contract.includes('tristate-fab-badge-size'), 'CssVariablesContract should map FAB badge size');
+assert.ok(contract.includes('tristate-fab-badge-bg'), 'CssVariablesContract should map FAB badge bg color');
 assert.ok(dyn.includes('print_footer_tristate_responsive_layer_css'), 'DynamicStylesProvider should inject tri-state responsive CSS');
 assert.ok(dyn.includes('tristate-dock-inset-left'), 'Tri-state responsive CSS should use dock inset-left');
 assert.ok(hooks.includes('mp-scc-tristate-preset--'), 'Body class should expose tri-state mobile preset');
@@ -83,5 +94,7 @@ assert.ok(admin.includes('tristate_panel_c_width_px'), 'Settings UI should expos
 assert.ok(admin.includes('tristate_action_icon_hit_px'), 'Settings UI should expose tri-state icon hit');
 assert.ok(admin.includes('tristate_mobile_layout_preset'), 'Settings UI should expose tri-state mobile preset');
 assert.ok(admin.includes('tristate_state_a_dock_inset_right_px'), 'Settings UI should expose tri-state state A dock inset');
+assert.ok(admin.includes('tristate_fab_badge_size_px'), 'Settings UI should expose FAB badge sizing');
+assert.ok(admin.includes('tristate_fab_badge_bg_color'), 'Settings UI should expose FAB badge colors');
 
 console.log('sticky-tristate-panel-b: OK');
