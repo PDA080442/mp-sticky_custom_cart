@@ -123,6 +123,9 @@ body.mp-scc-sticky-active.mp-scc-sticky-layout-tristate {
 }
 
 .mp-scc-sticky-bar.mp-scc-sticky--tristate {
+	/* Keep dock tokens in CSS contract while FAB stays anchored in place across A/B/C states. */
+	--mp-scc-tristate-dock-inset-top-effective: var(--mp-scc-tristate-dock-inset-top, 0px);
+	--mp-scc-tristate-dock-inset-left-effective: var(--mp-scc-tristate-dock-inset-left, 32px);
 	inset: auto 0 0 auto !important;
 	left: auto !important;
 	right: 0 !important;
@@ -149,13 +152,13 @@ body.mp-scc-sticky-active.mp-scc-sticky-layout-tristate {
 
 .mp-scc-sticky-bar.mp-scc-sticky--tristate[data-mp-scc-shell-state="B"],
 .mp-scc-sticky-bar.mp-scc-sticky--tristate[data-mp-scc-shell-state="C"] {
-	padding-top: max(var(--mp-scc-tristate-dock-inset-top, 0px), env(safe-area-inset-top, 0px)) !important;
-	padding-right: max(var(--mp-scc-tristate-dock-inset-right, 32px), env(safe-area-inset-right, 0px)) !important;
+	padding-top: max(var(--mp-scc-tristate-state-a-dock-inset-top, 0px), env(safe-area-inset-top, 0px)) !important;
+	padding-right: max(var(--mp-scc-tristate-state-a-dock-inset-right, 32px), env(safe-area-inset-right, 0px)) !important;
 	padding-bottom: max(
-		var(--mp-scc-tristate-dock-inset-bottom, 32px),
+		var(--mp-scc-tristate-state-a-dock-inset-bottom, 32px),
 		env(safe-area-inset-bottom, 0px)
 	) !important;
-	padding-left: max(var(--mp-scc-tristate-dock-inset-left, 32px), env(safe-area-inset-left, 0px)) !important;
+	padding-left: max(var(--mp-scc-tristate-state-a-dock-inset-left, 32px), env(safe-area-inset-left, 0px)) !important;
 }
 
 .mp-scc-sticky-bar.mp-scc-sticky--tristate .mp-scc-sticky-stack {
@@ -207,7 +210,10 @@ body.mp-scc-sticky-active.mp-scc-sticky-layout-tristate {
 /* Drawer C (tri-state): same vertical budget as panel B, wider column expanding leftward (dp §17.4). */
 .mp-scc-sticky-bar.mp-scc-sticky--tristate .mp-scc-drawer.mp-scc-drawer--tristate-c {
 	left: auto;
-	right: 0;
+	right: calc(var(--mp-scc-tristate-dock-inset-right, 32px) - var(--mp-scc-tristate-state-a-dock-inset-right, 32px));
+	bottom: calc(
+		100% + var(--mp-scc-tristate-dock-inset-bottom, 32px) - var(--mp-scc-tristate-state-a-dock-inset-bottom, 32px)
+	);
 	z-index: var(--mp-scc-tristate-z-drawer-c, 100056);
 	align-self: flex-end;
 	box-sizing: border-box;
@@ -327,10 +333,10 @@ body.mp-scc-sticky-active.mp-scc-sticky-layout-tristate {
 
 	.mp-scc-sticky-bar.mp-scc-sticky--tristate[data-mp-scc-shell-state="B"],
 	.mp-scc-sticky-bar.mp-scc-sticky--tristate[data-mp-scc-shell-state="C"] {
-		padding-top: max(var(--mp-scc-tristate-dock-inset-top, 0px), env(safe-area-inset-top, 0px)) !important;
-		padding-right: max(var(--mp-scc-tristate-dock-inset-right, 32px), env(safe-area-inset-right, 0px)) !important;
-		padding-bottom: max(var(--mp-scc-tristate-dock-inset-bottom, 32px), env(safe-area-inset-bottom, 0px)) !important;
-		padding-left: max(var(--mp-scc-tristate-dock-inset-left, 32px), env(safe-area-inset-left, 0px)) !important;
+		padding-top: max(var(--mp-scc-tristate-state-a-dock-inset-top, 0px), env(safe-area-inset-top, 0px)) !important;
+		padding-right: max(var(--mp-scc-tristate-state-a-dock-inset-right, 32px), env(safe-area-inset-right, 0px)) !important;
+		padding-bottom: max(var(--mp-scc-tristate-state-a-dock-inset-bottom, 32px), env(safe-area-inset-bottom, 0px)) !important;
+		padding-left: max(var(--mp-scc-tristate-state-a-dock-inset-left, 32px), env(safe-area-inset-left, 0px)) !important;
 	}
 }
 
@@ -378,8 +384,10 @@ body.mp-scc-sticky-active.mp-scc-sticky-layout-tristate {
 /* Tri-state panel B: right-docked, grows upward (dp §17.3) */
 .mp-scc-sticky-bar.mp-scc-sticky--tristate .mp-scc-shell-panel-b {
 	position: absolute;
-	right: 0;
-	bottom: 100%;
+	right: calc(var(--mp-scc-tristate-dock-inset-right, 32px) - var(--mp-scc-tristate-state-a-dock-inset-right, 32px));
+	bottom: calc(
+		100% + var(--mp-scc-tristate-dock-inset-bottom, 32px) - var(--mp-scc-tristate-state-a-dock-inset-bottom, 32px)
+	);
 	z-index: var(--mp-scc-tristate-z-panel-b, 100055);
 	box-sizing: border-box;
 	width: min(
