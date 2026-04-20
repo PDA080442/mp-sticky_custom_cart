@@ -17,6 +17,7 @@ defined( 'ABSPATH' ) || exit;
  * - StickyCartEnabled — sticky-панель
  * - StickyDrawerEnabled — drawer корзины
  * - StickyTristateEnabled — плавающая иконка (фаза 17) вместо полосы summary
+ * - StickyHideWhenEmptyEnabled — не выводить плавающий shell при пустой корзине (фаза 18)
  * - HoverMoreInfoEnabled — hover «подробнее»
  * - WishlistIconIntegrationEnabled — интеграция heart-иконки
  */
@@ -26,6 +27,7 @@ final class FeatureFlagsDefaults {
 	public const KEY_STICKY_CART_ENABLED             = 'sticky_cart_enabled';
 	public const KEY_STICKY_DRAWER_ENABLED           = 'sticky_drawer_enabled';
 	public const KEY_STICKY_TRISTATE_ENABLED         = 'sticky_tristate_enabled';
+	public const KEY_STICKY_HIDE_WHEN_EMPTY_ENABLED = 'sticky_hide_when_empty_enabled';
 	public const KEY_HOVER_MORE_INFO_ENABLED         = 'hover_more_info_enabled';
 	public const KEY_WISHLIST_ICON_INTEGRATION_ENABLED = 'wishlist_icon_integration_enabled';
 
@@ -38,6 +40,7 @@ final class FeatureFlagsDefaults {
 			self::KEY_STICKY_CART_ENABLED               => true,
 			self::KEY_STICKY_DRAWER_ENABLED             => true,
 			self::KEY_STICKY_TRISTATE_ENABLED           => false,
+			self::KEY_STICKY_HIDE_WHEN_EMPTY_ENABLED   => true,
 			self::KEY_HOVER_MORE_INFO_ENABLED           => true,
 			self::KEY_WISHLIST_ICON_INTEGRATION_ENABLED => true,
 		);

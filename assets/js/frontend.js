@@ -240,6 +240,102 @@
 		});
 	};
 
+	var __mpSccStickyDeferredTimer = null;
+
+	function mpSccStickyHideWhenEmptyEnabled() {
+		return !!(window.mpScc.flagEnabled && window.mpScc.flagEnabled('sticky_hide_when_empty_enabled'));
+	}
+
+	function mpSccRegisterDeferredFloatingStickyListener() {
+		if (!mpSccStickyHideWhenEmptyEnabled() || !window.mpScc.flagEnabled('sticky_cart_enabled')) {
+			return;
+		}
+		if ($('#mp-scc-sticky-root').length) {
+			return;
+		}
+		$(document.body).off('.mpSccStickyDeferred');
+		$(document.body).on(
+			'added_to_cart.mpSccStickyDeferred removed_from_cart.mpSccStickyDeferred wc_fragments_refreshed.mpSccStickyDeferred updated_cart_totals.mpSccStickyDeferred wc_fragments_loaded.mpSccStickyDeferred updated_wc_div.mpSccStickyDeferred',
+			function () {
+				if (__mpSccStickyDeferredTimer) {
+					clearTimeout(__mpSccStickyDeferredTimer);
+				}
+				__mpSccStickyDeferredTimer = setTimeout(function () {
+					__mpSccStickyDeferredTimer = null;
+					mpSccRunDeferredFloatingStickySnapshot();
+				}, 90);
+			}
+		);
+	}
+
+	function mpSccRunDeferredFloatingStickySnapshot() {
+		if ($('#mp-scc-sticky-root').length || !mpSccStickyHideWhenEmptyEnabled()) {
+			return;
+		}
+		window.mpScc
+			.postAjax('cartSnapshot', { include_sticky_shell: 1 })
+			.done(function (resp) {
+				if (!resp || !resp.success || !resp.data) {
+					return;
+				}
+				var td = resp.data;
+				if (td.is_empty || !td.sticky_shell_html) {
+					return;
+				}
+				$(document.body).off('.mpSccStickyDeferred');
+				$(document.body).append(td.sticky_shell_html);
+				var bcls = Array.isArray(td.sticky_body_classes) ? td.sticky_body_classes : [];
+				window.mpScc.__stickyShellBodyClassesApplied = bcls.slice();
+				var bi;
+				for (bi = 0; bi < bcls.length; bi++) {
+					document.body.classList.add(String(bcls[bi]));
+				}
+				var $root = $('#mp-scc-sticky-root');
+				if (!$root.length) {
+					mpSccRegisterDeferredFloatingStickyListener();
+					return;
+				}
+				try {
+					var sticky = new StickyCartController($root[0]);
+					if (window.mpSccCartUiShell && typeof window.mpSccCartUiShell.attachSticky === 'function') {
+						window.mpSccCartUiShell.attachSticky(sticky);
+					}
+					sticky.bind();
+					sticky.applyPayload(td);
+					window.mpScc.sticky = sticky;
+				} catch (e2) {
+					if (window.mpScc.reportStickyError) {
+						window.mpScc.reportStickyError(
+							'sticky_deferred_mount_failed',
+							e2 && e2.message ? String(e2.message) : String(e2),
+							e2 && e2.stack ? String(e2.stack).slice(0, 500) : ''
+						);
+					}
+					mpSccRegisterDeferredFloatingStickyListener();
+				}
+			});
+	}
+
+	window.mpScc.teardownFloatingStickyShell = function () {
+		var cls = window.mpScc.__stickyShellBodyClassesApplied;
+		var i;
+		if (window.mpScc.sticky && typeof window.mpScc.sticky.destroy === 'function') {
+			window.mpScc.sticky.destroy();
+		}
+		window.mpScc.sticky = null;
+		var r = document.getElementById('mp-scc-sticky-root');
+		if (r && r.parentNode) {
+			r.parentNode.removeChild(r);
+		}
+		if (cls && cls.length) {
+			for (i = 0; i < cls.length; i++) {
+				document.body.classList.remove(String(cls[i]));
+			}
+		}
+		window.mpScc.__stickyShellBodyClassesApplied = [];
+		mpSccRegisterDeferredFloatingStickyListener();
+	};
+
 	var clientDiagBuffer = [];
 	var clientDiagFlushTimer = null;
 	var clientDiagReporting = false;
@@ -2487,6 +2583,10 @@
 		if (this.cartUiShell && typeof this.cartUiShell.onStickyPayloadApplied === 'function') {
 			this.cartUiShell.onStickyPayloadApplied({ empty: empty });
 		}
+
+		if (mpSccStickyHideWhenEmptyEnabled() && empty && typeof window.mpScc.teardownFloatingStickyShell === 'function') {
+			window.mpScc.teardownFloatingStickyShell();
+		}
 	};
 
 	/**
@@ -2940,6 +3040,20 @@
 			});
 	};
 
+	StickyCartController.prototype.destroy = function () {
+		if (this.cartUiShell && typeof this.cartUiShell.destroy === 'function') {
+			this.cartUiShell.destroy();
+			this.cartUiShell = null;
+		}
+		$(document.body).off('.mpSccStickyWoo');
+		if (this.$toggle && this.$toggle.length) {
+			this.$toggle.off();
+		}
+		if (this.$root && this.$root.length) {
+			this.$root.off();
+		}
+	};
+
 	StickyCartController.prototype.bind = function () {
 		var self = this;
 
@@ -3084,7 +3198,7 @@
 		});
 
 		$(document.body).on(
-			'added_to_cart removed_from_cart wc_fragments_refreshed updated_cart_totals wc_fragments_loaded updated_wc_div',
+			'added_to_cart.mpSccStickyWoo removed_from_cart.mpSccStickyWoo wc_fragments_refreshed.mpSccStickyWoo updated_cart_totals.mpSccStickyWoo wc_fragments_loaded.mpSccStickyWoo updated_wc_div.mpSccStickyWoo',
 			function (e) {
 				self.scheduleRefreshFromWooEvent(e && e.type ? e.type : 'woo');
 			}
@@ -3154,6 +3268,8 @@
 		window.mpScc.refreshCatalogOverlay = scheduleCatalogChromeLayouts;
 
 		$(window.document).trigger('mpScc:ready');
+
+		mpSccRegisterDeferredFloatingStickyListener();
 	});
 
 	initCatalogImageAddToCart();

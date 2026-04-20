@@ -13,7 +13,8 @@ use MpStickyCustomCart\Core\OptionResolver;
 defined( 'ABSPATH' ) || exit;
 
 /**
- * Sticky bar is rendered for any cart state, including empty — there is no `is_empty()` gate.
+ * Sticky shell is rendered when {@see should_render_sticky()} is true.
+ * With {@see FeatureFlagsDefaults::KEY_STICKY_HIDE_WHEN_EMPTY_ENABLED}, an empty cart skips markup and body reserve (dp §18.1).
  */
 final class StickyCartVisibility {
 
@@ -36,6 +37,10 @@ final class StickyCartVisibility {
 		}
 
 		if ( ! function_exists( 'WC' ) || ! WC()->cart ) {
+			return false;
+		}
+
+		if ( OptionResolver::get_flag( FeatureFlagsDefaults::KEY_STICKY_HIDE_WHEN_EMPTY_ENABLED, true ) && WC()->cart->is_empty() ) {
 			return false;
 		}
 
