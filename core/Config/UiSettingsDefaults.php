@@ -61,8 +61,14 @@ final class UiSettingsDefaults {
 			'tristate_action_icon_hit_px',
 			'tristate_action_icon_glyph_px',
 			'tristate_panel_c_width_px',
+			'tristate_state_a_dock_inset_top_px',
+			'tristate_state_a_dock_inset_right_px',
+			'tristate_state_a_dock_inset_bottom_px',
+			'tristate_state_a_dock_inset_left_px',
+			'tristate_dock_inset_top_px',
 			'tristate_dock_inset_right_px',
 			'tristate_dock_inset_bottom_px',
+			'tristate_dock_inset_left_px',
 			'tristate_column_backdrop_blur_px',
 			'tristate_column_shadow_blur_px',
 			'tristate_column_shadow_offset_y_px',
@@ -216,10 +222,22 @@ final class UiSettingsDefaults {
 				'tristate_action_icon_glyph_px'      => 22,
 				/** Drawer C width (px), expands left from right edge; height matches panel B max-height. */
 				'tristate_panel_c_width_px'          => 400,
-				/** Horizontal inset of tri-state dock (FAB + B/C) from viewport edges (px). */
+				/** State A (FAB only): top inset from viewport (px). */
+				'tristate_state_a_dock_inset_top_px'    => 0,
+				/** State A: right inset (px). */
+				'tristate_state_a_dock_inset_right_px'  => 32,
+				/** State A: bottom inset above safe-area (px). */
+				'tristate_state_a_dock_inset_bottom_px' => 32,
+				/** State A: left inset (px). */
+				'tristate_state_a_dock_inset_left_px'   => 32,
+				/** Top inset of tri-state dock (FAB + B/C) from viewport (px). */
+				'tristate_dock_inset_top_px'         => 0,
+				/** Right inset of tri-state dock from viewport (px). */
 				'tristate_dock_inset_right_px'       => 32,
 				/** Bottom inset of tri-state dock above safe-area (px). */
 				'tristate_dock_inset_bottom_px'      => 32,
+				/** Left inset of tri-state dock from viewport (px). */
+				'tristate_dock_inset_left_px'        => 32,
 				/** Backdrop blur for floating panels B/C (px); 0 disables blur on those surfaces. */
 				'tristate_column_backdrop_blur_px'   => 14,
 				/** Box-shadow blur for B/C elevation (px). */

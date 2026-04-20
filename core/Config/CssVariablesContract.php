@@ -323,6 +323,36 @@ final class CssVariablesContract {
 				'format' => 'unit',
 			),
 			array(
+				'name'   => self::PREFIX . 'tristate-state-a-dock-inset-top',
+				'path'   => 'sticky_cart.tristate_state_a_dock_inset_top_px',
+				'suffix' => 'px',
+				'format' => 'unit',
+			),
+			array(
+				'name'   => self::PREFIX . 'tristate-state-a-dock-inset-right',
+				'path'   => 'sticky_cart.tristate_state_a_dock_inset_right_px',
+				'suffix' => 'px',
+				'format' => 'unit',
+			),
+			array(
+				'name'   => self::PREFIX . 'tristate-state-a-dock-inset-bottom',
+				'path'   => 'sticky_cart.tristate_state_a_dock_inset_bottom_px',
+				'suffix' => 'px',
+				'format' => 'unit',
+			),
+			array(
+				'name'   => self::PREFIX . 'tristate-state-a-dock-inset-left',
+				'path'   => 'sticky_cart.tristate_state_a_dock_inset_left_px',
+				'suffix' => 'px',
+				'format' => 'unit',
+			),
+			array(
+				'name'   => self::PREFIX . 'tristate-dock-inset-top',
+				'path'   => 'sticky_cart.tristate_dock_inset_top_px',
+				'suffix' => 'px',
+				'format' => 'unit',
+			),
+			array(
 				'name'   => self::PREFIX . 'tristate-dock-inset-right',
 				'path'   => 'sticky_cart.tristate_dock_inset_right_px',
 				'suffix' => 'px',
@@ -331,6 +361,12 @@ final class CssVariablesContract {
 			array(
 				'name'   => self::PREFIX . 'tristate-dock-inset-bottom',
 				'path'   => 'sticky_cart.tristate_dock_inset_bottom_px',
+				'suffix' => 'px',
+				'format' => 'unit',
+			),
+			array(
+				'name'   => self::PREFIX . 'tristate-dock-inset-left',
+				'path'   => 'sticky_cart.tristate_dock_inset_left_px',
 				'suffix' => 'px',
 				'format' => 'unit',
 			),

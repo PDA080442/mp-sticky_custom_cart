@@ -98,10 +98,10 @@ final class DynamicStylesProvider implements DynamicStylesProviderInterface {
 		$sel_c     = 'body.mp-scc-sticky-layout-tristate.mp-scc-tristate-preset--full-bottom .mp-scc-sticky-bar.mp-scc-sticky--tristate .mp-scc-drawer.mp-scc-drawer--tristate-c';
 
 		$css  = '@media (max-width: ' . (string) $bp . "px) {\n";
-		$css .= $sel_stack . "{align-items:stretch;width:100%;max-width:100%;}\n";
-		$css .= $sel_inner . "{justify-content:center;width:100%;}\n";
-		$css .= $sel_b . "{left:max(var(--mp-scc-tristate-dock-inset-right,32px),env(safe-area-inset-left,0));right:max(var(--mp-scc-tristate-dock-inset-right,32px),env(safe-area-inset-right,0));width:auto;max-width:none;margin-left:auto;margin-right:auto;}\n";
-		$css .= $sel_c . "{left:max(var(--mp-scc-tristate-dock-inset-right,32px),env(safe-area-inset-left,0));right:max(var(--mp-scc-tristate-dock-inset-right,32px),env(safe-area-inset-right,0));width:auto;max-width:none;}\n";
+		$css .= $sel_stack . "{align-items:stretch!important;width:100%!important;max-width:100%!important;}\n";
+		$css .= $sel_inner . "{justify-content:center!important;width:100%!important;}\n";
+		$css .= $sel_b . "{left:max(var(--mp-scc-tristate-dock-inset-left,32px),env(safe-area-inset-left,0))!important;right:max(var(--mp-scc-tristate-dock-inset-right,32px),env(safe-area-inset-right,0))!important;width:auto!important;max-width:none!important;margin-left:auto!important;margin-right:auto!important;}\n";
+		$css .= $sel_c . "{left:max(var(--mp-scc-tristate-dock-inset-left,32px),env(safe-area-inset-left,0))!important;right:max(var(--mp-scc-tristate-dock-inset-right,32px),env(safe-area-inset-right,0))!important;width:auto!important;max-width:none!important;}\n";
 		$css .= "}\n";
 
 		echo '<style id="mp-scc-tristate-responsive" type="text/css">' . "\n";

@@ -15,6 +15,13 @@ var localize = fs.readFileSync(path.join(__dirname, '..', 'frontend', 'FrontendF
 var preserve = fs.readFileSync(path.join(__dirname, '..', 'core', 'CheckoutQueryPreserve.php'), 'utf8');
 
 assert.ok(renderer.includes('position:fixed'), 'Renderer should inline fixed positioning so early-body output is not top-left in flow');
+
+var classAttrMatch = renderer.match(/class="mp-scc-root mp-scc-sticky-bar([^"]*)\$root_mods/);
+assert.ok(
+	renderer.includes("mp-scc-sticky-bar<?php echo $root_mods ? ' ' . esc_attr( $root_mods ) : ''; ?>\"") ||
+		renderer.includes('mp-scc-sticky-bar <?php'),
+	'Root class attribute MUST have a space before $root_mods to avoid class concatenation (e.g. sticky-barmp-scc-sticky--tristate)'
+);
 assert.ok(renderer.includes('wc_get_checkout_url'), 'Renderer should use WooCommerce checkout URL');
 assert.ok(renderer.includes('data-mp-scc-checkout-base'), 'Renderer should expose base checkout URL for JS');
 assert.ok(renderer.includes('mp-scc-checkout--disabled'), 'Renderer should mark disabled state when cart empty');
