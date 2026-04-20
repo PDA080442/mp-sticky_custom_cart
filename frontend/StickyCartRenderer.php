@@ -120,7 +120,8 @@ final class StickyCartRenderer implements StickyCartRendererInterface {
 					$clear_label,
 					$clear_aria_unavailable,
 					$checkout_label,
-					$checkout_aria_unavailable
+					$checkout_aria_unavailable,
+					'open'
 				);
 				?>
 			</div>
@@ -150,7 +151,8 @@ final class StickyCartRenderer implements StickyCartRendererInterface {
 						$clear_label,
 						$clear_aria_unavailable,
 						$checkout_label,
-						$checkout_aria_unavailable
+						$checkout_aria_unavailable,
+						'close'
 					);
 					?>
 				</div>
@@ -266,6 +268,7 @@ final class StickyCartRenderer implements StickyCartRendererInterface {
 	 * @param string $clear_aria_unavailable  Aria when clear disabled.
 	 * @param string $checkout_label          Checkout label.
 	 * @param string $checkout_aria_unavailable Aria when checkout disabled.
+	 * @param string $c_toggle_mode            open|close|none explicit B<->C control mode.
 	 */
 	private static function tristate_icon_actions_toolbar_markup(
 		$empty,
@@ -274,8 +277,13 @@ final class StickyCartRenderer implements StickyCartRendererInterface {
 		$clear_label,
 		$clear_aria_unavailable,
 		$checkout_label,
-		$checkout_aria_unavailable
+		$checkout_aria_unavailable,
+		$c_toggle_mode
 	) {
+		$c_toggle_mode = is_string( $c_toggle_mode ) ? $c_toggle_mode : 'none';
+		if ( ! in_array( $c_toggle_mode, array( 'open', 'close', 'none' ), true ) ) {
+			$c_toggle_mode = 'none';
+		}
 		ob_start();
 		?>
 		<div class="mp-scc-shell-panel-b__actions" role="toolbar" aria-orientation="horizontal" aria-label="<?php esc_attr_e( 'Cart actions', 'mp-sticky-custom-cart' ); ?>">
@@ -311,6 +319,18 @@ final class StickyCartRenderer implements StickyCartRendererInterface {
 			>
 				<span class="mp-scc-shell-panel-b__icon-svg" aria-hidden="true"><?php echo self::inline_svg_cart_icon(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></span>
 			</a>
+			<?php if ( 'none' !== $c_toggle_mode ) : ?>
+			<button type="button" class="mp-scc-btn mp-scc-btn--ghost mp-scc-shell-panel-b__icon-btn mp-scc-shell-panel-b__toggle-c"
+				data-mp-scc-toggle-c
+				data-mp-scc-toggle-c-mode="<?php echo esc_attr( $c_toggle_mode ); ?>"
+				title="<?php echo esc_attr( 'open' === $c_toggle_mode ? __( 'Открыть список товаров', 'mp-sticky-custom-cart' ) : __( 'Свернуть список товаров', 'mp-sticky-custom-cart' ) ); ?>"
+				aria-label="<?php echo esc_attr( 'open' === $c_toggle_mode ? __( 'Открыть список товаров', 'mp-sticky-custom-cart' ) : __( 'Свернуть список товаров', 'mp-sticky-custom-cart' ) ); ?>"
+			>
+				<span class="mp-scc-shell-panel-b__icon-svg" aria-hidden="true">
+					<?php echo 'open' === $c_toggle_mode ? self::inline_svg_chevron_up_icon() : self::inline_svg_chevron_down_icon(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+				</span>
+			</button>
+			<?php endif; ?>
 		</div>
 		<?php
 		return (string) ob_get_clean();
@@ -328,5 +348,19 @@ final class StickyCartRenderer implements StickyCartRendererInterface {
 	 */
 	private static function inline_svg_cart_icon() {
 		return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" class="mp-scc-tristate-action-svg mp-scc-tristate-action-svg--cart"><path d="M7 18c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zM1 2v2h2l3.6 7.59-1.35 2.45c-.15.28-.25.61-.25.96 0 1.1.9 2 2 2h12v-2H7.42c-.14 0-.25-.11-.25-.25l.03-.12L8.1 13h7.45c.75 0 1.41-.41 1.75-1.03L21.7 4H5.21l-.94-2H1zm16 16c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/></svg>';
+	}
+
+	/**
+	 * Inline SVG for explicit B->C control (chevron up).
+	 */
+	private static function inline_svg_chevron_up_icon() {
+		return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" class="mp-scc-tristate-action-svg mp-scc-tristate-action-svg--chevron-up"><path d="M12 8.41l4.29 4.3a1 1 0 001.42-1.42l-5-5a1 1 0 00-1.42 0l-5 5a1 1 0 001.42 1.42L12 8.4z"/></svg>';
+	}
+
+	/**
+	 * Inline SVG for explicit C->B control (chevron down).
+	 */
+	private static function inline_svg_chevron_down_icon() {
+		return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" class="mp-scc-tristate-action-svg mp-scc-tristate-action-svg--chevron-down"><path d="M12 15.59l-4.29-4.3a1 1 0 10-1.42 1.42l5 5a1 1 0 001.42 0l5-5a1 1 0 10-1.42-1.42L12 15.6z"/></svg>';
 	}
 }
