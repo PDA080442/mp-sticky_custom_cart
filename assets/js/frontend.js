@@ -2331,7 +2331,8 @@
 		this.$drawer = this.$root.find('[data-mp-scc-drawer]');
 		this.$toggle = this.$root.find('[data-mp-scc-drawer-toggle]');
 		this.$summary = this.$root.find('.mp-scc-sticky-summary');
-		this.$count = this.$root.find('[data-mp-scc-cart-count]');
+		this.$lineCount = this.$root.find('[data-mp-scc-cart-line-count]');
+		this.$qtyCount = this.$root.find('[data-mp-scc-cart-qty-count]');
 		this.$total = this.$root.find('[data-mp-scc-cart-total]');
 		this.$qtySr = this.$root.find('[data-mp-scc-cart-qty-total]');
 		this.$items = this.$root.find('[data-mp-scc-drawer-items]');
@@ -2573,10 +2574,12 @@
 
 		this.syncServerQtyFromItems(items);
 
-		var prevLineText = this.$count.text();
+		var prevLineText = this.$lineCount.length ? this.$lineCount.first().text() : '';
+		var prevQtyText = this.$qtyCount.length ? this.$qtyCount.first().text() : '';
 		var prevSubHtml = this.$total.html();
 
-		this.$count.text(String(lineCount));
+		this.$lineCount.text(String(lineCount));
+		this.$qtyCount.text(String(qty));
 
 		if (this.$qtySr.length) {
 			var fmt =
@@ -2596,7 +2599,10 @@
 		this._fallbackSubtotalHtml = subHtml;
 
 		if (String(prevLineText) !== String(lineCount)) {
-			this.pulseSummaryEl(this.$count);
+			this.pulseSummaryEl(this.$lineCount);
+		}
+		if (String(prevQtyText) !== String(qty)) {
+			this.pulseSummaryEl(this.$qtyCount);
 		}
 		if (prevSubHtml !== subHtml) {
 			this.pulseSummaryEl(this.$total);

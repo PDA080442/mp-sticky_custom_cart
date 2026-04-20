@@ -106,7 +106,11 @@ final class StickyCartRenderer implements StickyCartRendererInterface {
 				<div class="mp-scc-shell-panel-b__metrics" aria-live="polite" aria-atomic="true">
 					<div class="mp-scc-shell-panel-b__row mp-scc-shell-panel-b__row--lines">
 						<span class="mp-scc-shell-panel-b__label"><?php esc_html_e( 'Позиций', 'mp-sticky-custom-cart' ); ?></span>
-						<span class="mp-scc-cart-count mp-scc-shell-panel-b__value" data-mp-scc-cart-count><?php echo esc_html( (string) $line_count ); ?></span>
+						<span class="mp-scc-cart-count mp-scc-shell-panel-b__value" data-mp-scc-cart-line-count><?php echo esc_html( (string) $line_count ); ?></span>
+					</div>
+					<div class="mp-scc-shell-panel-b__row mp-scc-shell-panel-b__row--qty">
+						<span class="mp-scc-shell-panel-b__label"><?php esc_html_e( 'Товаров', 'mp-sticky-custom-cart' ); ?></span>
+						<span class="mp-scc-cart-qty-count mp-scc-shell-panel-b__value" data-mp-scc-cart-qty-count><?php echo esc_html( (string) (int) $qty_total ); ?></span>
 					</div>
 					<div class="mp-scc-shell-panel-b__row mp-scc-shell-panel-b__row--total">
 						<span class="mp-scc-shell-panel-b__label"><?php esc_html_e( 'Сумма', 'mp-sticky-custom-cart' ); ?></span>
@@ -142,7 +146,7 @@ final class StickyCartRenderer implements StickyCartRendererInterface {
 						>
 							<span class="mp-scc-shell-panel-b__icon-svg" aria-hidden="true"><?php echo self::inline_svg_chevron_down_icon(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></span>
 						</button>
-						<?php echo self::tristate_drawer_c_metrics_markup( $line_count, $total ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+						<?php echo self::tristate_drawer_c_metrics_markup( $line_count, $qty_total, $total ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 						<?php echo self::tristate_panel_dismiss_button_markup( 'c' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 					</div>
 					<div class="mp-scc-drawer-c__scroll" data-mp-scc-drawer-lines-scroll>
@@ -188,13 +192,13 @@ final class StickyCartRenderer implements StickyCartRendererInterface {
 					<span class="mp-scc-sr-only"><?php echo esc_html__( 'Show or hide cart details', 'mp-sticky-custom-cart' ); ?></span>
 					<span class="mp-scc-drawer-toggle-icon" aria-hidden="true"></span>
 					<?php if ( $tristate ) : ?>
-					<span class="mp-scc-drawer-toggle-badge" data-mp-scc-cart-count aria-hidden="true"><?php echo esc_html( (string) $line_count ); ?></span>
+					<span class="mp-scc-drawer-toggle-badge" data-mp-scc-cart-line-count aria-hidden="true"><?php echo esc_html( (string) $line_count ); ?></span>
 					<?php endif; ?>
 				</button>
 				<?php endif; ?>
 				<?php if ( $show_sticky_bar_summary ) : ?>
 				<div class="mp-scc-sticky-summary-text">
-					<span class="mp-scc-cart-count" data-mp-scc-cart-count><?php echo esc_html( (string) $line_count ); ?></span>
+					<span class="mp-scc-cart-count" data-mp-scc-cart-line-count><?php echo esc_html( (string) $line_count ); ?></span>
 					<span class="mp-scc-sr-only" data-mp-scc-cart-qty-total><?php echo esc_html( sprintf( /* translators: %d: total quantity of all line items */ __( 'Total quantity in cart: %d', 'mp-sticky-custom-cart' ), $qty_total ) ); ?></span>
 					<span class="mp-scc-cart-total" data-mp-scc-cart-total><?php echo wp_kses_post( $total ); ?></span>
 				</div>
@@ -271,16 +275,21 @@ final class StickyCartRenderer implements StickyCartRendererInterface {
 	/**
 	 * Metrics header for tri-state drawer C (same figures as panel B; dp §17.4).
 	 *
-	 * @param int    $line_count Number of cart lines.
+	 * @param int    $line_count Number of cart lines (distinct rows).
+	 * @param int    $qty_total  Sum of line quantities (pieces).
 	 * @param string $total      Subtotal HTML.
 	 */
-	private static function tristate_drawer_c_metrics_markup( $line_count, $total ) {
+	private static function tristate_drawer_c_metrics_markup( $line_count, $qty_total, $total ) {
 		ob_start();
 		?>
 		<div class="mp-scc-drawer-c__metrics" aria-live="polite" aria-atomic="true">
 			<div class="mp-scc-drawer-c__row mp-scc-drawer-c__row--lines">
 				<span class="mp-scc-drawer-c__label"><?php esc_html_e( 'Позиций', 'mp-sticky-custom-cart' ); ?></span>
-				<span class="mp-scc-cart-count mp-scc-drawer-c__value" data-mp-scc-cart-count><?php echo esc_html( (string) $line_count ); ?></span>
+				<span class="mp-scc-cart-count mp-scc-drawer-c__value" data-mp-scc-cart-line-count><?php echo esc_html( (string) $line_count ); ?></span>
+			</div>
+			<div class="mp-scc-drawer-c__row mp-scc-drawer-c__row--qty">
+				<span class="mp-scc-drawer-c__label"><?php esc_html_e( 'Товаров', 'mp-sticky-custom-cart' ); ?></span>
+				<span class="mp-scc-cart-qty-count mp-scc-drawer-c__value" data-mp-scc-cart-qty-count><?php echo esc_html( (string) (int) $qty_total ); ?></span>
 			</div>
 			<div class="mp-scc-drawer-c__row mp-scc-drawer-c__row--total">
 				<span class="mp-scc-drawer-c__label"><?php esc_html_e( 'Сумма', 'mp-sticky-custom-cart' ); ?></span>

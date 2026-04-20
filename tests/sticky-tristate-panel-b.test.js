@@ -34,7 +34,12 @@ assert.ok(renderer.includes('data-mp-scc-toggle-c'), 'Panel B/C should expose ex
 assert.ok(renderer.includes('data-mp-scc-toggle-c-mode'), 'Toggle control should carry explicit open/close mode');
 assert.ok(renderer.includes('mp-scc-tristate-action-svg--chevron-up'), 'Panel B control should use chevron-up icon');
 assert.ok(renderer.includes('mp-scc-tristate-action-svg--chevron-down'), 'Panel C control should use chevron-down icon');
-assert.ok(renderer.includes('mp-scc-drawer-toggle-badge'), 'State A FAB should render cart-count badge');
+assert.ok(renderer.includes('mp-scc-drawer-toggle-badge'), 'State A FAB should render line-count badge');
+assert.ok(renderer.includes('data-mp-scc-cart-line-count'), 'Renderer should tag line-count slots for JS sync');
+assert.ok(
+	renderer.includes('data-mp-scc-cart-qty-count') && renderer.includes('Товаров'),
+	'Renderer should show total pieces (Товаров) separate from line count'
+);
 assert.ok(renderer.includes('show_sticky_bar_summary'), 'Renderer should gate legacy bar strip when tristate+drawer');
 
 assert.ok(shell.includes('return STATES.B') && shell.includes('ACTION.TOGGLE_C'), 'Shell reducer should open B from A when panel exists');

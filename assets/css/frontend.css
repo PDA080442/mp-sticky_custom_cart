@@ -1146,12 +1146,14 @@ body.mp-scc-sticky-active.mp-scc-sticky-layout-tristate {
 }
 
 .mp-scc-cart-count,
+.mp-scc-cart-qty-count,
 .mp-scc-cart-total {
 	font-variant-numeric: tabular-nums;
 	transition: opacity 0.2s ease;
 }
 
 .mp-scc-sticky-summary--loading .mp-scc-cart-count,
+.mp-scc-sticky-summary--loading .mp-scc-cart-qty-count,
 .mp-scc-sticky-summary--loading .mp-scc-cart-total {
 	opacity: 0.45;
 }

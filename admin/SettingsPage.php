@@ -1432,7 +1432,7 @@ final class SettingsPage {
 		echo '<p><code>.mp-scc-sticky-inner</code> — ' . esc_html__( 'нижняя полоса', 'mp-sticky-custom-cart' ) . '<br />';
 		echo '<code>.mp-scc-sticky-summary</code> — ' . esc_html__( 'область FAB', 'mp-sticky-custom-cart' ) . '<br />';
 		echo '<code>#mp-scc-drawer-toggle</code> <code>.mp-scc-drawer-toggle</code> <code>.mp-scc-drawer-toggle--fab</code> — <code>data-mp-scc-drawer-toggle</code>, <code>aria-controls</code><br />';
-		echo '<code>.mp-scc-drawer-toggle-icon</code>, <code>.mp-scc-drawer-toggle-badge</code> (<code>data-mp-scc-cart-count</code>)<br />';
+		echo '<code>.mp-scc-drawer-toggle-icon</code>, <code>.mp-scc-drawer-toggle-badge</code> (<code>data-mp-scc-cart-line-count</code>)<br />';
 		echo '<code>.mp-scc-sticky-summary-text</code>, <code>.mp-scc-cart-count</code>, <code>.mp-scc-cart-total</code>, <code>data-mp-scc-cart-qty-total</code> — ' . esc_html__( 'в tri-state часть скрыта a11y/CSS', 'mp-sticky-custom-cart' ) . '<br />';
 		echo '<code>.mp-scc-sticky-actions</code> <code>data-mp-scc-actions</code> — ' . esc_html__( 'текстовые кнопки в tri-state обычно скрыты', 'mp-sticky-custom-cart' ) . '</p>';
 		echo '<p><code>#mp-scc-shell-panel-b</code> … — ' . esc_html__( 'есть в DOM, при A обычно', 'mp-sticky-custom-cart' ) . ' <code>hidden</code>. ';
@@ -1443,8 +1443,8 @@ final class SettingsPage {
 		echo '<p><code>#mp-scc-shell-panel-b</code> <code>.mp-scc-shell-panel-b</code> <code>data-mp-scc-shell-panel-b</code><br />';
 		echo '<code>.mp-scc-shell-panel-b__body</code><br />';
 		echo '<code>.mp-scc-shell-panel-b__metrics</code> (<code>aria-live</code>)<br />';
-		echo '<code>.mp-scc-shell-panel-b__row</code> <code>.mp-scc-shell-panel-b__row--lines</code> <code>.mp-scc-shell-panel-b__row--total</code><br />';
-		echo '<code>.mp-scc-shell-panel-b__label</code> <code>.mp-scc-shell-panel-b__value</code> <code>.mp-scc-shell-panel-b__subtotal</code> + <code>data-mp-scc-cart-count</code> / <code>data-mp-scc-cart-total</code><br />';
+		echo '<code>.mp-scc-shell-panel-b__row</code> <code>.mp-scc-shell-panel-b__row--lines</code> <code>.mp-scc-shell-panel-b__row--qty</code> <code>.mp-scc-shell-panel-b__row--total</code><br />';
+		echo '<code>.mp-scc-shell-panel-b__label</code> <code>.mp-scc-shell-panel-b__value</code> <code>.mp-scc-shell-panel-b__subtotal</code> + <code>data-mp-scc-cart-line-count</code> / <code>data-mp-scc-cart-qty-count</code> / <code>data-mp-scc-cart-total</code><br />';
 		echo '<code>.mp-scc-shell-panel-b__actions</code> (<code>role="toolbar"</code>)<br />';
 		echo '<code>.mp-scc-tristate-dismiss</code> <code>data-mp-scc-shell-dismiss="b"</code> <code>.mp-scc-tristate-dismiss__glyph</code> <code>.mp-scc-tristate-dismiss__svg</code><br />';
 		echo '<code>.mp-scc-shell-panel-b__icon-btn</code> <code>.mp-scc-btn</code> <code>.mp-scc-btn--ghost</code> / <code>.mp-scc-btn--primary</code><br />';
@@ -1461,7 +1461,7 @@ final class SettingsPage {
 		echo '<code>.mp-scc-drawer-c</code> <code>data-mp-scc-drawer-tristate-c</code><br />';
 		echo '<code>.mp-scc-drawer-c__top</code> — <code>.mp-scc-tristate-dismiss</code> <code>data-mp-scc-shell-dismiss="c"</code><br />';
 		echo '<code>.mp-scc-drawer-c__collapse</code> <code>.mp-scc-shell-panel-b__toggle-c</code> <code>data-mp-scc-toggle-c</code> <code>data-mp-scc-toggle-c-mode="close"</code> + <code>.mp-scc-tristate-action-svg--chevron-down</code><br />';
-		echo '<code>.mp-scc-drawer-c__metrics</code> — <code>.mp-scc-drawer-c__row</code> <code>.mp-scc-drawer-c__row--lines</code> <code>.mp-scc-drawer-c__row--total</code> <code>.mp-scc-drawer-c__label</code> <code>.mp-scc-drawer-c__value</code> <code>.mp-scc-drawer-c__subtotal</code><br />';
+		echo '<code>.mp-scc-drawer-c__metrics</code> — <code>.mp-scc-drawer-c__row</code> <code>.mp-scc-drawer-c__row--lines</code> <code>.mp-scc-drawer-c__row--qty</code> <code>.mp-scc-drawer-c__row--total</code> <code>.mp-scc-drawer-c__label</code> <code>.mp-scc-drawer-c__value</code> <code>.mp-scc-drawer-c__subtotal</code><br />';
 		echo '<code>.mp-scc-drawer-c__scroll</code> <code>data-mp-scc-drawer-lines-scroll</code><br />';
 		echo '<code>#mp-scc-drawer-items</code> <code>.mp-scc-drawer-items</code> <code>data-mp-scc-drawer-items</code><br />';
 		echo '<code>#mp-scc-drawer-empty</code> <code>.mp-scc-drawer-empty</code> <code>.mp-scc-drawer-empty--off</code> <code>data-mp-scc-drawer-empty</code><br />';
