@@ -40,23 +40,36 @@ final class StickyCartRenderHooks {
 	}
 
 	/**
+	 * Body classes for layout reserve when the sticky shell is present (same list after AJAX mount).
+	 *
+	 * @return string[]
+	 */
+	public static function collect_sticky_body_classes() {
+		if ( ! StickyCartVisibility::should_render_sticky() ) {
+			return array();
+		}
+		$out = array( 'mp-scc-sticky-active' );
+		if ( OptionResolver::get_flag( FeatureFlagsDefaults::KEY_STICKY_TRISTATE_ENABLED, false ) ) {
+			$out[] = 'mp-scc-sticky-layout-tristate';
+			$preset = OptionResolver::get_by_path( OptionResolver::get_settings(), 'sticky_cart.tristate_mobile_layout_preset', 'right_docked' );
+			$preset = is_string( $preset ) ? $preset : 'right_docked';
+			if ( ! in_array( $preset, array( 'right_docked', 'full_bottom' ), true ) ) {
+				$preset = 'right_docked';
+			}
+			$out[] = 'mp-scc-tristate-preset--' . str_replace( '_', '-', $preset );
+		}
+		return $out;
+	}
+
+	/**
 	 * Marks the document when the sticky bar is active (layout reserve, QA hooks).
 	 *
 	 * @param string[] $classes Body classes.
 	 * @return string[]
 	 */
 	public static function body_class( array $classes ) {
-		if ( StickyCartVisibility::should_render_sticky() ) {
-			$classes[] = 'mp-scc-sticky-active';
-			if ( OptionResolver::get_flag( FeatureFlagsDefaults::KEY_STICKY_TRISTATE_ENABLED, false ) ) {
-				$classes[] = 'mp-scc-sticky-layout-tristate';
-				$preset     = OptionResolver::get_by_path( OptionResolver::get_settings(), 'sticky_cart.tristate_mobile_layout_preset', 'right_docked' );
-				$preset     = is_string( $preset ) ? $preset : 'right_docked';
-				if ( ! in_array( $preset, array( 'right_docked', 'full_bottom' ), true ) ) {
-					$preset = 'right_docked';
-				}
-				$classes[] = 'mp-scc-tristate-preset--' . str_replace( '_', '-', $preset );
-			}
+		foreach ( self::collect_sticky_body_classes() as $c ) {
+			$classes[] = $c;
 		}
 		return $classes;
 	}
