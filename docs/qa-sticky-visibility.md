@@ -24,6 +24,13 @@
 
 Условие вывода: `StickyCartVisibility::should_render_sticky()` (учёт пустой корзины — при включённом `sticky_hide_when_empty_enabled`).
 
+### Политика из админки (CQ 91–93)
+
+- [ ] Во вкладке **Корзина → Видимость плавающей корзины** флаг «Показывать на всех шаблонах при непустой корзине» = ON: sticky видна на не-Woo страницах (при непустой корзине).
+- [ ] Тот же флаг = OFF: sticky остаётся только на Woo-контекстах (`shop/product/cart/checkout/account` + WC endpoints).
+- [ ] В поле URL-исключений проверить правила по строкам: `/checkout/*`, `/cart/*`, `/my-account/orders/*`, конкретный absolute URL; на совпавших URL sticky не выводится.
+- [ ] Строки с `#` в начале игнорируются как комментарии.
+
 ## 3. CLS и первый рендер
 
 - [ ] У `body` класс **`mp-scc-sticky-active`** только когда sticky shell реально выведен (SSR или после deferred mount).

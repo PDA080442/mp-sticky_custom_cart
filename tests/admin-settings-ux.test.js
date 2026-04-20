@@ -58,5 +58,12 @@ assert.ok(adminJs.includes('mp-scc-help-popover'), 'Admin JS should render help 
 assert.ok(settingsPage.includes('font_family_preset'), 'Styles tab should expose font_family_preset');
 assert.ok(settingsPage.includes('render_font_family_examples_line'), 'Settings should show font stack examples helper');
 assert.ok(settingsPage.includes('Montserrat, sans-serif'), 'Settings should document Montserrat example');
+assert.ok(settingsPage.includes('CQ 91–93'), 'Cart tab should document cq 91-93 mapping for visibility policy');
+assert.ok(
+	settingsPage.includes('visibility_show_on_all_templates') &&
+		settingsPage.includes('visibility_excluded_urls') &&
+		settingsPage.includes('field_textarea'),
+	'Cart tab should expose visibility policy toggle + URL exclusions textarea'
+);
 
 console.log('admin-settings-ux: OK');

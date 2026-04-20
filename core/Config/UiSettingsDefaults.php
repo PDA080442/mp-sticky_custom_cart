@@ -249,6 +249,16 @@ final class UiSettingsDefaults {
 				/** Viewport max-width (px) for mobile preset rules (admin + injected @media). */
 				'tristate_mobile_breakpoint_max_px'  => 782,
 				/**
+				 * Show sticky cart shell on all frontend templates when cart has items.
+				 * When false, sticky is limited to Woo templates/endpoints only.
+				 */
+				'visibility_show_on_all_templates' => true,
+				/**
+				 * Optional URL/path exclusions (one per line, supports '*' wildcard).
+				 * Examples: /checkout/*, /cart/*, https://example.com/some-page
+				 */
+				'visibility_excluded_urls'         => '',
+				/**
 				 * right_docked: narrow view keeps column at right (default).
 				 * full_bottom: below breakpoint, B/C span between horizontal insets (bottom-sheet style).
 				 */
