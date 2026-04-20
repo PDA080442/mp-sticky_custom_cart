@@ -4,7 +4,7 @@
  * - Single transition table + dispatch(); cart UI syncs via attachSticky().
  * - Escape: C → B (if panel B exists) → A; B → A.
  * - No session persistence: reset on pagehide; hydrate from DOM on load / pageshow.
- * - Elevated z-index + focus trap while B or C; pointer-dismiss closes B.
+ * - Elevated z-index + focus trap while B or C; panel B does not close on outside pointer (dismiss ×, Escape, FAB).
  *
  * @package MpStickyCustomCart
  */
@@ -147,8 +147,6 @@
 		this._trapBound = false;
 		this._preFocus = null;
 		this._elevated = false;
-		this._pointerBound = false;
-		this._onPointerDownCapture = this._onPointerDownCapture.bind(this);
 	}
 
 	CartUiShellStateMachine.prototype._ctx = function () {
@@ -355,33 +353,6 @@
 		}
 	};
 
-	CartUiShellStateMachine.prototype._syncPointerDismiss = function () {
-		var want = this._state === STATES.B;
-		if (want === this._pointerBound) {
-			return;
-		}
-		this._pointerBound = want;
-		if (want) {
-			document.addEventListener('pointerdown', this._onPointerDownCapture, true);
-		} else {
-			document.removeEventListener('pointerdown', this._onPointerDownCapture, true);
-		}
-	};
-
-	CartUiShellStateMachine.prototype._onPointerDownCapture = function (e) {
-		if (this._state !== STATES.B) {
-			return;
-		}
-		var t = e.target;
-		if (!t || !this.rootEl) {
-			return;
-		}
-		if (this.rootEl.contains(t)) {
-			return;
-		}
-		this.dispatch(ACTION.CLOSE_B);
-	};
-
 	CartUiShellStateMachine.prototype._tristateFabLayout = function () {
 		var el = this.rootEl;
 		if (el && el.getAttribute) {
@@ -428,7 +399,6 @@
 		if (this._state === STATES.C || this._state === STATES.B) {
 			this._focusTrapStart();
 		}
-		this._syncPointerDismiss();
 	};
 
 	CartUiShellStateMachine.prototype.dispatch = function (actionType) {
@@ -482,7 +452,6 @@
 			this.rootEl.removeAttribute('data-mp-scc-shell-state');
 		}
 		this._syncPanelBDom();
-		this._syncPointerDismiss();
 	};
 
 	CartUiShellStateMachine.prototype._onPageShow = function () {
@@ -518,10 +487,6 @@
 		document.removeEventListener('keydown', this._onEscape, false);
 		window.removeEventListener('pagehide', this._onPageHide, false);
 		window.removeEventListener('pageshow', this._onPageShow, false);
-		if (this._pointerBound) {
-			this._pointerBound = false;
-			document.removeEventListener('pointerdown', this._onPointerDownCapture, true);
-		}
 		this._focusTrapStop();
 		this._setElevated(false);
 	};

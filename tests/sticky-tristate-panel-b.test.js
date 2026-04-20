@@ -40,7 +40,7 @@ assert.ok(renderer.includes('show_sticky_bar_summary'), 'Renderer should gate le
 assert.ok(shell.includes('return STATES.B') && shell.includes('ACTION.TOGGLE_C'), 'Shell reducer should open B from A when panel exists');
 assert.ok(shell.includes('ACTION.OPEN_C') && shell.includes('ACTION.CLOSE_C'), 'Shell reducer should support explicit OPEN_C/CLOSE_C actions');
 assert.ok(shell.includes('_syncPanelBDom'), 'Shell should sync panel B visibility');
-assert.ok(shell.includes('_onPointerDownCapture'), 'Shell should dismiss panel B on outside pointer');
+assert.ok(!shell.includes('_onPointerDownCapture'), 'Shell should not close panel B on outside pointer');
 assert.ok(shell.includes('data-mp-scc-sticky-tristate'), 'Shell should honor PHP tristate data attribute on root');
 
 assert.ok(css.includes('.mp-scc-drawer[hidden]') && css.includes('display: none !important'), 'CSS should enforce display:none on drawer[hidden] to prevent display:flex override');
