@@ -35,6 +35,8 @@ assert.ok(shell.includes('_syncPanelBDom'), 'Shell should sync panel B visibilit
 assert.ok(shell.includes('_onPointerDownCapture'), 'Shell should dismiss panel B on outside pointer');
 assert.ok(shell.includes('data-mp-scc-sticky-tristate'), 'Shell should honor PHP tristate data attribute on root');
 
+assert.ok(css.includes('.mp-scc-drawer[hidden]') && css.includes('display: none !important'), 'CSS should enforce display:none on drawer[hidden] to prevent display:flex override');
+assert.ok(css.includes('.mp-scc-shell-panel-b[hidden]') && css.includes('display: none !important'), 'CSS should enforce display:none on panel-b[hidden] to prevent author CSS override');
 assert.ok(css.includes('mp-scc-shell-panel-b'), 'CSS should style panel B');
 assert.ok(css.includes('--mp-scc-tristate-panel-b-max-height'), 'CSS should consume B max-height token');
 assert.ok(css.includes('--mp-scc-tristate-panel-c-width'), 'CSS should consume drawer C width token');

@@ -197,6 +197,13 @@ body.mp-scc-sticky-active.mp-scc-sticky-layout-tristate {
 	border: 0;
 }
 
+/* Honour [hidden] for tristate panels: author `display: flex/block` would otherwise override the
+   user-agent `[hidden] { display: none }` rule, making the drawer/panel permanently visible. */
+.mp-scc-sticky-bar.mp-scc-sticky--tristate .mp-scc-drawer[hidden],
+.mp-scc-sticky-bar.mp-scc-sticky--tristate .mp-scc-shell-panel-b[hidden] {
+	display: none !important;
+}
+
 /* Drawer C (tri-state): same vertical budget as panel B, wider column expanding leftward (dp §17.4). */
 .mp-scc-sticky-bar.mp-scc-sticky--tristate .mp-scc-drawer.mp-scc-drawer--tristate-c {
 	left: auto;
