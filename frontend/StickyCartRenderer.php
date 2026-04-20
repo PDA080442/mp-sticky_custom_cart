@@ -102,6 +102,7 @@ final class StickyCartRenderer implements StickyCartRendererInterface {
 		<?php if ( $tristate && $drawer ) : ?>
 		<div id="mp-scc-shell-panel-b" class="mp-scc-shell-panel-b" data-mp-scc-shell-panel-b role="region" aria-label="<?php esc_attr_e( 'Cart summary', 'mp-sticky-custom-cart' ); ?>" hidden aria-hidden="true">
 			<div class="mp-scc-shell-panel-b__body">
+				<?php echo self::tristate_panel_dismiss_button_markup( 'b' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 				<div class="mp-scc-shell-panel-b__metrics" aria-live="polite" aria-atomic="true">
 					<div class="mp-scc-shell-panel-b__row mp-scc-shell-panel-b__row--lines">
 						<span class="mp-scc-shell-panel-b__label"><?php esc_html_e( 'Позиций', 'mp-sticky-custom-cart' ); ?></span>
@@ -132,7 +133,18 @@ final class StickyCartRenderer implements StickyCartRendererInterface {
 			<div class="mp-scc-drawer-inner<?php echo $empty ? ' mp-scc-drawer-inner--empty' : ''; ?>">
 				<?php if ( $tristate ) : ?>
 				<div class="mp-scc-drawer-c" data-mp-scc-drawer-tristate-c>
-					<?php echo self::tristate_drawer_c_metrics_markup( $line_count, $total ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+					<div class="mp-scc-drawer-c__top">
+						<button type="button" class="mp-scc-btn mp-scc-btn--ghost mp-scc-shell-panel-b__icon-btn mp-scc-drawer-c__collapse mp-scc-shell-panel-b__toggle-c"
+							data-mp-scc-toggle-c
+							data-mp-scc-toggle-c-mode="close"
+							title="<?php echo esc_attr__( 'Свернуть список товаров', 'mp-sticky-custom-cart' ); ?>"
+							aria-label="<?php echo esc_attr__( 'Свернуть список товаров', 'mp-sticky-custom-cart' ); ?>"
+						>
+							<span class="mp-scc-shell-panel-b__icon-svg" aria-hidden="true"><?php echo self::inline_svg_chevron_down_icon(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></span>
+						</button>
+						<?php echo self::tristate_drawer_c_metrics_markup( $line_count, $total ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+						<?php echo self::tristate_panel_dismiss_button_markup( 'c' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+					</div>
 					<div class="mp-scc-drawer-c__scroll" data-mp-scc-drawer-lines-scroll>
 						<ul id="mp-scc-drawer-items" class="mp-scc-drawer-items" aria-label="<?php esc_attr_e( 'Products in cart', 'mp-sticky-custom-cart' ); ?>" data-mp-scc-drawer-items<?php echo $empty ? ' hidden aria-hidden="true"' : ''; ?>></ul>
 						<div id="mp-scc-drawer-empty" class="mp-scc-drawer-empty" role="status"<?php echo $empty ? '' : ' hidden'; ?> data-mp-scc-drawer-empty>
@@ -152,7 +164,7 @@ final class StickyCartRenderer implements StickyCartRendererInterface {
 						$clear_aria_unavailable,
 						$checkout_label,
 						$checkout_aria_unavailable,
-						'close'
+						'none'
 					);
 					?>
 				</div>
@@ -233,6 +245,27 @@ final class StickyCartRenderer implements StickyCartRendererInterface {
 		);
 
 		return (string) apply_filters( 'mp_sticky_custom_cart_sticky_cart_html', $html, $context );
+	}
+
+	/**
+	 * Close control for tri-state panel B and drawer C (dispatches shell CLOSE_B / CLOSE_C).
+	 *
+	 * @param string $which Host id for data-mp-scc-shell-dismiss: b|c.
+	 */
+	private static function tristate_panel_dismiss_button_markup( $which ) {
+		$which = 'c' === $which ? 'c' : 'b';
+		$label   = __( 'Закрыть', 'mp-sticky-custom-cart' );
+		ob_start();
+		?>
+		<button type="button" class="mp-scc-tristate-dismiss"
+			data-mp-scc-shell-dismiss="<?php echo esc_attr( $which ); ?>"
+			title="<?php echo esc_attr( $label ); ?>"
+			aria-label="<?php echo esc_attr( $label ); ?>"
+		>
+			<span class="mp-scc-tristate-dismiss__glyph" aria-hidden="true"><?php echo self::inline_svg_dismiss_x_icon(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></span>
+		</button>
+		<?php
+		return (string) ob_get_clean();
 	}
 
 	/**
@@ -362,5 +395,12 @@ final class StickyCartRenderer implements StickyCartRendererInterface {
 	 */
 	private static function inline_svg_chevron_down_icon() {
 		return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" class="mp-scc-tristate-action-svg mp-scc-tristate-action-svg--chevron-down"><path d="M12 15.59l-4.29-4.3a1 1 0 10-1.42 1.42l5 5a1 1 0 001.42 0l5-5a1 1 0 10-1.42-1.42L12 15.6z"/></svg>';
+	}
+
+	/**
+	 * Inline SVG for dismiss (×) using currentColor stroke.
+	 */
+	private static function inline_svg_dismiss_x_icon() {
+		return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true" class="mp-scc-tristate-dismiss__svg"><path d="M18 6L6 18M6 6l12 12"/></svg>';
 	}
 }

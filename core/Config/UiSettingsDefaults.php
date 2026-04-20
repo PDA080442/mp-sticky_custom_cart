@@ -58,9 +58,32 @@ final class UiSettingsDefaults {
 			'tristate_panel_b_padding_px',
 			'tristate_panel_b_border_radius_px',
 			'tristate_panel_b_actions_gap_px',
+			'tristate_actions_toolbar_padding_top_px',
+			'tristate_actions_toolbar_padding_right_px',
+			'tristate_actions_toolbar_padding_bottom_px',
+			'tristate_actions_toolbar_padding_left_px',
+			'tristate_dismiss_hit_px',
+			'tristate_dismiss_margin_top_px',
+			'tristate_dismiss_margin_right_px',
+			'tristate_dismiss_margin_bottom_px',
+			'tristate_dismiss_margin_left_px',
+			'tristate_dismiss_padding_top_px',
+			'tristate_dismiss_padding_right_px',
+			'tristate_dismiss_padding_bottom_px',
+			'tristate_dismiss_padding_left_px',
+			'tristate_dismiss_border_width_px',
+			'tristate_dismiss_border_radius_px',
+			'tristate_dismiss_color',
+			'tristate_dismiss_bg_color',
+			'tristate_dismiss_border_color',
+			'tristate_dismiss_hover_color',
+			'tristate_dismiss_hover_bg_color',
+			'tristate_dismiss_hover_border_color',
+			'tristate_dismiss_glyph_px',
 			'tristate_action_icon_hit_px',
 			'tristate_action_icon_glyph_px',
 			'tristate_panel_c_width_px',
+			'tristate_panel_c_height_px',
 			'tristate_state_a_dock_inset_top_px',
 			'tristate_state_a_dock_inset_right_px',
 			'tristate_state_a_dock_inset_bottom_px',
@@ -81,6 +104,10 @@ final class UiSettingsDefaults {
 			'tristate_fab_badge_font_size_px',
 			'tristate_fab_badge_bg_color',
 			'tristate_fab_badge_text_color',
+			'tristate_custom_css_global',
+			'tristate_custom_css_state_a',
+			'tristate_custom_css_state_b',
+			'tristate_custom_css_state_c',
 		);
 	}
 
@@ -211,7 +238,7 @@ final class UiSettingsDefaults {
 				'sticky_inner_gap_desktop_row_px' => 16,
 				'sticky_inner_gap_desktop_col_px' => 24,
 				/** Max height of tri-state summary panel B (px); typical content should fit without inner scroll. */
-				'tristate_panel_b_max_height_px'     => 200,
+				'tristate_panel_b_max_height_px'     => 368,
 				/** Width of panel B (px). */
 				'tristate_panel_b_width_px'          => 280,
 				/** Gap between FAB and bottom edge of panel B (px). */
@@ -222,12 +249,38 @@ final class UiSettingsDefaults {
 				'tristate_panel_b_border_radius_px'  => 12,
 				/** Gap between icon action buttons in panel B (px). */
 				'tristate_panel_b_actions_gap_px'    => 8,
+				/** Padding around the icon toolbar (panel B body + drawer C), px per side → --mp-scc-tristate-actions-toolbar-padding-*. */
+				'tristate_actions_toolbar_padding_top_px'    => 24,
+				'tristate_actions_toolbar_padding_right_px'  => 0,
+				'tristate_actions_toolbar_padding_bottom_px' => 0,
+				'tristate_actions_toolbar_padding_left_px'   => 0,
+				/** Dismiss (×) for panel B + drawer C: outer hit (px). */
+				'tristate_dismiss_hit_px'                    => 36,
+				'tristate_dismiss_margin_top_px'             => 0,
+				'tristate_dismiss_margin_right_px'           => 0,
+				'tristate_dismiss_margin_bottom_px'          => 0,
+				'tristate_dismiss_margin_left_px'            => 0,
+				'tristate_dismiss_padding_top_px'            => 2,
+				'tristate_dismiss_padding_right_px'          => 2,
+				'tristate_dismiss_padding_bottom_px'         => 2,
+				'tristate_dismiss_padding_left_px'           => 2,
+				'tristate_dismiss_border_width_px'           => 1,
+				'tristate_dismiss_border_radius_px'          => 8,
+				'tristate_dismiss_color'                     => '#1a1a1a',
+				'tristate_dismiss_bg_color'                  => '#ffffff',
+				'tristate_dismiss_border_color'              => '#d0d0d0',
+				'tristate_dismiss_hover_color'               => '#1a1a1a',
+				'tristate_dismiss_hover_bg_color'            => '#f0f0f0',
+				'tristate_dismiss_hover_border_color'        => '#b0b0b0',
+				'tristate_dismiss_glyph_px'                  => 16,
 				/** Icon-only clear/checkout control outer size (px), tri-state panel B + drawer C. */
 				'tristate_action_icon_hit_px'        => 44,
 				/** Glyph (SVG) size inside {@see tristate_action_icon_hit_px} (px). */
 				'tristate_action_icon_glyph_px'      => 22,
 				/** Drawer C width (px), expands left from right edge; height matches panel B max-height. */
-				'tristate_panel_c_width_px'          => 400,
+				'tristate_panel_c_width_px'          => 600,
+				/** Drawer C fixed height (px). */
+				'tristate_panel_c_height_px'         => 368,
 				/** State A (FAB only): top inset from viewport (px). */
 				'tristate_state_a_dock_inset_top_px'    => 0,
 				/** State A: right inset (px). */
@@ -266,6 +319,14 @@ final class UiSettingsDefaults {
 				'tristate_fab_badge_bg_color'        => '#e53935',
 				/** FAB badge text color. */
 				'tristate_fab_badge_text_color'      => '#ffffff',
+				/** Advanced override CSS for all tri-state nodes (printed as-is). */
+				'tristate_custom_css_global'         => '',
+				/** Advanced override CSS for state A wrapper only (printed as-is). */
+				'tristate_custom_css_state_a'        => '',
+				/** Advanced override CSS for state B wrapper only (printed as-is). */
+				'tristate_custom_css_state_b'        => '',
+				/** Advanced override CSS for state C wrapper only (printed as-is). */
+				'tristate_custom_css_state_c'        => '',
 				/**
 				 * Show sticky cart shell on all frontend templates when cart has items.
 				 * When false, sticky is limited to Woo templates/endpoints only.

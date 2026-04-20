@@ -59,6 +59,8 @@ assert.ok(settingsPage.includes('font_family_preset'), 'Styles tab should expose
 assert.ok(settingsPage.includes('render_font_family_examples_line'), 'Settings should show font stack examples helper');
 assert.ok(settingsPage.includes('Montserrat, sans-serif'), 'Settings should document Montserrat example');
 assert.ok(settingsPage.includes('CQ 91–93'), 'Cart tab should document cq 91-93 mapping for visibility policy');
+assert.ok(settingsPage.includes('tristate_custom_css_global'), 'Cart tab should expose advanced tri-state custom CSS fields');
+assert.ok(settingsPage.includes('mp-scc-tristate-css-cheatsheet'), 'Cart tab should expose tri-state CSS selector cheatsheet');
 assert.ok(
 	settingsPage.includes('visibility_show_on_all_templates') &&
 		settingsPage.includes('visibility_excluded_urls') &&

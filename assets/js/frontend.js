@@ -3238,6 +3238,19 @@
 			}
 		});
 
+		this.$root.on('click', '[data-mp-scc-shell-dismiss]', function (e) {
+			e.preventDefault();
+			if (!self.cartUiShell || !window.mpSccCartUiShell || !window.mpSccCartUiShell.ACTION) {
+				return;
+			}
+			var which = ($(e.currentTarget).attr('data-mp-scc-shell-dismiss') || '').toLowerCase();
+			if (which === 'b') {
+				self.cartUiShell.dispatch(window.mpSccCartUiShell.ACTION.CLOSE_B);
+			} else if (which === 'c') {
+				self.cartUiShell.dispatch(window.mpSccCartUiShell.ACTION.CLOSE_C);
+			}
+		});
+
 		this.$root.on('click', '[data-mp-scc-clear-cart]', function (e) {
 			e.preventDefault();
 			var cfg = window.mpScc.ajaxConfig();
