@@ -45,6 +45,20 @@ assert.ok(css.includes('mp-scc-sticky-suppress'), 'CSS should document modal sup
 assert.ok(js.includes('mp-scc-sticky--empty'), 'JS should toggle empty class on sticky root');
 assert.ok(js.includes('teardownFloatingStickyShell'), 'JS should expose teardown for hide-when-empty');
 assert.ok(js.includes('mpSccRegisterDeferredFloatingStickyListener'), 'JS should register deferred mount listener');
+assert.ok(
+	js.includes('mpSccScheduleDeferredFloatingStickySnapshot') && js.includes('__mpSccStickyDeferredMounting'),
+	'JS should debounce deferred snapshot and guard concurrent mounts (dp §18.2)'
+);
+assert.ok(
+	js.includes('yith_added_to_cart.mpSccYith') &&
+		js.includes("mpSccScheduleDeferredFloatingStickySnapshot()") &&
+		js.includes("!$('#mp-scc-sticky-root').length"),
+	'YITH add should trigger deferred shell mount when sticky was not SSR’d (dp §18.2.1)'
+);
+assert.ok(
+	js.includes('_mpSccDestroyed') && js.includes('if (!self._mpSccDestroyed)') && js.includes('drainMutationQueue'),
+	'Sticky controller should skip work after destroy / empty teardown races (dp §18.2.4)'
+);
 assert.ok(js.includes('mpSccStickyWoo'), 'JS should namespace Woo body handlers for clean teardown');
 assert.ok(renderer.includes('data-mp-scc-cart-empty'), 'Renderer should expose cart empty data attribute');
 assert.ok(renderer.includes('data-mp-scc-sticky-tristate'), 'Renderer should expose tristate data attribute');
