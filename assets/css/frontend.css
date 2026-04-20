@@ -209,13 +209,13 @@ body.mp-scc-sticky-active.mp-scc-sticky-layout-tristate {
 
 /* Drawer C (tri-state): same vertical budget as panel B, wider column expanding leftward (dp §17.4). */
 .mp-scc-sticky-bar.mp-scc-sticky--tristate .mp-scc-drawer.mp-scc-drawer--tristate-c {
+	position: absolute;
 	left: auto;
 	right: calc(var(--mp-scc-tristate-dock-inset-right, 32px) - var(--mp-scc-tristate-state-a-dock-inset-right, 32px));
 	bottom: calc(
-		100% + var(--mp-scc-tristate-dock-inset-bottom, 32px) - var(--mp-scc-tristate-state-a-dock-inset-bottom, 32px)
+		100% + max(0px, var(--mp-scc-tristate-dock-inset-bottom, 32px) - var(--mp-scc-tristate-state-a-dock-inset-bottom, 32px))
 	);
 	z-index: var(--mp-scc-tristate-z-drawer-c, 100056);
-	align-self: flex-end;
 	box-sizing: border-box;
 	width: min(
 		var(--mp-scc-tristate-panel-c-width, 400px),
@@ -230,8 +230,6 @@ body.mp-scc-sticky-active.mp-scc-sticky-layout-tristate {
 		)
 	);
 	max-width: min(92vw, var(--mp-scc-tristate-panel-c-width, 400px));
-	max-height: var(--mp-scc-tristate-panel-b-max-height, 200px);
-	height: var(--mp-scc-tristate-panel-b-max-height, 200px);
 	margin-bottom: var(--mp-scc-tristate-panel-b-gap-bottom, 10px);
 	padding: var(--mp-scc-tristate-panel-b-padding, 12px);
 	overflow: hidden;
@@ -254,8 +252,6 @@ body.mp-scc-sticky-active.mp-scc-sticky-layout-tristate {
 .mp-scc-sticky-bar.mp-scc-sticky--tristate .mp-scc-drawer.mp-scc-drawer--tristate-c .mp-scc-drawer-inner {
 	flex: 1 1 auto;
 	min-height: 0;
-	max-height: 100%;
-	height: 100%;
 	display: flex;
 	flex-direction: column;
 	gap: 8px;
@@ -266,7 +262,6 @@ body.mp-scc-sticky-active.mp-scc-sticky-layout-tristate {
 	flex-direction: column;
 	flex: 1 1 auto;
 	min-height: 0;
-	max-height: 100%;
 	gap: 8px;
 }
 
@@ -316,8 +311,13 @@ body.mp-scc-sticky-active.mp-scc-sticky-layout-tristate {
 }
 
 .mp-scc-drawer-c__scroll {
-	flex: 1 1 auto;
+	/*
+	 * State C: list viewport is capped to ~3 product rows.
+	 * More items stay reachable via inner scroll without clipping qty +/- controls.
+	 */
+	flex: 0 1 auto;
 	min-height: 0;
+	max-height: calc(var(--mp-scc-tristate-c-line-row-height, 112px) * 3);
 	overflow-x: hidden;
 	overflow-y: auto;
 	-webkit-overflow-scrolling: touch;
@@ -386,7 +386,7 @@ body.mp-scc-sticky-active.mp-scc-sticky-layout-tristate {
 	position: absolute;
 	right: calc(var(--mp-scc-tristate-dock-inset-right, 32px) - var(--mp-scc-tristate-state-a-dock-inset-right, 32px));
 	bottom: calc(
-		100% + var(--mp-scc-tristate-dock-inset-bottom, 32px) - var(--mp-scc-tristate-state-a-dock-inset-bottom, 32px)
+		100% + max(0px, var(--mp-scc-tristate-dock-inset-bottom, 32px) - var(--mp-scc-tristate-state-a-dock-inset-bottom, 32px))
 	);
 	z-index: var(--mp-scc-tristate-z-panel-b, 100055);
 	box-sizing: border-box;
