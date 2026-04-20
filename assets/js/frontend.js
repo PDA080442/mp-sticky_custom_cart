@@ -241,9 +241,20 @@
 	};
 
 	var __mpSccStickyDeferredTimer = null;
+	var __mpSccStickyDeferredMounting = false;
 
 	function mpSccStickyHideWhenEmptyEnabled() {
 		return !!(window.mpScc.flagEnabled && window.mpScc.flagEnabled('sticky_hide_when_empty_enabled'));
+	}
+
+	function mpSccScheduleDeferredFloatingStickySnapshot() {
+		if (__mpSccStickyDeferredTimer) {
+			clearTimeout(__mpSccStickyDeferredTimer);
+		}
+		__mpSccStickyDeferredTimer = setTimeout(function () {
+			__mpSccStickyDeferredTimer = null;
+			mpSccRunDeferredFloatingStickySnapshot();
+		}, 90);
 	}
 
 	function mpSccRegisterDeferredFloatingStickyListener() {
@@ -257,13 +268,7 @@
 		$(document.body).on(
 			'added_to_cart.mpSccStickyDeferred removed_from_cart.mpSccStickyDeferred wc_fragments_refreshed.mpSccStickyDeferred updated_cart_totals.mpSccStickyDeferred wc_fragments_loaded.mpSccStickyDeferred updated_wc_div.mpSccStickyDeferred',
 			function () {
-				if (__mpSccStickyDeferredTimer) {
-					clearTimeout(__mpSccStickyDeferredTimer);
-				}
-				__mpSccStickyDeferredTimer = setTimeout(function () {
-					__mpSccStickyDeferredTimer = null;
-					mpSccRunDeferredFloatingStickySnapshot();
-				}, 90);
+				mpSccScheduleDeferredFloatingStickySnapshot();
 			}
 		);
 	}
@@ -272,6 +277,10 @@
 		if ($('#mp-scc-sticky-root').length || !mpSccStickyHideWhenEmptyEnabled()) {
 			return;
 		}
+		if (__mpSccStickyDeferredMounting) {
+			return;
+		}
+		__mpSccStickyDeferredMounting = true;
 		window.mpScc
 			.postAjax('cartSnapshot', { include_sticky_shell: 1 })
 			.done(function (resp) {
@@ -284,26 +293,38 @@
 				}
 				$(document.body).off('.mpSccStickyDeferred');
 				$(document.body).append(td.sticky_shell_html);
+				var $root = $('#mp-scc-sticky-root');
+				if (!$root.length) {
+					mpSccRegisterDeferredFloatingStickyListener();
+					return;
+				}
 				var bcls = Array.isArray(td.sticky_body_classes) ? td.sticky_body_classes : [];
 				window.mpScc.__stickyShellBodyClassesApplied = bcls.slice();
 				var bi;
 				for (bi = 0; bi < bcls.length; bi++) {
 					document.body.classList.add(String(bcls[bi]));
 				}
-				var $root = $('#mp-scc-sticky-root');
-				if (!$root.length) {
-					mpSccRegisterDeferredFloatingStickyListener();
-					return;
-				}
+				var stickyLocal = null;
 				try {
-					var sticky = new StickyCartController($root[0]);
+					stickyLocal = new StickyCartController($root[0]);
 					if (window.mpSccCartUiShell && typeof window.mpSccCartUiShell.attachSticky === 'function') {
-						window.mpSccCartUiShell.attachSticky(sticky);
+						window.mpSccCartUiShell.attachSticky(stickyLocal);
 					}
-					sticky.bind();
-					sticky.applyPayload(td);
-					window.mpScc.sticky = sticky;
+					stickyLocal.bind();
+					stickyLocal.applyPayload(td);
+					window.mpScc.sticky = stickyLocal;
 				} catch (e2) {
+					try {
+						if (stickyLocal && typeof stickyLocal.destroy === 'function') {
+							stickyLocal.destroy();
+						}
+					} catch (e3) {
+						/* ignore nested teardown errors */
+					}
+					window.mpScc.sticky = null;
+					if (typeof window.mpScc.teardownFloatingStickyShell === 'function') {
+						window.mpScc.teardownFloatingStickyShell();
+					}
 					if (window.mpScc.reportStickyError) {
 						window.mpScc.reportStickyError(
 							'sticky_deferred_mount_failed',
@@ -313,6 +334,12 @@
 					}
 					mpSccRegisterDeferredFloatingStickyListener();
 				}
+			})
+			.fail(function () {
+				mpSccRegisterDeferredFloatingStickyListener();
+			})
+			.always(function () {
+				__mpSccStickyDeferredMounting = false;
 			});
 	}
 
@@ -2254,6 +2281,10 @@
 			var sticky = window.mpScc.sticky;
 			if (sticky && typeof sticky.scheduleRefreshFromWooEvent === 'function') {
 				sticky.scheduleRefreshFromWooEvent(e.type || 'yith_added_to_cart');
+				return;
+			}
+			if (!$('#mp-scc-sticky-root').length && mpSccStickyHideWhenEmptyEnabled()) {
+				mpSccScheduleDeferredFloatingStickySnapshot();
 			}
 		});
 	}
@@ -2325,6 +2356,7 @@
 		this.clearCartLocked = false;
 		/** Last successful snapshot quantities per cart line key (for optimistic +/- rollback). */
 		this.serverQty = {};
+		this._mpSccDestroyed = false;
 	}
 
 	StickyCartController.prototype.isDrawerOpen = function () {
@@ -2417,6 +2449,9 @@
 	};
 
 	StickyCartController.prototype.scheduleReconcile = function () {
+		if (this._mpSccDestroyed) {
+			return;
+		}
 		var self = this;
 		if (this.reconcileTimer) {
 			clearTimeout(this.reconcileTimer);
@@ -2459,6 +2494,9 @@
 	 * @param {string} [eventType] Woo event name (for future diagnostics).
 	 */
 	StickyCartController.prototype.scheduleRefreshFromWooEvent = function (eventType) {
+		if (this._mpSccDestroyed) {
+			return;
+		}
 		var self = this;
 		if (this.wooEventDebounceTimer) {
 			clearTimeout(this.wooEventDebounceTimer);
@@ -2473,6 +2511,9 @@
 	 * @param {string} [eventType]
 	 */
 	StickyCartController.prototype._onWooCartEventRefresh = function (eventType) {
+		if (this._mpSccDestroyed) {
+			return;
+		}
 		var scheduledAt = Date.now();
 		this.refresh();
 		this._armWooSyncFallback(scheduledAt);
@@ -2489,6 +2530,9 @@
 		}
 		this.wooFallbackTimer = window.setTimeout(function () {
 			self.wooFallbackTimer = null;
+			if (self._mpSccDestroyed) {
+				return;
+			}
 			if (self._lastSnapshotAppliedAt >= scheduledAt) {
 				return;
 			}
@@ -2497,6 +2541,9 @@
 	};
 
 	StickyCartController.prototype.applyPayload = function (p) {
+		if (this._mpSccDestroyed) {
+			return;
+		}
 		if (!p || typeof p !== 'object') {
 			this.scheduleReconcile();
 			return;
@@ -2689,6 +2736,10 @@
 	};
 
 	StickyCartController.prototype.drainMutationQueue = function () {
+		if (this._mpSccDestroyed) {
+			this.mutationQueue = [];
+			return;
+		}
 		if (!this.mutationQueue.length) {
 			return;
 		}
@@ -2701,6 +2752,9 @@
 	};
 
 	StickyCartController.prototype.commitRemoveLine = function (cartItemKey) {
+		if (this._mpSccDestroyed) {
+			return;
+		}
 		var self = this;
 		var cfg = window.mpScc.ajaxConfig();
 		var action = cfg.actions.removeCartLine;
@@ -2745,10 +2799,17 @@
 		})
 			.done(function (resp) {
 				if (resp && resp.success && resp.data) {
-					self.applyPayload(resp.data);
-					$(document.body).trigger('removed_from_cart');
+					var d = resp.data;
+					var hideEmpty = mpSccStickyHideWhenEmptyEnabled();
 					var okMsg = window.mpScc.label('line_removed') || 'Позиция удалена';
-					self.showStickyInlineFeedback(okMsg, 'success');
+					if (d.is_empty && hideEmpty) {
+						self.showStickyInlineFeedback(okMsg, 'success');
+					}
+					self.applyPayload(d);
+					$(document.body).trigger('removed_from_cart');
+					if (!d.is_empty || !hideEmpty) {
+						self.showStickyInlineFeedback(okMsg, 'success');
+					}
 					return;
 				}
 				self.clearLineRemovingState(keyStr);
@@ -2768,7 +2829,9 @@
 			})
 			.always(function () {
 				self.mutationInFlight = false;
-				self.drainMutationQueue();
+				if (!self._mpSccDestroyed) {
+					self.drainMutationQueue();
+				}
 			});
 	};
 
@@ -2909,6 +2972,10 @@
 		}
 		this.qtyTimers[cartItemKey] = setTimeout(function () {
 			delete self.qtyTimers[cartItemKey];
+			if (self._mpSccDestroyed) {
+				delete self.pendingQty[cartItemKey];
+				return;
+			}
 			var q = self.pendingQty[cartItemKey];
 			delete self.pendingQty[cartItemKey];
 			self.commitQuantity(cartItemKey, q);
@@ -2916,6 +2983,9 @@
 	};
 
 	StickyCartController.prototype.commitQuantity = function (cartItemKey, quantity) {
+		if (this._mpSccDestroyed) {
+			return;
+		}
 		var self = this;
 		var cfg = window.mpScc.ajaxConfig();
 		var action = cfg.actions.setLineQuantity;
@@ -2972,7 +3042,9 @@
 			})
 			.always(function () {
 				self.mutationInFlight = false;
-				self.drainMutationQueue();
+				if (!self._mpSccDestroyed) {
+					self.drainMutationQueue();
+				}
 			});
 	};
 
@@ -2988,6 +3060,9 @@
 	 * @param {'success'|'error'} variant
 	 */
 	StickyCartController.prototype.showStickyInlineFeedback = function (message, variant) {
+		if (this._mpSccDestroyed) {
+			return;
+		}
 		var text = message ? String(message) : '';
 		if (!text) {
 			return;
@@ -3006,6 +3081,9 @@
 	};
 
 	StickyCartController.prototype.refresh = function () {
+		if (this._mpSccDestroyed) {
+			return;
+		}
 		var self = this;
 		if (this.snapshotLocked) {
 			this.pendingRefresh = true;
@@ -3031,6 +3109,11 @@
 				self.scheduleReconcile();
 			})
 			.always(function () {
+				if (self._mpSccDestroyed) {
+					self.snapshotLocked = false;
+					self.pendingRefresh = false;
+					return;
+				}
 				self.$summary.removeClass('mp-scc-sticky-summary--loading');
 				self.snapshotLocked = false;
 				if (self.pendingRefresh) {
@@ -3041,6 +3124,26 @@
 	};
 
 	StickyCartController.prototype.destroy = function () {
+		this._mpSccDestroyed = true;
+		if (this.reconcileTimer) {
+			clearTimeout(this.reconcileTimer);
+			this.reconcileTimer = null;
+		}
+		if (this.wooEventDebounceTimer) {
+			clearTimeout(this.wooEventDebounceTimer);
+			this.wooEventDebounceTimer = null;
+		}
+		if (this.wooFallbackTimer) {
+			clearTimeout(this.wooFallbackTimer);
+			this.wooFallbackTimer = null;
+		}
+		var qk;
+		for (qk in this.qtyTimers) {
+			if (Object.prototype.hasOwnProperty.call(this.qtyTimers, qk)) {
+				clearTimeout(this.qtyTimers[qk]);
+			}
+		}
+		this.qtyTimers = {};
 		if (this.cartUiShell && typeof this.cartUiShell.destroy === 'function') {
 			this.cartUiShell.destroy();
 			this.cartUiShell = null;
@@ -3155,10 +3258,17 @@
 				.postAjax('clearCart', {})
 				.done(function (resp) {
 					if (resp && resp.success && resp.data) {
-						self.applyPayload(resp.data);
-						$(document.body).trigger('removed_from_cart');
+						var d = resp.data;
+						var hideEmpty = mpSccStickyHideWhenEmptyEnabled();
 						var okMsg = window.mpScc.label('cart_cleared') || 'Корзина очищена';
-						self.showStickyInlineFeedback(okMsg, 'success');
+						if (d.is_empty && hideEmpty) {
+							self.showStickyInlineFeedback(okMsg, 'success');
+						}
+						self.applyPayload(d);
+						$(document.body).trigger('removed_from_cart');
+						if (!d.is_empty || !hideEmpty) {
+							self.showStickyInlineFeedback(okMsg, 'success');
+						}
 					} else {
 						self.scheduleReconcile();
 					}
@@ -3173,6 +3283,9 @@
 				})
 				.always(function () {
 					self.clearCartLocked = false;
+					if (self._mpSccDestroyed) {
+						return;
+					}
 					self.$root.find('[data-mp-scc-clear-cart]').each(function () {
 						var $b = $(this);
 						$b.removeAttr('aria-busy').removeClass('mp-scc-clear-cart--loading');
