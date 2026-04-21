@@ -1700,7 +1700,8 @@ ul.products div.product,
 	border: none;
 	width: var(--mp-scc-catalog-cart-icon-hit-size, 36px);
 	height: var(--mp-scc-catalog-cart-icon-hit-size, 36px);
-	z-index: calc(var(--mp-scc-catalog-overlay-z-index, 4) + 1);
+	/* Keep icon above theme/product hover overlays (Yandex/Chromium forks may otherwise swallow clicks). */
+	z-index: 40;
 	transition-property: opacity, visibility, transform;
 	transition-duration: 0.18s;
 	transition-timing-function: ease;
@@ -1712,7 +1713,7 @@ ul.products div.product,
 }
 
 body.mp-scc-wishlist-integration-on .mp-scc-catalog-cart-icon-slot {
-	z-index: calc(var(--mp-scc-wishlist-icon-z-index, 6) - 1);
+	z-index: 39;
 }
 
 /*
