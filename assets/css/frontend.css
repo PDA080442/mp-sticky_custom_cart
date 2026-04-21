@@ -294,17 +294,34 @@ body.mp-scc-sticky-active.mp-scc-sticky-layout-tristate {
 .mp-scc-drawer-c__metrics {
 	display: flex;
 	flex-direction: column;
-	gap: 6px;
+	gap: 0;
 	flex: 0 0 auto;
 	min-width: 0;
 }
 
-.mp-scc-drawer-c__row {
+.mp-scc-tristate-metrics-hr {
+	flex-shrink: 0;
+	width: 100%;
+	height: 0;
+	margin: var(--mp-scc-tristate-metrics-hr-margin-y-drawer-c, 8px) 0;
+	border: 0;
+	border-top-width: var(--mp-scc-tristate-metrics-hr-border-width, 1px);
+	border-top-style: var(--mp-scc-tristate-metrics-hr-style, dashed);
+	border-top-color: var(--mp-scc-tristate-metrics-hr-border-color, rgba(0, 0, 0, 0.14));
+	background: none;
+}
+
+.mp-scc-shell-panel-b__metrics .mp-scc-tristate-metrics-hr {
+	margin: var(--mp-scc-tristate-metrics-hr-margin-y-panel-b, 0px) 0;
+}
+
+.mp-scc-drawer-c__metrics .mp-scc-drawer-c__row {
 	display: flex;
 	align-items: baseline;
 	justify-content: space-between;
 	gap: 8px;
 	min-width: 0;
+	padding: var(--mp-scc-tristate-metrics-row-padding-y, 10px) 0;
 }
 
 .mp-scc-drawer-c__label {
@@ -592,14 +609,13 @@ body.mp-scc-sticky-active.mp-scc-sticky-layout-tristate {
 	flex: 0 1 auto;
 }
 
-.mp-scc-shell-panel-b__row {
+.mp-scc-shell-panel-b__metrics .mp-scc-shell-panel-b__row {
 	display: flex;
 	align-items: baseline;
 	justify-content: space-between;
 	gap: 10px;
 	min-width: 0;
-	padding: 10px 0;
-	border-bottom: 1px solid rgba(0, 0, 0, 0.09);
+	padding: var(--mp-scc-tristate-metrics-row-padding-y, 10px) 0;
 }
 
 .mp-scc-shell-panel-b__label {

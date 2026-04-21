@@ -200,6 +200,17 @@ final class SettingsValidationSchema {
 				'tristate_panel_b_padding_px'        => array( 'type' => 'integer', 'min' => 8, 'max' => 32 ),
 				'tristate_panel_b_border_radius_px'  => array( 'type' => 'integer', 'min' => 0, 'max' => 28 ),
 				'tristate_panel_b_actions_gap_px'    => array( 'type' => 'integer', 'min' => 4, 'max' => 24 ),
+				/** Vertical padding for each metric row (panel B + drawer C header). */
+				'tristate_metrics_row_padding_y_px'           => array( 'type' => 'integer', 'min' => 4, 'max' => 24 ),
+				'tristate_metrics_hr_margin_y_panel_b_px'     => array( 'type' => 'integer', 'min' => 0, 'max' => 20 ),
+				'tristate_metrics_hr_margin_y_drawer_c_px'    => array( 'type' => 'integer', 'min' => 0, 'max' => 24 ),
+				'tristate_metrics_hr_border_width_px'         => array( 'type' => 'integer', 'min' => 0, 'max' => 4 ),
+				'tristate_metrics_hr_style'                   => array(
+					'type'  => 'text',
+					'oneof' => array( 'dashed', 'solid', 'dotted' ),
+				),
+				'tristate_metrics_hr_color'                   => array( 'type' => 'color' ),
+				'tristate_metrics_hr_opacity_percent'         => array( 'type' => 'integer', 'min' => 0, 'max' => 100 ),
 				/** Padding of .mp-scc-shell-panel-b__actions (panel B + drawer C), maps to --mp-scc-tristate-actions-toolbar-padding-*. */
 				'tristate_actions_toolbar_padding_top_px'    => array( 'type' => 'integer', 'min' => 0, 'max' => 80 ),
 				'tristate_actions_toolbar_padding_right_px'  => array( 'type' => 'integer', 'min' => 0, 'max' => 80 ),
@@ -321,6 +332,9 @@ final class SettingsValidationSchema {
 				'drawer_empty_hint'  => array( 'type' => 'text', 'max_length' => 500 ),
 				'drawer_remove_line' => array( 'type' => 'text', 'max_length' => 500 ),
 				'line_removed'       => array( 'type' => 'text', 'max_length' => 500 ),
+				'tristate_metric_lines' => array( 'type' => 'text', 'max_length' => 120 ),
+				'tristate_metric_qty'   => array( 'type' => 'text', 'max_length' => 120 ),
+				'tristate_metric_total' => array( 'type' => 'text', 'max_length' => 120 ),
 			),
 		);
 	}

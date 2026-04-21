@@ -105,15 +105,17 @@ final class StickyCartRenderer implements StickyCartRendererInterface {
 				<?php echo self::tristate_panel_dismiss_button_markup( 'b' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 				<div class="mp-scc-shell-panel-b__metrics" aria-live="polite" aria-atomic="true">
 					<div class="mp-scc-shell-panel-b__row mp-scc-shell-panel-b__row--lines">
-						<span class="mp-scc-shell-panel-b__label"><?php esc_html_e( 'Позиций', 'mp-sticky-custom-cart' ); ?></span>
+						<span class="mp-scc-shell-panel-b__label"><?php echo esc_html( OptionResolver::get_label( UiLabelsDefaults::KEY_TRISTATE_METRIC_LINES, __( 'Позиций', 'mp-sticky-custom-cart' ) ) ); ?></span>
 						<span class="mp-scc-cart-count mp-scc-shell-panel-b__value" data-mp-scc-cart-line-count><?php echo esc_html( (string) $line_count ); ?></span>
 					</div>
+					<hr class="mp-scc-tristate-metrics-hr" aria-hidden="true" />
 					<div class="mp-scc-shell-panel-b__row mp-scc-shell-panel-b__row--qty">
-						<span class="mp-scc-shell-panel-b__label"><?php esc_html_e( 'Товаров', 'mp-sticky-custom-cart' ); ?></span>
+						<span class="mp-scc-shell-panel-b__label"><?php echo esc_html( OptionResolver::get_label( UiLabelsDefaults::KEY_TRISTATE_METRIC_QTY, __( 'Товаров', 'mp-sticky-custom-cart' ) ) ); ?></span>
 						<span class="mp-scc-cart-qty-count mp-scc-shell-panel-b__value" data-mp-scc-cart-qty-count><?php echo esc_html( (string) (int) $qty_total ); ?></span>
 					</div>
+					<hr class="mp-scc-tristate-metrics-hr" aria-hidden="true" />
 					<div class="mp-scc-shell-panel-b__row mp-scc-shell-panel-b__row--total">
-						<span class="mp-scc-shell-panel-b__label"><?php esc_html_e( 'Сумма', 'mp-sticky-custom-cart' ); ?></span>
+						<span class="mp-scc-shell-panel-b__label"><?php echo esc_html( OptionResolver::get_label( UiLabelsDefaults::KEY_TRISTATE_METRIC_TOTAL, __( 'Сумма', 'mp-sticky-custom-cart' ) ) ); ?></span>
 						<span class="mp-scc-cart-total mp-scc-shell-panel-b__subtotal" data-mp-scc-cart-total><?php echo wp_kses_post( $total ); ?></span>
 					</div>
 				</div>
@@ -284,15 +286,17 @@ final class StickyCartRenderer implements StickyCartRendererInterface {
 		?>
 		<div class="mp-scc-drawer-c__metrics" aria-live="polite" aria-atomic="true">
 			<div class="mp-scc-drawer-c__row mp-scc-drawer-c__row--lines">
-				<span class="mp-scc-drawer-c__label"><?php esc_html_e( 'Позиций', 'mp-sticky-custom-cart' ); ?></span>
+				<span class="mp-scc-drawer-c__label"><?php echo esc_html( OptionResolver::get_label( UiLabelsDefaults::KEY_TRISTATE_METRIC_LINES, __( 'Позиций', 'mp-sticky-custom-cart' ) ) ); ?></span>
 				<span class="mp-scc-cart-count mp-scc-drawer-c__value" data-mp-scc-cart-line-count><?php echo esc_html( (string) $line_count ); ?></span>
 			</div>
+			<hr class="mp-scc-tristate-metrics-hr" aria-hidden="true" />
 			<div class="mp-scc-drawer-c__row mp-scc-drawer-c__row--qty">
-				<span class="mp-scc-drawer-c__label"><?php esc_html_e( 'Товаров', 'mp-sticky-custom-cart' ); ?></span>
+				<span class="mp-scc-drawer-c__label"><?php echo esc_html( OptionResolver::get_label( UiLabelsDefaults::KEY_TRISTATE_METRIC_QTY, __( 'Товаров', 'mp-sticky-custom-cart' ) ) ); ?></span>
 				<span class="mp-scc-cart-qty-count mp-scc-drawer-c__value" data-mp-scc-cart-qty-count><?php echo esc_html( (string) (int) $qty_total ); ?></span>
 			</div>
+			<hr class="mp-scc-tristate-metrics-hr" aria-hidden="true" />
 			<div class="mp-scc-drawer-c__row mp-scc-drawer-c__row--total">
-				<span class="mp-scc-drawer-c__label"><?php esc_html_e( 'Сумма', 'mp-sticky-custom-cart' ); ?></span>
+				<span class="mp-scc-drawer-c__label"><?php echo esc_html( OptionResolver::get_label( UiLabelsDefaults::KEY_TRISTATE_METRIC_TOTAL, __( 'Сумма', 'mp-sticky-custom-cart' ) ) ); ?></span>
 				<span class="mp-scc-cart-total mp-scc-drawer-c__subtotal" data-mp-scc-cart-total><?php echo wp_kses_post( $total ); ?></span>
 			</div>
 		</div>

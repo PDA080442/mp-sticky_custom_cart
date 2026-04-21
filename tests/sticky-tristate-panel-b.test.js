@@ -37,9 +37,10 @@ assert.ok(renderer.includes('mp-scc-tristate-action-svg--chevron-down'), 'Panel 
 assert.ok(renderer.includes('mp-scc-drawer-toggle-badge'), 'State A FAB should render line-count badge');
 assert.ok(renderer.includes('data-mp-scc-cart-line-count'), 'Renderer should tag line-count slots for JS sync');
 assert.ok(
-	renderer.includes('data-mp-scc-cart-qty-count') && renderer.includes('Товаров'),
-	'Renderer should show total pieces (Товаров) separate from line count'
+	renderer.includes('data-mp-scc-cart-qty-count') && renderer.includes('KEY_TRISTATE_METRIC_QTY'),
+	'Renderer should show total qty row and resolve label via OptionResolver'
 );
+assert.ok(renderer.includes('mp-scc-tristate-metrics-hr'), 'Renderer should separate metric rows with dashed hr');
 assert.ok(renderer.includes('show_sticky_bar_summary'), 'Renderer should gate legacy bar strip when tristate+drawer');
 
 assert.ok(shell.includes('return STATES.B') && shell.includes('ACTION.TOGGLE_C'), 'Shell reducer should open B from A when panel exists');
@@ -51,6 +52,14 @@ assert.ok(shell.includes('data-mp-scc-sticky-tristate'), 'Shell should honor PHP
 assert.ok(css.includes('.mp-scc-drawer[hidden]') && css.includes('display: none !important'), 'CSS should enforce display:none on drawer[hidden] to prevent display:flex override');
 assert.ok(css.includes('.mp-scc-shell-panel-b[hidden]') && css.includes('display: none !important'), 'CSS should enforce display:none on panel-b[hidden] to prevent author CSS override');
 assert.ok(css.includes('mp-scc-shell-panel-b'), 'CSS should style panel B');
+assert.ok(css.includes('mp-scc-tristate-metrics-hr'), 'CSS should style tri-state metrics hr');
+assert.ok(css.includes('--mp-scc-tristate-metrics-hr-border-color'), 'CSS should consume metrics hr color token');
+assert.ok(defaults.includes('tristate_metrics_row_padding_y_px'), 'Defaults should define tri-state metrics row padding');
+assert.ok(schema.includes('tristate_metrics_hr_style'), 'Schema should validate metrics hr style');
+assert.ok(contract.includes('tristate-metrics-row-padding-y'), 'CssVariablesContract should map metrics row padding');
+assert.ok(contract.includes('tristate-metrics-hr-border-color'), 'CssVariablesContract should emit metrics hr rgba');
+assert.ok(admin.includes('tristate_metrics_hr_opacity_percent'), 'Settings UI should expose metrics hr opacity');
+assert.ok(admin.includes('tristate_metric_lines'), 'Settings UI should expose tri-state metric line label');
 assert.ok(css.includes('--mp-scc-tristate-panel-b-max-height'), 'CSS should consume B max-height token');
 assert.ok(css.includes('--mp-scc-tristate-panel-c-width'), 'CSS should consume drawer C width token');
 assert.ok(css.includes('--mp-scc-tristate-panel-c-height'), 'CSS should consume drawer C height token');

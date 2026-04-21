@@ -58,6 +58,13 @@ final class UiSettingsDefaults {
 			'tristate_panel_b_padding_px',
 			'tristate_panel_b_border_radius_px',
 			'tristate_panel_b_actions_gap_px',
+			'tristate_metrics_row_padding_y_px',
+			'tristate_metrics_hr_margin_y_panel_b_px',
+			'tristate_metrics_hr_margin_y_drawer_c_px',
+			'tristate_metrics_hr_border_width_px',
+			'tristate_metrics_hr_style',
+			'tristate_metrics_hr_color',
+			'tristate_metrics_hr_opacity_percent',
 			'tristate_actions_toolbar_padding_top_px',
 			'tristate_actions_toolbar_padding_right_px',
 			'tristate_actions_toolbar_padding_bottom_px',
@@ -249,6 +256,14 @@ final class UiSettingsDefaults {
 				'tristate_panel_b_border_radius_px'  => 12,
 				/** Gap between icon action buttons in panel B (px). */
 				'tristate_panel_b_actions_gap_px'    => 8,
+				/** Panel B + drawer C metrics rows: vertical padding (px). */
+				'tristate_metrics_row_padding_y_px'           => 10,
+				'tristate_metrics_hr_margin_y_panel_b_px'     => 0,
+				'tristate_metrics_hr_margin_y_drawer_c_px'    => 8,
+				'tristate_metrics_hr_border_width_px'         => 1,
+				'tristate_metrics_hr_style'                   => 'dashed',
+				'tristate_metrics_hr_color'                   => '#000000',
+				'tristate_metrics_hr_opacity_percent'         => 14,
 				/** Padding around the icon toolbar (panel B body + drawer C), px per side → --mp-scc-tristate-actions-toolbar-padding-*. */
 				'tristate_actions_toolbar_padding_top_px'    => 24,
 				'tristate_actions_toolbar_padding_right_px'  => 0,
