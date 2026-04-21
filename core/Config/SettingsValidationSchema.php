@@ -7,6 +7,8 @@
 
 namespace MpStickyCustomCart\Core\Config;
 
+use MpStickyCustomCart\Core\CatalogCartIconPresets;
+
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -25,6 +27,77 @@ final class SettingsValidationSchema {
 				'image_click_behavior'        => array(
 					'type'  => 'text',
 					'oneof' => array( 'add_to_cart', 'theme_default' ),
+				),
+				'catalog_add_surface'         => array(
+					'type'  => 'text',
+					'oneof' => array( 'image_click', 'cart_icon' ),
+				),
+				'catalog_cart_icon_desktop'   => array(
+					'type'  => 'text',
+					'oneof' => array( 'hover', 'always' ),
+				),
+				'catalog_cart_icon_touch'     => array(
+					'type'  => 'text',
+					'oneof' => array( 'always', 'tap_reveal' ),
+				),
+				'catalog_cart_icon_offset_top_px'  => array(
+					'type' => 'integer',
+					'min'  => 0,
+					'max'  => 64,
+				),
+				'catalog_cart_icon_offset_left_px' => array(
+					'type' => 'integer',
+					'min'  => 0,
+					'max'  => 64,
+				),
+				'catalog_cart_icon_hit_size_px'    => array(
+					'type' => 'integer',
+					'min'  => 28,
+					'max'  => 56,
+				),
+				'catalog_cart_icon_glyph_size_px'  => array(
+					'type' => 'integer',
+					'min'  => 14,
+					'max'  => 28,
+				),
+				'catalog_cart_icon_stroke_width'   => array(
+					'type' => 'float',
+					'min'  => 1,
+					'max'  => 3,
+				),
+				'catalog_cart_icon_transition_delay_ms' => array(
+					'type' => 'integer',
+					'min'  => 0,
+					'max'  => 2000,
+				),
+				'catalog_cart_icon_mobile_mode'    => array(
+					'type'  => 'text',
+					'oneof' => array( 'inherit', 'force_visible' ),
+				),
+				'catalog_cart_icon_appearance_preset' => array(
+					'type'  => 'text',
+					'oneof' => array( 'black_cart_white_bg', 'white_cart_black_bg' ),
+				),
+				'catalog_cart_icon_color'          => array( 'type' => 'color' ),
+				'catalog_cart_icon_bg_color'       => array( 'type' => 'color' ),
+				'catalog_cart_icon_bg_alpha_percent' => array(
+					'type' => 'integer',
+					'min'  => 0,
+					'max'  => 100,
+				),
+				'catalog_cart_icon_bg_border_radius_px' => array(
+					'type' => 'integer',
+					'min'  => 0,
+					'max'  => 28,
+				),
+				'catalog_cart_icon_inner_padding_px' => array(
+					'type' => 'integer',
+					'min'  => 0,
+					'max'  => 12,
+				),
+				'catalog_cart_icon_preset'         => array(
+					'type'  => 'text',
+					'oneof' => CatalogCartIconPresets::IDS,
 				),
 				'hover_overlay_mobile_always' => array(
 					'type' => 'boolean',
@@ -121,6 +194,84 @@ final class SettingsValidationSchema {
 				'sticky_inner_gap_mobile_px' => array( 'type' => 'integer', 'min' => 0, 'max' => 48 ),
 				'sticky_inner_gap_desktop_row_px' => array( 'type' => 'integer', 'min' => 0, 'max' => 64 ),
 				'sticky_inner_gap_desktop_col_px' => array( 'type' => 'integer', 'min' => 0, 'max' => 96 ),
+				'tristate_panel_b_max_height_px'     => array( 'type' => 'integer', 'min' => 120, 'max' => 480 ),
+				'tristate_panel_b_width_px'          => array( 'type' => 'integer', 'min' => 200, 'max' => 480 ),
+				'tristate_panel_b_gap_bottom_px'     => array( 'type' => 'integer', 'min' => 4, 'max' => 40 ),
+				'tristate_panel_b_padding_px'        => array( 'type' => 'integer', 'min' => 8, 'max' => 32 ),
+				'tristate_panel_b_border_radius_px'  => array( 'type' => 'integer', 'min' => 0, 'max' => 28 ),
+				'tristate_panel_b_actions_gap_px'    => array( 'type' => 'integer', 'min' => 4, 'max' => 24 ),
+				/** Vertical padding for each metric row (panel B + drawer C header). */
+				'tristate_metrics_row_padding_y_px'           => array( 'type' => 'integer', 'min' => 4, 'max' => 24 ),
+				'tristate_metrics_hr_margin_y_panel_b_px'     => array( 'type' => 'integer', 'min' => 0, 'max' => 20 ),
+				'tristate_metrics_hr_margin_y_drawer_c_px'    => array( 'type' => 'integer', 'min' => 0, 'max' => 24 ),
+				'tristate_metrics_hr_border_width_px'         => array( 'type' => 'integer', 'min' => 0, 'max' => 4 ),
+				'tristate_metrics_hr_style'                   => array(
+					'type'  => 'text',
+					'oneof' => array( 'dashed', 'solid', 'dotted' ),
+				),
+				'tristate_metrics_hr_color'                   => array( 'type' => 'color' ),
+				'tristate_metrics_hr_opacity_percent'         => array( 'type' => 'integer', 'min' => 0, 'max' => 100 ),
+				/** Padding of .mp-scc-shell-panel-b__actions (panel B + drawer C), maps to --mp-scc-tristate-actions-toolbar-padding-*. */
+				'tristate_actions_toolbar_padding_top_px'    => array( 'type' => 'integer', 'min' => 0, 'max' => 80 ),
+				'tristate_actions_toolbar_padding_right_px'  => array( 'type' => 'integer', 'min' => 0, 'max' => 80 ),
+				'tristate_actions_toolbar_padding_bottom_px' => array( 'type' => 'integer', 'min' => 0, 'max' => 80 ),
+				'tristate_actions_toolbar_padding_left_px'   => array( 'type' => 'integer', 'min' => 0, 'max' => 80 ),
+				'tristate_dismiss_hit_px'                    => array( 'type' => 'integer', 'min' => 20, 'max' => 56 ),
+				'tristate_dismiss_margin_top_px'             => array( 'type' => 'integer', 'min' => 0, 'max' => 48 ),
+				'tristate_dismiss_margin_right_px'           => array( 'type' => 'integer', 'min' => 0, 'max' => 48 ),
+				'tristate_dismiss_margin_bottom_px'          => array( 'type' => 'integer', 'min' => 0, 'max' => 48 ),
+				'tristate_dismiss_margin_left_px'            => array( 'type' => 'integer', 'min' => 0, 'max' => 48 ),
+				'tristate_dismiss_padding_top_px'            => array( 'type' => 'integer', 'min' => 0, 'max' => 24 ),
+				'tristate_dismiss_padding_right_px'          => array( 'type' => 'integer', 'min' => 0, 'max' => 24 ),
+				'tristate_dismiss_padding_bottom_px'         => array( 'type' => 'integer', 'min' => 0, 'max' => 24 ),
+				'tristate_dismiss_padding_left_px'           => array( 'type' => 'integer', 'min' => 0, 'max' => 24 ),
+				'tristate_dismiss_border_width_px'           => array( 'type' => 'integer', 'min' => 0, 'max' => 4 ),
+				'tristate_dismiss_border_radius_px'          => array( 'type' => 'integer', 'min' => 0, 'max' => 28 ),
+				'tristate_dismiss_color'                     => array( 'type' => 'color' ),
+				'tristate_dismiss_bg_color'                  => array( 'type' => 'color' ),
+				'tristate_dismiss_border_color'              => array( 'type' => 'color' ),
+				'tristate_dismiss_hover_color'               => array( 'type' => 'color' ),
+				'tristate_dismiss_hover_bg_color'            => array( 'type' => 'color' ),
+				'tristate_dismiss_hover_border_color'        => array( 'type' => 'color' ),
+				'tristate_dismiss_glyph_px'                  => array( 'type' => 'integer', 'min' => 10, 'max' => 28 ),
+				/** Square hit target for tri-state clear/checkout icon buttons (panel B + drawer C). */
+				'tristate_action_icon_hit_px'        => array( 'type' => 'integer', 'min' => 36, 'max' => 56 ),
+				/** SVG glyph size inside the icon hit target. */
+				'tristate_action_icon_glyph_px'      => array( 'type' => 'integer', 'min' => 14, 'max' => 32 ),
+				'tristate_panel_c_width_px'          => array( 'type' => 'integer', 'min' => 260, 'max' => 760 ),
+				'tristate_panel_c_height_px'         => array( 'type' => 'integer', 'min' => 180, 'max' => 960 ),
+				'tristate_state_a_dock_inset_top_px'    => array( 'type' => 'integer', 'min' => 0, 'max' => 64 ),
+				'tristate_state_a_dock_inset_right_px'  => array( 'type' => 'integer', 'min' => 0, 'max' => 64 ),
+				'tristate_state_a_dock_inset_bottom_px' => array( 'type' => 'integer', 'min' => 0, 'max' => 64 ),
+				'tristate_state_a_dock_inset_left_px'   => array( 'type' => 'integer', 'min' => 0, 'max' => 64 ),
+				'tristate_dock_inset_top_px'         => array( 'type' => 'integer', 'min' => 0, 'max' => 64 ),
+				'tristate_dock_inset_right_px'       => array( 'type' => 'integer', 'min' => 0, 'max' => 64 ),
+				'tristate_dock_inset_bottom_px'      => array( 'type' => 'integer', 'min' => 0, 'max' => 64 ),
+				'tristate_dock_inset_left_px'        => array( 'type' => 'integer', 'min' => 0, 'max' => 64 ),
+				'tristate_column_backdrop_blur_px'   => array( 'type' => 'integer', 'min' => 0, 'max' => 40 ),
+				'tristate_column_shadow_blur_px'     => array( 'type' => 'integer', 'min' => 0, 'max' => 48 ),
+				'tristate_column_shadow_offset_y_px' => array( 'type' => 'integer', 'min' => 0, 'max' => 24 ),
+				'tristate_column_shadow_opacity_percent' => array( 'type' => 'integer', 'min' => 4, 'max' => 28 ),
+				'tristate_mobile_breakpoint_max_px'  => array( 'type' => 'integer', 'min' => 480, 'max' => 900 ),
+				'tristate_fab_badge_size_px'         => array( 'type' => 'integer', 'min' => 14, 'max' => 36 ),
+				'tristate_fab_badge_offset_top_px'   => array( 'type' => 'integer', 'min' => -24, 'max' => 24 ),
+				'tristate_fab_badge_offset_right_px' => array( 'type' => 'integer', 'min' => -24, 'max' => 24 ),
+				'tristate_fab_badge_font_size_px'    => array( 'type' => 'integer', 'min' => 9, 'max' => 18 ),
+				'tristate_fab_badge_bg_color'        => array( 'type' => 'color' ),
+				'tristate_fab_badge_text_color'      => array( 'type' => 'color' ),
+				'visibility_show_on_all_templates'   => array( 'type' => 'boolean' ),
+				'visibility_excluded_urls'           => array(
+					'type'       => 'text',
+					'max_length' => 4000,
+				),
+				'tristate_custom_css_global'         => array( 'type' => 'text', 'max_length' => 20000 ),
+				'tristate_custom_css_state_a'        => array( 'type' => 'text', 'max_length' => 20000 ),
+				'tristate_custom_css_state_b'        => array( 'type' => 'text', 'max_length' => 20000 ),
+				'tristate_custom_css_state_c'        => array( 'type' => 'text', 'max_length' => 20000 ),
+				'tristate_mobile_layout_preset'      => array(
+					'type'  => 'text',
+					'oneof' => array( 'right_docked', 'full_bottom' ),
+				),
 			),
 			'wishlist_ui' => array(
 				'heart_reserve_top_px'       => array( 'type' => 'integer', 'min' => 0, 'max' => 200 ),
@@ -168,9 +319,11 @@ final class SettingsValidationSchema {
 				'remove_view_cart_link' => array( 'type' => 'boolean' ),
 			),
 			'labels'      => array(
+				'catalog_cart_icon'  => array( 'type' => 'text', 'max_length' => 500 ),
 				'more_info'          => array( 'type' => 'text', 'max_length' => 500 ),
 				'out_of_stock'       => array( 'type' => 'text', 'max_length' => 500 ),
 				'clear_cart'         => array( 'type' => 'text', 'max_length' => 500 ),
+				'clear_cart_in_progress' => array( 'type' => 'text', 'max_length' => 500 ),
 				'cart_cleared'       => array( 'type' => 'text', 'max_length' => 500 ),
 				'checkout'           => array( 'type' => 'text', 'max_length' => 500 ),
 				'variation_required' => array( 'type' => 'text', 'max_length' => 500 ),
@@ -179,6 +332,9 @@ final class SettingsValidationSchema {
 				'drawer_empty_hint'  => array( 'type' => 'text', 'max_length' => 500 ),
 				'drawer_remove_line' => array( 'type' => 'text', 'max_length' => 500 ),
 				'line_removed'       => array( 'type' => 'text', 'max_length' => 500 ),
+				'tristate_metric_lines' => array( 'type' => 'text', 'max_length' => 120 ),
+				'tristate_metric_qty'   => array( 'type' => 'text', 'max_length' => 120 ),
+				'tristate_metric_total' => array( 'type' => 'text', 'max_length' => 120 ),
 			),
 		);
 	}
@@ -193,6 +349,8 @@ final class SettingsValidationSchema {
 			FeatureFlagsDefaults::KEY_PRODUCT_IMAGE_ADD_TO_CART         => array( 'type' => 'boolean' ),
 			FeatureFlagsDefaults::KEY_STICKY_CART_ENABLED               => array( 'type' => 'boolean' ),
 			FeatureFlagsDefaults::KEY_STICKY_DRAWER_ENABLED             => array( 'type' => 'boolean' ),
+			FeatureFlagsDefaults::KEY_STICKY_TRISTATE_ENABLED           => array( 'type' => 'boolean' ),
+			FeatureFlagsDefaults::KEY_STICKY_HIDE_WHEN_EMPTY_ENABLED   => array( 'type' => 'boolean' ),
 			FeatureFlagsDefaults::KEY_HOVER_MORE_INFO_ENABLED           => array( 'type' => 'boolean' ),
 			FeatureFlagsDefaults::KEY_WISHLIST_ICON_INTEGRATION_ENABLED => array( 'type' => 'boolean' ),
 		);

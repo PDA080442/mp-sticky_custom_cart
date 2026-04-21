@@ -31,6 +31,12 @@ assert.ok(settingsPage.includes('mp-scc-settings-form'), 'Main form should have 
 assert.ok(settingsPage.includes('mp-scc-style-live-preview'), 'Styles tab should render live preview anchor');
 assert.ok(settingsPage.includes('data-mp-scc-preview-baseline'), 'Sticky preview should store baseline for revert');
 assert.ok(settingsPage.includes('mp-scc-reset-tab-form'), 'Reset form should be separate from options form');
+	assert.ok(
+		settingsPage.includes('ERROR_LOG_PURGE_FORM_ID') &&
+			settingsPage.includes("'form'") &&
+			settingsPage.includes('self::ERROR_LOG_PURGE_FORM_ID'),
+		'Error log purge must use external form + form= on submit (no nested form inside options.php)'
+	);
 assert.ok(settingsPage.includes('help_tip_button'), 'Settings should support contextual help tooltips');
 assert.ok(resetHandler.includes("admin_post_' . self::ACTION") && resetHandler.includes('mp_scc_reset_settings_tab'), 'Reset handler should use admin-post action');
 assert.ok(resetHandler.includes('reset_styles_tab_appearance'), 'Reset handler should reset styles tab appearance keys');
@@ -52,5 +58,14 @@ assert.ok(adminJs.includes('mp-scc-help-popover'), 'Admin JS should render help 
 assert.ok(settingsPage.includes('font_family_preset'), 'Styles tab should expose font_family_preset');
 assert.ok(settingsPage.includes('render_font_family_examples_line'), 'Settings should show font stack examples helper');
 assert.ok(settingsPage.includes('Montserrat, sans-serif'), 'Settings should document Montserrat example');
+assert.ok(settingsPage.includes('CQ 91–93'), 'Cart tab should document cq 91-93 mapping for visibility policy');
+assert.ok(settingsPage.includes('tristate_custom_css_global'), 'Cart tab should expose advanced tri-state custom CSS fields');
+assert.ok(settingsPage.includes('mp-scc-tristate-css-cheatsheet'), 'Cart tab should expose tri-state CSS selector cheatsheet');
+assert.ok(
+	settingsPage.includes('visibility_show_on_all_templates') &&
+		settingsPage.includes('visibility_excluded_urls') &&
+		settingsPage.includes('field_textarea'),
+	'Cart tab should expose visibility policy toggle + URL exclusions textarea'
+);
 
 console.log('admin-settings-ux: OK');

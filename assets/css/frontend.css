@@ -22,6 +22,10 @@
 /* -------------------------------------------------------------------------
    1) Fixed bottom shell + 2) safe-area (iOS notch / home indicator)
    ------------------------------------------------------------------------- */
+html[data-mp-scc-cart-shell-elevated="1"] .mp-scc-sticky-bar {
+	z-index: calc(var(--mp-scc-sticky-z-index, 99999) + var(--mp-scc-cart-shell-z-boost, 0));
+}
+
 .mp-scc-sticky-bar {
 	position: fixed;
 	z-index: var(--mp-scc-sticky-z-index, 99999);
@@ -100,6 +104,682 @@ body.mp-scc-sticky-suppress .mp-scc-sticky-bar {
 body.modal-open .mp-scc-sticky-bar,
 body.popup-overlay-open .mp-scc-sticky-bar {
 	z-index: 1030;
+}
+
+/* -------------------------------------------------------------------------
+   Phase 17.2 — Tristate A: floating FAB bottom-right, icon-only (no bar chrome)
+   ------------------------------------------------------------------------- */
+body.mp-scc-sticky-active.mp-scc-sticky-layout-tristate {
+	padding-bottom: calc(var(--mp-scc-sticky-fab-layout-reserve, 72px) + env(safe-area-inset-bottom, 0px));
+}
+
+@media (orientation: landscape) and (max-height: 500px) {
+	body.mp-scc-sticky-active.mp-scc-sticky-layout-tristate {
+		padding-bottom: calc(
+			var(--mp-scc-sticky-fab-layout-reserve, 72px) + env(safe-area-inset-bottom, 0px) +
+				min(12px, max(env(safe-area-inset-left, 0px), env(safe-area-inset-right, 0px)))
+		);
+	}
+}
+
+.mp-scc-sticky-bar.mp-scc-sticky--tristate {
+	/* Keep dock tokens in CSS contract while FAB stays anchored in place across A/B/C states. */
+	--mp-scc-tristate-dock-inset-top-effective: var(--mp-scc-tristate-dock-inset-top, 0px);
+	--mp-scc-tristate-dock-inset-left-effective: var(--mp-scc-tristate-dock-inset-left, 32px);
+	inset: auto 0 0 auto !important;
+	left: auto !important;
+	right: 0 !important;
+	bottom: 0 !important;
+	top: auto !important;
+	width: auto !important;
+	max-width: none !important;
+	margin: 0 !important;
+	padding-top: max(var(--mp-scc-tristate-state-a-dock-inset-top, 0px), env(safe-area-inset-top, 0px)) !important;
+	padding-right: max(var(--mp-scc-tristate-state-a-dock-inset-right, 32px), env(safe-area-inset-right, 0px)) !important;
+	padding-bottom: max(
+		var(--mp-scc-tristate-state-a-dock-inset-bottom, 32px),
+		env(safe-area-inset-bottom, 0px)
+	) !important;
+	padding-left: max(var(--mp-scc-tristate-state-a-dock-inset-left, 32px), env(safe-area-inset-left, 0px)) !important;
+	border-radius: var(--mp-scc-catalog-cart-icon-border-radius, 12px) !important;
+	background: transparent !important;
+	backdrop-filter: none !important;
+	-webkit-backdrop-filter: none !important;
+	box-shadow: none !important;
+	border: none !important;
+	isolation: isolate;
+}
+
+.mp-scc-sticky-bar.mp-scc-sticky--tristate[data-mp-scc-shell-state="B"],
+.mp-scc-sticky-bar.mp-scc-sticky--tristate[data-mp-scc-shell-state="C"] {
+	padding-top: max(var(--mp-scc-tristate-state-a-dock-inset-top, 0px), env(safe-area-inset-top, 0px)) !important;
+	padding-right: max(var(--mp-scc-tristate-state-a-dock-inset-right, 32px), env(safe-area-inset-right, 0px)) !important;
+	padding-bottom: max(
+		var(--mp-scc-tristate-state-a-dock-inset-bottom, 32px),
+		env(safe-area-inset-bottom, 0px)
+	) !important;
+	padding-left: max(var(--mp-scc-tristate-state-a-dock-inset-left, 32px), env(safe-area-inset-left, 0px)) !important;
+}
+
+.mp-scc-sticky-bar.mp-scc-sticky--tristate .mp-scc-sticky-stack {
+	position: relative !important;
+	width: auto !important;
+	align-items: flex-end !important;
+	overflow: visible !important;
+}
+
+.mp-scc-sticky-bar.mp-scc-sticky--tristate .mp-scc-sticky-inner {
+	width: auto !important;
+	min-width: min-content !important;
+	flex-direction: row !important;
+	flex-wrap: nowrap !important;
+	align-items: center !important;
+	justify-content: flex-end !important;
+	gap: 0 !important;
+	overflow: visible !important;
+}
+
+.mp-scc-sticky-bar.mp-scc-sticky--tristate .mp-scc-sticky-summary {
+	width: auto !important;
+	flex: 0 0 auto !important;
+	flex-shrink: 0 !important;
+	min-width: min-content !important;
+	overflow: visible !important;
+}
+
+.mp-scc-sticky-bar.mp-scc-sticky--tristate .mp-scc-sticky-summary-text,
+.mp-scc-sticky-bar.mp-scc-sticky--tristate .mp-scc-sticky-actions {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	padding: 0;
+	margin: -1px;
+	overflow: hidden;
+	clip: rect(0, 0, 0, 0);
+	white-space: nowrap;
+	border: 0;
+}
+
+/* Honour [hidden] for tristate panels: author `display: flex/block` would otherwise override the
+   user-agent `[hidden] { display: none }` rule, making the drawer/panel permanently visible. */
+.mp-scc-sticky-bar.mp-scc-sticky--tristate .mp-scc-drawer[hidden],
+.mp-scc-sticky-bar.mp-scc-sticky--tristate .mp-scc-shell-panel-b[hidden] {
+	display: none !important;
+}
+
+/* Drawer C (tri-state): same vertical budget as panel B, wider column expanding leftward (dp §17.4). */
+.mp-scc-sticky-bar.mp-scc-sticky--tristate .mp-scc-drawer.mp-scc-drawer--tristate-c {
+	position: absolute;
+	left: auto;
+	right: calc(var(--mp-scc-tristate-dock-inset-right, 32px) - var(--mp-scc-tristate-state-a-dock-inset-right, 32px));
+	bottom: calc(
+		100% + max(0px, var(--mp-scc-tristate-dock-inset-bottom, 32px) - var(--mp-scc-tristate-state-a-dock-inset-bottom, 32px))
+	);
+	z-index: var(--mp-scc-tristate-z-drawer-c, 100056);
+	box-sizing: border-box;
+	width: min(
+		var(--mp-scc-tristate-panel-c-width, 600px),
+		calc(
+			100vw - max(
+				calc(
+					var(--mp-scc-tristate-dock-inset-left, 32px) +
+						var(--mp-scc-tristate-dock-inset-right, 32px)
+				),
+				calc(env(safe-area-inset-left, 0px) + env(safe-area-inset-right, 0px))
+			)
+		)
+	);
+	max-width: min(92vw, var(--mp-scc-tristate-panel-c-width, 600px));
+	height: var(--mp-scc-tristate-panel-c-height, 368px);
+	min-height: var(--mp-scc-tristate-panel-c-height, 368px);
+	max-height: var(--mp-scc-tristate-panel-c-height, 368px);
+	margin-bottom: var(--mp-scc-tristate-panel-b-gap-bottom, 10px);
+	padding: var(--mp-scc-tristate-panel-b-padding, 12px);
+	overflow: hidden;
+	color: var(--mp-scc-color-text-primary, #1a1a1a);
+	border: 1px solid rgba(0, 0, 0, 0.08);
+	border-radius: var(--mp-scc-tristate-panel-b-border-radius, 12px) var(--mp-scc-tristate-panel-b-border-radius, 12px) 0 0;
+	backdrop-filter: blur(var(--mp-scc-tristate-column-backdrop-blur, 14px));
+	-webkit-backdrop-filter: blur(var(--mp-scc-tristate-column-backdrop-blur, 14px));
+	background-color: rgba(255, 255, 255, var(--mp-scc-sticky-drawer-surface-alpha, 0.94));
+	box-shadow:
+		0 calc(-1 * var(--mp-scc-tristate-column-shadow-offset-y, 8px)) var(--mp-scc-tristate-column-shadow-blur, 28px)
+			rgba(0, 0, 0, var(--mp-scc-tristate-column-shadow-alpha, 0.12));
+	display: flex;
+	flex-direction: column;
+	transition:
+		box-shadow 0.22s var(--mp-scc-motion-easing, cubic-bezier(0.4, 0, 0.2, 1)),
+		background-color 0.22s var(--mp-scc-motion-easing, cubic-bezier(0.4, 0, 0.2, 1));
+}
+
+.mp-scc-sticky-bar.mp-scc-sticky--tristate .mp-scc-drawer.mp-scc-drawer--tristate-c .mp-scc-drawer-inner {
+	flex: 1 1 auto;
+	min-height: 0;
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+}
+
+.mp-scc-drawer-c {
+	display: flex;
+	flex-direction: column;
+	flex: 1 1 auto;
+	min-height: 0;
+	gap: 8px;
+}
+
+.mp-scc-drawer-c__top {
+	display: flex;
+	flex-direction: row;
+	align-items: flex-start;
+	gap: 10px;
+	flex: 0 0 auto;
+	min-width: 0;
+}
+
+.mp-scc-drawer-c__top .mp-scc-drawer-c__metrics {
+	flex: 1 1 auto;
+	min-width: 0;
+}
+
+.mp-scc-drawer-c__collapse.mp-scc-shell-panel-b__icon-btn {
+	flex: 0 0 auto;
+	width: var(--mp-scc-tristate-action-icon-hit, 44px);
+	height: var(--mp-scc-tristate-action-icon-hit, 44px);
+	min-width: var(--mp-scc-tristate-action-icon-hit, 44px);
+	min-height: var(--mp-scc-tristate-action-icon-hit, 44px);
+	border-radius: min(12px, calc(var(--mp-scc-tristate-action-icon-hit, 44px) * 0.28));
+}
+
+.mp-scc-drawer-c__metrics {
+	display: flex;
+	flex-direction: column;
+	gap: 0;
+	flex: 0 0 auto;
+	min-width: 0;
+}
+
+.mp-scc-tristate-metrics-hr {
+	flex-shrink: 0;
+	width: 100%;
+	height: 0;
+	margin: var(--mp-scc-tristate-metrics-hr-margin-y-drawer-c, 8px) 0;
+	border: 0;
+	border-top-width: var(--mp-scc-tristate-metrics-hr-border-width, 1px);
+	border-top-style: var(--mp-scc-tristate-metrics-hr-style, dashed);
+	border-top-color: var(--mp-scc-tristate-metrics-hr-border-color, rgba(0, 0, 0, 0.14));
+	background: none;
+}
+
+.mp-scc-shell-panel-b__metrics .mp-scc-tristate-metrics-hr {
+	margin: var(--mp-scc-tristate-metrics-hr-margin-y-panel-b, 0px) 0;
+}
+
+.mp-scc-drawer-c__metrics .mp-scc-drawer-c__row {
+	display: flex;
+	align-items: baseline;
+	justify-content: space-between;
+	gap: 8px;
+	min-width: 0;
+	padding: var(--mp-scc-tristate-metrics-row-padding-y, 10px) 0;
+}
+
+.mp-scc-drawer-c__label {
+	flex: 0 0 auto;
+	font-size: calc(var(--mp-scc-sticky-summary-font-size, 15px) * 0.88);
+	font-weight: 500;
+	opacity: 0.88;
+}
+
+.mp-scc-drawer-c__value {
+	font-size: var(--mp-scc-sticky-summary-font-size, 15px);
+	font-weight: var(--mp-scc-sticky-summary-font-weight, 600);
+	font-variant-numeric: tabular-nums;
+}
+
+.mp-scc-drawer-c__row--total .mp-scc-drawer-c__subtotal {
+	flex: 1 1 auto;
+	min-width: 0;
+	text-align: right;
+	font-size: var(--mp-scc-sticky-summary-font-size, 15px);
+	font-weight: var(--mp-scc-sticky-summary-font-weight, 600);
+	font-variant-numeric: tabular-nums;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.mp-scc-drawer-c__subtotal .woocommerce-Price-amount {
+	white-space: nowrap;
+}
+
+.mp-scc-drawer-c__scroll {
+	/* Fills space between header metrics and bottom icon toolbar; inner scroll when many lines. */
+	flex: 1 1 auto;
+	min-height: 0;
+	overflow-x: hidden;
+	overflow-y: auto;
+	-webkit-overflow-scrolling: touch;
+}
+
+@media (min-width: 783px) {
+	.mp-scc-sticky-bar.mp-scc-sticky--tristate {
+		padding-top: max(var(--mp-scc-tristate-state-a-dock-inset-top, 0px), env(safe-area-inset-top, 0px)) !important;
+		padding-right: max(var(--mp-scc-tristate-state-a-dock-inset-right, 32px), env(safe-area-inset-right, 0px)) !important;
+		padding-bottom: max(var(--mp-scc-tristate-state-a-dock-inset-bottom, 32px), env(safe-area-inset-bottom, 0px)) !important;
+		padding-left: max(var(--mp-scc-tristate-state-a-dock-inset-left, 32px), env(safe-area-inset-left, 0px)) !important;
+	}
+
+	.mp-scc-sticky-bar.mp-scc-sticky--tristate[data-mp-scc-shell-state="B"],
+	.mp-scc-sticky-bar.mp-scc-sticky--tristate[data-mp-scc-shell-state="C"] {
+		padding-top: max(var(--mp-scc-tristate-state-a-dock-inset-top, 0px), env(safe-area-inset-top, 0px)) !important;
+		padding-right: max(var(--mp-scc-tristate-state-a-dock-inset-right, 32px), env(safe-area-inset-right, 0px)) !important;
+		padding-bottom: max(var(--mp-scc-tristate-state-a-dock-inset-bottom, 32px), env(safe-area-inset-bottom, 0px)) !important;
+		padding-left: max(var(--mp-scc-tristate-state-a-dock-inset-left, 32px), env(safe-area-inset-left, 0px)) !important;
+	}
+}
+
+.mp-scc-sticky-bar.mp-scc-sticky--tristate .mp-scc-drawer-toggle--fab {
+	position: relative;
+	width: max(44px, var(--mp-scc-catalog-cart-icon-hit-size, 48px));
+	height: max(44px, var(--mp-scc-catalog-cart-icon-hit-size, 48px));
+	border-radius: var(--mp-scc-catalog-cart-icon-border-radius, 12px);
+	background: var(--mp-scc-catalog-cart-icon-background, rgba(255, 255, 255, 0.94));
+	color: var(--mp-scc-catalog-cart-icon-color, #1a1a1a);
+	box-shadow: 0 4px 18px rgba(0, 0, 0, 0.12);
+	overflow: visible;
+}
+
+.mp-scc-sticky-bar.mp-scc-sticky--tristate .mp-scc-drawer-toggle-badge {
+	position: absolute;
+	top: var(--mp-scc-tristate-fab-badge-offset-top, -8px);
+	right: var(--mp-scc-tristate-fab-badge-offset-right, -8px);
+	min-width: var(--mp-scc-tristate-fab-badge-size, 20px);
+	height: var(--mp-scc-tristate-fab-badge-size, 20px);
+	padding: 0 6px;
+	border-radius: 999px;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	background: var(--mp-scc-tristate-fab-badge-bg, #e53935);
+	color: var(--mp-scc-tristate-fab-badge-text, #ffffff);
+	font-size: var(--mp-scc-tristate-fab-badge-font-size, 11px);
+	font-weight: 700;
+	line-height: 1;
+	font-variant-numeric: tabular-nums;
+	box-shadow: 0 2px 6px rgba(0, 0, 0, 0.28);
+	pointer-events: none;
+}
+
+.mp-scc-sticky-bar.mp-scc-sticky--tristate[data-mp-scc-cart-empty="1"] .mp-scc-drawer-toggle-badge {
+	display: none;
+}
+
+.mp-scc-sticky-bar.mp-scc-sticky--tristate .mp-scc-drawer-toggle--fab:hover {
+	background: var(--mp-scc-catalog-cart-icon-background-hover, rgba(26, 26, 26, 1));
+	color: var(--mp-scc-catalog-cart-icon-color-hover, #ffffff);
+}
+
+.mp-scc-sticky-bar.mp-scc-sticky--tristate .mp-scc-drawer-toggle--fab:focus-visible {
+	outline: 2px solid var(--mp-scc-color-button-primary, #111);
+	outline-offset: 2px;
+}
+
+/* State A: visible cart glyph (chevron triangle is 0×0 box — some flex themes clip it; bag reads as «корзина»). */
+.mp-scc-sticky-bar.mp-scc-sticky--tristate .mp-scc-drawer-toggle--fab .mp-scc-drawer-toggle-icon {
+	display: block;
+	width: 26px;
+	height: 26px;
+	margin: 0 auto;
+	border: none;
+	border-radius: 0;
+	background-color: currentColor;
+	-webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%23000' d='M7 18c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zM1 2v2h2l3.6 7.59-1.35 2.45c-.15.28-.25.61-.25.96 0 1.1.9 2 2 2h12v-2H7.42c-.14 0-.25-.11-.25-.25l.03-.12L8.1 13h7.45c.75 0 1.41-.41 1.75-1.03L21.7 4H5.21l-.94-2H1zm16 16c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z'/%3E%3C/svg%3E");
+	mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%23000' d='M7 18c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zM1 2v2h2l3.6 7.59-1.35 2.45c-.15.28-.25.61-.25.96 0 1.1.9 2 2 2h12v-2H7.42c-.14 0-.25-.11-.25-.25l.03-.12L8.1 13h7.45c.75 0 1.41-.41 1.75-1.03L21.7 4H5.21l-.94-2H1zm16 16c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z'/%3E%3C/svg%3E");
+	-webkit-mask-size: contain;
+	mask-size: contain;
+	-webkit-mask-repeat: no-repeat;
+	mask-repeat: no-repeat;
+	-webkit-mask-position: center;
+	mask-position: center;
+	transform: none;
+	transition: opacity var(--mp-scc-motion-duration) var(--mp-scc-motion-easing);
+}
+
+/* Tri-state panel B: right-docked, grows upward (dp §17.3) */
+.mp-scc-sticky-bar.mp-scc-sticky--tristate .mp-scc-shell-panel-b {
+	position: absolute;
+	right: calc(var(--mp-scc-tristate-dock-inset-right, 32px) - var(--mp-scc-tristate-state-a-dock-inset-right, 32px));
+	bottom: calc(
+		100% + max(0px, var(--mp-scc-tristate-dock-inset-bottom, 32px) - var(--mp-scc-tristate-state-a-dock-inset-bottom, 32px))
+	);
+	z-index: var(--mp-scc-tristate-z-panel-b, 100055);
+	/* Keep design-token consumption for settings/tests, while fixed geometry is enforced below. */
+	--mp-scc-tristate-panel-b-height-token: var(--mp-scc-tristate-panel-b-max-height, 368px);
+	box-sizing: border-box;
+	width: min(
+		var(--mp-scc-tristate-panel-b-width, 280px),
+		calc(
+			100vw - max(
+				calc(
+					var(--mp-scc-tristate-dock-inset-left, 32px) +
+						var(--mp-scc-tristate-dock-inset-right, 32px)
+				),
+				calc(env(safe-area-inset-left, 0px) + env(safe-area-inset-right, 0px))
+			)
+		)
+	);
+	max-width: min(92vw, var(--mp-scc-tristate-panel-b-width, 280px));
+	/* Admin-controlled B height (default = 368px). */
+	height: var(--mp-scc-tristate-panel-b-max-height, 368px);
+	min-height: var(--mp-scc-tristate-panel-b-max-height, 368px);
+	max-height: var(--mp-scc-tristate-panel-b-max-height, 368px);
+	margin-bottom: var(--mp-scc-tristate-panel-b-gap-bottom, 10px);
+	padding: var(--mp-scc-tristate-panel-b-padding, 12px);
+	border-radius: var(--mp-scc-tristate-panel-b-border-radius, 12px);
+	overflow: hidden;
+	color: var(--mp-scc-color-text-primary, #1a1a1a);
+	border: 1px solid rgba(0, 0, 0, 0.08);
+	box-shadow:
+		0 calc(-1 * var(--mp-scc-tristate-column-shadow-offset-y, 8px)) var(--mp-scc-tristate-column-shadow-blur, 28px)
+			rgba(0, 0, 0, var(--mp-scc-tristate-column-shadow-alpha, 0.12));
+	backdrop-filter: blur(var(--mp-scc-tristate-column-backdrop-blur, 14px));
+	-webkit-backdrop-filter: blur(var(--mp-scc-tristate-column-backdrop-blur, 14px));
+	background-color: rgba(255, 255, 255, var(--mp-scc-sticky-drawer-surface-alpha, 0.94));
+	transition:
+		box-shadow 0.22s var(--mp-scc-motion-easing, cubic-bezier(0.4, 0, 0.2, 1)),
+		background-color 0.22s var(--mp-scc-motion-easing, cubic-bezier(0.4, 0, 0.2, 1));
+}
+
+@supports (background: color-mix(in srgb, red, blue)) {
+	.mp-scc-sticky-bar.mp-scc-sticky--tristate .mp-scc-shell-panel-b,
+	.mp-scc-sticky-bar.mp-scc-sticky--tristate .mp-scc-drawer.mp-scc-drawer--tristate-c {
+		background-color: color-mix(
+			in srgb,
+			var(--mp-scc-color-drawer-surface-tint, var(--mp-scc-color-surface-tint, #ffffff))
+				calc(var(--mp-scc-sticky-drawer-surface-alpha, 0.94) * 100%),
+			transparent
+		);
+	}
+}
+
+@supports (color: color-mix(in srgb, red, blue)) {
+	.mp-scc-sticky-bar.mp-scc-sticky--tristate .mp-scc-shell-panel-b,
+	.mp-scc-sticky-bar.mp-scc-sticky--tristate .mp-scc-drawer.mp-scc-drawer--tristate-c {
+		border-color: color-mix(in srgb, var(--mp-scc-color-text-primary, #1a1a1a) 10%, transparent);
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.mp-scc-sticky-bar.mp-scc-sticky--tristate .mp-scc-shell-panel-b,
+	.mp-scc-sticky-bar.mp-scc-sticky--tristate .mp-scc-drawer.mp-scc-drawer--tristate-c {
+		transition: none;
+	}
+}
+
+.mp-scc-shell-panel-b__body {
+	display: flex;
+	flex-direction: column;
+	justify-content: flex-start;
+	gap: 12px;
+	position: relative;
+	height: 100%;
+	min-height: 0;
+	max-height: 100%;
+	padding-top: calc(var(--mp-scc-tristate-action-icon-hit, 44px) + 8px);
+}
+
+/* Tri-state dismiss (×): panel B (absolute) + drawer C header (flex). */
+.mp-scc-sticky-bar.mp-scc-sticky--tristate .mp-scc-tristate-dismiss {
+	appearance: none;
+	-webkit-appearance: none;
+	margin: 0;
+	border-style: solid;
+	cursor: pointer;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	box-sizing: border-box;
+	width: var(--mp-scc-tristate-dismiss-hit, 36px);
+	min-width: var(--mp-scc-tristate-dismiss-hit, 36px);
+	height: var(--mp-scc-tristate-dismiss-hit, 36px);
+	min-height: var(--mp-scc-tristate-dismiss-hit, 36px);
+	padding: var(--mp-scc-tristate-dismiss-padding-top, 2px) var(--mp-scc-tristate-dismiss-padding-right, 2px)
+		var(--mp-scc-tristate-dismiss-padding-bottom, 2px) var(--mp-scc-tristate-dismiss-padding-left, 2px);
+	border-width: var(--mp-scc-tristate-dismiss-border-width, 1px);
+	border-color: var(--mp-scc-tristate-dismiss-border-color, #d0d0d0);
+	border-radius: var(--mp-scc-tristate-dismiss-border-radius, 8px);
+	background-color: var(--mp-scc-tristate-dismiss-bg, #ffffff);
+	color: var(--mp-scc-tristate-dismiss-color, #1a1a1a);
+	line-height: 0;
+	flex-shrink: 0;
+	transition:
+		background-color 0.15s ease,
+		border-color 0.15s ease,
+		color 0.15s ease;
+}
+
+.mp-scc-sticky-bar.mp-scc-sticky--tristate .mp-scc-tristate-dismiss:hover {
+	background-color: var(--mp-scc-tristate-dismiss-hover-bg, #f0f0f0);
+	color: var(--mp-scc-tristate-dismiss-hover-color, #1a1a1a);
+	border-color: var(--mp-scc-tristate-dismiss-hover-border-color, #b0b0b0);
+}
+
+.mp-scc-sticky-bar.mp-scc-sticky--tristate .mp-scc-tristate-dismiss:focus-visible {
+	outline: 2px solid var(--mp-scc-tristate-dismiss-hover-border-color, #9a9a9a);
+	outline-offset: 2px;
+}
+
+.mp-scc-shell-panel-b__body > .mp-scc-tristate-dismiss[data-mp-scc-shell-dismiss="b"] {
+	position: absolute;
+	z-index: 6;
+	top: var(--mp-scc-tristate-dismiss-margin-top, 0px);
+	right: var(--mp-scc-tristate-dismiss-margin-right, 0px);
+	left: auto;
+	bottom: auto;
+}
+
+.mp-scc-drawer-c__top .mp-scc-tristate-dismiss[data-mp-scc-shell-dismiss="c"] {
+	align-self: flex-start;
+	flex: 0 0 auto;
+	margin-top: var(--mp-scc-tristate-dismiss-margin-top, 0px);
+	margin-right: var(--mp-scc-tristate-dismiss-margin-right, 0px);
+	margin-bottom: var(--mp-scc-tristate-dismiss-margin-bottom, 0px);
+	margin-left: var(--mp-scc-tristate-dismiss-margin-left, 0px);
+}
+
+.mp-scc-tristate-dismiss__glyph {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	line-height: 0;
+}
+
+.mp-scc-sticky-bar.mp-scc-sticky--tristate .mp-scc-tristate-dismiss__svg {
+	display: block;
+	width: var(--mp-scc-tristate-dismiss-glyph, 16px);
+	height: var(--mp-scc-tristate-dismiss-glyph, 16px);
+}
+
+.mp-scc-shell-panel-b__metrics {
+	display: flex;
+	flex-direction: column;
+	gap: 0;
+	min-width: 0;
+	flex: 0 1 auto;
+}
+
+.mp-scc-shell-panel-b__metrics .mp-scc-shell-panel-b__row {
+	display: flex;
+	align-items: baseline;
+	justify-content: space-between;
+	gap: 10px;
+	min-width: 0;
+	padding: var(--mp-scc-tristate-metrics-row-padding-y, 10px) 0;
+}
+
+.mp-scc-shell-panel-b__label {
+	flex: 0 0 auto;
+	font-size: calc(var(--mp-scc-sticky-summary-font-size, 15px) * 0.88);
+	font-weight: 500;
+	opacity: 0.88;
+}
+
+.mp-scc-shell-panel-b__value {
+	font-size: var(--mp-scc-sticky-summary-font-size, 15px);
+	font-weight: var(--mp-scc-sticky-summary-font-weight, 600);
+	font-variant-numeric: tabular-nums;
+}
+
+.mp-scc-shell-panel-b__row--total .mp-scc-shell-panel-b__subtotal {
+	flex: 1 1 auto;
+	min-width: 0;
+	text-align: right;
+	font-size: var(--mp-scc-sticky-summary-font-size, 15px);
+	font-weight: var(--mp-scc-sticky-summary-font-weight, 600);
+	font-variant-numeric: tabular-nums;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.mp-scc-shell-panel-b__subtotal .woocommerce-Price-amount {
+	white-space: nowrap;
+}
+
+.mp-scc-sticky-bar.mp-scc-sticky--tristate .mp-scc-shell-panel-b__actions {
+	display: flex;
+	flex-direction: row;
+	flex-wrap: nowrap;
+	align-items: center;
+	justify-content: space-between;
+	gap: var(--mp-scc-tristate-panel-b-actions-gap, 8px);
+	flex: 0 0 auto;
+	width: 100%;
+	margin-top: auto;
+	padding: var(--mp-scc-tristate-actions-toolbar-padding-top, 24px)
+		var(--mp-scc-tristate-actions-toolbar-padding-right, 0px)
+		var(--mp-scc-tristate-actions-toolbar-padding-bottom, 0px)
+		var(--mp-scc-tristate-actions-toolbar-padding-left, 0px);
+}
+
+.mp-scc-sticky-bar.mp-scc-sticky--tristate .mp-scc-shell-panel-b__actions .mp-scc-shell-panel-b__icon-btn {
+	width: calc((100% - var(--mp-scc-tristate-panel-b-actions-gap, 8px)) / 2);
+	height: var(--mp-scc-tristate-action-icon-hit, 44px);
+	min-width: 0;
+	min-height: var(--mp-scc-tristate-action-icon-hit, 44px);
+	padding: 0;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	box-sizing: border-box;
+	border-radius: min(14px, calc(var(--mp-scc-tristate-action-icon-hit, 44px) * 0.32));
+	transition:
+		background-color 0.16s ease,
+		border-color 0.16s ease,
+		color 0.16s ease,
+		box-shadow 0.16s ease,
+		opacity 0.16s ease,
+		transform 0.08s ease;
+}
+
+.mp-scc-sticky-bar.mp-scc-sticky--tristate .mp-scc-shell-panel-b__actions .mp-scc-shell-panel-b__icon-btn.mp-scc-checkout {
+	text-decoration: none;
+}
+
+.mp-scc-shell-panel-b__icon-svg {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	line-height: 0;
+	width: var(--mp-scc-tristate-action-icon-glyph, 22px);
+	height: var(--mp-scc-tristate-action-icon-glyph, 22px);
+	flex: 0 0 auto;
+}
+
+.mp-scc-shell-panel-b__icon-svg svg {
+	display: block;
+}
+
+.mp-scc-tristate-action-svg {
+	width: 100%;
+	height: 100%;
+	display: block;
+}
+
+/* Tri-state icon clear: same token semantics as sticky bar ghost «Очистить». */
+.mp-scc-sticky-bar.mp-scc-sticky--tristate .mp-scc-shell-panel-b__actions .mp-scc-shell-panel-b__icon-btn.mp-scc-btn--ghost {
+	color: var(--mp-scc-color-clear-button-text, inherit);
+	border-color: var(--mp-scc-color-clear-button-border, rgba(0, 0, 0, 0.2));
+	background-color: var(--mp-scc-color-clear-button-bg, #ffffff);
+}
+
+.mp-scc-sticky-bar.mp-scc-sticky--tristate .mp-scc-shell-panel-b__actions .mp-scc-shell-panel-b__icon-btn.mp-scc-btn--ghost:hover:not(:disabled):not(.mp-scc-clear-cart--disabled) {
+	color: var(--mp-scc-color-clear-button-text-hover, var(--mp-scc-color-clear-button-text, #1a1a1a));
+	border-color: var(
+		--mp-scc-color-clear-button-border-hover,
+		var(--mp-scc-color-clear-button-border, #cfcfcf)
+	);
+	background-color: var(
+		--mp-scc-color-clear-button-bg-hover,
+		var(--mp-scc-color-clear-button-bg, #f0f0f0)
+	);
+}
+
+.mp-scc-sticky-bar.mp-scc-sticky--tristate .mp-scc-shell-panel-b__actions .mp-scc-shell-panel-b__icon-btn.mp-scc-btn--ghost:active:not(:disabled):not(.mp-scc-clear-cart--disabled) {
+	transform: translateY(1px);
+}
+
+.mp-scc-sticky-bar.mp-scc-sticky--tristate .mp-scc-shell-panel-b__actions .mp-scc-shell-panel-b__icon-btn.mp-scc-btn--ghost:focus-visible {
+	outline: 2px solid var(--mp-scc-color-clear-button-border-hover, #9a9a9a);
+	outline-offset: 2px;
+}
+
+/* Tri-state icon checkout: square primary control (panel B + drawer C). */
+.mp-scc-sticky-bar.mp-scc-sticky--tristate .mp-scc-shell-panel-b__actions .mp-scc-shell-panel-b__icon-btn.mp-scc-btn--primary.mp-scc-checkout {
+	background-color: var(--mp-scc-color-clear-button-bg, #ffffff);
+	color: var(--mp-scc-color-clear-button-text, inherit);
+	border-color: var(--mp-scc-color-clear-button-border, rgba(0, 0, 0, 0.2));
+	box-shadow: none;
+}
+
+.mp-scc-sticky-bar.mp-scc-sticky--tristate .mp-scc-shell-panel-b__actions .mp-scc-shell-panel-b__icon-btn.mp-scc-btn--primary.mp-scc-checkout:hover:not(.mp-scc-checkout--disabled) {
+	color: var(--mp-scc-color-clear-button-text-hover, var(--mp-scc-color-clear-button-text, #1a1a1a));
+	border-color: var(
+		--mp-scc-color-clear-button-border-hover,
+		var(--mp-scc-color-clear-button-border, #cfcfcf)
+	);
+	background-color: var(
+		--mp-scc-color-clear-button-bg-hover,
+		var(--mp-scc-color-clear-button-bg, #f0f0f0)
+	);
+	box-shadow: none;
+}
+
+.mp-scc-sticky-bar.mp-scc-sticky--tristate .mp-scc-shell-panel-b__actions .mp-scc-shell-panel-b__icon-btn.mp-scc-btn--primary.mp-scc-checkout:active:not(.mp-scc-checkout--disabled) {
+	transform: translateY(1px);
+}
+
+.mp-scc-sticky-bar.mp-scc-sticky--tristate .mp-scc-shell-panel-b__actions .mp-scc-shell-panel-b__icon-btn.mp-scc-btn--primary.mp-scc-checkout:focus-visible {
+	outline: 2px solid var(--mp-scc-color-clear-button-border-hover, #9a9a9a);
+	outline-offset: 2px;
+}
+
+/* B<->C chevron control: move out of bottom actions into top-left corner. */
+.mp-scc-shell-panel-b .mp-scc-shell-panel-b__actions .mp-scc-shell-panel-b__toggle-c {
+	position: absolute;
+	left: 0;
+	top: 0;
+	width: var(--mp-scc-tristate-action-icon-hit, 44px);
+	height: var(--mp-scc-tristate-action-icon-hit, 44px);
+	min-width: var(--mp-scc-tristate-action-icon-hit, 44px);
+	border-radius: min(12px, calc(var(--mp-scc-tristate-action-icon-hit, 44px) * 0.28));
+}
+
+.mp-scc-sticky-bar.mp-scc-sticky--tristate .mp-scc-shell-panel-b__actions .mp-scc-shell-panel-b__icon-btn.mp-scc-clear-cart--loading,
+.mp-scc-sticky-bar.mp-scc-sticky--tristate .mp-scc-shell-panel-b__actions .mp-scc-shell-panel-b__icon-btn.mp-scc-clear-cart--disabled,
+.mp-scc-sticky-bar.mp-scc-sticky--tristate .mp-scc-shell-panel-b__actions .mp-scc-shell-panel-b__icon-btn.mp-scc-checkout.mp-scc-checkout--disabled {
+	cursor: not-allowed;
 }
 
 /* -------------------------------------------------------------------------
@@ -482,12 +1162,14 @@ body.popup-overlay-open .mp-scc-sticky-bar {
 }
 
 .mp-scc-cart-count,
+.mp-scc-cart-qty-count,
 .mp-scc-cart-total {
 	font-variant-numeric: tabular-nums;
 	transition: opacity 0.2s ease;
 }
 
 .mp-scc-sticky-summary--loading .mp-scc-cart-count,
+.mp-scc-sticky-summary--loading .mp-scc-cart-qty-count,
 .mp-scc-sticky-summary--loading .mp-scc-cart-total {
 	opacity: 0.45;
 }
@@ -570,7 +1252,7 @@ body.popup-overlay-open .mp-scc-sticky-bar {
  * «Оформить заказ» — ссылка с классами темы/Woo (.button, .alt и т.д.).
  * Принудительно применяем токены плагина поверх типичных правил темы.
  */
-.mp-scc-sticky-bar a.mp-scc-checkout.mp-scc-btn--primary {
+.mp-scc-sticky-bar a.mp-scc-checkout.mp-scc-btn--primary:not(.mp-scc-shell-panel-b__icon-btn) {
 	background-color: var(--mp-scc-color-button-primary, #111111) !important;
 	background-image: none !important;
 	color: var(--mp-scc-color-button-primary-text, #ffffff) !important;
@@ -580,7 +1262,7 @@ body.popup-overlay-open .mp-scc-sticky-bar {
 	filter: none !important;
 }
 
-.mp-scc-sticky-bar a.mp-scc-checkout.mp-scc-btn--primary:hover {
+.mp-scc-sticky-bar a.mp-scc-checkout.mp-scc-btn--primary:not(.mp-scc-shell-panel-b__icon-btn):hover {
 	background-color: var(--mp-scc-color-button-primary-hover, #333333) !important;
 	background-image: none !important;
 	color: var(
@@ -597,7 +1279,7 @@ body.popup-overlay-open .mp-scc-sticky-bar {
 	filter: none !important;
 }
 
-.mp-scc-sticky-bar a.mp-scc-checkout.mp-scc-btn--primary:active {
+.mp-scc-sticky-bar a.mp-scc-checkout.mp-scc-btn--primary:not(.mp-scc-shell-panel-b__icon-btn):active {
 	color: var(
 			--mp-scc-color-button-primary-text-hover,
 			var(--mp-scc-color-button-primary-text, #ffffff)
@@ -609,14 +1291,14 @@ body.popup-overlay-open .mp-scc-sticky-bar {
 	text-decoration: none !important;
 }
 
-.mp-scc-sticky-bar a.mp-scc-checkout.mp-scc-btn--primary:focus-visible {
+.mp-scc-sticky-bar a.mp-scc-checkout.mp-scc-btn--primary:not(.mp-scc-shell-panel-b__icon-btn):focus-visible {
 	outline: 2px solid var(--mp-scc-color-button-primary-text, #ffffff) !important;
 	outline-offset: 2px !important;
 	color: var(--mp-scc-color-button-primary-text, #ffffff) !important;
 	-webkit-text-fill-color: var(--mp-scc-color-button-primary-text, #ffffff) !important;
 }
 
-.mp-scc-sticky-bar a.mp-scc-checkout.mp-scc-btn--primary.mp-scc-checkout--disabled {
+.mp-scc-sticky-bar a.mp-scc-checkout.mp-scc-btn--primary.mp-scc-checkout--disabled:not(.mp-scc-shell-panel-b__icon-btn) {
 	background-color: var(--mp-scc-color-button-primary, #111111) !important;
 	background-image: none !important;
 	color: var(--mp-scc-color-button-primary-text, #ffffff) !important;
@@ -1006,6 +1688,166 @@ ul.products div.product,
 .woocommerce .products li.product,
 .woocommerce .products div.product {
 	position: relative;
+}
+
+/*
+ * Loop cart icon: slot is positioned over first image (JS). Stacking: above overlay band, below wishlist heart.
+ */
+.mp-scc-catalog-cart-icon-slot {
+	position: absolute;
+	margin: 0;
+	padding: 0;
+	border: none;
+	width: var(--mp-scc-catalog-cart-icon-hit-size, 36px);
+	height: var(--mp-scc-catalog-cart-icon-hit-size, 36px);
+	/* Keep icon above theme/product hover overlays (Yandex/Chromium forks may otherwise swallow clicks). */
+	z-index: 40;
+	transition-property: opacity, visibility, transform;
+	transition-duration: 0.18s;
+	transition-timing-function: ease;
+	transition-delay: var(--mp-scc-catalog-cart-icon-transition-delay, 0ms);
+}
+
+.mp-scc-catalog-cart-icon-slot:empty {
+	display: none !important;
+}
+
+body.mp-scc-wishlist-integration-on .mp-scc-catalog-cart-icon-slot {
+	z-index: 39;
+}
+
+/*
+ * Visibility branches align with assets/js/frontend.js isCatalogCartIconTouchUi():
+ * touch: (max-width: 768px) or (pointer: coarse); else desktop (wide + fine pointer).
+ */
+@media (min-width: 769px) and (pointer: fine) {
+	.mp-scc-catalog-card--cart-icon[data-mp-scc-cart-icon-desktop='hover'] .mp-scc-catalog-cart-icon-slot {
+		opacity: 0;
+		visibility: hidden;
+		pointer-events: none;
+	}
+
+	.mp-scc-catalog-card--cart-icon[data-mp-scc-cart-icon-desktop='hover']:hover .mp-scc-catalog-cart-icon-slot,
+	.mp-scc-catalog-card--cart-icon[data-mp-scc-cart-icon-desktop='hover']:focus-within .mp-scc-catalog-cart-icon-slot,
+	.mp-scc-catalog-card--cart-icon[data-mp-scc-cart-icon-desktop='hover'].mp-scc-card--hover-intent .mp-scc-catalog-cart-icon-slot {
+		opacity: 1;
+		visibility: visible;
+		pointer-events: auto;
+	}
+
+	.mp-scc-catalog-card--cart-icon[data-mp-scc-cart-icon-desktop='always'] .mp-scc-catalog-cart-icon-slot {
+		opacity: 1;
+		visibility: visible;
+		pointer-events: auto;
+	}
+}
+
+@media (max-width: 768px), (pointer: coarse) {
+	.mp-scc-catalog-card--cart-icon[data-mp-scc-cart-icon-touch='always'] .mp-scc-catalog-cart-icon-slot {
+		opacity: 1;
+		visibility: visible;
+		pointer-events: auto;
+	}
+
+	.mp-scc-catalog-card--cart-icon[data-mp-scc-cart-icon-touch='tap_reveal'] .mp-scc-catalog-cart-icon-slot {
+		opacity: 0;
+		visibility: hidden;
+		pointer-events: none;
+	}
+
+	.mp-scc-catalog-card--cart-icon[data-mp-scc-cart-icon-touch='tap_reveal'].mp-scc-catalog-cart-icon--revealed-touch
+		.mp-scc-catalog-cart-icon-slot {
+		opacity: 1;
+		visibility: visible;
+		pointer-events: auto;
+	}
+
+	html[data-mp-scc-cart-icon-mobile-mode='force_visible'] .mp-scc-catalog-card--cart-icon .mp-scc-catalog-cart-icon-slot {
+		opacity: 1 !important;
+		visibility: visible !important;
+		pointer-events: auto !important;
+	}
+}
+
+/*
+ * Cart icon button: !important beats typical Woo/theme button rules; vars still match admin preview.
+ */
+button.mp-scc-catalog-cart-icon-btn[data-mp-scc-cart-icon='1'],
+ul.products button.mp-scc-catalog-cart-icon-btn[data-mp-scc-cart-icon='1'],
+div.products button.mp-scc-catalog-cart-icon-btn[data-mp-scc-cart-icon='1'],
+.woocommerce ul.products button.mp-scc-catalog-cart-icon-btn[data-mp-scc-cart-icon='1'],
+.woocommerce-page ul.products button.mp-scc-catalog-cart-icon-btn[data-mp-scc-cart-icon='1'] {
+	position: relative;
+	margin: 0 !important;
+	padding: var(--mp-scc-catalog-cart-icon-inner-padding, 0px) !important;
+	box-sizing: border-box !important;
+	width: 100%;
+	height: 100%;
+	border: none !important;
+	border-radius: var(--mp-scc-catalog-cart-icon-border-radius, 10px);
+	cursor: pointer;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	color: var(--mp-scc-catalog-cart-icon-color, var(--mp-scc-color-text-primary, #1a1a1a)) !important;
+	background-color: var(--mp-scc-catalog-cart-icon-background, rgba(255, 255, 255, 0.94)) !important;
+	background-image: none !important;
+	box-shadow: 0 1px 4px rgba(0, 0, 0, 0.12) !important;
+	-webkit-tap-highlight-color: transparent;
+	appearance: none !important;
+	-webkit-appearance: none !important;
+	pointer-events: auto;
+	transition:
+		background-color 0.15s ease,
+		color 0.15s ease,
+		box-shadow 0.15s ease,
+		transform 0.15s ease;
+}
+
+button.mp-scc-catalog-cart-icon-btn[data-mp-scc-cart-icon='1']:hover,
+ul.products button.mp-scc-catalog-cart-icon-btn[data-mp-scc-cart-icon='1']:hover,
+div.products button.mp-scc-catalog-cart-icon-btn[data-mp-scc-cart-icon='1']:hover,
+.woocommerce ul.products button.mp-scc-catalog-cart-icon-btn[data-mp-scc-cart-icon='1']:hover {
+	background-color: var(--mp-scc-catalog-cart-icon-background-hover, rgba(26, 26, 26, 1)) !important;
+	color: var(--mp-scc-catalog-cart-icon-color-hover, #ffffff) !important;
+	background-image: none !important;
+	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.14) !important;
+}
+
+button.mp-scc-catalog-cart-icon-btn:focus-visible {
+	outline: 2px solid var(--mp-scc-color-button-primary, #111);
+	outline-offset: 2px;
+}
+
+button.mp-scc-catalog-cart-icon-btn .mp-scc-catalog-cart-icon-btn__svg {
+	display: block;
+	width: var(--mp-scc-catalog-cart-icon-glyph-size, 20px);
+	height: var(--mp-scc-catalog-cart-icon-glyph-size, 20px);
+	max-width: 100%;
+	max-height: 100%;
+}
+
+button.mp-scc-catalog-cart-icon-btn .mp-scc-catalog-cart-icon-btn__icon {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+button.mp-scc-catalog-cart-icon-btn .mp-scc-catalog-cart-icon-btn__img {
+	display: block;
+	width: var(--mp-scc-catalog-cart-icon-glyph-size, 20px);
+	height: var(--mp-scc-catalog-cart-icon-glyph-size, 20px);
+	max-width: 100%;
+	max-height: 100%;
+	object-fit: contain;
+	vertical-align: middle;
+	pointer-events: none;
+}
+
+li.product.mp-scc-card--loading .mp-scc-catalog-cart-icon-btn,
+div.product.mp-scc-card--loading .mp-scc-catalog-cart-icon-btn {
+	pointer-events: none;
+	opacity: 0.55;
 }
 
 /* Catalog: image add-to-cart card states */

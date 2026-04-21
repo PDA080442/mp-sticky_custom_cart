@@ -7,15 +7,30 @@
 
 namespace MpStickyCustomCart\Frontend;
 
+use MpStickyCustomCart\Core\Config\FeatureFlagsDefaults;
+use MpStickyCustomCart\Core\OptionResolver;
+
 defined( 'ABSPATH' ) || exit;
 
 /**
- * Registers footer/body hooks for the sticky shell (markup added in renderer task).
+ * Registers hooks so the sticky shell prints outside theme footers (fixed positioning vs. viewport).
  */
 final class StickyCartRenderHooks {
 
+	/**
+	 * Ensures the cart root is only printed once when both body and footer hooks run.
+	 *
+	 * @var bool
+	 */
+	private static $sticky_root_printed = false;
+
 	public static function register() {
 		add_filter( 'body_class', array( self::class, 'body_class' ), 20 );
+		/*
+		 * Prefer {@see wp_body_open}: many themes call {@see wp_footer} inside <footer>; ancestors with
+		 * transform/filter create a containing block so position:fixed sticks to the footer instead of the viewport.
+		 */
+		add_action( 'wp_body_open', array( self::class, 'render_placeholder' ), 5 );
 		add_action( 'wp_footer', array( self::class, 'render_placeholder' ), 50 );
 
 		/**
@@ -25,14 +40,36 @@ final class StickyCartRenderHooks {
 	}
 
 	/**
+	 * Body classes for layout reserve when the sticky shell is present (same list after AJAX mount).
+	 *
+	 * @return string[]
+	 */
+	public static function collect_sticky_body_classes() {
+		if ( ! StickyCartVisibility::should_render_sticky() ) {
+			return array();
+		}
+		$out = array( 'mp-scc-sticky-active' );
+		if ( OptionResolver::get_flag( FeatureFlagsDefaults::KEY_STICKY_TRISTATE_ENABLED, false ) ) {
+			$out[] = 'mp-scc-sticky-layout-tristate';
+			$preset = OptionResolver::get_by_path( OptionResolver::get_settings(), 'sticky_cart.tristate_mobile_layout_preset', 'right_docked' );
+			$preset = is_string( $preset ) ? $preset : 'right_docked';
+			if ( ! in_array( $preset, array( 'right_docked', 'full_bottom' ), true ) ) {
+				$preset = 'right_docked';
+			}
+			$out[] = 'mp-scc-tristate-preset--' . str_replace( '_', '-', $preset );
+		}
+		return $out;
+	}
+
+	/**
 	 * Marks the document when the sticky bar is active (layout reserve, QA hooks).
 	 *
 	 * @param string[] $classes Body classes.
 	 * @return string[]
 	 */
 	public static function body_class( array $classes ) {
-		if ( StickyCartVisibility::should_render_sticky() ) {
-			$classes[] = 'mp-scc-sticky-active';
+		foreach ( self::collect_sticky_body_classes() as $c ) {
+			$classes[] = $c;
 		}
 		return $classes;
 	}
@@ -41,6 +78,11 @@ final class StickyCartRenderHooks {
 	 * Stub output location; replaced by {@see StickyCartRendererInterface} implementation.
 	 */
 	public static function render_placeholder() {
+		if ( self::$sticky_root_printed ) {
+			return;
+		}
+		self::$sticky_root_printed = true;
+
 		/**
 		 * Fires where the sticky cart root should be printed.
 		 */

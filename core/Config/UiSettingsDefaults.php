@@ -52,6 +52,69 @@ final class UiSettingsDefaults {
 			'drawer_line_unit_font_size_px',
 			'drawer_line_price_font_size_px',
 			'drawer_line_price_font_weight',
+			'tristate_panel_b_max_height_px',
+			'tristate_panel_b_width_px',
+			'tristate_panel_b_gap_bottom_px',
+			'tristate_panel_b_padding_px',
+			'tristate_panel_b_border_radius_px',
+			'tristate_panel_b_actions_gap_px',
+			'tristate_metrics_row_padding_y_px',
+			'tristate_metrics_hr_margin_y_panel_b_px',
+			'tristate_metrics_hr_margin_y_drawer_c_px',
+			'tristate_metrics_hr_border_width_px',
+			'tristate_metrics_hr_style',
+			'tristate_metrics_hr_color',
+			'tristate_metrics_hr_opacity_percent',
+			'tristate_actions_toolbar_padding_top_px',
+			'tristate_actions_toolbar_padding_right_px',
+			'tristate_actions_toolbar_padding_bottom_px',
+			'tristate_actions_toolbar_padding_left_px',
+			'tristate_dismiss_hit_px',
+			'tristate_dismiss_margin_top_px',
+			'tristate_dismiss_margin_right_px',
+			'tristate_dismiss_margin_bottom_px',
+			'tristate_dismiss_margin_left_px',
+			'tristate_dismiss_padding_top_px',
+			'tristate_dismiss_padding_right_px',
+			'tristate_dismiss_padding_bottom_px',
+			'tristate_dismiss_padding_left_px',
+			'tristate_dismiss_border_width_px',
+			'tristate_dismiss_border_radius_px',
+			'tristate_dismiss_color',
+			'tristate_dismiss_bg_color',
+			'tristate_dismiss_border_color',
+			'tristate_dismiss_hover_color',
+			'tristate_dismiss_hover_bg_color',
+			'tristate_dismiss_hover_border_color',
+			'tristate_dismiss_glyph_px',
+			'tristate_action_icon_hit_px',
+			'tristate_action_icon_glyph_px',
+			'tristate_panel_c_width_px',
+			'tristate_panel_c_height_px',
+			'tristate_state_a_dock_inset_top_px',
+			'tristate_state_a_dock_inset_right_px',
+			'tristate_state_a_dock_inset_bottom_px',
+			'tristate_state_a_dock_inset_left_px',
+			'tristate_dock_inset_top_px',
+			'tristate_dock_inset_right_px',
+			'tristate_dock_inset_bottom_px',
+			'tristate_dock_inset_left_px',
+			'tristate_column_backdrop_blur_px',
+			'tristate_column_shadow_blur_px',
+			'tristate_column_shadow_offset_y_px',
+			'tristate_column_shadow_opacity_percent',
+			'tristate_mobile_breakpoint_max_px',
+			'tristate_mobile_layout_preset',
+			'tristate_fab_badge_size_px',
+			'tristate_fab_badge_offset_top_px',
+			'tristate_fab_badge_offset_right_px',
+			'tristate_fab_badge_font_size_px',
+			'tristate_fab_badge_bg_color',
+			'tristate_fab_badge_text_color',
+			'tristate_custom_css_global',
+			'tristate_custom_css_state_a',
+			'tristate_custom_css_state_b',
+			'tristate_custom_css_state_c',
 		);
 	}
 
@@ -66,6 +129,48 @@ final class UiSettingsDefaults {
 				 * theme_default: не вешать обработчик — тема и ссылки Woo ведут себя как обычно.
 				 */
 				'image_click_behavior'        => 'add_to_cart',
+				/**
+				 * image_click: добавление по клику на миниатюру (legacy).
+				 * cart_icon: кнопка-иконка корзины на карточке (тот же AJAX endpoint).
+				 */
+				'catalog_add_surface'         => 'image_click',
+				/** Desktop: hover = show icon on card hover; always = always visible. */
+				'catalog_cart_icon_desktop'   => 'hover',
+				/** Touch: always = visible; tap_reveal = show after first tap on card (non-link). */
+				'catalog_cart_icon_touch'     => 'always',
+				/** Offset of the icon slot from the top-left of the first loop image (px). */
+				'catalog_cart_icon_offset_top_px'  => 8,
+				'catalog_cart_icon_offset_left_px'   => 8,
+				/** Square hit target (button outer size, px). */
+				'catalog_cart_icon_hit_size_px'      => 36,
+				/** SVG glyph size inside the button (px). */
+				'catalog_cart_icon_glyph_size_px'    => 20,
+				/** Built-in SVG cart path stroke width (1–3, default matches previous hard-coded look). */
+				'catalog_cart_icon_stroke_width'     => 1.75,
+				/** Delay before opacity/visibility transition starts (ms). */
+				'catalog_cart_icon_transition_delay_ms' => 0,
+				/**
+				 * inherit: follow «тач / узкий экран» above.
+				 * force_visible: on touch/narrow viewport always show the icon (overrides tap_reveal).
+				 */
+				'catalog_cart_icon_mobile_mode'      => 'inherit',
+				/**
+				 * Two curated looks: dark glyph on light button, or light glyph on dark button.
+				 * Legacy per-channel color keys remain for import; storefront CSS uses the preset.
+				 */
+				'catalog_cart_icon_appearance_preset' => 'black_cart_white_bg',
+				/** Fill/stroke color for the loop cart icon (SVG uses currentColor). */
+				'catalog_cart_icon_color'            => '#1a1a1a',
+				/** Button face behind the glyph (combined with alpha into rgba() on the storefront). */
+				'catalog_cart_icon_bg_color'         => '#ffffff',
+				/** 0–100, opacity of the background (100 = solid). */
+				'catalog_cart_icon_bg_alpha_percent' => 94,
+				/** Border radius of the cart icon button face (px); see --mp-scc-catalog-cart-icon-border-radius. */
+				'catalog_cart_icon_bg_border_radius_px' => 10,
+				/** Symmetric padding between button edge and glyph (px); see --mp-scc-catalog-cart-icon-inner-padding. */
+				'catalog_cart_icon_inner_padding_px' => 0,
+				/** Preset id from {@see \MpStickyCustomCart\Core\CatalogCartIconPresets::IDS}. */
+				'catalog_cart_icon_preset'           => 'classic',
 				'hover_overlay_mobile_always' => true,
 				'hover_animation_duration_ms'  => 220,
 				'hover_animation_easing'       => 'cubic-bezier(0.4, 0, 0.2, 1)',
@@ -139,6 +244,119 @@ final class UiSettingsDefaults {
 				'sticky_inner_gap_mobile_px' => 10,
 				'sticky_inner_gap_desktop_row_px' => 16,
 				'sticky_inner_gap_desktop_col_px' => 24,
+				/** Max height of tri-state summary panel B (px); typical content should fit without inner scroll. */
+				'tristate_panel_b_max_height_px'     => 368,
+				/** Width of panel B (px). */
+				'tristate_panel_b_width_px'          => 280,
+				/** Gap between FAB and bottom edge of panel B (px). */
+				'tristate_panel_b_gap_bottom_px'     => 10,
+				/** Inner padding of panel B (px). */
+				'tristate_panel_b_padding_px'        => 12,
+				/** Corner radius of panel B (px). */
+				'tristate_panel_b_border_radius_px'  => 12,
+				/** Gap between icon action buttons in panel B (px). */
+				'tristate_panel_b_actions_gap_px'    => 8,
+				/** Panel B + drawer C metrics rows: vertical padding (px). */
+				'tristate_metrics_row_padding_y_px'           => 10,
+				'tristate_metrics_hr_margin_y_panel_b_px'     => 0,
+				'tristate_metrics_hr_margin_y_drawer_c_px'    => 8,
+				'tristate_metrics_hr_border_width_px'         => 1,
+				'tristate_metrics_hr_style'                   => 'dashed',
+				'tristate_metrics_hr_color'                   => '#000000',
+				'tristate_metrics_hr_opacity_percent'         => 14,
+				/** Padding around the icon toolbar (panel B body + drawer C), px per side → --mp-scc-tristate-actions-toolbar-padding-*. */
+				'tristate_actions_toolbar_padding_top_px'    => 24,
+				'tristate_actions_toolbar_padding_right_px'  => 0,
+				'tristate_actions_toolbar_padding_bottom_px' => 0,
+				'tristate_actions_toolbar_padding_left_px'   => 0,
+				/** Dismiss (×) for panel B + drawer C: outer hit (px). */
+				'tristate_dismiss_hit_px'                    => 36,
+				'tristate_dismiss_margin_top_px'             => 0,
+				'tristate_dismiss_margin_right_px'           => 0,
+				'tristate_dismiss_margin_bottom_px'          => 0,
+				'tristate_dismiss_margin_left_px'            => 0,
+				'tristate_dismiss_padding_top_px'            => 2,
+				'tristate_dismiss_padding_right_px'          => 2,
+				'tristate_dismiss_padding_bottom_px'         => 2,
+				'tristate_dismiss_padding_left_px'           => 2,
+				'tristate_dismiss_border_width_px'           => 1,
+				'tristate_dismiss_border_radius_px'          => 8,
+				'tristate_dismiss_color'                     => '#1a1a1a',
+				'tristate_dismiss_bg_color'                  => '#ffffff',
+				'tristate_dismiss_border_color'              => '#d0d0d0',
+				'tristate_dismiss_hover_color'               => '#1a1a1a',
+				'tristate_dismiss_hover_bg_color'            => '#f0f0f0',
+				'tristate_dismiss_hover_border_color'        => '#b0b0b0',
+				'tristate_dismiss_glyph_px'                  => 16,
+				/** Icon-only clear/checkout control outer size (px), tri-state panel B + drawer C. */
+				'tristate_action_icon_hit_px'        => 44,
+				/** Glyph (SVG) size inside {@see tristate_action_icon_hit_px} (px). */
+				'tristate_action_icon_glyph_px'      => 22,
+				/** Drawer C width (px), expands left from right edge; height matches panel B max-height. */
+				'tristate_panel_c_width_px'          => 600,
+				/** Drawer C fixed height (px). */
+				'tristate_panel_c_height_px'         => 368,
+				/** State A (FAB only): top inset from viewport (px). */
+				'tristate_state_a_dock_inset_top_px'    => 0,
+				/** State A: right inset (px). */
+				'tristate_state_a_dock_inset_right_px'  => 32,
+				/** State A: bottom inset above safe-area (px). */
+				'tristate_state_a_dock_inset_bottom_px' => 32,
+				/** State A: left inset (px). */
+				'tristate_state_a_dock_inset_left_px'   => 32,
+				/** Top inset of tri-state dock (FAB + B/C) from viewport (px). */
+				'tristate_dock_inset_top_px'         => 0,
+				/** Right inset of tri-state dock from viewport (px). */
+				'tristate_dock_inset_right_px'       => 32,
+				/** Bottom inset of tri-state dock above safe-area (px). */
+				'tristate_dock_inset_bottom_px'      => 32,
+				/** Left inset of tri-state dock from viewport (px). */
+				'tristate_dock_inset_left_px'        => 32,
+				/** Backdrop blur for floating panels B/C (px); 0 disables blur on those surfaces. */
+				'tristate_column_backdrop_blur_px'   => 14,
+				/** Box-shadow blur for B/C elevation (px). */
+				'tristate_column_shadow_blur_px'     => 28,
+				/** Shadow offset upward (px); rendered as negative Y. */
+				'tristate_column_shadow_offset_y_px' => 8,
+				/** Shadow opacity 4–28 → 0.04–0.28 (rgba alpha). */
+				'tristate_column_shadow_opacity_percent' => 12,
+				/** Viewport max-width (px) for mobile preset rules (admin + injected @media). */
+				'tristate_mobile_breakpoint_max_px'  => 782,
+				/** Cart count badge on FAB (state A): circle size in px. */
+				'tristate_fab_badge_size_px'         => 20,
+				/** FAB badge offset from top edge (negative lifts outside button). */
+				'tristate_fab_badge_offset_top_px'   => -8,
+				/** FAB badge offset from right edge (negative shifts outside button). */
+				'tristate_fab_badge_offset_right_px' => -8,
+				/** FAB badge font size (px). */
+				'tristate_fab_badge_font_size_px'    => 11,
+				/** FAB badge background color. */
+				'tristate_fab_badge_bg_color'        => '#e53935',
+				/** FAB badge text color. */
+				'tristate_fab_badge_text_color'      => '#ffffff',
+				/** Advanced override CSS for all tri-state nodes (printed as-is). */
+				'tristate_custom_css_global'         => '',
+				/** Advanced override CSS for state A wrapper only (printed as-is). */
+				'tristate_custom_css_state_a'        => '',
+				/** Advanced override CSS for state B wrapper only (printed as-is). */
+				'tristate_custom_css_state_b'        => '',
+				/** Advanced override CSS for state C wrapper only (printed as-is). */
+				'tristate_custom_css_state_c'        => '',
+				/**
+				 * Show sticky cart shell on all frontend templates when cart has items.
+				 * When false, sticky is limited to Woo templates/endpoints only.
+				 */
+				'visibility_show_on_all_templates' => true,
+				/**
+				 * Optional URL/path exclusions (one per line, supports '*' wildcard).
+				 * Examples: /checkout/*, /cart/*, https://example.com/some-page
+				 */
+				'visibility_excluded_urls'         => '',
+				/**
+				 * right_docked: narrow view keeps column at right (default).
+				 * full_bottom: below breakpoint, B/C span between horizontal insets (bottom-sheet style).
+				 */
+				'tristate_mobile_layout_preset'      => 'right_docked',
 			),
 			'wishlist_ui' => array(
 				'heart_reserve_top_px'       => 10,

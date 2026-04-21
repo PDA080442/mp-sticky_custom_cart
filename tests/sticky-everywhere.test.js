@@ -18,10 +18,20 @@ assert.ok(
 	vis.includes("apply_filters( 'mp_sticky_custom_cart_should_render_sticky', true )"),
 	'Visibility should default to true with filter mp_sticky_custom_cart_should_render_sticky'
 );
-assert.ok(!vis.includes('is_checkout()'), 'Visibility should not hard-exclude checkout (use filter if needed)');
-assert.ok(!vis.includes('is_product()'), 'Visibility should not gate on product template');
-assert.ok(!vis.includes('is_shop()'), 'Visibility should not gate on shop template');
-assert.ok(hooks.includes('mp_sticky_custom_cart_render_sticky_cart'), 'Footer hook should fire sticky render action');
+assert.ok(
+	vis.includes('visibility_show_on_all_templates') && vis.includes('is_woocommerce_context'),
+	'Visibility policy should support all-templates toggle with Woo-only scope fallback (dp §18.3)'
+);
+assert.ok(
+	vis.includes('visibility_excluded_urls') && vis.includes('match_url_rule'),
+	'Visibility should support URL exclusions list with wildcard matching (dp §18.3)'
+);
+assert.ok(!vis.includes('is_product()'), 'Visibility policy should not hardcode single-product-only gates');
+assert.ok(!vis.includes('is_shop()'), 'Visibility policy should not hardcode shop-only gates');
+assert.ok(
+	hooks.includes('wp_body_open') && hooks.includes('wp_footer') && hooks.includes('sticky_root_printed'),
+	'Sticky should print from wp_body_open with wp_footer fallback (fixed cart vs viewport, not trapped in footer)'
+);
 assert.ok(qaEverywhere.includes('is_checkout'), 'qa-sticky-everywhere should document checkout case');
 assert.ok(qaEverywhere.includes('is_account'), 'qa-sticky-everywhere should document account case');
 assert.ok(qaEverywhere.includes('is_product') || qaEverywhere.includes('Single product'), 'qa-sticky-everywhere should cover single product');

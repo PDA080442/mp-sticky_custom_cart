@@ -64,7 +64,9 @@ final class OptionMigrationHandler {
 	 */
 	private static function get_migrations() {
 		return array(
-			'0.1.0' => array( self::class, 'migrate_to_0_1_0' ),
+			'0.1.0'  => array( self::class, 'migrate_to_0_1_0' ),
+			'0.1.52' => array( self::class, 'migrate_to_0_1_52_tristate_dock_insets' ),
+			'0.1.53' => array( self::class, 'migrate_to_0_1_53_tristate_state_a_dock_insets' ),
 		);
 	}
 
@@ -130,6 +132,63 @@ final class OptionMigrationHandler {
 		 * Fires after the 0.1.0 option migration.
 		 */
 		do_action( 'mp_sticky_custom_cart_migrated_0_1_0' );
+	}
+
+	/**
+	 * Per-side tri-state dock insets: legacy installs only had right + bottom (left mirrored right in CSS).
+	 */
+	private static function migrate_to_0_1_52_tristate_dock_insets() {
+		$settings = get_option( Constants::OPTION_SETTINGS, array() );
+		if ( ! is_array( $settings ) || ! isset( $settings['sticky_cart'] ) || ! is_array( $settings['sticky_cart'] ) ) {
+			return;
+		}
+		$sc    = &$settings['sticky_cart'];
+		$dirty = false;
+		$right = isset( $sc['tristate_dock_inset_right_px'] ) ? (int) $sc['tristate_dock_inset_right_px'] : 32;
+		if ( ! array_key_exists( 'tristate_dock_inset_left_px', $sc ) ) {
+			$sc['tristate_dock_inset_left_px'] = $right;
+			$dirty                             = true;
+		}
+		if ( ! array_key_exists( 'tristate_dock_inset_top_px', $sc ) ) {
+			$sc['tristate_dock_inset_top_px'] = 0;
+			$dirty                            = true;
+		}
+		if ( $dirty ) {
+			update_option( Constants::OPTION_SETTINGS, $settings, false );
+		}
+	}
+
+	/**
+	 * Tri-state state A (FAB-only) dock insets: seed from column insets so upgrades keep the same look.
+	 */
+	private static function migrate_to_0_1_53_tristate_state_a_dock_insets() {
+		$settings = get_option( Constants::OPTION_SETTINGS, array() );
+		if ( ! is_array( $settings ) || ! isset( $settings['sticky_cart'] ) || ! is_array( $settings['sticky_cart'] ) ) {
+			return;
+		}
+		$sc    = &$settings['sticky_cart'];
+		$dirty = false;
+		$dock_r = isset( $sc['tristate_dock_inset_right_px'] ) ? (int) $sc['tristate_dock_inset_right_px'] : 32;
+		$dock_l = array_key_exists( 'tristate_dock_inset_left_px', $sc ) ? (int) $sc['tristate_dock_inset_left_px'] : $dock_r;
+		if ( ! array_key_exists( 'tristate_state_a_dock_inset_top_px', $sc ) ) {
+			$sc['tristate_state_a_dock_inset_top_px'] = isset( $sc['tristate_dock_inset_top_px'] ) ? (int) $sc['tristate_dock_inset_top_px'] : 0;
+			$dirty                                    = true;
+		}
+		if ( ! array_key_exists( 'tristate_state_a_dock_inset_right_px', $sc ) ) {
+			$sc['tristate_state_a_dock_inset_right_px'] = $dock_r;
+			$dirty                                      = true;
+		}
+		if ( ! array_key_exists( 'tristate_state_a_dock_inset_bottom_px', $sc ) ) {
+			$sc['tristate_state_a_dock_inset_bottom_px'] = isset( $sc['tristate_dock_inset_bottom_px'] ) ? (int) $sc['tristate_dock_inset_bottom_px'] : 32;
+			$dirty                                         = true;
+		}
+		if ( ! array_key_exists( 'tristate_state_a_dock_inset_left_px', $sc ) ) {
+			$sc['tristate_state_a_dock_inset_left_px'] = $dock_l;
+			$dirty                                     = true;
+		}
+		if ( $dirty ) {
+			update_option( Constants::OPTION_SETTINGS, $settings, false );
+		}
 	}
 
 	/**

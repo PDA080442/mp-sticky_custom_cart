@@ -14,6 +14,7 @@ use MpStickyCustomCart\Frontend\CartRouteRedirectHooks;
 use MpStickyCustomCart\Frontend\DynamicStylesProvider;
 use MpStickyCustomCart\Frontend\FrontendAssetsHooks;
 use MpStickyCustomCart\Frontend\ShopLoopAddToCartWrapper;
+use MpStickyCustomCart\Frontend\ShopLoopCartIconHost;
 use MpStickyCustomCart\Frontend\StickyCartRenderer;
 use MpStickyCustomCart\Frontend\StickyCartRenderHooks;
 
@@ -29,6 +30,7 @@ final class HookRegistry {
 	 */
 	public static function register() {
 		ShopLoopAddToCartWrapper::register();
+		ShopLoopCartIconHost::register();
 		FrontendAssetsHooks::register();
 		CartRouteRedirectHooks::register();
 		( new DynamicStylesProvider() )->register_hooks();

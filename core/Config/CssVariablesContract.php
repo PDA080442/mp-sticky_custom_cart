@@ -7,6 +7,7 @@
 
 namespace MpStickyCustomCart\Core\Config;
 
+use MpStickyCustomCart\Core\CatalogCartIconAppearance;
 use MpStickyCustomCart\Core\OptionResolver;
 
 defined( 'ABSPATH' ) || exit;
@@ -60,6 +61,36 @@ final class CssVariablesContract {
 				'path'   => 'catalog.catalog_overlay_z_index',
 				'suffix' => '',
 				'format' => 'integer',
+			),
+			array(
+				'name'   => self::PREFIX . 'catalog-cart-icon-hit-size',
+				'path'   => 'catalog.catalog_cart_icon_hit_size_px',
+				'suffix' => 'px',
+				'format' => 'unit',
+			),
+			array(
+				'name'   => self::PREFIX . 'catalog-cart-icon-glyph-size',
+				'path'   => 'catalog.catalog_cart_icon_glyph_size_px',
+				'suffix' => 'px',
+				'format' => 'unit',
+			),
+			array(
+				'name'   => self::PREFIX . 'catalog-cart-icon-transition-delay',
+				'path'   => 'catalog.catalog_cart_icon_transition_delay_ms',
+				'suffix' => 'ms',
+				'format' => 'unit',
+			),
+			array(
+				'name'   => self::PREFIX . 'catalog-cart-icon-border-radius',
+				'path'   => 'catalog.catalog_cart_icon_bg_border_radius_px',
+				'suffix' => 'px',
+				'format' => 'unit',
+			),
+			array(
+				'name'   => self::PREFIX . 'catalog-cart-icon-inner-padding',
+				'path'   => 'catalog.catalog_cart_icon_inner_padding_px',
+				'suffix' => 'px',
+				'format' => 'unit',
 			),
 			array(
 				'name'   => self::PREFIX . 'sticky-z-index',
@@ -236,6 +267,332 @@ final class CssVariablesContract {
 				'suffix'       => 'px',
 				'format'       => 'unit',
 				'omit_if_zero' => true,
+			),
+			array(
+				'name'   => self::PREFIX . 'tristate-panel-b-max-height',
+				'path'   => 'sticky_cart.tristate_panel_b_max_height_px',
+				'suffix' => 'px',
+				'format' => 'unit',
+			),
+			array(
+				'name'   => self::PREFIX . 'tristate-panel-b-width',
+				'path'   => 'sticky_cart.tristate_panel_b_width_px',
+				'suffix' => 'px',
+				'format' => 'unit',
+			),
+			array(
+				'name'   => self::PREFIX . 'tristate-panel-b-gap-bottom',
+				'path'   => 'sticky_cart.tristate_panel_b_gap_bottom_px',
+				'suffix' => 'px',
+				'format' => 'unit',
+			),
+			array(
+				'name'   => self::PREFIX . 'tristate-panel-b-padding',
+				'path'   => 'sticky_cart.tristate_panel_b_padding_px',
+				'suffix' => 'px',
+				'format' => 'unit',
+			),
+			array(
+				'name'   => self::PREFIX . 'tristate-panel-b-border-radius',
+				'path'   => 'sticky_cart.tristate_panel_b_border_radius_px',
+				'suffix' => 'px',
+				'format' => 'unit',
+			),
+			array(
+				'name'   => self::PREFIX . 'tristate-panel-b-actions-gap',
+				'path'   => 'sticky_cart.tristate_panel_b_actions_gap_px',
+				'suffix' => 'px',
+				'format' => 'unit',
+			),
+			array(
+				'name'   => self::PREFIX . 'tristate-metrics-row-padding-y',
+				'path'   => 'sticky_cart.tristate_metrics_row_padding_y_px',
+				'suffix' => 'px',
+				'format' => 'unit',
+			),
+			array(
+				'name'         => self::PREFIX . 'tristate-metrics-hr-margin-y-panel-b',
+				'path'         => 'sticky_cart.tristate_metrics_hr_margin_y_panel_b_px',
+				'suffix'       => 'px',
+				'format'       => 'unit',
+				'omit_if_zero' => true,
+			),
+			array(
+				'name'   => self::PREFIX . 'tristate-metrics-hr-margin-y-drawer-c',
+				'path'   => 'sticky_cart.tristate_metrics_hr_margin_y_drawer_c_px',
+				'suffix' => 'px',
+				'format' => 'unit',
+			),
+			array(
+				'name'         => self::PREFIX . 'tristate-metrics-hr-border-width',
+				'path'         => 'sticky_cart.tristate_metrics_hr_border_width_px',
+				'suffix'       => 'px',
+				'format'       => 'unit',
+				'omit_if_zero' => true,
+			),
+			array(
+				'name'   => self::PREFIX . 'tristate-metrics-hr-style',
+				'path'   => 'sticky_cart.tristate_metrics_hr_style',
+				'suffix' => '',
+				'format' => 'raw',
+			),
+			array(
+				'name'   => self::PREFIX . 'tristate-actions-toolbar-padding-top',
+				'path'   => 'sticky_cart.tristate_actions_toolbar_padding_top_px',
+				'suffix' => 'px',
+				'format' => 'unit',
+			),
+			array(
+				'name'   => self::PREFIX . 'tristate-actions-toolbar-padding-right',
+				'path'   => 'sticky_cart.tristate_actions_toolbar_padding_right_px',
+				'suffix' => 'px',
+				'format' => 'unit',
+			),
+			array(
+				'name'   => self::PREFIX . 'tristate-actions-toolbar-padding-bottom',
+				'path'   => 'sticky_cart.tristate_actions_toolbar_padding_bottom_px',
+				'suffix' => 'px',
+				'format' => 'unit',
+			),
+			array(
+				'name'   => self::PREFIX . 'tristate-actions-toolbar-padding-left',
+				'path'   => 'sticky_cart.tristate_actions_toolbar_padding_left_px',
+				'suffix' => 'px',
+				'format' => 'unit',
+			),
+			array(
+				'name'   => self::PREFIX . 'tristate-action-icon-hit',
+				'path'   => 'sticky_cart.tristate_action_icon_hit_px',
+				'suffix' => 'px',
+				'format' => 'unit',
+			),
+			array(
+				'name'   => self::PREFIX . 'tristate-action-icon-glyph',
+				'path'   => 'sticky_cart.tristate_action_icon_glyph_px',
+				'suffix' => 'px',
+				'format' => 'unit',
+			),
+			array(
+				'name'   => self::PREFIX . 'tristate-dismiss-hit',
+				'path'   => 'sticky_cart.tristate_dismiss_hit_px',
+				'suffix' => 'px',
+				'format' => 'unit',
+			),
+			array(
+				'name'   => self::PREFIX . 'tristate-dismiss-margin-top',
+				'path'   => 'sticky_cart.tristate_dismiss_margin_top_px',
+				'suffix' => 'px',
+				'format' => 'unit',
+			),
+			array(
+				'name'   => self::PREFIX . 'tristate-dismiss-margin-right',
+				'path'   => 'sticky_cart.tristate_dismiss_margin_right_px',
+				'suffix' => 'px',
+				'format' => 'unit',
+			),
+			array(
+				'name'   => self::PREFIX . 'tristate-dismiss-margin-bottom',
+				'path'   => 'sticky_cart.tristate_dismiss_margin_bottom_px',
+				'suffix' => 'px',
+				'format' => 'unit',
+			),
+			array(
+				'name'   => self::PREFIX . 'tristate-dismiss-margin-left',
+				'path'   => 'sticky_cart.tristate_dismiss_margin_left_px',
+				'suffix' => 'px',
+				'format' => 'unit',
+			),
+			array(
+				'name'   => self::PREFIX . 'tristate-dismiss-padding-top',
+				'path'   => 'sticky_cart.tristate_dismiss_padding_top_px',
+				'suffix' => 'px',
+				'format' => 'unit',
+			),
+			array(
+				'name'   => self::PREFIX . 'tristate-dismiss-padding-right',
+				'path'   => 'sticky_cart.tristate_dismiss_padding_right_px',
+				'suffix' => 'px',
+				'format' => 'unit',
+			),
+			array(
+				'name'   => self::PREFIX . 'tristate-dismiss-padding-bottom',
+				'path'   => 'sticky_cart.tristate_dismiss_padding_bottom_px',
+				'suffix' => 'px',
+				'format' => 'unit',
+			),
+			array(
+				'name'   => self::PREFIX . 'tristate-dismiss-padding-left',
+				'path'   => 'sticky_cart.tristate_dismiss_padding_left_px',
+				'suffix' => 'px',
+				'format' => 'unit',
+			),
+			array(
+				'name'   => self::PREFIX . 'tristate-dismiss-border-width',
+				'path'   => 'sticky_cart.tristate_dismiss_border_width_px',
+				'suffix' => 'px',
+				'format' => 'unit',
+			),
+			array(
+				'name'   => self::PREFIX . 'tristate-dismiss-border-radius',
+				'path'   => 'sticky_cart.tristate_dismiss_border_radius_px',
+				'suffix' => 'px',
+				'format' => 'unit',
+			),
+			array(
+				'name'   => self::PREFIX . 'tristate-dismiss-color',
+				'path'   => 'sticky_cart.tristate_dismiss_color',
+				'suffix' => '',
+				'format' => 'color',
+			),
+			array(
+				'name'   => self::PREFIX . 'tristate-dismiss-bg',
+				'path'   => 'sticky_cart.tristate_dismiss_bg_color',
+				'suffix' => '',
+				'format' => 'color',
+			),
+			array(
+				'name'   => self::PREFIX . 'tristate-dismiss-border-color',
+				'path'   => 'sticky_cart.tristate_dismiss_border_color',
+				'suffix' => '',
+				'format' => 'color',
+			),
+			array(
+				'name'   => self::PREFIX . 'tristate-dismiss-hover-color',
+				'path'   => 'sticky_cart.tristate_dismiss_hover_color',
+				'suffix' => '',
+				'format' => 'color',
+			),
+			array(
+				'name'   => self::PREFIX . 'tristate-dismiss-hover-bg',
+				'path'   => 'sticky_cart.tristate_dismiss_hover_bg_color',
+				'suffix' => '',
+				'format' => 'color',
+			),
+			array(
+				'name'   => self::PREFIX . 'tristate-dismiss-hover-border-color',
+				'path'   => 'sticky_cart.tristate_dismiss_hover_border_color',
+				'suffix' => '',
+				'format' => 'color',
+			),
+			array(
+				'name'   => self::PREFIX . 'tristate-dismiss-glyph',
+				'path'   => 'sticky_cart.tristate_dismiss_glyph_px',
+				'suffix' => 'px',
+				'format' => 'unit',
+			),
+			array(
+				'name'   => self::PREFIX . 'tristate-panel-c-width',
+				'path'   => 'sticky_cart.tristate_panel_c_width_px',
+				'suffix' => 'px',
+				'format' => 'unit',
+			),
+			array(
+				'name'   => self::PREFIX . 'tristate-panel-c-height',
+				'path'   => 'sticky_cart.tristate_panel_c_height_px',
+				'suffix' => 'px',
+				'format' => 'unit',
+			),
+			array(
+				'name'   => self::PREFIX . 'tristate-state-a-dock-inset-top',
+				'path'   => 'sticky_cart.tristate_state_a_dock_inset_top_px',
+				'suffix' => 'px',
+				'format' => 'unit',
+			),
+			array(
+				'name'   => self::PREFIX . 'tristate-state-a-dock-inset-right',
+				'path'   => 'sticky_cart.tristate_state_a_dock_inset_right_px',
+				'suffix' => 'px',
+				'format' => 'unit',
+			),
+			array(
+				'name'   => self::PREFIX . 'tristate-state-a-dock-inset-bottom',
+				'path'   => 'sticky_cart.tristate_state_a_dock_inset_bottom_px',
+				'suffix' => 'px',
+				'format' => 'unit',
+			),
+			array(
+				'name'   => self::PREFIX . 'tristate-state-a-dock-inset-left',
+				'path'   => 'sticky_cart.tristate_state_a_dock_inset_left_px',
+				'suffix' => 'px',
+				'format' => 'unit',
+			),
+			array(
+				'name'   => self::PREFIX . 'tristate-fab-badge-size',
+				'path'   => 'sticky_cart.tristate_fab_badge_size_px',
+				'suffix' => 'px',
+				'format' => 'unit',
+			),
+			array(
+				'name'   => self::PREFIX . 'tristate-fab-badge-offset-top',
+				'path'   => 'sticky_cart.tristate_fab_badge_offset_top_px',
+				'suffix' => 'px',
+				'format' => 'unit',
+			),
+			array(
+				'name'   => self::PREFIX . 'tristate-fab-badge-offset-right',
+				'path'   => 'sticky_cart.tristate_fab_badge_offset_right_px',
+				'suffix' => 'px',
+				'format' => 'unit',
+			),
+			array(
+				'name'   => self::PREFIX . 'tristate-fab-badge-font-size',
+				'path'   => 'sticky_cart.tristate_fab_badge_font_size_px',
+				'suffix' => 'px',
+				'format' => 'unit',
+			),
+			array(
+				'name'   => self::PREFIX . 'tristate-fab-badge-bg',
+				'path'   => 'sticky_cart.tristate_fab_badge_bg_color',
+				'suffix' => '',
+				'format' => 'color',
+			),
+			array(
+				'name'   => self::PREFIX . 'tristate-fab-badge-text',
+				'path'   => 'sticky_cart.tristate_fab_badge_text_color',
+				'suffix' => '',
+				'format' => 'color',
+			),
+			array(
+				'name'   => self::PREFIX . 'tristate-dock-inset-top',
+				'path'   => 'sticky_cart.tristate_dock_inset_top_px',
+				'suffix' => 'px',
+				'format' => 'unit',
+			),
+			array(
+				'name'   => self::PREFIX . 'tristate-dock-inset-right',
+				'path'   => 'sticky_cart.tristate_dock_inset_right_px',
+				'suffix' => 'px',
+				'format' => 'unit',
+			),
+			array(
+				'name'   => self::PREFIX . 'tristate-dock-inset-bottom',
+				'path'   => 'sticky_cart.tristate_dock_inset_bottom_px',
+				'suffix' => 'px',
+				'format' => 'unit',
+			),
+			array(
+				'name'   => self::PREFIX . 'tristate-dock-inset-left',
+				'path'   => 'sticky_cart.tristate_dock_inset_left_px',
+				'suffix' => 'px',
+				'format' => 'unit',
+			),
+			array(
+				'name'   => self::PREFIX . 'tristate-column-backdrop-blur',
+				'path'   => 'sticky_cart.tristate_column_backdrop_blur_px',
+				'suffix' => 'px',
+				'format' => 'unit',
+			),
+			array(
+				'name'   => self::PREFIX . 'tristate-column-shadow-blur',
+				'path'   => 'sticky_cart.tristate_column_shadow_blur_px',
+				'suffix' => 'px',
+				'format' => 'unit',
+			),
+			array(
+				'name'   => self::PREFIX . 'tristate-column-shadow-offset-y',
+				'path'   => 'sticky_cart.tristate_column_shadow_offset_y_px',
+				'suffix' => 'px',
+				'format' => 'unit',
 			),
 			array(
 				'name'   => self::PREFIX . 'color-text-primary',
@@ -466,7 +823,156 @@ final class CssVariablesContract {
 
 		$out[ self::PREFIX . 'sticky-layout-reserve' ] = self::format_sticky_layout_reserve_px( $merged_settings );
 
+		// Reserve under floating FAB (phase 17.2); body uses it only with .mp-scc-sticky-layout-tristate.
+		$out[ self::PREFIX . 'sticky-fab-layout-reserve' ] = '72px';
+
+		$z = (int) OptionResolver::get_by_path( $merged_settings, 'sticky_cart.z_index', 100050 );
+		$z = max( 1, min( 9999999, $z ) );
+		$out[ self::PREFIX . 'tristate-z-panel-b' ]   = (string) ( $z + 5 );
+		$out[ self::PREFIX . 'tristate-z-drawer-c' ] = (string) ( $z + 6 );
+
+		$shadow_pct = (int) OptionResolver::get_by_path( $merged_settings, 'sticky_cart.tristate_column_shadow_opacity_percent', 12 );
+		$shadow_pct = max( 4, min( 28, $shadow_pct ) );
+		$out[ self::PREFIX . 'tristate-column-shadow-alpha' ] = (string) round( $shadow_pct / 100, 4 );
+
+		$hr_hex = (string) OptionResolver::get_by_path( $merged_settings, 'sticky_cart.tristate_metrics_hr_color', '#000000' );
+		$hr_pct = (int) OptionResolver::get_by_path( $merged_settings, 'sticky_cart.tristate_metrics_hr_opacity_percent', 14 );
+		$hr_pct = max( 0, min( 100, $hr_pct ) );
+		$tri    = self::parse_hex_rgb_triplet( $hr_hex );
+		$r      = ( $tri && isset( $tri[0] ) ) ? $tri[0] : 0;
+		$g      = ( $tri && isset( $tri[1] ) ) ? $tri[1] : 0;
+		$b      = ( $tri && isset( $tri[2] ) ) ? $tri[2] : 0;
+		$hr_a   = $hr_pct / 100.0;
+		$out[ self::PREFIX . 'tristate-metrics-hr-border-color' ] = sprintf(
+			'rgba(%d,%d,%d,%s)',
+			$r,
+			$g,
+			$b,
+			self::format_css_alpha_string( $hr_a )
+		);
+
+		self::apply_catalog_cart_icon_appearance_tokens( $merged_settings, $out );
+
 		return $out;
+	}
+
+	/**
+	 * Glyph color + button background from {@see CatalogCartIconAppearance} (two admin presets).
+	 *
+	 * @param array<string, mixed>    $merged_settings Merged settings tree.
+	 * @param array<string, string> $out               Output map (by ref).
+	 */
+	private static function apply_catalog_cart_icon_appearance_tokens( array $merged_settings, array &$out ) {
+		$catalog = OptionResolver::get_by_path( $merged_settings, 'catalog', array() );
+		if ( ! is_array( $catalog ) ) {
+			$catalog = array();
+		}
+		$r       = CatalogCartIconAppearance::resolve( $catalog );
+		$row     = array( 'format' => 'color' );
+		$glyph   = sanitize_hex_color( $r['glyph_hex'] );
+		$out[ self::PREFIX . 'catalog-cart-icon-color' ] = self::format_value( $glyph ? $glyph : $r['glyph_hex'], $row );
+
+		foreach ( self::build_catalog_cart_icon_background_from_hex_alpha( $r['bg_hex'], $r['bg_alpha_percent'] ) as $name => $value ) {
+			$out[ $name ] = $value;
+		}
+
+		// Hover: invert face vs glyph (same idea as wishlist heart: dark/light swap).
+		$tri = self::parse_hex_rgb_triplet( $r['glyph_hex'] );
+		if ( null !== $tri ) {
+			$out[ self::PREFIX . 'catalog-cart-icon-background-hover' ] = sprintf(
+				'rgba(%d,%d,%d,1)',
+				$tri[0],
+				$tri[1],
+				$tri[2]
+			);
+		} else {
+			$out[ self::PREFIX . 'catalog-cart-icon-background-hover' ] = 'rgba(26,26,26,1)';
+		}
+		$icon_hover = sanitize_hex_color( $r['bg_hex'] );
+		$out[ self::PREFIX . 'catalog-cart-icon-color-hover' ] = self::format_value(
+			$icon_hover ? $icon_hover : '#ffffff',
+			$row
+		);
+	}
+
+	/**
+	 * rgba() for default button face (hover uses inverted solid colors in {@see self::apply_catalog_cart_icon_appearance_tokens}).
+	 *
+	 * @param string $bg_hex          #rrggbb
+	 * @param int    $bg_alpha_percent 0–100
+	 * @return array<string, string>
+	 */
+	private static function build_catalog_cart_icon_background_from_hex_alpha( $bg_hex, $bg_alpha_percent ) {
+		$hex = sanitize_hex_color( (string) $bg_hex );
+		if ( ! is_string( $hex ) || '' === $hex ) {
+			$hex = '#ffffff';
+		}
+		$pct = (int) $bg_alpha_percent;
+		$pct = max( 0, min( 100, $pct ) );
+		$a   = $pct / 100.0;
+
+		$stripped = strtolower( ltrim( $hex, '#' ) );
+		if ( 3 === strlen( $stripped ) && ctype_xdigit( $stripped ) ) {
+			$stripped = $stripped[0] . $stripped[0] . $stripped[1] . $stripped[1] . $stripped[2] . $stripped[2];
+		}
+		$r = 255;
+		$g = 255;
+		$b = 255;
+		if ( 6 === strlen( $stripped ) && ctype_xdigit( $stripped ) ) {
+			$r = hexdec( substr( $stripped, 0, 2 ) );
+			$g = hexdec( substr( $stripped, 2, 2 ) );
+			$b = hexdec( substr( $stripped, 4, 2 ) );
+		}
+
+		return array(
+			self::PREFIX . 'catalog-cart-icon-background' => sprintf(
+				'rgba(%d,%d,%d,%s)',
+				$r,
+				$g,
+				$b,
+				self::format_css_alpha_string( $a )
+			),
+		);
+	}
+
+	/**
+	 * @param string $hex #rrggbb (or #rgb expanded by sanitize_hex_color).
+	 * @return array{0:int,1:int,2:int}|null
+	 */
+	private static function parse_hex_rgb_triplet( $hex ) {
+		$hex = sanitize_hex_color( (string) $hex );
+		if ( ! is_string( $hex ) || '' === $hex ) {
+			return null;
+		}
+		$stripped = strtolower( ltrim( $hex, '#' ) );
+		if ( 3 === strlen( $stripped ) && ctype_xdigit( $stripped ) ) {
+			$stripped = $stripped[0] . $stripped[0] . $stripped[1] . $stripped[1] . $stripped[2] . $stripped[2];
+		}
+		if ( 6 !== strlen( $stripped ) || ! ctype_xdigit( $stripped ) ) {
+			return null;
+		}
+
+		return array(
+			(int) hexdec( substr( $stripped, 0, 2 ) ),
+			(int) hexdec( substr( $stripped, 2, 2 ) ),
+			(int) hexdec( substr( $stripped, 4, 2 ) ),
+		);
+	}
+
+	/**
+	 * @param float $a 0..1
+	 */
+	private static function format_css_alpha_string( $a ) {
+		$a = (float) $a;
+		if ( $a >= 1.0 ) {
+			return '1';
+		}
+		if ( $a <= 0.0 ) {
+			return '0';
+		}
+		$s = rtrim( rtrim( sprintf( '%.4f', $a ), '0' ), '.' );
+
+		return '' === $s ? '0' : $s;
 	}
 
 	/**
