@@ -2007,7 +2007,8 @@
 		window.addEventListener(
 			'click',
 			function mpSccCatalogImageCapture(e) {
-				if (e.button !== 0) {
+				// Some Chromium forks may omit `button` on synthesized click events.
+				if (typeof e.button === 'number' && e.button !== 0) {
 					return;
 				}
 				var d = data();
