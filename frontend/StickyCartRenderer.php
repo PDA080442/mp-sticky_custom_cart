@@ -397,17 +397,17 @@ final class StickyCartRenderer implements StickyCartRendererInterface {
 	}
 
 	/**
-	 * Inline SVG for explicit B->C control (chevron up).
+	 * Inline SVG for explicit B->C control (chevron left).
 	 */
 	private static function inline_svg_chevron_up_icon() {
-		return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" class="mp-scc-tristate-action-svg mp-scc-tristate-action-svg--chevron-up"><path d="M12 8.41l4.29 4.3a1 1 0 001.42-1.42l-5-5a1 1 0 00-1.42 0l-5 5a1 1 0 001.42 1.42L12 8.4z"/></svg>';
+		return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" class="mp-scc-tristate-action-svg mp-scc-tristate-action-svg--chevron-up"><path d="M14.59 6.41l-4.3 4.29a1 1 0 000 1.42l4.3 4.29a1 1 0 101.42-1.42L12.41 12l3.6-3.59a1 1 0 10-1.42-1.42z"/></svg>';
 	}
 
 	/**
-	 * Inline SVG for explicit C->B control (chevron down).
+	 * Inline SVG for explicit C->B control (chevron right).
 	 */
 	private static function inline_svg_chevron_down_icon() {
-		return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" class="mp-scc-tristate-action-svg mp-scc-tristate-action-svg--chevron-down"><path d="M12 15.59l-4.29-4.3a1 1 0 10-1.42 1.42l5 5a1 1 0 001.42 0l5-5a1 1 0 10-1.42-1.42L12 15.6z"/></svg>';
+		return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" class="mp-scc-tristate-action-svg mp-scc-tristate-action-svg--chevron-down"><path d="M9.41 6.41a1 1 0 000 1.42L13 11.41l-3.59 3.6a1 1 0 101.42 1.42l4.3-4.29a1 1 0 000-1.42l-4.3-4.29a1 1 0 00-1.42 0z"/></svg>';
 	}
 
 	/**
