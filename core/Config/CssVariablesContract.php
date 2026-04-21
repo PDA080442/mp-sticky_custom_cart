@@ -305,6 +305,62 @@ final class CssVariablesContract {
 				'format' => 'unit',
 			),
 			array(
+				'name'   => self::PREFIX . 'tristate-metrics-row-padding-y',
+				'path'   => 'sticky_cart.tristate_metrics_row_padding_y_px',
+				'suffix' => 'px',
+				'format' => 'unit',
+			),
+			array(
+				'name'         => self::PREFIX . 'tristate-metrics-hr-margin-y-panel-b',
+				'path'         => 'sticky_cart.tristate_metrics_hr_margin_y_panel_b_px',
+				'suffix'       => 'px',
+				'format'       => 'unit',
+				'omit_if_zero' => true,
+			),
+			array(
+				'name'   => self::PREFIX . 'tristate-metrics-hr-margin-y-drawer-c',
+				'path'   => 'sticky_cart.tristate_metrics_hr_margin_y_drawer_c_px',
+				'suffix' => 'px',
+				'format' => 'unit',
+			),
+			array(
+				'name'         => self::PREFIX . 'tristate-metrics-hr-border-width',
+				'path'         => 'sticky_cart.tristate_metrics_hr_border_width_px',
+				'suffix'       => 'px',
+				'format'       => 'unit',
+				'omit_if_zero' => true,
+			),
+			array(
+				'name'   => self::PREFIX . 'tristate-metrics-hr-style',
+				'path'   => 'sticky_cart.tristate_metrics_hr_style',
+				'suffix' => '',
+				'format' => 'raw',
+			),
+			array(
+				'name'   => self::PREFIX . 'tristate-actions-toolbar-padding-top',
+				'path'   => 'sticky_cart.tristate_actions_toolbar_padding_top_px',
+				'suffix' => 'px',
+				'format' => 'unit',
+			),
+			array(
+				'name'   => self::PREFIX . 'tristate-actions-toolbar-padding-right',
+				'path'   => 'sticky_cart.tristate_actions_toolbar_padding_right_px',
+				'suffix' => 'px',
+				'format' => 'unit',
+			),
+			array(
+				'name'   => self::PREFIX . 'tristate-actions-toolbar-padding-bottom',
+				'path'   => 'sticky_cart.tristate_actions_toolbar_padding_bottom_px',
+				'suffix' => 'px',
+				'format' => 'unit',
+			),
+			array(
+				'name'   => self::PREFIX . 'tristate-actions-toolbar-padding-left',
+				'path'   => 'sticky_cart.tristate_actions_toolbar_padding_left_px',
+				'suffix' => 'px',
+				'format' => 'unit',
+			),
+			array(
 				'name'   => self::PREFIX . 'tristate-action-icon-hit',
 				'path'   => 'sticky_cart.tristate_action_icon_hit_px',
 				'suffix' => 'px',
@@ -317,8 +373,122 @@ final class CssVariablesContract {
 				'format' => 'unit',
 			),
 			array(
+				'name'   => self::PREFIX . 'tristate-dismiss-hit',
+				'path'   => 'sticky_cart.tristate_dismiss_hit_px',
+				'suffix' => 'px',
+				'format' => 'unit',
+			),
+			array(
+				'name'   => self::PREFIX . 'tristate-dismiss-margin-top',
+				'path'   => 'sticky_cart.tristate_dismiss_margin_top_px',
+				'suffix' => 'px',
+				'format' => 'unit',
+			),
+			array(
+				'name'   => self::PREFIX . 'tristate-dismiss-margin-right',
+				'path'   => 'sticky_cart.tristate_dismiss_margin_right_px',
+				'suffix' => 'px',
+				'format' => 'unit',
+			),
+			array(
+				'name'   => self::PREFIX . 'tristate-dismiss-margin-bottom',
+				'path'   => 'sticky_cart.tristate_dismiss_margin_bottom_px',
+				'suffix' => 'px',
+				'format' => 'unit',
+			),
+			array(
+				'name'   => self::PREFIX . 'tristate-dismiss-margin-left',
+				'path'   => 'sticky_cart.tristate_dismiss_margin_left_px',
+				'suffix' => 'px',
+				'format' => 'unit',
+			),
+			array(
+				'name'   => self::PREFIX . 'tristate-dismiss-padding-top',
+				'path'   => 'sticky_cart.tristate_dismiss_padding_top_px',
+				'suffix' => 'px',
+				'format' => 'unit',
+			),
+			array(
+				'name'   => self::PREFIX . 'tristate-dismiss-padding-right',
+				'path'   => 'sticky_cart.tristate_dismiss_padding_right_px',
+				'suffix' => 'px',
+				'format' => 'unit',
+			),
+			array(
+				'name'   => self::PREFIX . 'tristate-dismiss-padding-bottom',
+				'path'   => 'sticky_cart.tristate_dismiss_padding_bottom_px',
+				'suffix' => 'px',
+				'format' => 'unit',
+			),
+			array(
+				'name'   => self::PREFIX . 'tristate-dismiss-padding-left',
+				'path'   => 'sticky_cart.tristate_dismiss_padding_left_px',
+				'suffix' => 'px',
+				'format' => 'unit',
+			),
+			array(
+				'name'   => self::PREFIX . 'tristate-dismiss-border-width',
+				'path'   => 'sticky_cart.tristate_dismiss_border_width_px',
+				'suffix' => 'px',
+				'format' => 'unit',
+			),
+			array(
+				'name'   => self::PREFIX . 'tristate-dismiss-border-radius',
+				'path'   => 'sticky_cart.tristate_dismiss_border_radius_px',
+				'suffix' => 'px',
+				'format' => 'unit',
+			),
+			array(
+				'name'   => self::PREFIX . 'tristate-dismiss-color',
+				'path'   => 'sticky_cart.tristate_dismiss_color',
+				'suffix' => '',
+				'format' => 'color',
+			),
+			array(
+				'name'   => self::PREFIX . 'tristate-dismiss-bg',
+				'path'   => 'sticky_cart.tristate_dismiss_bg_color',
+				'suffix' => '',
+				'format' => 'color',
+			),
+			array(
+				'name'   => self::PREFIX . 'tristate-dismiss-border-color',
+				'path'   => 'sticky_cart.tristate_dismiss_border_color',
+				'suffix' => '',
+				'format' => 'color',
+			),
+			array(
+				'name'   => self::PREFIX . 'tristate-dismiss-hover-color',
+				'path'   => 'sticky_cart.tristate_dismiss_hover_color',
+				'suffix' => '',
+				'format' => 'color',
+			),
+			array(
+				'name'   => self::PREFIX . 'tristate-dismiss-hover-bg',
+				'path'   => 'sticky_cart.tristate_dismiss_hover_bg_color',
+				'suffix' => '',
+				'format' => 'color',
+			),
+			array(
+				'name'   => self::PREFIX . 'tristate-dismiss-hover-border-color',
+				'path'   => 'sticky_cart.tristate_dismiss_hover_border_color',
+				'suffix' => '',
+				'format' => 'color',
+			),
+			array(
+				'name'   => self::PREFIX . 'tristate-dismiss-glyph',
+				'path'   => 'sticky_cart.tristate_dismiss_glyph_px',
+				'suffix' => 'px',
+				'format' => 'unit',
+			),
+			array(
 				'name'   => self::PREFIX . 'tristate-panel-c-width',
 				'path'   => 'sticky_cart.tristate_panel_c_width_px',
+				'suffix' => 'px',
+				'format' => 'unit',
+			),
+			array(
+				'name'   => self::PREFIX . 'tristate-panel-c-height',
+				'path'   => 'sticky_cart.tristate_panel_c_height_px',
 				'suffix' => 'px',
 				'format' => 'unit',
 			),
@@ -664,6 +834,22 @@ final class CssVariablesContract {
 		$shadow_pct = (int) OptionResolver::get_by_path( $merged_settings, 'sticky_cart.tristate_column_shadow_opacity_percent', 12 );
 		$shadow_pct = max( 4, min( 28, $shadow_pct ) );
 		$out[ self::PREFIX . 'tristate-column-shadow-alpha' ] = (string) round( $shadow_pct / 100, 4 );
+
+		$hr_hex = (string) OptionResolver::get_by_path( $merged_settings, 'sticky_cart.tristate_metrics_hr_color', '#000000' );
+		$hr_pct = (int) OptionResolver::get_by_path( $merged_settings, 'sticky_cart.tristate_metrics_hr_opacity_percent', 14 );
+		$hr_pct = max( 0, min( 100, $hr_pct ) );
+		$tri    = self::parse_hex_rgb_triplet( $hr_hex );
+		$r      = ( $tri && isset( $tri[0] ) ) ? $tri[0] : 0;
+		$g      = ( $tri && isset( $tri[1] ) ) ? $tri[1] : 0;
+		$b      = ( $tri && isset( $tri[2] ) ) ? $tri[2] : 0;
+		$hr_a   = $hr_pct / 100.0;
+		$out[ self::PREFIX . 'tristate-metrics-hr-border-color' ] = sprintf(
+			'rgba(%d,%d,%d,%s)',
+			$r,
+			$g,
+			$b,
+			self::format_css_alpha_string( $hr_a )
+		);
 
 		self::apply_catalog_cart_icon_appearance_tokens( $merged_settings, $out );
 

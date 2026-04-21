@@ -65,6 +65,8 @@ final class DynamicStylesProvider implements DynamicStylesProviderInterface {
 		 * optimizers / edge cases where the src-less `mp-scc-runtime-vars` inline is dropped.
 		 */
 		add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_catalog_cart_icon_vars_on_main_stylesheet' ), 27 );
+		/** Advanced user overrides for tri-state A/B/C styles (admin textarea CSS). */
+		add_action( 'wp_footer', array( $this, 'print_footer_tristate_custom_css' ), 997 );
 		/** Tri-state mobile preset (phase 17.6 / 20): breakpoint is numeric → safe injected @media. */
 		add_action( 'wp_footer', array( $this, 'print_footer_tristate_responsive_layer_css' ), 998 );
 		/** Last-resort :root + rules at end of body (after theme CSS / late bundles). */
@@ -106,6 +108,52 @@ final class DynamicStylesProvider implements DynamicStylesProviderInterface {
 
 		echo '<style id="mp-scc-tristate-responsive" type="text/css">' . "\n";
 		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- numeric breakpoint + fixed selectors.
+		echo $css;
+		echo '</style>' . "\n";
+	}
+
+	/**
+	 * Prints advanced user CSS overrides for tri-state states A/B/C.
+	 * Global CSS is printed as-is; state CSS fields are wrapped by state selectors.
+	 */
+	public function print_footer_tristate_custom_css() {
+		if ( is_admin() || wp_doing_ajax() ) {
+			return;
+		}
+		if ( ! wp_style_is( FrontendAssetsHooks::HANDLE_STYLE, 'enqueued' ) && ! wp_style_is( FrontendAssetsHooks::HANDLE_STYLE, 'done' ) ) {
+			return;
+		}
+		if ( ! OptionResolver::get_flag( FeatureFlagsDefaults::KEY_STICKY_TRISTATE_ENABLED, false ) ) {
+			return;
+		}
+		$settings = OptionResolver::get_settings();
+		$global   = trim( (string) OptionResolver::get_by_path( $settings, 'sticky_cart.tristate_custom_css_global', '' ) );
+		$state_a  = trim( (string) OptionResolver::get_by_path( $settings, 'sticky_cart.tristate_custom_css_state_a', '' ) );
+		$state_b  = trim( (string) OptionResolver::get_by_path( $settings, 'sticky_cart.tristate_custom_css_state_b', '' ) );
+		$state_c  = trim( (string) OptionResolver::get_by_path( $settings, 'sticky_cart.tristate_custom_css_state_c', '' ) );
+		if ( '' === $global && '' === $state_a && '' === $state_b && '' === $state_c ) {
+			return;
+		}
+
+		$css = '';
+		if ( '' !== $global ) {
+			$css .= "/* mp-scc tristate custom global */\n" . $global . "\n";
+		}
+		if ( '' !== $state_a ) {
+			$css .= ".mp-scc-sticky-bar.mp-scc-sticky--tristate[data-mp-scc-shell-state=\"A\"]{\n" . $state_a . "\n}\n";
+		}
+		if ( '' !== $state_b ) {
+			$css .= ".mp-scc-sticky-bar.mp-scc-sticky--tristate[data-mp-scc-shell-state=\"B\"]{\n" . $state_b . "\n}\n";
+		}
+		if ( '' !== $state_c ) {
+			$css .= ".mp-scc-sticky-bar.mp-scc-sticky--tristate[data-mp-scc-shell-state=\"C\"]{\n" . $state_c . "\n}\n";
+		}
+		if ( '' === trim( $css ) ) {
+			return;
+		}
+
+		echo '<style id="mp-scc-tristate-custom-css" type="text/css">' . "\n";
+		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- settings sanitizer strips tags; CSS is intended raw text.
 		echo $css;
 		echo '</style>' . "\n";
 	}

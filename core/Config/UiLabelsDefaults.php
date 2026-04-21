@@ -31,6 +31,12 @@ final class UiLabelsDefaults {
 	public const KEY_DRAWER_EMPTY_HINT   = 'drawer_empty_hint';
 	public const KEY_DRAWER_REMOVE_LINE  = 'drawer_remove_line';
 	public const KEY_LINE_REMOVED        = 'line_removed';
+	/** Tri-state panel B + drawer C: metric row label (cart line count). */
+	public const KEY_TRISTATE_METRIC_LINES = 'tristate_metric_lines';
+	/** Tri-state: total pieces label (sum of quantities). */
+	public const KEY_TRISTATE_METRIC_QTY   = 'tristate_metric_qty';
+	/** Tri-state: subtotal row label. */
+	public const KEY_TRISTATE_METRIC_TOTAL = 'tristate_metric_total';
 
 	/**
 	 * @return array<string, string>
@@ -50,6 +56,9 @@ final class UiLabelsDefaults {
 			self::KEY_DRAWER_EMPTY_HINT  => __( 'Добавьте товары из каталога', 'mp-sticky-custom-cart' ),
 			self::KEY_DRAWER_REMOVE_LINE => __( 'Удалить позицию', 'mp-sticky-custom-cart' ),
 			self::KEY_LINE_REMOVED       => __( 'Позиция удалена', 'mp-sticky-custom-cart' ),
+			self::KEY_TRISTATE_METRIC_LINES => __( 'Позиций', 'mp-sticky-custom-cart' ),
+			self::KEY_TRISTATE_METRIC_QTY   => __( 'Товаров', 'mp-sticky-custom-cart' ),
+			self::KEY_TRISTATE_METRIC_TOTAL => __( 'Сумма', 'mp-sticky-custom-cart' ),
 		);
 	}
 
@@ -73,6 +82,9 @@ final class UiLabelsDefaults {
 			self::KEY_DRAWER_EMPTY_HINT  => 'Добавьте товары из каталога',
 			self::KEY_DRAWER_REMOVE_LINE => 'Удалить позицию',
 			self::KEY_LINE_REMOVED       => 'Позиция удалена',
+			self::KEY_TRISTATE_METRIC_LINES => 'Позиций',
+			self::KEY_TRISTATE_METRIC_QTY   => 'Товаров',
+			self::KEY_TRISTATE_METRIC_TOTAL => 'Сумма',
 		);
 	}
 

@@ -776,6 +776,11 @@ final class SettingsPage {
 		self::field_text( $opt, 'labels', 'drawer_empty_hint', __( 'Подсказка под пустой корзиной (drawer)', 'mp-sticky-custom-cart' ), isset( $l['drawer_empty_hint'] ) ? (string) $l['drawer_empty_hint'] : '' );
 		self::field_text( $opt, 'labels', 'drawer_remove_line', __( 'Кнопка удаления позиции (aria)', 'mp-sticky-custom-cart' ), isset( $l['drawer_remove_line'] ) ? (string) $l['drawer_remove_line'] : '' );
 		self::field_text( $opt, 'labels', 'line_removed', __( 'Сообщение после удаления позиции', 'mp-sticky-custom-cart' ), isset( $l['line_removed'] ) ? (string) $l['line_removed'] : '' );
+		echo '<tr><td colspan="2"><p class="description" style="margin:0.75em 0 0;"><strong>' . esc_html__( 'Три состояния: сводка (панель B и шапка drawer C)', 'mp-sticky-custom-cart' ) . '</strong> — ';
+		echo esc_html__( 'Подписи к числам «позиций», «товаров» (штуки) и строке суммы.', 'mp-sticky-custom-cart' ) . '</p></td></tr>';
+		self::field_text( $opt, 'labels', 'tristate_metric_lines', __( 'Подпись: число позиций (строк в корзине)', 'mp-sticky-custom-cart' ), isset( $l['tristate_metric_lines'] ) ? (string) $l['tristate_metric_lines'] : '' );
+		self::field_text( $opt, 'labels', 'tristate_metric_qty', __( 'Подпись: всего товаров (сумма количеств)', 'mp-sticky-custom-cart' ), isset( $l['tristate_metric_qty'] ) ? (string) $l['tristate_metric_qty'] : '' );
+		self::field_text( $opt, 'labels', 'tristate_metric_total', __( 'Подпись: сумма заказа', 'mp-sticky-custom-cart' ), isset( $l['tristate_metric_total'] ) ? (string) $l['tristate_metric_total'] : '' );
 		echo '</tbody></table>';
 
 		self::render_labels_preview_panel();
@@ -1277,15 +1282,63 @@ final class SettingsPage {
 		echo '<h3>' . esc_html__( 'Три состояния: панель B (краткая сводка)', 'mp-sticky-custom-cart' ) . '</h3>';
 		echo '<p class="description">' . esc_html__( 'Важно: нижняя полоса с текстовыми кнопками «Очистить» / «Оформить» остаётся, пока на вкладке «Служебное» в блоке Feature flags не включён пункт «Корзина: режим «иконка» (три состояния)» (и включён drawer). Поля ниже задают внешний вид уже режима FAB + панелей B/C.', 'mp-sticky-custom-cart' ) . '</p>';
 		echo '<table class="form-table" role="presentation"><tbody>';
-		self::field_number( $opt, 'sticky_cart', 'tristate_panel_b_max_height_px', __( 'Макс. высота панели B (px)', 'mp-sticky-custom-cart' ), isset( $c['tristate_panel_b_max_height_px'] ) ? (int) $c['tristate_panel_b_max_height_px'] : 200, __( 'Ограничивает блок; при превышении контент обрезается по краю (без скролла внутри панели).', 'mp-sticky-custom-cart' ), array( 'var' => $p . 'tristate-panel-b-max-height', 'fmt' => 'unit', 'suffix' => 'px' ) );
+		self::field_number( $opt, 'sticky_cart', 'tristate_panel_b_max_height_px', __( 'Макс. высота панели B (px)', 'mp-sticky-custom-cart' ), isset( $c['tristate_panel_b_max_height_px'] ) ? (int) $c['tristate_panel_b_max_height_px'] : 368, __( 'Ограничивает блок; при превышении контент обрезается по краю (без скролла внутри панели).', 'mp-sticky-custom-cart' ), array( 'var' => $p . 'tristate-panel-b-max-height', 'fmt' => 'unit', 'suffix' => 'px' ) );
 		self::field_number( $opt, 'sticky_cart', 'tristate_panel_b_width_px', __( 'Ширина панели B (px)', 'mp-sticky-custom-cart' ), isset( $c['tristate_panel_b_width_px'] ) ? (int) $c['tristate_panel_b_width_px'] : 280, '', array( 'var' => $p . 'tristate-panel-b-width', 'fmt' => 'unit', 'suffix' => 'px' ) );
 		self::field_number( $opt, 'sticky_cart', 'tristate_panel_b_gap_bottom_px', __( 'Зазор между FAB и панелью B (px)', 'mp-sticky-custom-cart' ), isset( $c['tristate_panel_b_gap_bottom_px'] ) ? (int) $c['tristate_panel_b_gap_bottom_px'] : 10, '', array( 'var' => $p . 'tristate-panel-b-gap-bottom', 'fmt' => 'unit', 'suffix' => 'px' ) );
 		self::field_number( $opt, 'sticky_cart', 'tristate_panel_b_padding_px', __( 'Внутренний отступ панели B (px)', 'mp-sticky-custom-cart' ), isset( $c['tristate_panel_b_padding_px'] ) ? (int) $c['tristate_panel_b_padding_px'] : 12, '', array( 'var' => $p . 'tristate-panel-b-padding', 'fmt' => 'unit', 'suffix' => 'px' ) );
 		self::field_number( $opt, 'sticky_cart', 'tristate_panel_b_border_radius_px', __( 'Скругление панели B (px)', 'mp-sticky-custom-cart' ), isset( $c['tristate_panel_b_border_radius_px'] ) ? (int) $c['tristate_panel_b_border_radius_px'] : 12, '', array( 'var' => $p . 'tristate-panel-b-border-radius', 'fmt' => 'unit', 'suffix' => 'px' ) );
 		self::field_number( $opt, 'sticky_cart', 'tristate_panel_b_actions_gap_px', __( 'Зазор между иконками в панели B (px)', 'mp-sticky-custom-cart' ), isset( $c['tristate_panel_b_actions_gap_px'] ) ? (int) $c['tristate_panel_b_actions_gap_px'] : 8, '', array( 'var' => $p . 'tristate-panel-b-actions-gap', 'fmt' => 'unit', 'suffix' => 'px' ) );
+		echo '<tr><td colspan="2"><p class="description" style="margin:0 0 4px;"><strong>' . esc_html__( 'Сводка: позиции, товары, сумма и разделители', 'mp-sticky-custom-cart' ) . '</strong> — ';
+		echo esc_html__( 'Вертикальные отступы строк, пунктирные линии между ними (панель B и шапка C). Подписи — во вкладке «Подписи».', 'mp-sticky-custom-cart' ) . '</p></td></tr>';
+		self::field_number( $opt, 'sticky_cart', 'tristate_metrics_row_padding_y_px', __( 'Сводка: вертикальный отступ одной строки метрик (px)', 'mp-sticky-custom-cart' ), isset( $c['tristate_metrics_row_padding_y_px'] ) ? (int) $c['tristate_metrics_row_padding_y_px'] : 10, __( 'Одинаково для панели B и блока метрик в drawer C.', 'mp-sticky-custom-cart' ), array( 'var' => $p . 'tristate-metrics-row-padding-y', 'fmt' => 'unit', 'suffix' => 'px' ) );
+		self::field_number( $opt, 'sticky_cart', 'tristate_metrics_hr_margin_y_panel_b_px', __( 'Сводка: отступ пунктира в панели B сверху/снизу (px)', 'mp-sticky-custom-cart' ), isset( $c['tristate_metrics_hr_margin_y_panel_b_px'] ) ? (int) $c['tristate_metrics_hr_margin_y_panel_b_px'] : 0, __( 'Часто 0: линия идёт вплотную к отступам строк.', 'mp-sticky-custom-cart' ), array( 'var' => $p . 'tristate-metrics-hr-margin-y-panel-b', 'fmt' => 'unit', 'suffix' => 'px' ) );
+		self::field_number( $opt, 'sticky_cart', 'tristate_metrics_hr_margin_y_drawer_c_px', __( 'Сводка: отступ пунктира в шапке drawer C сверху/снизу (px)', 'mp-sticky-custom-cart' ), isset( $c['tristate_metrics_hr_margin_y_drawer_c_px'] ) ? (int) $c['tristate_metrics_hr_margin_y_drawer_c_px'] : 8, '', array( 'var' => $p . 'tristate-metrics-hr-margin-y-drawer-c', 'fmt' => 'unit', 'suffix' => 'px' ) );
+		self::field_number( $opt, 'sticky_cart', 'tristate_metrics_hr_border_width_px', __( 'Сводка: толщина линии-разделителя (px)', 'mp-sticky-custom-cart' ), isset( $c['tristate_metrics_hr_border_width_px'] ) ? (int) $c['tristate_metrics_hr_border_width_px'] : 1, __( '0 скрывает линию (оставьте стиль «пунктир» для будущего).', 'mp-sticky-custom-cart' ), array( 'var' => $p . 'tristate-metrics-hr-border-width', 'fmt' => 'unit', 'suffix' => 'px' ) );
+		self::field_select(
+			$opt,
+			'sticky_cart',
+			'tristate_metrics_hr_style',
+			__( 'Сводка: стиль линии-разделителя', 'mp-sticky-custom-cart' ),
+			isset( $c['tristate_metrics_hr_style'] ) ? (string) $c['tristate_metrics_hr_style'] : 'dashed',
+			array(
+				'dashed' => __( 'Пунктир', 'mp-sticky-custom-cart' ),
+				'solid'  => __( 'Сплошная', 'mp-sticky-custom-cart' ),
+				'dotted' => __( 'Точки', 'mp-sticky-custom-cart' ),
+			),
+			__( 'CSS: border-top-style для .mp-scc-tristate-metrics-hr.', 'mp-sticky-custom-cart' ),
+			array( 'var' => $p . 'tristate-metrics-hr-style', 'fmt' => 'raw' )
+		);
+		self::field_color( $opt, 'sticky_cart', 'tristate_metrics_hr_color', __( 'Сводка: цвет линии-разделителя (RGB)', 'mp-sticky-custom-cart' ), isset( $c['tristate_metrics_hr_color'] ) ? (string) $c['tristate_metrics_hr_color'] : '#000000', __( 'Итоговая линия: цвет × непрозрачность ниже → rgba на :root (--mp-scc-tristate-metrics-hr-border-color).', 'mp-sticky-custom-cart' ) );
+		self::field_number( $opt, 'sticky_cart', 'tristate_metrics_hr_opacity_percent', __( 'Сводка: непрозрачность линии (%)', 'mp-sticky-custom-cart' ), isset( $c['tristate_metrics_hr_opacity_percent'] ) ? (int) $c['tristate_metrics_hr_opacity_percent'] : 14, __( '0 — невидимая, 100 — полный цвет.', 'mp-sticky-custom-cart' ) );
+		self::field_number( $opt, 'sticky_cart', 'tristate_actions_toolbar_padding_top_px', __( 'Панель B и drawer C: отступ строки иконок сверху (px)', 'mp-sticky-custom-cart' ), isset( $c['tristate_actions_toolbar_padding_top_px'] ) ? (int) $c['tristate_actions_toolbar_padding_top_px'] : 24, __( 'Роль toolbar: .mp-scc-shell-panel-b__actions. CSS: --mp-scc-tristate-actions-toolbar-padding-top.', 'mp-sticky-custom-cart' ), array( 'var' => $p . 'tristate-actions-toolbar-padding-top', 'fmt' => 'unit', 'suffix' => 'px' ) );
+		self::field_number( $opt, 'sticky_cart', 'tristate_actions_toolbar_padding_right_px', __( 'Панель B и drawer C: отступ строки иконок справа (px)', 'mp-sticky-custom-cart' ), isset( $c['tristate_actions_toolbar_padding_right_px'] ) ? (int) $c['tristate_actions_toolbar_padding_right_px'] : 0, '', array( 'var' => $p . 'tristate-actions-toolbar-padding-right', 'fmt' => 'unit', 'suffix' => 'px' ) );
+		self::field_number( $opt, 'sticky_cart', 'tristate_actions_toolbar_padding_bottom_px', __( 'Панель B и drawer C: отступ строки иконок снизу (px)', 'mp-sticky-custom-cart' ), isset( $c['tristate_actions_toolbar_padding_bottom_px'] ) ? (int) $c['tristate_actions_toolbar_padding_bottom_px'] : 0, '', array( 'var' => $p . 'tristate-actions-toolbar-padding-bottom', 'fmt' => 'unit', 'suffix' => 'px' ) );
+		self::field_number( $opt, 'sticky_cart', 'tristate_actions_toolbar_padding_left_px', __( 'Панель B и drawer C: отступ строки иконок слева (px)', 'mp-sticky-custom-cart' ), isset( $c['tristate_actions_toolbar_padding_left_px'] ) ? (int) $c['tristate_actions_toolbar_padding_left_px'] : 0, '', array( 'var' => $p . 'tristate-actions-toolbar-padding-left', 'fmt' => 'unit', 'suffix' => 'px' ) );
 		self::field_number( $opt, 'sticky_cart', 'tristate_action_icon_hit_px', __( 'Размер зоны нажатия иконок «очистить / оформить» (px)', 'mp-sticky-custom-cart' ), isset( $c['tristate_action_icon_hit_px'] ) ? (int) $c['tristate_action_icon_hit_px'] : 44, __( 'Квадратная кнопка в панели B и в drawer C (три состояния).', 'mp-sticky-custom-cart' ), array( 'var' => $p . 'tristate-action-icon-hit', 'fmt' => 'unit', 'suffix' => 'px' ) );
 		self::field_number( $opt, 'sticky_cart', 'tristate_action_icon_glyph_px', __( 'Размер SVG-иконки внутри зоны (px)', 'mp-sticky-custom-cart' ), isset( $c['tristate_action_icon_glyph_px'] ) ? (int) $c['tristate_action_icon_glyph_px'] : 22, '', array( 'var' => $p . 'tristate-action-icon-glyph', 'fmt' => 'unit', 'suffix' => 'px' ) );
-		self::field_number( $opt, 'sticky_cart', 'tristate_panel_c_width_px', __( 'Ширина панели C / drawer (px)', 'mp-sticky-custom-cart' ), isset( $c['tristate_panel_c_width_px'] ) ? (int) $c['tristate_panel_c_width_px'] : 400, __( 'Расширение влево от правого края; высота совпадает с макс. высотой панели B.', 'mp-sticky-custom-cart' ), array( 'var' => $p . 'tristate-panel-c-width', 'fmt' => 'unit', 'suffix' => 'px' ) );
+		echo '<tr><td colspan="2"><p class="description" style="margin:0 0 4px;"><strong>' . esc_html__( 'Крестик закрытия (панель B и список C)', 'mp-sticky-custom-cart' ) . '</strong> — ';
+		echo esc_html__( 'Кнопка «×» сверху справа: панель B — position внутри блока метрик; в C — в шапке строки рядом с суммой. Переменные --mp-scc-tristate-dismiss-* на :root.', 'mp-sticky-custom-cart' ) . '</p></td></tr>';
+		self::field_number( $opt, 'sticky_cart', 'tristate_dismiss_hit_px', __( 'Крестик: внешний размер кнопки (px)', 'mp-sticky-custom-cart' ), isset( $c['tristate_dismiss_hit_px'] ) ? (int) $c['tristate_dismiss_hit_px'] : 36, __( 'Квадрат: ширина и высота области нажатия.', 'mp-sticky-custom-cart' ), array( 'var' => $p . 'tristate-dismiss-hit', 'fmt' => 'unit', 'suffix' => 'px' ) );
+		self::field_number( $opt, 'sticky_cart', 'tristate_dismiss_glyph_px', __( 'Крестик: размер значка × внутри (px)', 'mp-sticky-custom-cart' ), isset( $c['tristate_dismiss_glyph_px'] ) ? (int) $c['tristate_dismiss_glyph_px'] : 16, '', array( 'var' => $p . 'tristate-dismiss-glyph', 'fmt' => 'unit', 'suffix' => 'px' ) );
+		self::field_number( $opt, 'sticky_cart', 'tristate_dismiss_margin_top_px', __( 'Крестик: внешний отступ сверху (px)', 'mp-sticky-custom-cart' ), isset( $c['tristate_dismiss_margin_top_px'] ) ? (int) $c['tristate_dismiss_margin_top_px'] : 0, __( 'У B: от верхнего края области тела панели. У C: от верхнего края строки шапки.', 'mp-sticky-custom-cart' ), array( 'var' => $p . 'tristate-dismiss-margin-top', 'fmt' => 'unit', 'suffix' => 'px' ) );
+		self::field_number( $opt, 'sticky_cart', 'tristate_dismiss_margin_right_px', __( 'Крестик: внешний отступ справа (px)', 'mp-sticky-custom-cart' ), isset( $c['tristate_dismiss_margin_right_px'] ) ? (int) $c['tristate_dismiss_margin_right_px'] : 0, '', array( 'var' => $p . 'tristate-dismiss-margin-right', 'fmt' => 'unit', 'suffix' => 'px' ) );
+		self::field_number( $opt, 'sticky_cart', 'tristate_dismiss_margin_bottom_px', __( 'Крестик: внешний отступ снизу (px)', 'mp-sticky-custom-cart' ), isset( $c['tristate_dismiss_margin_bottom_px'] ) ? (int) $c['tristate_dismiss_margin_bottom_px'] : 0, __( 'Для C в основном влияет в flex-строке; у B при absolute обычно 0.', 'mp-sticky-custom-cart' ), array( 'var' => $p . 'tristate-dismiss-margin-bottom', 'fmt' => 'unit', 'suffix' => 'px' ) );
+		self::field_number( $opt, 'sticky_cart', 'tristate_dismiss_margin_left_px', __( 'Крестик: внешний отступ слева (px)', 'mp-sticky-custom-cart' ), isset( $c['tristate_dismiss_margin_left_px'] ) ? (int) $c['tristate_dismiss_margin_left_px'] : 0, '', array( 'var' => $p . 'tristate-dismiss-margin-left', 'fmt' => 'unit', 'suffix' => 'px' ) );
+		self::field_number( $opt, 'sticky_cart', 'tristate_dismiss_padding_top_px', __( 'Крестик: внутренний отступ сверху (px)', 'mp-sticky-custom-cart' ), isset( $c['tristate_dismiss_padding_top_px'] ) ? (int) $c['tristate_dismiss_padding_top_px'] : 2, '', array( 'var' => $p . 'tristate-dismiss-padding-top', 'fmt' => 'unit', 'suffix' => 'px' ) );
+		self::field_number( $opt, 'sticky_cart', 'tristate_dismiss_padding_right_px', __( 'Крестик: внутренний отступ справа (px)', 'mp-sticky-custom-cart' ), isset( $c['tristate_dismiss_padding_right_px'] ) ? (int) $c['tristate_dismiss_padding_right_px'] : 2, '', array( 'var' => $p . 'tristate-dismiss-padding-right', 'fmt' => 'unit', 'suffix' => 'px' ) );
+		self::field_number( $opt, 'sticky_cart', 'tristate_dismiss_padding_bottom_px', __( 'Крестик: внутренний отступ снизу (px)', 'mp-sticky-custom-cart' ), isset( $c['tristate_dismiss_padding_bottom_px'] ) ? (int) $c['tristate_dismiss_padding_bottom_px'] : 2, '', array( 'var' => $p . 'tristate-dismiss-padding-bottom', 'fmt' => 'unit', 'suffix' => 'px' ) );
+		self::field_number( $opt, 'sticky_cart', 'tristate_dismiss_padding_left_px', __( 'Крестик: внутренний отступ слева (px)', 'mp-sticky-custom-cart' ), isset( $c['tristate_dismiss_padding_left_px'] ) ? (int) $c['tristate_dismiss_padding_left_px'] : 2, '', array( 'var' => $p . 'tristate-dismiss-padding-left', 'fmt' => 'unit', 'suffix' => 'px' ) );
+		self::field_number( $opt, 'sticky_cart', 'tristate_dismiss_border_width_px', __( 'Крестик: толщина обводки (px)', 'mp-sticky-custom-cart' ), isset( $c['tristate_dismiss_border_width_px'] ) ? (int) $c['tristate_dismiss_border_width_px'] : 1, '', array( 'var' => $p . 'tristate-dismiss-border-width', 'fmt' => 'unit', 'suffix' => 'px' ) );
+		self::field_number( $opt, 'sticky_cart', 'tristate_dismiss_border_radius_px', __( 'Крестик: скругление углов (px)', 'mp-sticky-custom-cart' ), isset( $c['tristate_dismiss_border_radius_px'] ) ? (int) $c['tristate_dismiss_border_radius_px'] : 8, '', array( 'var' => $p . 'tristate-dismiss-border-radius', 'fmt' => 'unit', 'suffix' => 'px' ) );
+		self::field_color( $opt, 'sticky_cart', 'tristate_dismiss_color', __( 'Крестик: цвет значка (обычно)', 'mp-sticky-custom-cart' ), isset( $c['tristate_dismiss_color'] ) ? (string) $c['tristate_dismiss_color'] : '#1a1a1a', '', array( 'var' => $p . 'tristate-dismiss-color', 'fmt' => 'color' ) );
+		self::field_color( $opt, 'sticky_cart', 'tristate_dismiss_bg_color', __( 'Крестик: фон (обычно)', 'mp-sticky-custom-cart' ), isset( $c['tristate_dismiss_bg_color'] ) ? (string) $c['tristate_dismiss_bg_color'] : '#ffffff', '', array( 'var' => $p . 'tristate-dismiss-bg', 'fmt' => 'color' ) );
+		self::field_color( $opt, 'sticky_cart', 'tristate_dismiss_border_color', __( 'Крестик: цвет обводки (обычно)', 'mp-sticky-custom-cart' ), isset( $c['tristate_dismiss_border_color'] ) ? (string) $c['tristate_dismiss_border_color'] : '#d0d0d0', '', array( 'var' => $p . 'tristate-dismiss-border-color', 'fmt' => 'color' ) );
+		self::field_color( $opt, 'sticky_cart', 'tristate_dismiss_hover_color', __( 'Крестик: цвет значка при наведении', 'mp-sticky-custom-cart' ), isset( $c['tristate_dismiss_hover_color'] ) ? (string) $c['tristate_dismiss_hover_color'] : '#1a1a1a', '', array( 'var' => $p . 'tristate-dismiss-hover-color', 'fmt' => 'color' ) );
+		self::field_color( $opt, 'sticky_cart', 'tristate_dismiss_hover_bg_color', __( 'Крестик: фон при наведении', 'mp-sticky-custom-cart' ), isset( $c['tristate_dismiss_hover_bg_color'] ) ? (string) $c['tristate_dismiss_hover_bg_color'] : '#f0f0f0', '', array( 'var' => $p . 'tristate-dismiss-hover-bg', 'fmt' => 'color' ) );
+		self::field_color( $opt, 'sticky_cart', 'tristate_dismiss_hover_border_color', __( 'Крестик: цвет обводки при наведении', 'mp-sticky-custom-cart' ), isset( $c['tristate_dismiss_hover_border_color'] ) ? (string) $c['tristate_dismiss_hover_border_color'] : '#b0b0b0', '', array( 'var' => $p . 'tristate-dismiss-hover-border-color', 'fmt' => 'color' ) );
+		echo '<tr><td colspan="2"><p class="description" style="margin:8px 0 0;"><strong>' . esc_html__( 'Панель C (drawer)', 'mp-sticky-custom-cart' ) . '</strong></p></td></tr>';
+		self::field_number( $opt, 'sticky_cart', 'tristate_panel_c_width_px', __( 'Ширина панели C / drawer (px)', 'mp-sticky-custom-cart' ), isset( $c['tristate_panel_c_width_px'] ) ? (int) $c['tristate_panel_c_width_px'] : 600, __( 'Расширение влево от правого края; высота совпадает с макс. высотой панели B.', 'mp-sticky-custom-cart' ), array( 'var' => $p . 'tristate-panel-c-width', 'fmt' => 'unit', 'suffix' => 'px' ) );
+		self::field_number( $opt, 'sticky_cart', 'tristate_panel_c_height_px', __( 'Высота панели C / drawer (px)', 'mp-sticky-custom-cart' ), isset( $c['tristate_panel_c_height_px'] ) ? (int) $c['tristate_panel_c_height_px'] : 368, __( 'Фиксированная высота состояния C.', 'mp-sticky-custom-cart' ), array( 'var' => $p . 'tristate-panel-c-height', 'fmt' => 'unit', 'suffix' => 'px' ) );
 		echo '</tbody></table>';
 
 		$dock_r = isset( $c['tristate_dock_inset_right_px'] ) ? (int) $c['tristate_dock_inset_right_px'] : 32;
@@ -1388,6 +1441,77 @@ final class SettingsPage {
 			__( 'Связь с фазой 20: при «широкой полосе» подключается отдельный CSS ниже заданной ширины viewport.', 'mp-sticky-custom-cart' )
 		);
 		self::field_number( $opt, 'sticky_cart', 'tristate_mobile_breakpoint_max_px', __( 'Макс. ширина экрана для пресета (px)', 'mp-sticky-custom-cart' ), isset( $c['tristate_mobile_breakpoint_max_px'] ) ? (int) $c['tristate_mobile_breakpoint_max_px'] : 782, __( 'Используется только для пресета «широкая полоса» (media max-width). Обычно 782 — как break у админ-бара WP.', 'mp-sticky-custom-cart' ), array() );
+		echo '</tbody></table>';
+
+		echo '<h3>' . esc_html__( 'Три состояния: полный CSS override (A/B/C)', 'mp-sticky-custom-cart' ) . '</h3>';
+		echo '<p class="description">' . esc_html__( 'Для тонкой настройки любых недостающих стилей. Поля ниже печатаются как CSS в footer. Можно задавать любые селекторы/правила без ограничений визуального конструктора.', 'mp-sticky-custom-cart' ) . '</p>';
+		echo '<details class="mp-scc-tristate-css-cheatsheet" style="margin: 10px 0 16px;">';
+		echo '<summary style="cursor:pointer;">' . esc_html__( 'Справочник селекторов (копируй и правь)', 'mp-sticky-custom-cart' ) . '</summary>';
+		echo '<div class="mp-scc-tristate-css-cheatsheet__body" style="margin-top:10px;">';
+		echo '<p class="description">' . esc_html__( 'Состояние A/B/C выставляется на корне как data-mp-scc-shell-state. Поля «State A/B/C CSS» автоматически оборачиваются в селектор корня для этого состояния — внутри можно писать только декларации или вложенные селекторы по потомкам.', 'mp-sticky-custom-cart' ) . '</p>';
+		echo '<p><strong>' . esc_html__( 'Корень (всегда в DOM)', 'mp-sticky-custom-cart' ) . '</strong><br />';
+		echo '<code>#mp-scc-sticky-root</code> <code>.mp-scc-root</code> <code>.mp-scc-sticky-bar</code> <code>.mp-scc-sticky--tristate</code><br />';
+		echo '<code>data-mp-scc-sticky-root</code>, <code>data-mp-scc-cart-empty</code> (<code>0|1</code>), <code>data-mp-scc-sticky-tristate</code> (<code>0|1</code>), <code>data-mp-scc-shell-state</code> (<code>A|B|C</code>)</p>';
+		echo '<p><strong>' . esc_html__( 'Обёртка колонки над нижней полосой', 'mp-sticky-custom-cart' ) . '</strong><br /><code>.mp-scc-sticky-stack</code></p>';
+
+		echo '<h4 style="margin:1em 0 0.35em;">' . esc_html__( 'Состояние A (только FAB / свёрнута панель)', 'mp-sticky-custom-cart' ) . '</h4>';
+		echo '<p><code>#mp-scc-sticky-root[data-mp-scc-shell-state="A"]</code> …</p>';
+		echo '<p><code>.mp-scc-sticky-inner</code> — ' . esc_html__( 'нижняя полоса', 'mp-sticky-custom-cart' ) . '<br />';
+		echo '<code>.mp-scc-sticky-summary</code> — ' . esc_html__( 'область FAB', 'mp-sticky-custom-cart' ) . '<br />';
+		echo '<code>#mp-scc-drawer-toggle</code> <code>.mp-scc-drawer-toggle</code> <code>.mp-scc-drawer-toggle--fab</code> — <code>data-mp-scc-drawer-toggle</code>, <code>aria-controls</code><br />';
+		echo '<code>.mp-scc-drawer-toggle-icon</code>, <code>.mp-scc-drawer-toggle-badge</code> (<code>data-mp-scc-cart-line-count</code>)<br />';
+		echo '<code>.mp-scc-sticky-summary-text</code>, <code>.mp-scc-cart-count</code>, <code>.mp-scc-cart-total</code>, <code>data-mp-scc-cart-qty-total</code> — ' . esc_html__( 'в tri-state часть скрыта a11y/CSS', 'mp-sticky-custom-cart' ) . '<br />';
+		echo '<code>.mp-scc-sticky-actions</code> <code>data-mp-scc-actions</code> — ' . esc_html__( 'текстовые кнопки в tri-state обычно скрыты', 'mp-sticky-custom-cart' ) . '</p>';
+		echo '<p><code>#mp-scc-shell-panel-b</code> … — ' . esc_html__( 'есть в DOM, при A обычно', 'mp-sticky-custom-cart' ) . ' <code>hidden</code>. ';
+		echo '<code>#mp-scc-drawer</code> … — ' . esc_html__( 'при A обычно', 'mp-sticky-custom-cart' ) . ' <code>hidden</code>.</p>';
+
+		echo '<h4 style="margin:1em 0 0.35em;">' . esc_html__( 'Состояние B (панель суммы)', 'mp-sticky-custom-cart' ) . '</h4>';
+		echo '<p><code>#mp-scc-sticky-root[data-mp-scc-shell-state="B"]</code> …</p>';
+		echo '<p><code>#mp-scc-shell-panel-b</code> <code>.mp-scc-shell-panel-b</code> <code>data-mp-scc-shell-panel-b</code><br />';
+		echo '<code>.mp-scc-shell-panel-b__body</code><br />';
+		echo '<code>.mp-scc-shell-panel-b__metrics</code> (<code>aria-live</code>)<br />';
+		echo '<code>.mp-scc-shell-panel-b__row</code> <code>.mp-scc-shell-panel-b__row--lines</code> <code>.mp-scc-tristate-metrics-hr</code> <code>.mp-scc-shell-panel-b__row--qty</code> <code>.mp-scc-shell-panel-b__row--total</code><br />';
+		echo '<code>.mp-scc-shell-panel-b__label</code> <code>.mp-scc-shell-panel-b__value</code> <code>.mp-scc-shell-panel-b__subtotal</code> + <code>data-mp-scc-cart-line-count</code> / <code>data-mp-scc-cart-qty-count</code> / <code>data-mp-scc-cart-total</code><br />';
+		echo '<code>.mp-scc-shell-panel-b__actions</code> (<code>role="toolbar"</code>)<br />';
+		echo '<code>.mp-scc-tristate-dismiss</code> <code>data-mp-scc-shell-dismiss="b"</code> <code>.mp-scc-tristate-dismiss__glyph</code> <code>.mp-scc-tristate-dismiss__svg</code><br />';
+		echo '<code>.mp-scc-shell-panel-b__icon-btn</code> <code>.mp-scc-btn</code> <code>.mp-scc-btn--ghost</code> / <code>.mp-scc-btn--primary</code><br />';
+		echo '<code>.mp-scc-clear-cart</code> <code>data-mp-scc-clear-cart</code> <code>data-mp-scc-clear-label</code> <code>data-mp-scc-clear-aria-disabled</code><br />';
+		echo '<code>.mp-scc-checkout</code> <code>data-mp-scc-checkout</code> <code>data-mp-scc-checkout-label</code> <code>data-mp-scc-checkout-base</code> <code>data-mp-scc-checkout-aria-disabled</code><br />';
+		echo '<code>.mp-scc-shell-panel-b__icon-svg</code> <code>.mp-scc-tristate-action-svg</code> <code>.mp-scc-tristate-action-svg--trash</code> <code>.mp-scc-tristate-action-svg--cart</code><br />';
+		echo '<code>.mp-scc-shell-panel-b__toggle-c</code> <code>data-mp-scc-toggle-c</code> <code>data-mp-scc-toggle-c-mode="open"</code> + <code>.mp-scc-tristate-action-svg--chevron-up</code></p>';
+
+		echo '<h4 style="margin:1em 0 0.35em;">' . esc_html__( 'Состояние C (drawer со списком строк)', 'mp-sticky-custom-cart' ) . '</h4>';
+		echo '<p><code>#mp-scc-sticky-root[data-mp-scc-shell-state="C"]</code> …</p>';
+		echo '<p><code>#mp-scc-drawer</code> <code>.mp-scc-drawer</code> <code>.mp-scc-drawer--tristate-c</code> <code>.mp-scc-drawer--empty</code> <code>data-mp-scc-drawer</code><br />';
+		echo esc_html__( 'Классы от JS при переключении списка:', 'mp-sticky-custom-cart' ) . ' <code>.mp-scc-drawer--show-items</code> / <code>.mp-scc-drawer--show-empty</code><br />';
+		echo '<code>.mp-scc-drawer-inner</code> <code>.mp-scc-drawer-inner--empty</code><br />';
+		echo '<code>.mp-scc-drawer-c</code> <code>data-mp-scc-drawer-tristate-c</code><br />';
+		echo '<code>.mp-scc-drawer-c__top</code> — <code>.mp-scc-tristate-dismiss</code> <code>data-mp-scc-shell-dismiss="c"</code><br />';
+		echo '<code>.mp-scc-drawer-c__collapse</code> <code>.mp-scc-shell-panel-b__toggle-c</code> <code>data-mp-scc-toggle-c</code> <code>data-mp-scc-toggle-c-mode="close"</code> + <code>.mp-scc-tristate-action-svg--chevron-down</code><br />';
+		echo '<code>.mp-scc-drawer-c__metrics</code> — <code>.mp-scc-drawer-c__row</code> <code>.mp-scc-drawer-c__row--lines</code> <code>.mp-scc-tristate-metrics-hr</code> <code>.mp-scc-drawer-c__row--qty</code> <code>.mp-scc-drawer-c__row--total</code> <code>.mp-scc-drawer-c__label</code> <code>.mp-scc-drawer-c__value</code> <code>.mp-scc-drawer-c__subtotal</code><br />';
+		echo '<code>.mp-scc-drawer-c__scroll</code> <code>data-mp-scc-drawer-lines-scroll</code><br />';
+		echo '<code>#mp-scc-drawer-items</code> <code>.mp-scc-drawer-items</code> <code>data-mp-scc-drawer-items</code><br />';
+		echo '<code>#mp-scc-drawer-empty</code> <code>.mp-scc-drawer-empty</code> <code>.mp-scc-drawer-empty--off</code> <code>data-mp-scc-drawer-empty</code><br />';
+		echo '<code>.mp-scc-drawer-empty-visual</code> <code>.mp-scc-drawer-empty-icon</code> <code>.mp-scc-drawer-empty-title</code> <code>.mp-scc-drawer-empty-hint</code><br />';
+		echo '<code>.mp-scc-shell-panel-b__actions</code> — ' . esc_html__( 'в C только очистка + оформление (без третьей стрелки в toolbar)', 'mp-sticky-custom-cart' ) . '</p>';
+
+		echo '<h4 style="margin:1em 0 0.35em;">' . esc_html__( 'Строки корзины (рендер JS, все состояния где открыт список)', 'mp-sticky-custom-cart' ) . '</h4>';
+		echo '<p><code>li.mp-scc-line</code> <code>.mp-scc-line--warn</code> <code>.mp-scc-line--removing</code><br />';
+		echo '<code>data-mp-scc-line-key</code> <code>data-cart-item-key</code> <code>data-mp-scc-snapshot-line-id</code> <code>data-mp-scc-product-id</code> <code>data-mp-scc-variation-id</code> <code>data-mp-scc-max-qty</code><br />';
+		echo '<code>.mp-scc-line__row</code> <code>.mp-scc-line__thumb</code> <code>.mp-scc-line__thumb-fallback</code> <code>.mp-scc-line__main</code> <code>.mp-scc-line__subtotal</code><br />';
+		echo '<code>.mp-scc-line__warning</code> <code>.mp-scc-line__name</code> (<code>a</code> или <code>span</code>) <code>.mp-scc-line__unit</code><br />';
+		echo '<code>.mp-scc-line__controls</code> <code>.mp-scc-line__qty</code> <code>.mp-scc-line__qty-val</code> <code>data-mp-scc-qty-display</code><br />';
+		echo '<code>.mp-scc-qty-btn</code> <code>data-mp-scc-qty-dec</code> <code>data-mp-scc-qty-inc</code><br />';
+		echo '<code>.mp-scc-line__remove</code> <code>data-mp-scc-line-remove</code></p>';
+
+		echo '<p class="description">' . esc_html__( 'Подсказка: в DevTools смотри id и data-*; для кастомного CSS удобнее цепляться к #mp-scc-sticky-root[data-mp-scc-shell-state="…"].', 'mp-sticky-custom-cart' ) . '</p>';
+		echo '</div>';
+		echo '</details>';
+		echo '<table class="form-table" role="presentation"><tbody>';
+		self::field_textarea( $opt, 'sticky_cart', 'tristate_custom_css_global', __( 'Global CSS (для всех состояний)', 'mp-sticky-custom-cart' ), isset( $c['tristate_custom_css_global'] ) ? (string) $c['tristate_custom_css_global'] : '', __( 'Применяется как есть, без авто-обёртки. Пример селектора: .mp-scc-sticky-bar.mp-scc-sticky--tristate {...}', 'mp-sticky-custom-cart' ), array( 'rows' => 6, 'maxlength' => 20000 ) );
+		self::field_textarea( $opt, 'sticky_cart', 'tristate_custom_css_state_a', __( 'State A CSS', 'mp-sticky-custom-cart' ), isset( $c['tristate_custom_css_state_a'] ) ? (string) $c['tristate_custom_css_state_a'] : '', __( 'Содержимое вставляется в селектор состояния A.', 'mp-sticky-custom-cart' ), array( 'rows' => 5, 'maxlength' => 20000 ) );
+		self::field_textarea( $opt, 'sticky_cart', 'tristate_custom_css_state_b', __( 'State B CSS', 'mp-sticky-custom-cart' ), isset( $c['tristate_custom_css_state_b'] ) ? (string) $c['tristate_custom_css_state_b'] : '', __( 'Содержимое вставляется в селектор состояния B.', 'mp-sticky-custom-cart' ), array( 'rows' => 5, 'maxlength' => 20000 ) );
+		self::field_textarea( $opt, 'sticky_cart', 'tristate_custom_css_state_c', __( 'State C CSS', 'mp-sticky-custom-cart' ), isset( $c['tristate_custom_css_state_c'] ) ? (string) $c['tristate_custom_css_state_c'] : '', __( 'Содержимое вставляется в селектор состояния C.', 'mp-sticky-custom-cart' ), array( 'rows' => 5, 'maxlength' => 20000 ) );
 		echo '</tbody></table>';
 	}
 
@@ -1803,6 +1927,9 @@ final class SettingsPage {
 			UiLabelsDefaults::KEY_DRAWER_EMPTY_HINT  => __( 'Подсказка под пустой корзиной (drawer)', 'mp-sticky-custom-cart' ),
 			UiLabelsDefaults::KEY_DRAWER_REMOVE_LINE => __( 'Кнопка удаления позиции (aria)', 'mp-sticky-custom-cart' ),
 			UiLabelsDefaults::KEY_LINE_REMOVED       => __( 'Сообщение после удаления позиции', 'mp-sticky-custom-cart' ),
+			UiLabelsDefaults::KEY_TRISTATE_METRIC_LINES => __( 'Три состояния: подпись «позиций»', 'mp-sticky-custom-cart' ),
+			UiLabelsDefaults::KEY_TRISTATE_METRIC_QTY   => __( 'Три состояния: подпись «товаров» (штуки)', 'mp-sticky-custom-cart' ),
+			UiLabelsDefaults::KEY_TRISTATE_METRIC_TOTAL => __( 'Три состояния: подпись суммы', 'mp-sticky-custom-cart' ),
 		);
 
 		echo '<table class="widefat striped mp-scc-label-preview"><thead><tr>';

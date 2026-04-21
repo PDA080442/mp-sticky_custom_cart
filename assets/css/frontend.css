@@ -218,7 +218,7 @@ body.mp-scc-sticky-active.mp-scc-sticky-layout-tristate {
 	z-index: var(--mp-scc-tristate-z-drawer-c, 100056);
 	box-sizing: border-box;
 	width: min(
-		var(--mp-scc-tristate-panel-c-width, 400px),
+		var(--mp-scc-tristate-panel-c-width, 600px),
 		calc(
 			100vw - max(
 				calc(
@@ -229,7 +229,10 @@ body.mp-scc-sticky-active.mp-scc-sticky-layout-tristate {
 			)
 		)
 	);
-	max-width: min(92vw, var(--mp-scc-tristate-panel-c-width, 400px));
+	max-width: min(92vw, var(--mp-scc-tristate-panel-c-width, 600px));
+	height: var(--mp-scc-tristate-panel-c-height, 368px);
+	min-height: var(--mp-scc-tristate-panel-c-height, 368px);
+	max-height: var(--mp-scc-tristate-panel-c-height, 368px);
 	margin-bottom: var(--mp-scc-tristate-panel-b-gap-bottom, 10px);
 	padding: var(--mp-scc-tristate-panel-b-padding, 12px);
 	overflow: hidden;
@@ -265,20 +268,60 @@ body.mp-scc-sticky-active.mp-scc-sticky-layout-tristate {
 	gap: 8px;
 }
 
-.mp-scc-drawer-c__metrics {
+.mp-scc-drawer-c__top {
 	display: flex;
-	flex-direction: column;
-	gap: 6px;
+	flex-direction: row;
+	align-items: flex-start;
+	gap: 10px;
 	flex: 0 0 auto;
 	min-width: 0;
 }
 
-.mp-scc-drawer-c__row {
+.mp-scc-drawer-c__top .mp-scc-drawer-c__metrics {
+	flex: 1 1 auto;
+	min-width: 0;
+}
+
+.mp-scc-drawer-c__collapse.mp-scc-shell-panel-b__icon-btn {
+	flex: 0 0 auto;
+	width: var(--mp-scc-tristate-action-icon-hit, 44px);
+	height: var(--mp-scc-tristate-action-icon-hit, 44px);
+	min-width: var(--mp-scc-tristate-action-icon-hit, 44px);
+	min-height: var(--mp-scc-tristate-action-icon-hit, 44px);
+	border-radius: min(12px, calc(var(--mp-scc-tristate-action-icon-hit, 44px) * 0.28));
+}
+
+.mp-scc-drawer-c__metrics {
+	display: flex;
+	flex-direction: column;
+	gap: 0;
+	flex: 0 0 auto;
+	min-width: 0;
+}
+
+.mp-scc-tristate-metrics-hr {
+	flex-shrink: 0;
+	width: 100%;
+	height: 0;
+	margin: var(--mp-scc-tristate-metrics-hr-margin-y-drawer-c, 8px) 0;
+	border: 0;
+	border-top-width: var(--mp-scc-tristate-metrics-hr-border-width, 1px);
+	border-top-style: var(--mp-scc-tristate-metrics-hr-style, dashed);
+	border-top-color: var(--mp-scc-tristate-metrics-hr-border-color, rgba(0, 0, 0, 0.14));
+	background: none;
+}
+
+.mp-scc-shell-panel-b__metrics .mp-scc-tristate-metrics-hr {
+	margin: var(--mp-scc-tristate-metrics-hr-margin-y-panel-b, 0px) 0;
+}
+
+.mp-scc-drawer-c__metrics .mp-scc-drawer-c__row {
 	display: flex;
 	align-items: baseline;
 	justify-content: space-between;
 	gap: 8px;
 	min-width: 0;
+	padding: var(--mp-scc-tristate-metrics-row-padding-y, 10px) 0;
 }
 
 .mp-scc-drawer-c__label {
@@ -311,13 +354,9 @@ body.mp-scc-sticky-active.mp-scc-sticky-layout-tristate {
 }
 
 .mp-scc-drawer-c__scroll {
-	/*
-	 * State C: list viewport is capped to ~3 product rows.
-	 * More items stay reachable via inner scroll without clipping qty +/- controls.
-	 */
-	flex: 0 1 auto;
+	/* Fills space between header metrics and bottom icon toolbar; inner scroll when many lines. */
+	flex: 1 1 auto;
 	min-height: 0;
-	max-height: calc(var(--mp-scc-tristate-c-line-row-height, 112px) * 3);
 	overflow-x: hidden;
 	overflow-y: auto;
 	-webkit-overflow-scrolling: touch;
@@ -415,6 +454,8 @@ body.mp-scc-sticky-active.mp-scc-sticky-layout-tristate {
 		100% + max(0px, var(--mp-scc-tristate-dock-inset-bottom, 32px) - var(--mp-scc-tristate-state-a-dock-inset-bottom, 32px))
 	);
 	z-index: var(--mp-scc-tristate-z-panel-b, 100055);
+	/* Keep design-token consumption for settings/tests, while fixed geometry is enforced below. */
+	--mp-scc-tristate-panel-b-height-token: var(--mp-scc-tristate-panel-b-max-height, 368px);
 	box-sizing: border-box;
 	width: min(
 		var(--mp-scc-tristate-panel-b-width, 280px),
@@ -429,7 +470,10 @@ body.mp-scc-sticky-active.mp-scc-sticky-layout-tristate {
 		)
 	);
 	max-width: min(92vw, var(--mp-scc-tristate-panel-b-width, 280px));
-	max-height: var(--mp-scc-tristate-panel-b-max-height, 200px);
+	/* Admin-controlled B height (default = 368px). */
+	height: var(--mp-scc-tristate-panel-b-max-height, 368px);
+	min-height: var(--mp-scc-tristate-panel-b-max-height, 368px);
+	max-height: var(--mp-scc-tristate-panel-b-max-height, 368px);
 	margin-bottom: var(--mp-scc-tristate-panel-b-gap-bottom, 10px);
 	padding: var(--mp-scc-tristate-panel-b-padding, 12px);
 	border-radius: var(--mp-scc-tristate-panel-b-border-radius, 12px);
@@ -478,24 +522,100 @@ body.mp-scc-sticky-active.mp-scc-sticky-layout-tristate {
 	flex-direction: column;
 	justify-content: flex-start;
 	gap: 12px;
+	position: relative;
+	height: 100%;
 	min-height: 0;
 	max-height: 100%;
+	padding-top: calc(var(--mp-scc-tristate-action-icon-hit, 44px) + 8px);
+}
+
+/* Tri-state dismiss (×): panel B (absolute) + drawer C header (flex). */
+.mp-scc-sticky-bar.mp-scc-sticky--tristate .mp-scc-tristate-dismiss {
+	appearance: none;
+	-webkit-appearance: none;
+	margin: 0;
+	border-style: solid;
+	cursor: pointer;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	box-sizing: border-box;
+	width: var(--mp-scc-tristate-dismiss-hit, 36px);
+	min-width: var(--mp-scc-tristate-dismiss-hit, 36px);
+	height: var(--mp-scc-tristate-dismiss-hit, 36px);
+	min-height: var(--mp-scc-tristate-dismiss-hit, 36px);
+	padding: var(--mp-scc-tristate-dismiss-padding-top, 2px) var(--mp-scc-tristate-dismiss-padding-right, 2px)
+		var(--mp-scc-tristate-dismiss-padding-bottom, 2px) var(--mp-scc-tristate-dismiss-padding-left, 2px);
+	border-width: var(--mp-scc-tristate-dismiss-border-width, 1px);
+	border-color: var(--mp-scc-tristate-dismiss-border-color, #d0d0d0);
+	border-radius: var(--mp-scc-tristate-dismiss-border-radius, 8px);
+	background-color: var(--mp-scc-tristate-dismiss-bg, #ffffff);
+	color: var(--mp-scc-tristate-dismiss-color, #1a1a1a);
+	line-height: 0;
+	flex-shrink: 0;
+	transition:
+		background-color 0.15s ease,
+		border-color 0.15s ease,
+		color 0.15s ease;
+}
+
+.mp-scc-sticky-bar.mp-scc-sticky--tristate .mp-scc-tristate-dismiss:hover {
+	background-color: var(--mp-scc-tristate-dismiss-hover-bg, #f0f0f0);
+	color: var(--mp-scc-tristate-dismiss-hover-color, #1a1a1a);
+	border-color: var(--mp-scc-tristate-dismiss-hover-border-color, #b0b0b0);
+}
+
+.mp-scc-sticky-bar.mp-scc-sticky--tristate .mp-scc-tristate-dismiss:focus-visible {
+	outline: 2px solid var(--mp-scc-tristate-dismiss-hover-border-color, #9a9a9a);
+	outline-offset: 2px;
+}
+
+.mp-scc-shell-panel-b__body > .mp-scc-tristate-dismiss[data-mp-scc-shell-dismiss="b"] {
+	position: absolute;
+	z-index: 6;
+	top: var(--mp-scc-tristate-dismiss-margin-top, 0px);
+	right: var(--mp-scc-tristate-dismiss-margin-right, 0px);
+	left: auto;
+	bottom: auto;
+}
+
+.mp-scc-drawer-c__top .mp-scc-tristate-dismiss[data-mp-scc-shell-dismiss="c"] {
+	align-self: flex-start;
+	flex: 0 0 auto;
+	margin-top: var(--mp-scc-tristate-dismiss-margin-top, 0px);
+	margin-right: var(--mp-scc-tristate-dismiss-margin-right, 0px);
+	margin-bottom: var(--mp-scc-tristate-dismiss-margin-bottom, 0px);
+	margin-left: var(--mp-scc-tristate-dismiss-margin-left, 0px);
+}
+
+.mp-scc-tristate-dismiss__glyph {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	line-height: 0;
+}
+
+.mp-scc-sticky-bar.mp-scc-sticky--tristate .mp-scc-tristate-dismiss__svg {
+	display: block;
+	width: var(--mp-scc-tristate-dismiss-glyph, 16px);
+	height: var(--mp-scc-tristate-dismiss-glyph, 16px);
 }
 
 .mp-scc-shell-panel-b__metrics {
 	display: flex;
 	flex-direction: column;
-	gap: 8px;
+	gap: 0;
 	min-width: 0;
 	flex: 0 1 auto;
 }
 
-.mp-scc-shell-panel-b__row {
+.mp-scc-shell-panel-b__metrics .mp-scc-shell-panel-b__row {
 	display: flex;
 	align-items: baseline;
 	justify-content: space-between;
 	gap: 10px;
 	min-width: 0;
+	padding: var(--mp-scc-tristate-metrics-row-padding-y, 10px) 0;
 }
 
 .mp-scc-shell-panel-b__label {
@@ -527,20 +647,26 @@ body.mp-scc-sticky-active.mp-scc-sticky-layout-tristate {
 	white-space: nowrap;
 }
 
-.mp-scc-shell-panel-b__actions {
+.mp-scc-sticky-bar.mp-scc-sticky--tristate .mp-scc-shell-panel-b__actions {
 	display: flex;
 	flex-direction: row;
 	flex-wrap: nowrap;
 	align-items: center;
-	justify-content: flex-end;
+	justify-content: space-between;
 	gap: var(--mp-scc-tristate-panel-b-actions-gap, 8px);
 	flex: 0 0 auto;
+	width: 100%;
+	margin-top: auto;
+	padding: var(--mp-scc-tristate-actions-toolbar-padding-top, 24px)
+		var(--mp-scc-tristate-actions-toolbar-padding-right, 0px)
+		var(--mp-scc-tristate-actions-toolbar-padding-bottom, 0px)
+		var(--mp-scc-tristate-actions-toolbar-padding-left, 0px);
 }
 
-.mp-scc-shell-panel-b__icon-btn {
-	width: var(--mp-scc-tristate-action-icon-hit, 44px);
+.mp-scc-sticky-bar.mp-scc-sticky--tristate .mp-scc-shell-panel-b__actions .mp-scc-shell-panel-b__icon-btn {
+	width: calc((100% - var(--mp-scc-tristate-panel-b-actions-gap, 8px)) / 2);
 	height: var(--mp-scc-tristate-action-icon-hit, 44px);
-	min-width: var(--mp-scc-tristate-action-icon-hit, 44px);
+	min-width: 0;
 	min-height: var(--mp-scc-tristate-action-icon-hit, 44px);
 	padding: 0;
 	display: inline-flex;
@@ -557,7 +683,7 @@ body.mp-scc-sticky-active.mp-scc-sticky-layout-tristate {
 		transform 0.08s ease;
 }
 
-.mp-scc-shell-panel-b__icon-btn.mp-scc-checkout {
+.mp-scc-sticky-bar.mp-scc-sticky--tristate .mp-scc-shell-panel-b__actions .mp-scc-shell-panel-b__icon-btn.mp-scc-checkout {
 	text-decoration: none;
 }
 
@@ -582,13 +708,13 @@ body.mp-scc-sticky-active.mp-scc-sticky-layout-tristate {
 }
 
 /* Tri-state icon clear: same token semantics as sticky bar ghost «Очистить». */
-.mp-scc-shell-panel-b__actions .mp-scc-shell-panel-b__icon-btn.mp-scc-btn--ghost {
+.mp-scc-sticky-bar.mp-scc-sticky--tristate .mp-scc-shell-panel-b__actions .mp-scc-shell-panel-b__icon-btn.mp-scc-btn--ghost {
 	color: var(--mp-scc-color-clear-button-text, inherit);
 	border-color: var(--mp-scc-color-clear-button-border, rgba(0, 0, 0, 0.2));
 	background-color: var(--mp-scc-color-clear-button-bg, #ffffff);
 }
 
-.mp-scc-shell-panel-b__actions .mp-scc-shell-panel-b__icon-btn.mp-scc-btn--ghost:hover:not(:disabled):not(.mp-scc-clear-cart--disabled) {
+.mp-scc-sticky-bar.mp-scc-sticky--tristate .mp-scc-shell-panel-b__actions .mp-scc-shell-panel-b__icon-btn.mp-scc-btn--ghost:hover:not(:disabled):not(.mp-scc-clear-cart--disabled) {
 	color: var(--mp-scc-color-clear-button-text-hover, var(--mp-scc-color-clear-button-text, #1a1a1a));
 	border-color: var(
 		--mp-scc-color-clear-button-border-hover,
@@ -600,44 +726,59 @@ body.mp-scc-sticky-active.mp-scc-sticky-layout-tristate {
 	);
 }
 
-.mp-scc-shell-panel-b__actions .mp-scc-shell-panel-b__icon-btn.mp-scc-btn--ghost:active:not(:disabled):not(.mp-scc-clear-cart--disabled) {
+.mp-scc-sticky-bar.mp-scc-sticky--tristate .mp-scc-shell-panel-b__actions .mp-scc-shell-panel-b__icon-btn.mp-scc-btn--ghost:active:not(:disabled):not(.mp-scc-clear-cart--disabled) {
 	transform: translateY(1px);
 }
 
-.mp-scc-shell-panel-b__actions .mp-scc-shell-panel-b__icon-btn.mp-scc-btn--ghost:focus-visible {
+.mp-scc-sticky-bar.mp-scc-sticky--tristate .mp-scc-shell-panel-b__actions .mp-scc-shell-panel-b__icon-btn.mp-scc-btn--ghost:focus-visible {
 	outline: 2px solid var(--mp-scc-color-clear-button-border-hover, #9a9a9a);
 	outline-offset: 2px;
 }
 
 /* Tri-state icon checkout: square primary control (panel B + drawer C). */
-.mp-scc-shell-panel-b__actions .mp-scc-shell-panel-b__icon-btn.mp-scc-btn--primary.mp-scc-checkout {
-	background-color: var(--mp-scc-color-button-primary, #111111);
-	color: var(--mp-scc-color-button-primary-text, #ffffff);
-	border-color: transparent;
-	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+.mp-scc-sticky-bar.mp-scc-sticky--tristate .mp-scc-shell-panel-b__actions .mp-scc-shell-panel-b__icon-btn.mp-scc-btn--primary.mp-scc-checkout {
+	background-color: var(--mp-scc-color-clear-button-bg, #ffffff);
+	color: var(--mp-scc-color-clear-button-text, inherit);
+	border-color: var(--mp-scc-color-clear-button-border, rgba(0, 0, 0, 0.2));
+	box-shadow: none;
 }
 
-.mp-scc-shell-panel-b__actions .mp-scc-shell-panel-b__icon-btn.mp-scc-btn--primary.mp-scc-checkout:hover:not(.mp-scc-checkout--disabled) {
-	background-color: var(--mp-scc-color-button-primary-hover, #333333);
-	color: var(
-		--mp-scc-color-button-primary-text-hover,
-		var(--mp-scc-color-button-primary-text, #ffffff)
+.mp-scc-sticky-bar.mp-scc-sticky--tristate .mp-scc-shell-panel-b__actions .mp-scc-shell-panel-b__icon-btn.mp-scc-btn--primary.mp-scc-checkout:hover:not(.mp-scc-checkout--disabled) {
+	color: var(--mp-scc-color-clear-button-text-hover, var(--mp-scc-color-clear-button-text, #1a1a1a));
+	border-color: var(
+		--mp-scc-color-clear-button-border-hover,
+		var(--mp-scc-color-clear-button-border, #cfcfcf)
 	);
-	box-shadow: 0 3px 12px rgba(0, 0, 0, 0.14);
+	background-color: var(
+		--mp-scc-color-clear-button-bg-hover,
+		var(--mp-scc-color-clear-button-bg, #f0f0f0)
+	);
+	box-shadow: none;
 }
 
-.mp-scc-shell-panel-b__actions .mp-scc-shell-panel-b__icon-btn.mp-scc-btn--primary.mp-scc-checkout:active:not(.mp-scc-checkout--disabled) {
+.mp-scc-sticky-bar.mp-scc-sticky--tristate .mp-scc-shell-panel-b__actions .mp-scc-shell-panel-b__icon-btn.mp-scc-btn--primary.mp-scc-checkout:active:not(.mp-scc-checkout--disabled) {
 	transform: translateY(1px);
 }
 
-.mp-scc-shell-panel-b__actions .mp-scc-shell-panel-b__icon-btn.mp-scc-btn--primary.mp-scc-checkout:focus-visible {
-	outline: 2px solid var(--mp-scc-color-button-primary-text, #ffffff);
+.mp-scc-sticky-bar.mp-scc-sticky--tristate .mp-scc-shell-panel-b__actions .mp-scc-shell-panel-b__icon-btn.mp-scc-btn--primary.mp-scc-checkout:focus-visible {
+	outline: 2px solid var(--mp-scc-color-clear-button-border-hover, #9a9a9a);
 	outline-offset: 2px;
 }
 
-.mp-scc-shell-panel-b__actions .mp-scc-shell-panel-b__icon-btn.mp-scc-clear-cart--loading,
-.mp-scc-shell-panel-b__actions .mp-scc-shell-panel-b__icon-btn.mp-scc-clear-cart--disabled,
-.mp-scc-shell-panel-b__actions .mp-scc-shell-panel-b__icon-btn.mp-scc-checkout.mp-scc-checkout--disabled {
+/* B<->C chevron control: move out of bottom actions into top-left corner. */
+.mp-scc-shell-panel-b .mp-scc-shell-panel-b__actions .mp-scc-shell-panel-b__toggle-c {
+	position: absolute;
+	left: 0;
+	top: 0;
+	width: var(--mp-scc-tristate-action-icon-hit, 44px);
+	height: var(--mp-scc-tristate-action-icon-hit, 44px);
+	min-width: var(--mp-scc-tristate-action-icon-hit, 44px);
+	border-radius: min(12px, calc(var(--mp-scc-tristate-action-icon-hit, 44px) * 0.28));
+}
+
+.mp-scc-sticky-bar.mp-scc-sticky--tristate .mp-scc-shell-panel-b__actions .mp-scc-shell-panel-b__icon-btn.mp-scc-clear-cart--loading,
+.mp-scc-sticky-bar.mp-scc-sticky--tristate .mp-scc-shell-panel-b__actions .mp-scc-shell-panel-b__icon-btn.mp-scc-clear-cart--disabled,
+.mp-scc-sticky-bar.mp-scc-sticky--tristate .mp-scc-shell-panel-b__actions .mp-scc-shell-panel-b__icon-btn.mp-scc-checkout.mp-scc-checkout--disabled {
 	cursor: not-allowed;
 }
 
@@ -1021,12 +1162,14 @@ body.mp-scc-sticky-active.mp-scc-sticky-layout-tristate {
 }
 
 .mp-scc-cart-count,
+.mp-scc-cart-qty-count,
 .mp-scc-cart-total {
 	font-variant-numeric: tabular-nums;
 	transition: opacity 0.2s ease;
 }
 
 .mp-scc-sticky-summary--loading .mp-scc-cart-count,
+.mp-scc-sticky-summary--loading .mp-scc-cart-qty-count,
 .mp-scc-sticky-summary--loading .mp-scc-cart-total {
 	opacity: 0.45;
 }
@@ -1109,7 +1252,7 @@ body.mp-scc-sticky-active.mp-scc-sticky-layout-tristate {
  * «Оформить заказ» — ссылка с классами темы/Woo (.button, .alt и т.д.).
  * Принудительно применяем токены плагина поверх типичных правил темы.
  */
-.mp-scc-sticky-bar a.mp-scc-checkout.mp-scc-btn--primary {
+.mp-scc-sticky-bar a.mp-scc-checkout.mp-scc-btn--primary:not(.mp-scc-shell-panel-b__icon-btn) {
 	background-color: var(--mp-scc-color-button-primary, #111111) !important;
 	background-image: none !important;
 	color: var(--mp-scc-color-button-primary-text, #ffffff) !important;
@@ -1119,7 +1262,7 @@ body.mp-scc-sticky-active.mp-scc-sticky-layout-tristate {
 	filter: none !important;
 }
 
-.mp-scc-sticky-bar a.mp-scc-checkout.mp-scc-btn--primary:hover {
+.mp-scc-sticky-bar a.mp-scc-checkout.mp-scc-btn--primary:not(.mp-scc-shell-panel-b__icon-btn):hover {
 	background-color: var(--mp-scc-color-button-primary-hover, #333333) !important;
 	background-image: none !important;
 	color: var(
@@ -1136,7 +1279,7 @@ body.mp-scc-sticky-active.mp-scc-sticky-layout-tristate {
 	filter: none !important;
 }
 
-.mp-scc-sticky-bar a.mp-scc-checkout.mp-scc-btn--primary:active {
+.mp-scc-sticky-bar a.mp-scc-checkout.mp-scc-btn--primary:not(.mp-scc-shell-panel-b__icon-btn):active {
 	color: var(
 			--mp-scc-color-button-primary-text-hover,
 			var(--mp-scc-color-button-primary-text, #ffffff)
@@ -1148,14 +1291,14 @@ body.mp-scc-sticky-active.mp-scc-sticky-layout-tristate {
 	text-decoration: none !important;
 }
 
-.mp-scc-sticky-bar a.mp-scc-checkout.mp-scc-btn--primary:focus-visible {
+.mp-scc-sticky-bar a.mp-scc-checkout.mp-scc-btn--primary:not(.mp-scc-shell-panel-b__icon-btn):focus-visible {
 	outline: 2px solid var(--mp-scc-color-button-primary-text, #ffffff) !important;
 	outline-offset: 2px !important;
 	color: var(--mp-scc-color-button-primary-text, #ffffff) !important;
 	-webkit-text-fill-color: var(--mp-scc-color-button-primary-text, #ffffff) !important;
 }
 
-.mp-scc-sticky-bar a.mp-scc-checkout.mp-scc-btn--primary.mp-scc-checkout--disabled {
+.mp-scc-sticky-bar a.mp-scc-checkout.mp-scc-btn--primary.mp-scc-checkout--disabled:not(.mp-scc-shell-panel-b__icon-btn) {
 	background-color: var(--mp-scc-color-button-primary, #111111) !important;
 	background-image: none !important;
 	color: var(--mp-scc-color-button-primary-text, #ffffff) !important;

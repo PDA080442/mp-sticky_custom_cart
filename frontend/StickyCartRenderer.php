@@ -102,13 +102,20 @@ final class StickyCartRenderer implements StickyCartRendererInterface {
 		<?php if ( $tristate && $drawer ) : ?>
 		<div id="mp-scc-shell-panel-b" class="mp-scc-shell-panel-b" data-mp-scc-shell-panel-b role="region" aria-label="<?php esc_attr_e( 'Cart summary', 'mp-sticky-custom-cart' ); ?>" hidden aria-hidden="true">
 			<div class="mp-scc-shell-panel-b__body">
+				<?php echo self::tristate_panel_dismiss_button_markup( 'b' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 				<div class="mp-scc-shell-panel-b__metrics" aria-live="polite" aria-atomic="true">
 					<div class="mp-scc-shell-panel-b__row mp-scc-shell-panel-b__row--lines">
-						<span class="mp-scc-shell-panel-b__label"><?php esc_html_e( 'Позиций', 'mp-sticky-custom-cart' ); ?></span>
-						<span class="mp-scc-cart-count mp-scc-shell-panel-b__value" data-mp-scc-cart-count><?php echo esc_html( (string) $line_count ); ?></span>
+						<span class="mp-scc-shell-panel-b__label"><?php echo esc_html( OptionResolver::get_label( UiLabelsDefaults::KEY_TRISTATE_METRIC_LINES, __( 'Позиций', 'mp-sticky-custom-cart' ) ) ); ?></span>
+						<span class="mp-scc-cart-count mp-scc-shell-panel-b__value" data-mp-scc-cart-line-count><?php echo esc_html( (string) $line_count ); ?></span>
 					</div>
+					<hr class="mp-scc-tristate-metrics-hr" aria-hidden="true" />
+					<div class="mp-scc-shell-panel-b__row mp-scc-shell-panel-b__row--qty">
+						<span class="mp-scc-shell-panel-b__label"><?php echo esc_html( OptionResolver::get_label( UiLabelsDefaults::KEY_TRISTATE_METRIC_QTY, __( 'Товаров', 'mp-sticky-custom-cart' ) ) ); ?></span>
+						<span class="mp-scc-cart-qty-count mp-scc-shell-panel-b__value" data-mp-scc-cart-qty-count><?php echo esc_html( (string) (int) $qty_total ); ?></span>
+					</div>
+					<hr class="mp-scc-tristate-metrics-hr" aria-hidden="true" />
 					<div class="mp-scc-shell-panel-b__row mp-scc-shell-panel-b__row--total">
-						<span class="mp-scc-shell-panel-b__label"><?php esc_html_e( 'Сумма', 'mp-sticky-custom-cart' ); ?></span>
+						<span class="mp-scc-shell-panel-b__label"><?php echo esc_html( OptionResolver::get_label( UiLabelsDefaults::KEY_TRISTATE_METRIC_TOTAL, __( 'Сумма', 'mp-sticky-custom-cart' ) ) ); ?></span>
 						<span class="mp-scc-cart-total mp-scc-shell-panel-b__subtotal" data-mp-scc-cart-total><?php echo wp_kses_post( $total ); ?></span>
 					</div>
 				</div>
@@ -132,7 +139,18 @@ final class StickyCartRenderer implements StickyCartRendererInterface {
 			<div class="mp-scc-drawer-inner<?php echo $empty ? ' mp-scc-drawer-inner--empty' : ''; ?>">
 				<?php if ( $tristate ) : ?>
 				<div class="mp-scc-drawer-c" data-mp-scc-drawer-tristate-c>
-					<?php echo self::tristate_drawer_c_metrics_markup( $line_count, $total ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+					<div class="mp-scc-drawer-c__top">
+						<button type="button" class="mp-scc-btn mp-scc-btn--ghost mp-scc-shell-panel-b__icon-btn mp-scc-drawer-c__collapse mp-scc-shell-panel-b__toggle-c"
+							data-mp-scc-toggle-c
+							data-mp-scc-toggle-c-mode="close"
+							title="<?php echo esc_attr__( 'Свернуть список товаров', 'mp-sticky-custom-cart' ); ?>"
+							aria-label="<?php echo esc_attr__( 'Свернуть список товаров', 'mp-sticky-custom-cart' ); ?>"
+						>
+							<span class="mp-scc-shell-panel-b__icon-svg" aria-hidden="true"><?php echo self::inline_svg_chevron_down_icon(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></span>
+						</button>
+						<?php echo self::tristate_drawer_c_metrics_markup( $line_count, $qty_total, $total ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+						<?php echo self::tristate_panel_dismiss_button_markup( 'c' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+					</div>
 					<div class="mp-scc-drawer-c__scroll" data-mp-scc-drawer-lines-scroll>
 						<ul id="mp-scc-drawer-items" class="mp-scc-drawer-items" aria-label="<?php esc_attr_e( 'Products in cart', 'mp-sticky-custom-cart' ); ?>" data-mp-scc-drawer-items<?php echo $empty ? ' hidden aria-hidden="true"' : ''; ?>></ul>
 						<div id="mp-scc-drawer-empty" class="mp-scc-drawer-empty" role="status"<?php echo $empty ? '' : ' hidden'; ?> data-mp-scc-drawer-empty>
@@ -152,7 +170,7 @@ final class StickyCartRenderer implements StickyCartRendererInterface {
 						$clear_aria_unavailable,
 						$checkout_label,
 						$checkout_aria_unavailable,
-						'close'
+						'none'
 					);
 					?>
 				</div>
@@ -176,13 +194,13 @@ final class StickyCartRenderer implements StickyCartRendererInterface {
 					<span class="mp-scc-sr-only"><?php echo esc_html__( 'Show or hide cart details', 'mp-sticky-custom-cart' ); ?></span>
 					<span class="mp-scc-drawer-toggle-icon" aria-hidden="true"></span>
 					<?php if ( $tristate ) : ?>
-					<span class="mp-scc-drawer-toggle-badge" data-mp-scc-cart-count aria-hidden="true"><?php echo esc_html( (string) $line_count ); ?></span>
+					<span class="mp-scc-drawer-toggle-badge" data-mp-scc-cart-line-count aria-hidden="true"><?php echo esc_html( (string) $line_count ); ?></span>
 					<?php endif; ?>
 				</button>
 				<?php endif; ?>
 				<?php if ( $show_sticky_bar_summary ) : ?>
 				<div class="mp-scc-sticky-summary-text">
-					<span class="mp-scc-cart-count" data-mp-scc-cart-count><?php echo esc_html( (string) $line_count ); ?></span>
+					<span class="mp-scc-cart-count" data-mp-scc-cart-line-count><?php echo esc_html( (string) $line_count ); ?></span>
 					<span class="mp-scc-sr-only" data-mp-scc-cart-qty-total><?php echo esc_html( sprintf( /* translators: %d: total quantity of all line items */ __( 'Total quantity in cart: %d', 'mp-sticky-custom-cart' ), $qty_total ) ); ?></span>
 					<span class="mp-scc-cart-total" data-mp-scc-cart-total><?php echo wp_kses_post( $total ); ?></span>
 				</div>
@@ -236,21 +254,49 @@ final class StickyCartRenderer implements StickyCartRendererInterface {
 	}
 
 	/**
+	 * Close control for tri-state panel B and drawer C (dispatches shell CLOSE_B / CLOSE_C).
+	 *
+	 * @param string $which Host id for data-mp-scc-shell-dismiss: b|c.
+	 */
+	private static function tristate_panel_dismiss_button_markup( $which ) {
+		$which = 'c' === $which ? 'c' : 'b';
+		$label   = __( 'Закрыть', 'mp-sticky-custom-cart' );
+		ob_start();
+		?>
+		<button type="button" class="mp-scc-tristate-dismiss"
+			data-mp-scc-shell-dismiss="<?php echo esc_attr( $which ); ?>"
+			title="<?php echo esc_attr( $label ); ?>"
+			aria-label="<?php echo esc_attr( $label ); ?>"
+		>
+			<span class="mp-scc-tristate-dismiss__glyph" aria-hidden="true"><?php echo self::inline_svg_dismiss_x_icon(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></span>
+		</button>
+		<?php
+		return (string) ob_get_clean();
+	}
+
+	/**
 	 * Metrics header for tri-state drawer C (same figures as panel B; dp §17.4).
 	 *
-	 * @param int    $line_count Number of cart lines.
+	 * @param int    $line_count Number of cart lines (distinct rows).
+	 * @param int    $qty_total  Sum of line quantities (pieces).
 	 * @param string $total      Subtotal HTML.
 	 */
-	private static function tristate_drawer_c_metrics_markup( $line_count, $total ) {
+	private static function tristate_drawer_c_metrics_markup( $line_count, $qty_total, $total ) {
 		ob_start();
 		?>
 		<div class="mp-scc-drawer-c__metrics" aria-live="polite" aria-atomic="true">
 			<div class="mp-scc-drawer-c__row mp-scc-drawer-c__row--lines">
-				<span class="mp-scc-drawer-c__label"><?php esc_html_e( 'Позиций', 'mp-sticky-custom-cart' ); ?></span>
-				<span class="mp-scc-cart-count mp-scc-drawer-c__value" data-mp-scc-cart-count><?php echo esc_html( (string) $line_count ); ?></span>
+				<span class="mp-scc-drawer-c__label"><?php echo esc_html( OptionResolver::get_label( UiLabelsDefaults::KEY_TRISTATE_METRIC_LINES, __( 'Позиций', 'mp-sticky-custom-cart' ) ) ); ?></span>
+				<span class="mp-scc-cart-count mp-scc-drawer-c__value" data-mp-scc-cart-line-count><?php echo esc_html( (string) $line_count ); ?></span>
 			</div>
+			<hr class="mp-scc-tristate-metrics-hr" aria-hidden="true" />
+			<div class="mp-scc-drawer-c__row mp-scc-drawer-c__row--qty">
+				<span class="mp-scc-drawer-c__label"><?php echo esc_html( OptionResolver::get_label( UiLabelsDefaults::KEY_TRISTATE_METRIC_QTY, __( 'Товаров', 'mp-sticky-custom-cart' ) ) ); ?></span>
+				<span class="mp-scc-cart-qty-count mp-scc-drawer-c__value" data-mp-scc-cart-qty-count><?php echo esc_html( (string) (int) $qty_total ); ?></span>
+			</div>
+			<hr class="mp-scc-tristate-metrics-hr" aria-hidden="true" />
 			<div class="mp-scc-drawer-c__row mp-scc-drawer-c__row--total">
-				<span class="mp-scc-drawer-c__label"><?php esc_html_e( 'Сумма', 'mp-sticky-custom-cart' ); ?></span>
+				<span class="mp-scc-drawer-c__label"><?php echo esc_html( OptionResolver::get_label( UiLabelsDefaults::KEY_TRISTATE_METRIC_TOTAL, __( 'Сумма', 'mp-sticky-custom-cart' ) ) ); ?></span>
 				<span class="mp-scc-cart-total mp-scc-drawer-c__subtotal" data-mp-scc-cart-total><?php echo wp_kses_post( $total ); ?></span>
 			</div>
 		</div>
@@ -351,16 +397,23 @@ final class StickyCartRenderer implements StickyCartRendererInterface {
 	}
 
 	/**
-	 * Inline SVG for explicit B->C control (chevron up).
+	 * Inline SVG for explicit B->C control (chevron left).
 	 */
 	private static function inline_svg_chevron_up_icon() {
-		return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" class="mp-scc-tristate-action-svg mp-scc-tristate-action-svg--chevron-up"><path d="M12 8.41l4.29 4.3a1 1 0 001.42-1.42l-5-5a1 1 0 00-1.42 0l-5 5a1 1 0 001.42 1.42L12 8.4z"/></svg>';
+		return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" class="mp-scc-tristate-action-svg mp-scc-tristate-action-svg--chevron-up"><path d="M14.59 6.41l-4.3 4.29a1 1 0 000 1.42l4.3 4.29a1 1 0 101.42-1.42L12.41 12l3.6-3.59a1 1 0 10-1.42-1.42z"/></svg>';
 	}
 
 	/**
-	 * Inline SVG for explicit C->B control (chevron down).
+	 * Inline SVG for explicit C->B control (chevron right).
 	 */
 	private static function inline_svg_chevron_down_icon() {
-		return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" class="mp-scc-tristate-action-svg mp-scc-tristate-action-svg--chevron-down"><path d="M12 15.59l-4.29-4.3a1 1 0 10-1.42 1.42l5 5a1 1 0 001.42 0l5-5a1 1 0 10-1.42-1.42L12 15.6z"/></svg>';
+		return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" class="mp-scc-tristate-action-svg mp-scc-tristate-action-svg--chevron-down"><path d="M9.41 6.41a1 1 0 000 1.42L13 11.41l-3.59 3.6a1 1 0 101.42 1.42l4.3-4.29a1 1 0 000-1.42l-4.3-4.29a1 1 0 00-1.42 0z"/></svg>';
+	}
+
+	/**
+	 * Inline SVG for dismiss (×) using currentColor stroke.
+	 */
+	private static function inline_svg_dismiss_x_icon() {
+		return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true" class="mp-scc-tristate-dismiss__svg"><path d="M18 6L6 18M6 6l12 12"/></svg>';
 	}
 }
