@@ -1,7 +1,7 @@
 # QA: sticky «везде» (регрессионный набор)
 
 Цель: убедиться, что нижняя панель корзины (`#mp-scc-sticky-root`) ведёт себя предсказуемо на типовых шаблонах WordPress / WooCommerce.  
-Правило по умолчанию в коде: **`StickyCartVisibility::should_render_sticky()`** возвращает `true` для фронта с корзиной Woo (без проверки «пустая корзина»). Исключения — флаг плагина, feed/embed, отсутствие `WC()->cart`, админка. Дополнительно можно отключить вывод фильтром **`mp_sticky_custom_cart_should_render_sticky`**.
+Правило по умолчанию в коде: **`StickyCartVisibility::should_render_sticky()`** возвращает `true` для фронта с корзиной Woo, **кроме** пустой корзины при включённом по умолчанию флаге **`sticky_hide_when_empty_enabled`** (shell появляется после первого добавления в корзину). Исключения — отключённая sticky, feed/embed, отсутствие `WC()->cart`, админка. Дополнительно можно отключить вывод фильтром **`mp_sticky_custom_cart_should_render_sticky`**.
 
 На каждой странице проверяйте:
 
