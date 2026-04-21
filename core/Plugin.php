@@ -24,6 +24,8 @@ final class Plugin {
 		register_deactivation_hook( MP_STICKY_CUSTOM_CART_FILE, array( Deactivator::class, 'deactivate' ) );
 
 		OptionMigrationHandler::register();
+		ThirdPartyCacheCleaner::register();
+		ThirdPartyOptimizerCompat::register();
 
 		WooCommerceGate::register();
 

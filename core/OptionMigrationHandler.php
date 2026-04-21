@@ -67,6 +67,7 @@ final class OptionMigrationHandler {
 			'0.1.0'  => array( self::class, 'migrate_to_0_1_0' ),
 			'0.1.52' => array( self::class, 'migrate_to_0_1_52_tristate_dock_insets' ),
 			'0.1.53' => array( self::class, 'migrate_to_0_1_53_tristate_state_a_dock_insets' ),
+			'0.1.68' => array( self::class, 'migrate_to_0_1_68_restore_sticky_hide_when_empty_default' ),
 		);
 	}
 
@@ -189,6 +190,20 @@ final class OptionMigrationHandler {
 		if ( $dirty ) {
 			update_option( Constants::OPTION_SETTINGS, $settings, false );
 		}
+	}
+
+	/**
+	 * Reverts mistaken 0.1.67 default: empty-cart shell must stay off until first add (tri-state FAB + bar).
+	 *
+	 * @see FeatureFlagsDefaults::KEY_STICKY_HIDE_WHEN_EMPTY_ENABLED
+	 */
+	private static function migrate_to_0_1_68_restore_sticky_hide_when_empty_default() {
+		$flags = get_option( Constants::OPTION_FEATURE_FLAGS, array() );
+		if ( ! is_array( $flags ) ) {
+			$flags = array();
+		}
+		$flags[ FeatureFlagsDefaults::KEY_STICKY_HIDE_WHEN_EMPTY_ENABLED ] = true;
+		update_option( Constants::OPTION_FEATURE_FLAGS, $flags, false );
 	}
 
 	/**

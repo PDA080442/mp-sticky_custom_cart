@@ -1701,7 +1701,7 @@ ul.products div.product,
 	width: var(--mp-scc-catalog-cart-icon-hit-size, 36px);
 	height: var(--mp-scc-catalog-cart-icon-hit-size, 36px);
 	/* Keep icon above theme/product hover overlays (Yandex/Chromium forks may otherwise swallow clicks). */
-	z-index: 40;
+	z-index: 55;
 	transition-property: opacity, visibility, transform;
 	transition-duration: 0.18s;
 	transition-timing-function: ease;
@@ -1713,7 +1713,7 @@ ul.products div.product,
 }
 
 body.mp-scc-wishlist-integration-on .mp-scc-catalog-cart-icon-slot {
-	z-index: 39;
+	z-index: 54;
 }
 
 /*
@@ -1730,6 +1730,16 @@ body.mp-scc-wishlist-integration-on .mp-scc-catalog-cart-icon-slot {
 	.mp-scc-catalog-card--cart-icon[data-mp-scc-cart-icon-desktop='hover']:hover .mp-scc-catalog-cart-icon-slot,
 	.mp-scc-catalog-card--cart-icon[data-mp-scc-cart-icon-desktop='hover']:focus-within .mp-scc-catalog-cart-icon-slot,
 	.mp-scc-catalog-card--cart-icon[data-mp-scc-cart-icon-desktop='hover'].mp-scc-card--hover-intent .mp-scc-catalog-cart-icon-slot {
+		opacity: 1;
+		visibility: visible;
+		pointer-events: auto;
+	}
+
+	/* Keep icon interactive while pointer is on the «Подробнее» strip (some themes break li:hover chaining). */
+	.mp-scc-catalog-card--cart-icon[data-mp-scc-cart-icon-desktop='hover']:has(.mp-scc-catalog-overlay:hover)
+		.mp-scc-catalog-cart-icon-slot,
+	.mp-scc-catalog-card--cart-icon[data-mp-scc-cart-icon-desktop='hover']:has(.mp-scc-catalog-overlay:focus-visible)
+		.mp-scc-catalog-cart-icon-slot {
 		opacity: 1;
 		visibility: visible;
 		pointer-events: auto;
@@ -1972,6 +1982,96 @@ body.mp-scc-wishlist-integration-on ul.products li.product a.mp-scc-catalog-over
 body.mp-scc-wishlist-integration-on .woocommerce .products li.product a.mp-scc-catalog-overlay:focus-visible {
 	outline: 2px solid var(--mp-scc-color-button-primary, #111111);
 	outline-offset: 3px;
+}
+
+/*
+ * YITH Wishlist pre-hydration fallback (XStore/Liquid/Hub themes).
+ *
+ * YITH Wishlist Premium renders different placeholders depending on context (catalog vs related
+ * products) — both are simplified compared to the post-hydration markup the theme CSS targets:
+ *   A) Homepage / archive: <div class="yith-wcwl-add-to-wishlist"><a><i class="fa fa-heart"/></a></div>
+ *   B) Single product "Related products": <div class="yith-wcwl-add-to-wishlist"><a>Добавить в избранное</a></div>
+ * Hub/Liquid/XStore ship circle rules only for `.yith-wcwl-add-to-wishlist > div a` (post-hydration shape).
+ * Until YITH's script swaps the content in on DOMReady, both placeholders look broken on first paint
+ * — case B is the worst because the literal label text spills out of the circle area.
+ *
+ * We only match the direct-anchor case (`> a`), so once YITH hydrates to `> div > a` the theme's
+ * own rules take over without interference from us.
+ */
+
+/* 1. Circle surface for the anchor. Text nodes (case B) get collapsed via font-size: 0 and the
+ *    anchor's `overflow: hidden` so they can't leak outside the circle.
+ *
+ *    IMPORTANT: border-radius uses `50%` (not `5em`) because `em` resolves against the element's
+ *    own font-size, and we set font-size to 0 to hide the bare "Добавить в избранное" label.
+ *    `5em * 0 = 0` collapses the circle into a square — `50%` of width/height is stable.
+ */
+body.mp-scc-wishlist-integration-on ul.products li.product .yith-wcwl-add-to-wishlist > a,
+body.mp-scc-wishlist-integration-on .woocommerce .products li.product .yith-wcwl-add-to-wishlist > a {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: var(--mp-scc-wishlist-heart-size, 39px);
+	height: var(--mp-scc-wishlist-heart-size, 39px);
+	margin: 0;
+	padding: 0;
+	border: 0;
+	border-radius: 50%;
+	background-color: var(--mp-scc-wishlist-heart-bg, #ffffff);
+	color: var(--mp-scc-wishlist-heart-color, #000000);
+	font-size: 0;
+	line-height: 0;
+	text-decoration: none;
+	text-indent: 0;
+	white-space: nowrap;
+	overflow: hidden;
+	transition: background-color 0.18s ease, color 0.18s ease, transform 0.18s ease;
+	box-shadow: var(--mp-scc-wishlist-heart-shadow, 0 2px 8px rgba(0, 0, 0, 0.08));
+}
+
+/* 2. Case A — restore font-size on any FontAwesome <i> inside the anchor (some YITH builds
+ *    wrap the glyph in an extra <span>, so we use descendant selector, not direct child).
+ */
+body.mp-scc-wishlist-integration-on ul.products li.product .yith-wcwl-add-to-wishlist > a i,
+body.mp-scc-wishlist-integration-on .woocommerce .products li.product .yith-wcwl-add-to-wishlist > a i {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	font-size: var(--mp-scc-wishlist-heart-glyph-size, 16px);
+	line-height: 1;
+	color: inherit;
+	opacity: 1;
+	visibility: visible;
+}
+
+/* 3. Case B — no <i> descendant, only a text label. Draw our own heart via pseudo-element.
+ *    Font Awesome is already enqueued on the page (yith-wcwl-font-awesome-css); we request the
+ *    glyph by its PUA codepoint and list multiple family names so FA4/5/6 builds all render it.
+ *    `:has()` is supported in Chrome 105+, Safari 15.4+, Firefox 121+ — safe for this storefront.
+ *
+ *    We use descendant `:has(i)` (not `:has(> i)`) so nested markup (<a><span><i>…</i></span></a>)
+ *    also suppresses the pseudo — otherwise we'd render two hearts stacked.
+ */
+body.mp-scc-wishlist-integration-on ul.products li.product .yith-wcwl-add-to-wishlist > a:not(:has(i))::before,
+body.mp-scc-wishlist-integration-on .woocommerce .products li.product .yith-wcwl-add-to-wishlist > a:not(:has(i))::before {
+	content: "\f004";
+	font-family: FontAwesome, "Font Awesome 5 Free", "Font Awesome 6 Free", "Font Awesome 5 Brands";
+	font-weight: 900;
+	font-style: normal;
+	font-size: var(--mp-scc-wishlist-heart-glyph-size, 16px);
+	line-height: 1;
+	color: inherit;
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+}
+
+/* 4. Hover / focus-visible: reuse the same flip the theme applies to the hydrated button. */
+body.mp-scc-wishlist-integration-on ul.products li.product .yith-wcwl-add-to-wishlist > a:hover,
+body.mp-scc-wishlist-integration-on ul.products li.product .yith-wcwl-add-to-wishlist > a:focus-visible,
+body.mp-scc-wishlist-integration-on .woocommerce .products li.product .yith-wcwl-add-to-wishlist > a:hover,
+body.mp-scc-wishlist-integration-on .woocommerce .products li.product .yith-wcwl-add-to-wishlist > a:focus-visible {
+	background-color: var(--mp-scc-wishlist-heart-bg-hover, #111111);
+	color: var(--mp-scc-wishlist-heart-color-hover, #ffffff);
 }
 
 /* Desktop: fade/slide in on hover, delayed fade-out + slide back to reduce edge flicker */

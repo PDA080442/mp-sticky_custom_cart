@@ -891,6 +891,108 @@
 	}
 
 	/**
+	 * Main catalog thumbnail (not the first img in DOM — themes often add badges, sprites, or lazy placeholders).
+	 * Must stay in sync with {@see findCatalogOverlayThumbnailHost} so overlay, hit layer, and cart icon share one box.
+	 *
+	 * @param {JQuery} $card
+	 * @param {Record<string, *>} catalog
+	 * @returns {JQuery}
+	 */
+	function findCatalogLayoutReferenceImg($card, catalog) {
+		catalog = catalog || {};
+		/**
+		 * @param {JQuery} $box
+		 * @returns {JQuery}
+		 */
+		function pickLargestImgInBox($box) {
+			if (!$box || !$box.length) {
+				return $();
+			}
+			var $imgs = $box.find('img');
+			if ($imgs.length === 1) {
+				return $imgs.first();
+			}
+			var bestEl = null;
+			var bestArea = 0;
+			$imgs.each(function () {
+				var $im = $(this);
+				var w = $im.outerWidth();
+				var h = $im.outerHeight();
+				if (w < 32 || h < 32) {
+					return;
+				}
+				var area = w * h;
+				if (area > bestArea) {
+					bestArea = area;
+					bestEl = this;
+				}
+			});
+			if (bestEl) {
+				return $(bestEl);
+			}
+			return $imgs.first();
+		}
+
+		var themeImgHosts = [
+			'.product-image',
+			'.product-content-image',
+			'.content-product > .product-image',
+			'.product-images',
+			'.product-main-image',
+			'.hover-product .product-image',
+		];
+		var ti;
+		for (ti = 0; ti < themeImgHosts.length; ti++) {
+			var $th = $card.find(themeImgHosts[ti]).first();
+			if ($th.length && $th.find('img').length) {
+				var $tp = pickLargestImgInBox($th);
+				if ($tp.length) {
+					return $tp;
+				}
+			}
+		}
+
+		var $host = findCatalogOverlayThumbnailHost($card, catalog);
+		if ($host.length) {
+			var $picked = pickLargestImgInBox($host);
+			if ($picked.length) {
+				return $picked;
+			}
+		}
+		var fallbacks = [
+			'a.woocommerce-LoopProduct-link img',
+			'a.woocommerce-loop-product__link img',
+			'.woocommerce-LoopProduct-link img',
+		];
+		var fi;
+		for (fi = 0; fi < fallbacks.length; fi++) {
+			var $f = $card.find(fallbacks[fi]).first();
+			if ($f.length) {
+				return $f;
+			}
+		}
+		var bestOuter = null;
+		var bestArea2 = 0;
+		$card.find('img').each(function () {
+			var $im = $(this);
+			var w = $im.outerWidth();
+			var h = $im.outerHeight();
+			if (w < 32 || h < 32) {
+				return;
+			}
+			var area = w * h;
+			if (area > bestArea2) {
+				bestArea2 = area;
+				bestOuter = this;
+			}
+		});
+		if (bestOuter) {
+			return $(bestOuter);
+		}
+		return $card.find('img').first();
+	}
+
+	/**
 	 * Positions «Подробнее» band + invisible add-to-cart hit layer from the first loop image geometry.
 	 * Band height matches the «Подробнее» strip (same formula as {@see syncCatalogCardLayouts} overlay block).
 	 *
@@ -900,11 +1002,11 @@
 		if (!$card || !$card.length) {
 			return;
 		}
-		var $img = $card.find('img').first();
+		var cat = data().catalog || {};
+		var $img = findCatalogLayoutReferenceImg($card, cat);
 		if (!$img.length) {
 			return;
 		}
-		var cat = data().catalog || {};
 		var io = $img.offset();
 		var co = $card.offset();
 		if (!io || !co) {
@@ -972,7 +1074,8 @@
 	 * @param {JQuery} $card
 	 */
 	function attachCatalogCardResizeSync($card) {
-		var $img = $card.find('img').first();
+		var cat = data().catalog || {};
+		var $img = findCatalogLayoutReferenceImg($card, cat);
 		if (!$img.length) {
 			return;
 		}
@@ -991,6 +1094,10 @@
 			ro.observe(cardEl);
 			ro.observe(imgEl);
 			$card.data('mpSccCatalogChromeRo', ro);
+		}
+		if (imgEl && !imgEl.getAttribute('data-mp-scc-catalog-layout-load')) {
+			imgEl.setAttribute('data-mp-scc-catalog-layout-load', '1');
+			imgEl.addEventListener('load', sync);
 		}
 	}
 
@@ -1040,7 +1147,7 @@
 
 		$(cardSel).each(function () {
 			var $card = $(this);
-			if (!$card.find('img').length) {
+			if (!findCatalogLayoutReferenceImg($card, catalog).length) {
 				return;
 			}
 			$card.find('.mp-scc-catalog-atc-hit--proxy').remove();
@@ -1132,7 +1239,7 @@
 
 		$(cardSel).each(function () {
 			var $card = $(this);
-			if (!$card.find('img').length) {
+			if (!findCatalogLayoutReferenceImg($card, catalog).length) {
 				return;
 			}
 			var $perm = findCatalogPermalinkAnchor($card, catalog);
@@ -1405,7 +1512,7 @@
 
 		$(cardSel).each(function () {
 			var $card = $(this);
-			if (!$card.find('img').length) {
+			if (!findCatalogLayoutReferenceImg($card, catalog).length) {
 				return;
 			}
 			var pid = resolveCatalogProductId($card);
@@ -3365,6 +3472,21 @@
 		applyCatalogCartIconMobileModeAttr();
 		initCatalogCartIconTouchReveal();
 		initCatalogCartIconHoverIntent();
+
+		// XStore/etheme: image block moves on :hover; re-sync chrome so the cart slot stays on the photo.
+		$(document.body).on(
+			'mouseenter.mpSccCatalogLayoutHover mouseleave.mpSccCatalogLayoutHover',
+			'.mp-scc-catalog-card--cart-icon',
+			function () {
+				var $c = $(this);
+				syncCatalogCardLayouts($c);
+				if (window.requestAnimationFrame) {
+					window.requestAnimationFrame(function () {
+						syncCatalogCardLayouts($c);
+					});
+				}
+			}
+		);
 
 		var $root = $('#mp-scc-sticky-root');
 		if ($root.length) {

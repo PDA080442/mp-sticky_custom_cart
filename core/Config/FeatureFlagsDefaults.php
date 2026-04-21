@@ -17,7 +17,7 @@ defined( 'ABSPATH' ) || exit;
  * - StickyCartEnabled — sticky-панель
  * - StickyDrawerEnabled — drawer корзины
  * - StickyTristateEnabled — плавающая иконка (фаза 17) вместо полосы summary
- * - StickyHideWhenEmptyEnabled — не выводить плавающий shell при пустой корзине (фаза 18)
+ * - StickyHideWhenEmptyEnabled — не выводить плавающий shell при пустой корзине до первого add (по умолчанию вкл.; фаза 18)
  * - HoverMoreInfoEnabled — hover «подробнее»
  * - WishlistIconIntegrationEnabled — интеграция heart-иконки
  */
