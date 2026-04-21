@@ -78,6 +78,10 @@ assert.ok(
 	'Localized catalog should pass cart icon preset + inner SVG map'
 );
 assert.ok(flagResolver.includes('catalogCartIconStrokeWidth'), 'Localized catalog should pass cart icon stroke width');
+assert.ok(
+	flagResolver.includes("'.product-image'") && flagResolver.includes("'overlayHostSelectors'"),
+	'FrontendFlagResolver overlay hosts should include theme product-image before Woo loop links'
+);
 assert.ok(hookRegistry.includes('ShopLoopCartIconHost'), 'HookRegistry should register ShopLoopCartIconHost');
 assert.ok(
 	dynamicStyles.includes('enqueue_catalog_cart_icon_vars_on_main_stylesheet'),
@@ -90,6 +94,10 @@ assert.ok(
 assert.ok(js.includes('imageClickBehavior') && js.includes('theme_default'), 'JS should respect imageClickBehavior');
 assert.ok(js.includes('catalogAddSurface') && js.includes('cart_icon'), 'JS should handle catalogAddSurface');
 assert.ok(js.includes('mp-scc-catalog-cart-icon-slot') && js.includes('attachCatalogCartIconPointerGuards'), 'JS should use cart icon slot + pointer guards');
+assert.ok(
+	js.includes('findCatalogLayoutReferenceImg') && js.includes('findCatalogOverlayThumbnailHost'),
+	'JS should anchor catalog chrome layout to the main thumbnail, not the first img in the card'
+);
 assert.ok(js.includes('applyCatalogCartIconMobileModeAttr') && js.includes('data-mp-scc-cart-icon-mobile-mode'), 'JS should apply mobile cart icon mode on html');
 assert.ok(js.includes('catalogCartIconPresetInners') && js.includes('__MP_SCC_SW__'), 'JS should build cart SVG from preset inners + stroke');
 assert.ok(js.includes('catalogCartIconStrokeWidth'), 'JS should use catalogCartIconStrokeWidth for built-in SVG');

@@ -37,7 +37,7 @@ final class FrontendAssetsHooks {
 			self::HANDLE_CART_SHELL,
 			PluginPaths::url( 'assets/js/cart-ui-shell-state.js' ),
 			array(),
-			MP_STICKY_CUSTOM_CART_ASSET_VERSION,
+			PluginPaths::asset_file_version( 'assets/js/cart-ui-shell-state.js' ),
 			true
 		);
 
@@ -50,7 +50,7 @@ final class FrontendAssetsHooks {
 			self::HANDLE_SCRIPT,
 			PluginPaths::url( 'assets/js/frontend.js' ),
 			$script_deps,
-			MP_STICKY_CUSTOM_CART_ASSET_VERSION,
+			PluginPaths::asset_file_version( 'assets/js/frontend.js' ),
 			true
 		);
 
@@ -58,7 +58,7 @@ final class FrontendAssetsHooks {
 			self::HANDLE_STYLE,
 			PluginPaths::url( 'assets/css/frontend.css' ),
 			array( DynamicStylesProvider::STYLE_HANDLE ),
-			MP_STICKY_CUSTOM_CART_ASSET_VERSION,
+			PluginPaths::asset_file_version( 'assets/css/frontend.css' ),
 			'all'
 		);
 
