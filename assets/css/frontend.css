@@ -1701,7 +1701,7 @@ ul.products div.product,
 	width: var(--mp-scc-catalog-cart-icon-hit-size, 36px);
 	height: var(--mp-scc-catalog-cart-icon-hit-size, 36px);
 	/* Keep icon above theme/product hover overlays (Yandex/Chromium forks may otherwise swallow clicks). */
-	z-index: 40;
+	z-index: 55;
 	transition-property: opacity, visibility, transform;
 	transition-duration: 0.18s;
 	transition-timing-function: ease;
@@ -1713,7 +1713,7 @@ ul.products div.product,
 }
 
 body.mp-scc-wishlist-integration-on .mp-scc-catalog-cart-icon-slot {
-	z-index: 39;
+	z-index: 54;
 }
 
 /*
@@ -1730,6 +1730,16 @@ body.mp-scc-wishlist-integration-on .mp-scc-catalog-cart-icon-slot {
 	.mp-scc-catalog-card--cart-icon[data-mp-scc-cart-icon-desktop='hover']:hover .mp-scc-catalog-cart-icon-slot,
 	.mp-scc-catalog-card--cart-icon[data-mp-scc-cart-icon-desktop='hover']:focus-within .mp-scc-catalog-cart-icon-slot,
 	.mp-scc-catalog-card--cart-icon[data-mp-scc-cart-icon-desktop='hover'].mp-scc-card--hover-intent .mp-scc-catalog-cart-icon-slot {
+		opacity: 1;
+		visibility: visible;
+		pointer-events: auto;
+	}
+
+	/* Keep icon interactive while pointer is on the «Подробнее» strip (some themes break li:hover chaining). */
+	.mp-scc-catalog-card--cart-icon[data-mp-scc-cart-icon-desktop='hover']:has(.mp-scc-catalog-overlay:hover)
+		.mp-scc-catalog-cart-icon-slot,
+	.mp-scc-catalog-card--cart-icon[data-mp-scc-cart-icon-desktop='hover']:has(.mp-scc-catalog-overlay:focus-visible)
+		.mp-scc-catalog-cart-icon-slot {
 		opacity: 1;
 		visibility: visible;
 		pointer-events: auto;

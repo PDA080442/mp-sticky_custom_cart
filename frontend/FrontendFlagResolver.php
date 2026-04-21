@@ -95,6 +95,10 @@ final class FrontendFlagResolver {
 		$image_title_block_selectors = apply_filters( 'mp_sticky_custom_cart_catalog_image_title_block_selectors', $image_title_block_selectors );
 
 		$overlay_host_selectors = array(
+			// XStore / etheme-style loops: main photo is not always the first <img> in the card.
+			'.product-image',
+			'.product-images',
+			'.content-product > .product-image',
 			'a.woocommerce-LoopProduct-link',
 			'a.woocommerce-loop-product__link',
 			'.woocommerce-LoopProduct-link',

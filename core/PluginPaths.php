@@ -61,4 +61,29 @@ final class PluginPaths {
 		 */
 		return (string) apply_filters( 'mp_sticky_custom_cart_asset_version', MP_STICKY_CUSTOM_CART_ASSET_VERSION );
 	}
+
+	/**
+	 * Per-file `?ver=` that changes every time the source on disk changes.
+	 *
+	 * Plugin-level `Version:` bumps alone aren't enough because minify plugins (WP Rocket,
+	 * Autoptimize, LiteSpeed, etc.) key their own cache on the file's reported version /
+	 * mtime. Appending `.{filemtime}` forces a new URL → new minified bundle on next hit.
+	 *
+	 * @param string $relative Path relative to the plugin root (e.g. `assets/css/frontend.css`).
+	 * @return string
+	 */
+	public static function asset_file_version( $relative ) {
+		$base  = MP_STICKY_CUSTOM_CART_ASSET_VERSION;
+		$path  = self::path( $relative );
+		$mtime = @filemtime( $path );
+		$ver   = $mtime ? $base . '.' . $mtime : $base;
+
+		/**
+		 * Filters the per-file asset version used for cache busting.
+		 *
+		 * @param string $ver      Computed version (version[.mtime]).
+		 * @param string $relative Source path relative to the plugin root.
+		 */
+		return (string) apply_filters( 'mp_sticky_custom_cart_asset_file_version', $ver, $relative );
+	}
 }
