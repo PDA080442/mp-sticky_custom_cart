@@ -78,4 +78,13 @@ assert.ok(
 	'fallback must not fall back to border-radius: 5em (breaks under font-size: 0)'
 );
 
+// Hub/Liquid: wishlist lives in `.ld-sp-btns` which is opacity:0 until hover + display:none on narrow phones.
+assert.ok(
+	css.includes('.ld-sp-btns') &&
+		css.includes('opacity: 1 !important') &&
+		css.includes('display: flex !important') &&
+		/@media \(max-width: 768px\), \(pointer: coarse\)/.test(css),
+	'mobile wishlist fix should force .ld-sp-btns visible under coarse pointer / narrow viewport'
+);
+
 console.log('wishlist-coexistence: OK');
