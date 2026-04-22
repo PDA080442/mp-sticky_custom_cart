@@ -1583,48 +1583,47 @@ body.mp-scc-sticky-active.mp-scc-sticky-layout-tristate {
 }
 
 /*
- * Catalog: hide theme “Add to cart” on desktop — image uses plugin AJAX.
+ * Catalog: hide theme “Add to cart” in loops at every viewport — image / cart-icon uses plugin AJAX.
+ * (Previously scoped to min-width 769px only, which left Hub’s full-width «В корзину» strip on phones.)
  * Home/Elementor pages often have `woocommerce-js` but NOT `body.woocommerce` (see Liquid/Hub themes).
  * Liquid `ld_woo_products_list`: `a.ld-sp-add-to-cart` sits in `figure.ld-sp-img`, not `.footer-product`.
  */
-@media (min-width: 769px) {
-	body:not(.single-product):not(.woocommerce-cart):not(.woocommerce-checkout)
-		ul.products
-		li.product
-		a[href*='add-to-cart'],
-	body:not(.single-product):not(.woocommerce-cart):not(.woocommerce-checkout)
-		ul.products
-		li.product
-		a.ld-sp-add-to-cart,
-	body:not(.single-product):not(.woocommerce-cart):not(.woocommerce-checkout)
-		ul.products
-		li.product
-		a.add_to_cart_button.ajax_add_to_cart,
-	body:not(.single-product):not(.woocommerce-cart):not(.woocommerce-checkout)
-		ul.products.lqd-prods-row
-		li.product
-		figure.ld-sp-img
-		a.ld-sp-add-to-cart,
-	body:not(.single-product):not(.woocommerce-cart):not(.woocommerce-checkout)
-		.products
-		div.product
-		.footer-product
-		.button,
-	body:not(.single-product):not(.woocommerce-cart):not(.woocommerce-checkout)
-		.products
-		div.product
-		.footer-product
-		.add_to_cart_button,
-	body:not(.single-product):not(.woocommerce-cart):not(.woocommerce-checkout)
-		.products
-		li.product
-		.et_product_hover
-		.footer-product
-		.button {
-		display: none !important;
-		visibility: hidden !important;
-		pointer-events: none !important;
-	}
+body:not(.single-product):not(.woocommerce-cart):not(.woocommerce-checkout)
+	ul.products
+	li.product
+	a[href*='add-to-cart'],
+body:not(.single-product):not(.woocommerce-cart):not(.woocommerce-checkout)
+	ul.products
+	li.product
+	a.ld-sp-add-to-cart,
+body:not(.single-product):not(.woocommerce-cart):not(.woocommerce-checkout)
+	ul.products
+	li.product
+	a.add_to_cart_button.ajax_add_to_cart,
+body:not(.single-product):not(.woocommerce-cart):not(.woocommerce-checkout)
+	ul.products.lqd-prods-row
+	li.product
+	figure.ld-sp-img
+	a.ld-sp-add-to-cart,
+body:not(.single-product):not(.woocommerce-cart):not(.woocommerce-checkout)
+	.products
+	div.product
+	.footer-product
+	.button,
+body:not(.single-product):not(.woocommerce-cart):not(.woocommerce-checkout)
+	.products
+	div.product
+	.footer-product
+	.add_to_cart_button,
+body:not(.single-product):not(.woocommerce-cart):not(.woocommerce-checkout)
+	.products
+	li.product
+	.et_product_hover
+	.footer-product
+	.button {
+	display: none !important;
+	visibility: hidden !important;
+	pointer-events: none !important;
 }
 
 /*
@@ -1668,18 +1667,16 @@ body.mp-scc-sticky-active.mp-scc-sticky-layout-tristate {
 }
 
 /*
- * Single product -> related products: hide theme hover add-to-cart layer (black square in Hub/Liquid).
- * Keep single product form button intact; this scopes only to related loop cards.
+ * Single product -> related products: hide theme hover add-to-cart layer (black square / «В корзину» in Hub/Liquid).
+ * Keep single product form button intact; this scopes only to related loop cards. All viewports (mobile too).
  */
-@media (min-width: 769px) {
-	body.single-product .related ul.products li.product a[href*='add-to-cart'],
-	body.single-product .related ul.products li.product a.add_to_cart_button,
-	body.single-product .related ul.products li.product a.ld-sp-add-to-cart,
-	body.single-product .related ul.products li.product .ld-sp-btn {
-		display: none !important;
-		visibility: hidden !important;
-		pointer-events: none !important;
-	}
+body.single-product .related ul.products li.product a[href*='add-to-cart'],
+body.single-product .related ul.products li.product a.add_to_cart_button,
+body.single-product .related ul.products li.product a.ld-sp-add-to-cart,
+body.single-product .related ul.products li.product .ld-sp-btn {
+	display: none !important;
+	visibility: hidden !important;
+	pointer-events: none !important;
 }
 
 /* Catalog: image add-to-cart — toast positioning */
@@ -2072,6 +2069,50 @@ body.mp-scc-wishlist-integration-on .woocommerce .products li.product .yith-wcwl
 body.mp-scc-wishlist-integration-on .woocommerce .products li.product .yith-wcwl-add-to-wishlist > a:focus-visible {
 	background-color: var(--mp-scc-wishlist-heart-bg-hover, #111111);
 	color: var(--mp-scc-wishlist-heart-color-hover, #ffffff);
+}
+
+/*
+ * Hub / Liquid `theme-shop`: `.woocommerce .ld-sp .ld-sp-btns` stays at opacity:0 until `.ld-sp:hover`.
+ * Phones never get a stable hover, so wishlist (inside `.ld-sp-btns`) is invisible. Narrow breakpoints
+ * also set `display:none!important` on that column — see `@media (max-width:479px)` in theme-shop.min.css.
+ * When wishlist integration is on, force the button stack visible in product loops (catalog + related).
+ */
+@media (max-width: 768px), (pointer: coarse) {
+	body.mp-scc-wishlist-integration-on:not(.woocommerce-cart):not(.woocommerce-checkout)
+		ul.products
+		li.product
+		.ld-sp
+		.ld-sp-btns,
+	body.mp-scc-wishlist-integration-on:not(.woocommerce-cart):not(.woocommerce-checkout)
+		ul.products.lqd-prods-row
+		li.product
+		.ld-sp
+		.ld-sp-btns,
+	body.mp-scc-wishlist-integration-on:not(.woocommerce-cart):not(.woocommerce-checkout)
+		.woocommerce
+		ul.products
+		li.product
+		.ld-sp
+		.ld-sp-btns,
+	body.mp-scc-wishlist-integration-on:not(.woocommerce-cart):not(.woocommerce-checkout)
+		.woocommerce-page
+		ul.products
+		li.product
+		.ld-sp
+		.ld-sp-btns,
+	body.mp-scc-wishlist-integration-on.single-product:not(.woocommerce-cart):not(.woocommerce-checkout)
+		.related
+		ul.products
+		li.product
+		.ld-sp
+		.ld-sp-btns {
+		opacity: 1 !important;
+		visibility: visible !important;
+		pointer-events: auto !important;
+		transform: none !important;
+		display: flex !important;
+		flex-direction: column !important;
+	}
 }
 
 /* Desktop: fade/slide in on hover, delayed fade-out + slide back to reduce edge flicker */
