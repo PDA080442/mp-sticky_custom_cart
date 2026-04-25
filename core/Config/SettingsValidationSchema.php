@@ -195,6 +195,10 @@ final class SettingsValidationSchema {
 				'sticky_inner_gap_desktop_row_px' => array( 'type' => 'integer', 'min' => 0, 'max' => 64 ),
 				'sticky_inner_gap_desktop_col_px' => array( 'type' => 'integer', 'min' => 0, 'max' => 96 ),
 				'tristate_panel_b_max_height_px'     => array( 'type' => 'integer', 'min' => 120, 'max' => 480 ),
+				/** 0 = inherit desktop; otherwise px. */
+				'tristate_panel_b_max_height_mobile_px' => array( 'type' => 'integer', 'min' => 0, 'max' => 720 ),
+				/** 0 = inherit desktop; otherwise px. */
+				'tristate_panel_b_max_height_tablet_px' => array( 'type' => 'integer', 'min' => 0, 'max' => 720 ),
 				'tristate_panel_b_width_px'          => array( 'type' => 'integer', 'min' => 200, 'max' => 480 ),
 				'tristate_panel_b_gap_bottom_px'     => array( 'type' => 'integer', 'min' => 4, 'max' => 40 ),
 				'tristate_panel_b_padding_px'        => array( 'type' => 'integer', 'min' => 8, 'max' => 32 ),
@@ -240,6 +244,10 @@ final class SettingsValidationSchema {
 				'tristate_action_icon_glyph_px'      => array( 'type' => 'integer', 'min' => 14, 'max' => 32 ),
 				'tristate_panel_c_width_px'          => array( 'type' => 'integer', 'min' => 260, 'max' => 760 ),
 				'tristate_panel_c_height_px'         => array( 'type' => 'integer', 'min' => 180, 'max' => 960 ),
+				/** 0 = inherit desktop; otherwise px. */
+				'tristate_panel_c_height_mobile_px'  => array( 'type' => 'integer', 'min' => 0, 'max' => 960 ),
+				/** 0 = inherit desktop; otherwise px. */
+				'tristate_panel_c_height_tablet_px'  => array( 'type' => 'integer', 'min' => 0, 'max' => 960 ),
 				'tristate_state_a_dock_inset_top_px'    => array( 'type' => 'integer', 'min' => 0, 'max' => 64 ),
 				'tristate_state_a_dock_inset_right_px'  => array( 'type' => 'integer', 'min' => 0, 'max' => 64 ),
 				'tristate_state_a_dock_inset_bottom_px' => array( 'type' => 'integer', 'min' => 0, 'max' => 64 ),
@@ -253,6 +261,7 @@ final class SettingsValidationSchema {
 				'tristate_column_shadow_offset_y_px' => array( 'type' => 'integer', 'min' => 0, 'max' => 24 ),
 				'tristate_column_shadow_opacity_percent' => array( 'type' => 'integer', 'min' => 4, 'max' => 28 ),
 				'tristate_mobile_breakpoint_max_px'  => array( 'type' => 'integer', 'min' => 480, 'max' => 900 ),
+				'tristate_tablet_breakpoint_max_px'  => array( 'type' => 'integer', 'min' => 768, 'max' => 1440 ),
 				'tristate_fab_badge_size_px'         => array( 'type' => 'integer', 'min' => 14, 'max' => 36 ),
 				'tristate_fab_badge_offset_top_px'   => array( 'type' => 'integer', 'min' => -24, 'max' => 24 ),
 				'tristate_fab_badge_offset_right_px' => array( 'type' => 'integer', 'min' => -24, 'max' => 24 ),

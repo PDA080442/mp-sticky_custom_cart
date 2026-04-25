@@ -53,6 +53,8 @@ final class UiSettingsDefaults {
 			'drawer_line_price_font_size_px',
 			'drawer_line_price_font_weight',
 			'tristate_panel_b_max_height_px',
+			'tristate_panel_b_max_height_mobile_px',
+			'tristate_panel_b_max_height_tablet_px',
 			'tristate_panel_b_width_px',
 			'tristate_panel_b_gap_bottom_px',
 			'tristate_panel_b_padding_px',
@@ -91,6 +93,8 @@ final class UiSettingsDefaults {
 			'tristate_action_icon_glyph_px',
 			'tristate_panel_c_width_px',
 			'tristate_panel_c_height_px',
+			'tristate_panel_c_height_mobile_px',
+			'tristate_panel_c_height_tablet_px',
 			'tristate_state_a_dock_inset_top_px',
 			'tristate_state_a_dock_inset_right_px',
 			'tristate_state_a_dock_inset_bottom_px',
@@ -104,6 +108,7 @@ final class UiSettingsDefaults {
 			'tristate_column_shadow_offset_y_px',
 			'tristate_column_shadow_opacity_percent',
 			'tristate_mobile_breakpoint_max_px',
+			'tristate_tablet_breakpoint_max_px',
 			'tristate_mobile_layout_preset',
 			'tristate_fab_badge_size_px',
 			'tristate_fab_badge_offset_top_px',
@@ -246,6 +251,16 @@ final class UiSettingsDefaults {
 				'sticky_inner_gap_desktop_col_px' => 24,
 				/** Max height of tri-state summary panel B (px); typical content should fit without inner scroll. */
 				'tristate_panel_b_max_height_px'     => 368,
+				/**
+				 * Mobile override for panel B max-height (px); 0 = inherit desktop.
+				 * Applies when viewport width ≤ `tristate_mobile_breakpoint_max_px`.
+				 */
+				'tristate_panel_b_max_height_mobile_px' => 0,
+				/**
+				 * Tablet override for panel B max-height (px); 0 = inherit desktop.
+				 * Applies between `tristate_mobile_breakpoint_max_px + 1` and `tristate_tablet_breakpoint_max_px`.
+				 */
+				'tristate_panel_b_max_height_tablet_px' => 0,
 				/** Width of panel B (px). */
 				'tristate_panel_b_width_px'          => 280,
 				/** Gap between FAB and bottom edge of panel B (px). */
@@ -296,6 +311,16 @@ final class UiSettingsDefaults {
 				'tristate_panel_c_width_px'          => 600,
 				/** Drawer C fixed height (px). */
 				'tristate_panel_c_height_px'         => 368,
+				/**
+				 * Mobile override for drawer C fixed height (px); 0 = inherit desktop.
+				 * Applies when viewport width ≤ `tristate_mobile_breakpoint_max_px`.
+				 */
+				'tristate_panel_c_height_mobile_px'  => 0,
+				/**
+				 * Tablet override for drawer C fixed height (px); 0 = inherit desktop.
+				 * Applies between `tristate_mobile_breakpoint_max_px + 1` and `tristate_tablet_breakpoint_max_px`.
+				 */
+				'tristate_panel_c_height_tablet_px'  => 0,
 				/** State A (FAB only): top inset from viewport (px). */
 				'tristate_state_a_dock_inset_top_px'    => 0,
 				/** State A: right inset (px). */
@@ -322,6 +347,11 @@ final class UiSettingsDefaults {
 				'tristate_column_shadow_opacity_percent' => 12,
 				/** Viewport max-width (px) for mobile preset rules (admin + injected @media). */
 				'tristate_mobile_breakpoint_max_px'  => 782,
+				/**
+				 * Viewport max-width (px) for the tablet adaptive range (mobile_bp, tablet_bp].
+				 * Used by the panel B/C adaptive height overrides below.
+				 */
+				'tristate_tablet_breakpoint_max_px'  => 1024,
 				/** Cart count badge on FAB (state A): circle size in px. */
 				'tristate_fab_badge_size_px'         => 20,
 				/** FAB badge offset from top edge (negative lifts outside button). */

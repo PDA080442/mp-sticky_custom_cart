@@ -1282,7 +1282,25 @@ final class SettingsPage {
 		echo '<h3>' . esc_html__( 'Три состояния: панель B (краткая сводка)', 'mp-sticky-custom-cart' ) . '</h3>';
 		echo '<p class="description">' . esc_html__( 'Важно: нижняя полоса с текстовыми кнопками «Очистить» / «Оформить» остаётся, пока на вкладке «Служебное» в блоке Feature flags не включён пункт «Корзина: режим «иконка» (три состояния)» (и включён drawer). Поля ниже задают внешний вид уже режима FAB + панелей B/C.', 'mp-sticky-custom-cart' ) . '</p>';
 		echo '<table class="form-table" role="presentation"><tbody>';
-		self::field_number( $opt, 'sticky_cart', 'tristate_panel_b_max_height_px', __( 'Макс. высота панели B (px)', 'mp-sticky-custom-cart' ), isset( $c['tristate_panel_b_max_height_px'] ) ? (int) $c['tristate_panel_b_max_height_px'] : 368, __( 'Ограничивает блок; при превышении контент обрезается по краю (без скролла внутри панели).', 'mp-sticky-custom-cart' ), array( 'var' => $p . 'tristate-panel-b-max-height', 'fmt' => 'unit', 'suffix' => 'px' ) );
+		self::field_number( $opt, 'sticky_cart', 'tristate_panel_b_max_height_px', __( 'Макс. высота панели B (px)', 'mp-sticky-custom-cart' ), isset( $c['tristate_panel_b_max_height_px'] ) ? (int) $c['tristate_panel_b_max_height_px'] : 368, __( 'Ограничивает блок; при превышении контент обрезается по краю (без скролла внутри панели). Десктоп.', 'mp-sticky-custom-cart' ), array( 'var' => $p . 'tristate-panel-b-max-height', 'fmt' => 'unit', 'suffix' => 'px' ) );
+		self::field_number(
+			$opt,
+			'sticky_cart',
+			'tristate_panel_b_max_height_mobile_px',
+			__( 'Макс. высота панели B — мобильная (px)', 'mp-sticky-custom-cart' ),
+			isset( $c['tristate_panel_b_max_height_mobile_px'] ) ? (int) $c['tristate_panel_b_max_height_mobile_px'] : 0,
+			__( '0 — как на десктопе. Применяется при ширине экрана ≤ «Макс. ширина экрана для пресета» ниже.', 'mp-sticky-custom-cart' ),
+			array()
+		);
+		self::field_number(
+			$opt,
+			'sticky_cart',
+			'tristate_panel_b_max_height_tablet_px',
+			__( 'Макс. высота панели B — планшет (px)', 'mp-sticky-custom-cart' ),
+			isset( $c['tristate_panel_b_max_height_tablet_px'] ) ? (int) $c['tristate_panel_b_max_height_tablet_px'] : 0,
+			__( '0 — как на десктопе. Применяется в диапазоне (мобильный брейкпоинт, планшетный брейкпоинт].', 'mp-sticky-custom-cart' ),
+			array()
+		);
 		self::field_number( $opt, 'sticky_cart', 'tristate_panel_b_width_px', __( 'Ширина панели B (px)', 'mp-sticky-custom-cart' ), isset( $c['tristate_panel_b_width_px'] ) ? (int) $c['tristate_panel_b_width_px'] : 280, '', array( 'var' => $p . 'tristate-panel-b-width', 'fmt' => 'unit', 'suffix' => 'px' ) );
 		self::field_number( $opt, 'sticky_cart', 'tristate_panel_b_gap_bottom_px', __( 'Зазор между FAB и панелью B (px)', 'mp-sticky-custom-cart' ), isset( $c['tristate_panel_b_gap_bottom_px'] ) ? (int) $c['tristate_panel_b_gap_bottom_px'] : 10, '', array( 'var' => $p . 'tristate-panel-b-gap-bottom', 'fmt' => 'unit', 'suffix' => 'px' ) );
 		self::field_number( $opt, 'sticky_cart', 'tristate_panel_b_padding_px', __( 'Внутренний отступ панели B (px)', 'mp-sticky-custom-cart' ), isset( $c['tristate_panel_b_padding_px'] ) ? (int) $c['tristate_panel_b_padding_px'] : 12, '', array( 'var' => $p . 'tristate-panel-b-padding', 'fmt' => 'unit', 'suffix' => 'px' ) );
@@ -1338,7 +1356,25 @@ final class SettingsPage {
 		self::field_color( $opt, 'sticky_cart', 'tristate_dismiss_hover_border_color', __( 'Крестик: цвет обводки при наведении', 'mp-sticky-custom-cart' ), isset( $c['tristate_dismiss_hover_border_color'] ) ? (string) $c['tristate_dismiss_hover_border_color'] : '#b0b0b0', '', array( 'var' => $p . 'tristate-dismiss-hover-border-color', 'fmt' => 'color' ) );
 		echo '<tr><td colspan="2"><p class="description" style="margin:8px 0 0;"><strong>' . esc_html__( 'Панель C (drawer)', 'mp-sticky-custom-cart' ) . '</strong></p></td></tr>';
 		self::field_number( $opt, 'sticky_cart', 'tristate_panel_c_width_px', __( 'Ширина панели C / drawer (px)', 'mp-sticky-custom-cart' ), isset( $c['tristate_panel_c_width_px'] ) ? (int) $c['tristate_panel_c_width_px'] : 600, __( 'Расширение влево от правого края; высота совпадает с макс. высотой панели B.', 'mp-sticky-custom-cart' ), array( 'var' => $p . 'tristate-panel-c-width', 'fmt' => 'unit', 'suffix' => 'px' ) );
-		self::field_number( $opt, 'sticky_cart', 'tristate_panel_c_height_px', __( 'Высота панели C / drawer (px)', 'mp-sticky-custom-cart' ), isset( $c['tristate_panel_c_height_px'] ) ? (int) $c['tristate_panel_c_height_px'] : 368, __( 'Фиксированная высота состояния C.', 'mp-sticky-custom-cart' ), array( 'var' => $p . 'tristate-panel-c-height', 'fmt' => 'unit', 'suffix' => 'px' ) );
+		self::field_number( $opt, 'sticky_cart', 'tristate_panel_c_height_px', __( 'Высота панели C / drawer (px)', 'mp-sticky-custom-cart' ), isset( $c['tristate_panel_c_height_px'] ) ? (int) $c['tristate_panel_c_height_px'] : 368, __( 'Фиксированная высота состояния C. Десктоп.', 'mp-sticky-custom-cart' ), array( 'var' => $p . 'tristate-panel-c-height', 'fmt' => 'unit', 'suffix' => 'px' ) );
+		self::field_number(
+			$opt,
+			'sticky_cart',
+			'tristate_panel_c_height_mobile_px',
+			__( 'Высота панели C — мобильная (px)', 'mp-sticky-custom-cart' ),
+			isset( $c['tristate_panel_c_height_mobile_px'] ) ? (int) $c['tristate_panel_c_height_mobile_px'] : 0,
+			__( '0 — как на десктопе. Применяется при ширине экрана ≤ «Макс. ширина экрана для пресета» ниже.', 'mp-sticky-custom-cart' ),
+			array()
+		);
+		self::field_number(
+			$opt,
+			'sticky_cart',
+			'tristate_panel_c_height_tablet_px',
+			__( 'Высота панели C — планшет (px)', 'mp-sticky-custom-cart' ),
+			isset( $c['tristate_panel_c_height_tablet_px'] ) ? (int) $c['tristate_panel_c_height_tablet_px'] : 0,
+			__( '0 — как на десктопе. Применяется в диапазоне (мобильный брейкпоинт, планшетный брейкпоинт].', 'mp-sticky-custom-cart' ),
+			array()
+		);
 		echo '</tbody></table>';
 
 		$dock_r = isset( $c['tristate_dock_inset_right_px'] ) ? (int) $c['tristate_dock_inset_right_px'] : 32;
@@ -1440,7 +1476,8 @@ final class SettingsPage {
 			),
 			__( 'Связь с фазой 20: при «широкой полосе» подключается отдельный CSS ниже заданной ширины viewport.', 'mp-sticky-custom-cart' )
 		);
-		self::field_number( $opt, 'sticky_cart', 'tristate_mobile_breakpoint_max_px', __( 'Макс. ширина экрана для пресета (px)', 'mp-sticky-custom-cart' ), isset( $c['tristate_mobile_breakpoint_max_px'] ) ? (int) $c['tristate_mobile_breakpoint_max_px'] : 782, __( 'Используется только для пресета «широкая полоса» (media max-width). Обычно 782 — как break у админ-бара WP.', 'mp-sticky-custom-cart' ), array() );
+		self::field_number( $opt, 'sticky_cart', 'tristate_mobile_breakpoint_max_px', __( 'Мобильный брейкпоинт: макс. ширина экрана (px)', 'mp-sticky-custom-cart' ), isset( $c['tristate_mobile_breakpoint_max_px'] ) ? (int) $c['tristate_mobile_breakpoint_max_px'] : 782, __( 'Используется для пресета «широкая полоса» И для адаптивных высот панелей B/C («мобильная» версия). Обычно 782 — как break у админ-бара WP.', 'mp-sticky-custom-cart' ), array() );
+		self::field_number( $opt, 'sticky_cart', 'tristate_tablet_breakpoint_max_px', __( 'Планшетный брейкпоинт: макс. ширина экрана (px)', 'mp-sticky-custom-cart' ), isset( $c['tristate_tablet_breakpoint_max_px'] ) ? (int) $c['tristate_tablet_breakpoint_max_px'] : 1024, __( 'Диапазон «планшет»: (мобильный брейкпоинт, этот брейкпоинт]. Используется для адаптивных высот B/C.', 'mp-sticky-custom-cart' ), array() );
 		echo '</tbody></table>';
 
 		echo '<h3>' . esc_html__( 'Три состояния: полный CSS override (A/B/C)', 'mp-sticky-custom-cart' ) . '</h3>';
