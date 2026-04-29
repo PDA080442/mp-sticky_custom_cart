@@ -19,6 +19,7 @@ var hookRegistry = fs.readFileSync(path.join(root, 'core', 'HookRegistry.php'), 
 var dynamicStyles = fs.readFileSync(path.join(root, 'frontend', 'DynamicStylesProvider.php'), 'utf8');
 var cssContract = fs.readFileSync(path.join(root, 'core', 'Config', 'CssVariablesContract.php'), 'utf8');
 var js = fs.readFileSync(path.join(root, 'assets', 'js', 'frontend.js'), 'utf8');
+var storefrontCss = fs.readFileSync(path.join(root, 'assets', 'css', 'frontend.css'), 'utf8');
 var css = fs.readFileSync(path.join(root, 'admin', 'css', 'settings-preview.css'), 'utf8');
 var cartPresets = fs.readFileSync(path.join(root, 'core', 'CatalogCartIconPresets.php'), 'utf8');
 
@@ -56,6 +57,23 @@ assert.ok(
 );
 assert.ok(!sanitizer.includes('CatalogCartIconMedia'), 'Sanitizer should not reference removed media helper');
 assert.ok(cartPresets.includes("'outline_bold'") && cartPresets.includes('STROKE_PLACEHOLDER'), 'Cart icon presets should define variants + stroke placeholder');
+assert.ok(
+	cartPresets.includes("'tristate_panel_a'") && cartPresets.includes('M7 18c-1.1'),
+	'Cart icon presets should include tri-state panel A (FAB mask path)'
+);
+assert.ok(
+	js.includes('tristate_panel_a') && js.includes('syncCatalogCartProductBadges'),
+	'frontend.js should wire panel A preset and per-product FAB-style badges'
+);
+assert.ok(
+	js.includes('mp-scc-catalog-cart-icon-btn__badge') && js.includes('mp-scc-catalog-cart-icon-btn--panel-a'),
+	'frontend.js should tag panel-a buttons and badge nodes'
+);
+assert.ok(
+	storefrontCss.includes('mp-scc-catalog-cart-icon-btn--panel-a') &&
+		storefrontCss.includes('mp-scc-catalog-cart-icon-btn__badge'),
+	'Storefront CSS should style panel-a FAB-style catalog badges'
+);
 assert.ok(sanitizer.includes('is_safe_css_easing_token'), 'Sanitizer should validate hover easing');
 assert.ok(sanitizer.includes('catalog.hover_animation_easing'), 'Sanitizer should special-case catalog easing');
 assert.ok(settings.includes('render_catalog_impact_notes'), 'Settings should show catalog impact notes');

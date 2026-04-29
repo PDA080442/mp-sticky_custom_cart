@@ -128,6 +128,68 @@
 	}
 
 	/**
+	 * Whether the catalog cart icon preset is `tristate_panel_a` (same glyph as tri-state FAB
+	 * `.mp-scc-drawer-toggle-icon`).
+	 * @returns {boolean}
+	 */
+	function isCatalogCartIconPresetTristatePanelA() {
+		var cat = data().catalog || {};
+		var k = String(cat.catalogCartIconPreset || '')
+			.trim()
+			.replace(/[^a-z0-9_-]/gi, '');
+		return k === 'tristate_panel_a';
+	}
+
+	/**
+	 * Updates per-product qty badge on loop cart buttons when preset is `tristate_panel_a`
+	 * (mirrors FAB badge styling via CSS).
+	 * @param {Array<{ product_id?: number|string, quantity?: number|string }>} items
+	 * @param {boolean} empty
+	 */
+	window.mpScc.syncCatalogCartProductBadges = function (items, empty) {
+		if (!isCatalogCartIconPresetTristatePanelA()) {
+			return;
+		}
+		var map = {};
+		if (!empty && items && items.length) {
+			items.forEach(function (it) {
+				var pid =
+					typeof it.product_id === 'number'
+						? it.product_id
+						: parseInt(it.product_id, 10);
+				if (!pid || isNaN(pid) || pid < 1) {
+					return;
+				}
+				var q =
+					typeof it.quantity === 'number' ? it.quantity : parseInt(it.quantity, 10) || 0;
+				map[pid] = (map[pid] || 0) + q;
+			});
+		}
+		var nodes = document.querySelectorAll(
+			'.mp-scc-catalog-cart-icon-btn--panel-a[data-mp-scc-loop-product-id]'
+		);
+		var i;
+		for (i = 0; i < nodes.length; i++) {
+			var btn = nodes[i];
+			var pidN = parseInt(btn.getAttribute('data-mp-scc-loop-product-id'), 10);
+			var n = !isNaN(pidN) && pidN > 0 ? map[pidN] || 0 : 0;
+			var badge = btn.querySelector('[data-mp-scc-catalog-cart-badge]');
+			if (!badge) {
+				continue;
+			}
+			if (n > 0) {
+				badge.textContent = n > 99 ? '99+' : String(n);
+				badge.removeAttribute('hidden');
+				badge.style.display = '';
+			} else {
+				badge.textContent = '';
+				badge.setAttribute('hidden', 'hidden');
+				badge.style.display = 'none';
+			}
+		}
+	};
+
+	/**
 	 * @param {string} key Flag key from persisted flags / mpSccData.flags.
 	 * @returns {boolean}
 	 */
@@ -1558,6 +1620,27 @@
 				$svg.attr({ width: glyphPx, height: glyphPx });
 			}
 
+			var isPanelA = presetKey === 'tristate_panel_a';
+			$btn.toggleClass('mp-scc-catalog-cart-icon-btn--panel-a', isPanelA);
+			if (isPanelA) {
+				if (pid) {
+					$btn.attr('data-mp-scc-loop-product-id', String(pid));
+				} else {
+					$btn.removeAttr('data-mp-scc-loop-product-id');
+				}
+				var $badge = $btn.find('[data-mp-scc-catalog-cart-badge]');
+				if (!$badge.length) {
+					$badge = $(
+						'<span class="mp-scc-catalog-cart-icon-btn__badge" data-mp-scc-catalog-cart-badge="1" hidden="hidden" aria-hidden="true"></span>'
+					);
+					$btn.append($badge);
+				}
+			} else {
+				$btn.removeClass('mp-scc-catalog-cart-icon-btn--panel-a');
+				$btn.removeAttr('data-mp-scc-loop-product-id');
+				$btn.find('[data-mp-scc-catalog-cart-badge]').remove();
+			}
+
 			var btnEl = $btn.get(0);
 			if (btnEl) {
 				attachCatalogCartIconPointerGuards(btnEl);
@@ -1569,6 +1652,14 @@
 		});
 
 		stampAllCatalogCartIconButtonsFromCssVars();
+
+		var stickyRef = window.mpScc && window.mpScc.sticky;
+		if (stickyRef && typeof window.mpScc.syncCatalogCartProductBadges === 'function') {
+			window.mpScc.syncCatalogCartProductBadges(
+				stickyRef._lastSnapshotItems || [],
+				!!stickyRef._lastSnapshotEmpty
+			);
+		}
 	}
 
 	function initCatalogCartIconHoverIntent() {
@@ -2466,6 +2557,9 @@
 		/** Last successful snapshot quantities per cart line key (for optimistic +/- rollback). */
 		this.serverQty = {};
 		this._mpSccDestroyed = false;
+		/** Last cart snapshot lines (for catalog FAB-style badges). */
+		this._lastSnapshotItems = [];
+		this._lastSnapshotEmpty = true;
 	}
 
 	StickyCartController.prototype.isDrawerOpen = function () {
@@ -2738,6 +2832,12 @@
 
 		this.$root.attr('data-mp-scc-cart-empty', empty ? '1' : '0');
 		this.$root.toggleClass('mp-scc-sticky--empty', !!empty);
+
+		this._lastSnapshotItems = items;
+		this._lastSnapshotEmpty = !!empty;
+		if (typeof window.mpScc.syncCatalogCartProductBadges === 'function') {
+			window.mpScc.syncCatalogCartProductBadges(items, !!empty);
+		}
 
 		this.syncStickyActions(empty);
 

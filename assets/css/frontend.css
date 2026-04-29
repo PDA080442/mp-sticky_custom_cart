@@ -1840,6 +1840,41 @@ button.mp-scc-catalog-cart-icon-btn .mp-scc-catalog-cart-icon-btn__icon {
 	justify-content: center;
 }
 
+/* Preset «Панель A»: overflow badge like tri-state FAB; vars match :root tri-state badge tokens when present. */
+.mp-scc-catalog-cart-icon-slot:has(.mp-scc-catalog-cart-icon-btn--panel-a) {
+	overflow: visible;
+}
+
+button.mp-scc-catalog-cart-icon-btn.mp-scc-catalog-cart-icon-btn--panel-a {
+	overflow: visible;
+}
+
+button.mp-scc-catalog-cart-icon-btn--panel-a .mp-scc-catalog-cart-icon-btn__badge {
+	position: absolute;
+	top: var(--mp-scc-tristate-fab-badge-offset-top, -8px);
+	right: var(--mp-scc-tristate-fab-badge-offset-right, -8px);
+	min-width: var(--mp-scc-tristate-fab-badge-size, 20px);
+	height: var(--mp-scc-tristate-fab-badge-size, 20px);
+	padding: 0 6px;
+	border-radius: 999px;
+	display: none;
+	align-items: center;
+	justify-content: center;
+	background: var(--mp-scc-tristate-fab-badge-bg, #e53935);
+	color: var(--mp-scc-tristate-fab-badge-text, #ffffff);
+	font-size: var(--mp-scc-tristate-fab-badge-font-size, 11px);
+	font-weight: 700;
+	line-height: 1;
+	font-variant-numeric: tabular-nums;
+	box-shadow: 0 2px 6px rgba(0, 0, 0, 0.28);
+	pointer-events: none;
+	z-index: 2;
+}
+
+button.mp-scc-catalog-cart-icon-btn--panel-a .mp-scc-catalog-cart-icon-btn__badge:not([hidden]) {
+	display: inline-flex;
+}
+
 button.mp-scc-catalog-cart-icon-btn .mp-scc-catalog-cart-icon-btn__img {
 	display: block;
 	width: var(--mp-scc-catalog-cart-icon-glyph-size, 20px);
