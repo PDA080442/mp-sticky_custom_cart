@@ -1092,15 +1092,6 @@
 		if (isNaN(hitSz) || hitSz < 28) {
 			hitSz = 36;
 		}
-		if (hitSz > 56) {
-			hitSz = 56;
-		}
-		if (isCatalogCartIconTouchUi()) {
-			var hitTouch = parseInt(cat.catalogCartIconHitSizeTouchPx, 10);
-			if (!isNaN(hitTouch) && hitTouch >= 28 && hitTouch <= 56) {
-				hitSz = hitTouch;
-			}
-		}
 		var delayMs = parseInt(cat.catalogCartIconTransitionDelayMs, 10);
 		if (isNaN(delayMs) || delayMs < 0) {
 			delayMs = 0;
@@ -1307,7 +1298,6 @@
 			motion = 'fade_slide';
 		}
 		var newTab = !!catalog.moreInfoNewTab;
-		var showMoreLabel = catalog.catalogMoreInfoShowLabel !== false;
 
 		$(cardSel).each(function () {
 			var $card = $(this);
@@ -1329,21 +1319,6 @@
 					$existing.attr('href', productHref);
 				}
 				applyMoreInfoLinkAttrs($existing, newTab);
-				if (label) {
-					$existing.attr('aria-label', label);
-				} else {
-					$existing.removeAttr('aria-label');
-				}
-				var $exLab = $existing.find('.mp-scc-catalog-overlay__label');
-				if (showMoreLabel) {
-					if (!$exLab.length) {
-						$existing.append($('<span class="mp-scc-catalog-overlay__label" />').text(label));
-					} else {
-						$exLab.text(label);
-					}
-				} else {
-					$exLab.remove();
-				}
 				attachCatalogCardResizeSync($card);
 				return;
 			}
@@ -1367,9 +1342,7 @@
 			if (label) {
 				$ov.attr('aria-label', label);
 			}
-			if (showMoreLabel) {
-				$ov.append($('<span class="mp-scc-catalog-overlay__label" />').text(label));
-			}
+			$ov.append($('<span class="mp-scc-catalog-overlay__label" />').text(label));
 			$card.append($ov);
 			attachCatalogCardResizeSync($card);
 		});
@@ -1556,6 +1529,14 @@
 		var desk = catalog.catalogCartIconDesktop || 'hover';
 		var touch = catalog.catalogCartIconTouch || 'always';
 
+		var glyphPx = parseInt(catalog.catalogCartIconGlyphSizePx, 10);
+		if (isNaN(glyphPx) || glyphPx < 14) {
+			glyphPx = 20;
+		}
+		if (glyphPx > 28) {
+			glyphPx = 28;
+		}
+
 		var presetKey = String(catalog.catalogCartIconPreset || 'classic')
 			.trim()
 			.replace(/[^a-z0-9_-]/gi, '');
@@ -1583,7 +1564,11 @@
 		innerTpl = String(innerTpl).split('__MP_SCC_SW__').join(String(strokePx));
 
 		var cartIconSvg =
-			'<svg class="mp-scc-catalog-cart-icon-btn__svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false">' +
+			'<svg class="mp-scc-catalog-cart-icon-btn__svg" xmlns="http://www.w3.org/2000/svg" width="' +
+			glyphPx +
+			'" height="' +
+			glyphPx +
+			'" viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false">' +
 			innerTpl +
 			'</svg>';
 
@@ -1630,6 +1615,10 @@
 			$iconWrap.empty();
 			$iconWrap.html(cartIconSvg);
 			$btn.toggleClass('mp-scc-catalog-cart-icon-btn--custom-img', false);
+			var $svg = $btn.find('.mp-scc-catalog-cart-icon-btn__svg');
+			if ($svg.length) {
+				$svg.attr({ width: glyphPx, height: glyphPx });
+			}
 
 			var isPanelA = presetKey === 'tristate_panel_a';
 			$btn.toggleClass('mp-scc-catalog-cart-icon-btn--panel-a', isPanelA);

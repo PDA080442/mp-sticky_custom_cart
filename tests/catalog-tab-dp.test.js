@@ -34,11 +34,6 @@ assert.ok(defaults.includes('catalog_cart_icon_preset'), 'Defaults should define
 assert.ok(defaults.includes('catalog_cart_icon_stroke_width'), 'Defaults should define catalog_cart_icon_stroke_width');
 assert.ok(defaults.includes('catalog_cart_icon_bg_border_radius_px'), 'Defaults should define catalog_cart_icon_bg_border_radius_px');
 assert.ok(defaults.includes('catalog_cart_icon_inner_padding_px'), 'Defaults should define catalog_cart_icon_inner_padding_px');
-assert.ok(
-	defaults.includes('catalog_cart_icon_hit_size_mobile_px') && defaults.includes('catalog_cart_icon_glyph_size_mobile_px'),
-	'Defaults should define mobile cart icon sizes (0 = inherit desktop)'
-);
-assert.ok(defaults.includes('catalog_more_info_show_label'), 'Defaults should define catalog_more_info_show_label');
 assert.ok(schema.includes('image_click_behavior') && schema.includes('theme_default'), 'Schema should allow image_click_behavior');
 assert.ok(schema.includes('catalog_add_surface') && schema.includes('cart_icon'), 'Schema should allow catalog_add_surface');
 assert.ok(schema.includes('catalog_cart_icon_desktop') && schema.includes('tap_reveal'), 'Schema should allow cart icon visibility keys');
@@ -49,12 +44,9 @@ assert.ok(
 		schema.includes('catalog_cart_icon_transition_delay_ms') &&
 		schema.includes('catalog_cart_icon_stroke_width') &&
 		schema.includes('catalog_cart_icon_mobile_mode') &&
-		schema.includes('catalog_cart_icon_hit_size_mobile_px') &&
-		schema.includes('catalog_cart_icon_glyph_size_mobile_px') &&
 		schema.includes('force_visible'),
 	'Schema should allow cart icon geometry + mobile mode'
 );
-assert.ok(schema.includes('catalog_more_info_show_label'), 'Schema should allow catalog_more_info_show_label');
 assert.ok(schema.includes('catalog_cart_icon_color'), 'Schema should allow catalog_cart_icon_color');
 assert.ok(schema.includes('catalog_cart_icon_bg_border_radius_px'), 'Schema should allow catalog cart icon bg border radius');
 assert.ok(schema.includes('catalog_cart_icon_inner_padding_px'), 'Schema should allow catalog cart icon inner padding');
@@ -100,11 +92,6 @@ assert.ok(
 	'Localized catalog should pass cart icon geometry + mobile mode'
 );
 assert.ok(
-	flagResolver.includes('catalogCartIconHitSizeTouchPx') && flagResolver.includes('catalogCartIconGlyphSizeTouchPx'),
-	'Localized catalog should pass resolved touch cart icon sizes'
-);
-assert.ok(flagResolver.includes('catalogMoreInfoShowLabel'), 'Localized catalog should pass catalogMoreInfoShowLabel');
-assert.ok(
 	flagResolver.includes('catalogCartIconPreset') && flagResolver.includes('catalogCartIconPresetInners'),
 	'Localized catalog should pass cart icon preset + inner SVG map'
 );
@@ -132,10 +119,6 @@ assert.ok(
 assert.ok(js.includes('applyCatalogCartIconMobileModeAttr') && js.includes('data-mp-scc-cart-icon-mobile-mode'), 'JS should apply mobile cart icon mode on html');
 assert.ok(js.includes('catalogCartIconPresetInners') && js.includes('__MP_SCC_SW__'), 'JS should build cart SVG from preset inners + stroke');
 assert.ok(js.includes('catalogCartIconStrokeWidth'), 'JS should use catalogCartIconStrokeWidth for built-in SVG');
-assert.ok(
-	js.includes('catalogCartIconHitSizeTouchPx') && js.includes('catalogMoreInfoShowLabel'),
-	'JS should use touch hit size for layout and respect catalogMoreInfoShowLabel'
-);
 assert.ok(
 	js.includes('--mp-scc-catalog-cart-icon-border-radius') && js.includes('border-radius'),
 	'JS should stamp catalog cart icon border radius from css vars'
