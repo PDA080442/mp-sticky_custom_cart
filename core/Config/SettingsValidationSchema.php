@@ -204,6 +204,7 @@ final class SettingsValidationSchema {
 				'tristate_panel_b_padding_px'        => array( 'type' => 'integer', 'min' => 8, 'max' => 32 ),
 				'tristate_panel_b_border_radius_px'  => array( 'type' => 'integer', 'min' => 0, 'max' => 28 ),
 				'tristate_panel_b_actions_gap_px'    => array( 'type' => 'integer', 'min' => 4, 'max' => 24 ),
+				'tristate_metric_lines_visible'      => array( 'type' => 'boolean' ),
 				/** Vertical padding for each metric row (panel B + drawer C header). */
 				'tristate_metrics_row_padding_y_px'           => array( 'type' => 'integer', 'min' => 4, 'max' => 24 ),
 				'tristate_metrics_hr_margin_y_panel_b_px'     => array( 'type' => 'integer', 'min' => 0, 'max' => 20 ),

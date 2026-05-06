@@ -1308,6 +1308,14 @@ final class SettingsPage {
 		self::field_number( $opt, 'sticky_cart', 'tristate_panel_b_actions_gap_px', __( 'Зазор между иконками в панели B (px)', 'mp-sticky-custom-cart' ), isset( $c['tristate_panel_b_actions_gap_px'] ) ? (int) $c['tristate_panel_b_actions_gap_px'] : 8, '', array( 'var' => $p . 'tristate-panel-b-actions-gap', 'fmt' => 'unit', 'suffix' => 'px' ) );
 		echo '<tr><td colspan="2"><p class="description" style="margin:0 0 4px;"><strong>' . esc_html__( 'Сводка: позиции, товары, сумма и разделители', 'mp-sticky-custom-cart' ) . '</strong> — ';
 		echo esc_html__( 'Вертикальные отступы строк, пунктирные линии между ними (панель B и шапка C). Подписи — во вкладке «Подписи».', 'mp-sticky-custom-cart' ) . '</p></td></tr>';
+		self::field_checkbox(
+			$opt,
+			'sticky_cart',
+			'tristate_metric_lines_visible',
+			__( 'Показывать строку «Позиций» в панели B и в шапке C', 'mp-sticky-custom-cart' ),
+			! isset( $c['tristate_metric_lines_visible'] ) || ! empty( $c['tristate_metric_lines_visible'] ),
+			__( 'Если выключено, скрывается только строка с числом позиций (отдельных строк корзины) и разделитель под ней. Счётчик на FAB и обновление через снимок корзины не меняются.', 'mp-sticky-custom-cart' )
+		);
 		self::field_number( $opt, 'sticky_cart', 'tristate_metrics_row_padding_y_px', __( 'Сводка: вертикальный отступ одной строки метрик (px)', 'mp-sticky-custom-cart' ), isset( $c['tristate_metrics_row_padding_y_px'] ) ? (int) $c['tristate_metrics_row_padding_y_px'] : 10, __( 'Одинаково для панели B и блока метрик в drawer C.', 'mp-sticky-custom-cart' ), array( 'var' => $p . 'tristate-metrics-row-padding-y', 'fmt' => 'unit', 'suffix' => 'px' ) );
 		self::field_number( $opt, 'sticky_cart', 'tristate_metrics_hr_margin_y_panel_b_px', __( 'Сводка: отступ пунктира в панели B сверху/снизу (px)', 'mp-sticky-custom-cart' ), isset( $c['tristate_metrics_hr_margin_y_panel_b_px'] ) ? (int) $c['tristate_metrics_hr_margin_y_panel_b_px'] : 0, __( 'Часто 0: линия идёт вплотную к отступам строк.', 'mp-sticky-custom-cart' ), array( 'var' => $p . 'tristate-metrics-hr-margin-y-panel-b', 'fmt' => 'unit', 'suffix' => 'px' ) );
 		self::field_number( $opt, 'sticky_cart', 'tristate_metrics_hr_margin_y_drawer_c_px', __( 'Сводка: отступ пунктира в шапке drawer C сверху/снизу (px)', 'mp-sticky-custom-cart' ), isset( $c['tristate_metrics_hr_margin_y_drawer_c_px'] ) ? (int) $c['tristate_metrics_hr_margin_y_drawer_c_px'] : 8, '', array( 'var' => $p . 'tristate-metrics-hr-margin-y-drawer-c', 'fmt' => 'unit', 'suffix' => 'px' ) );

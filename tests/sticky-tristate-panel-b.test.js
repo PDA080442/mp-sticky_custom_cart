@@ -60,6 +60,13 @@ assert.ok(contract.includes('tristate-metrics-row-padding-y'), 'CssVariablesCont
 assert.ok(contract.includes('tristate-metrics-hr-border-color'), 'CssVariablesContract should emit metrics hr rgba');
 assert.ok(admin.includes('tristate_metrics_hr_opacity_percent'), 'Settings UI should expose metrics hr opacity');
 assert.ok(admin.includes('tristate_metric_lines'), 'Settings UI should expose tri-state metric line label');
+assert.ok(defaults.includes('tristate_metric_lines_visible'), 'Defaults should define tri-state metric lines visibility');
+assert.ok(schema.includes('tristate_metric_lines_visible'), 'Schema should validate tri-state metric lines visibility');
+assert.ok(admin.includes('tristate_metric_lines_visible'), 'Settings UI should expose tri-state metric lines visibility toggle');
+assert.ok(
+	renderer.includes('$show_tristate_metric_lines') && renderer.includes('tristate_drawer_c_metrics_markup'),
+	'Renderer should gate panel B/C lines row on tristate_metric_lines_visible'
+);
 assert.ok(css.includes('--mp-scc-tristate-panel-b-max-height'), 'CSS should consume B max-height token');
 assert.ok(css.includes('--mp-scc-tristate-panel-c-width'), 'CSS should consume drawer C width token');
 assert.ok(css.includes('--mp-scc-tristate-panel-c-height'), 'CSS should consume drawer C height token');

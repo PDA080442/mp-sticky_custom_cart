@@ -53,6 +53,8 @@ final class StickyCartRenderer implements StickyCartRendererInterface {
 		$total       = is_string( $total ) ? $total : wc_price( 0 );
 		$drawer    = OptionResolver::get_flag( FeatureFlagsDefaults::KEY_STICKY_DRAWER_ENABLED, true );
 		$tristate  = OptionResolver::get_flag( FeatureFlagsDefaults::KEY_STICKY_TRISTATE_ENABLED, false );
+		/** When false, omit «Позиций» row (+ hr) in panel B and drawer C; FAB badge unchanged. */
+		$show_tristate_metric_lines = (bool) OptionResolver::get_setting( 'sticky_cart.tristate_metric_lines_visible', true );
 		$root_mods = trim( ( $empty ? ' mp-scc-sticky--empty' : '' ) . ( $tristate ? ' mp-scc-sticky--tristate' : '' ) );
 		$show_sticky_bar_summary = ! $tristate || ! $drawer;
 
@@ -104,11 +106,13 @@ final class StickyCartRenderer implements StickyCartRendererInterface {
 			<div class="mp-scc-shell-panel-b__body">
 				<?php echo self::tristate_panel_dismiss_button_markup( 'b' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 				<div class="mp-scc-shell-panel-b__metrics" aria-live="polite" aria-atomic="true">
+					<?php if ( $show_tristate_metric_lines ) : ?>
 					<div class="mp-scc-shell-panel-b__row mp-scc-shell-panel-b__row--lines">
 						<span class="mp-scc-shell-panel-b__label"><?php echo esc_html( OptionResolver::get_label( UiLabelsDefaults::KEY_TRISTATE_METRIC_LINES, __( 'Позиций', 'mp-sticky-custom-cart' ) ) ); ?></span>
 						<span class="mp-scc-cart-count mp-scc-shell-panel-b__value" data-mp-scc-cart-line-count><?php echo esc_html( (string) $line_count ); ?></span>
 					</div>
 					<hr class="mp-scc-tristate-metrics-hr" aria-hidden="true" />
+					<?php endif; ?>
 					<div class="mp-scc-shell-panel-b__row mp-scc-shell-panel-b__row--qty">
 						<span class="mp-scc-shell-panel-b__label"><?php echo esc_html( OptionResolver::get_label( UiLabelsDefaults::KEY_TRISTATE_METRIC_QTY, __( 'Товаров', 'mp-sticky-custom-cart' ) ) ); ?></span>
 						<span class="mp-scc-cart-qty-count mp-scc-shell-panel-b__value" data-mp-scc-cart-qty-count><?php echo esc_html( (string) (int) $qty_total ); ?></span>
@@ -148,7 +152,7 @@ final class StickyCartRenderer implements StickyCartRendererInterface {
 						>
 							<span class="mp-scc-shell-panel-b__icon-svg" aria-hidden="true"><?php echo self::inline_svg_chevron_down_icon(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></span>
 						</button>
-						<?php echo self::tristate_drawer_c_metrics_markup( $line_count, $qty_total, $total ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+						<?php echo self::tristate_drawer_c_metrics_markup( $line_count, $qty_total, $total, $show_tristate_metric_lines ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 						<?php echo self::tristate_panel_dismiss_button_markup( 'c' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 					</div>
 					<div class="mp-scc-drawer-c__scroll" data-mp-scc-drawer-lines-scroll>
@@ -280,16 +284,19 @@ final class StickyCartRenderer implements StickyCartRendererInterface {
 	 * @param int    $line_count Number of cart lines (distinct rows).
 	 * @param int    $qty_total  Sum of line quantities (pieces).
 	 * @param string $total      Subtotal HTML.
+	 * @param bool   $show_lines When false, omit the «Позиций» row and the hr below it (same as panel B).
 	 */
-	private static function tristate_drawer_c_metrics_markup( $line_count, $qty_total, $total ) {
+	private static function tristate_drawer_c_metrics_markup( $line_count, $qty_total, $total, $show_lines = true ) {
 		ob_start();
 		?>
 		<div class="mp-scc-drawer-c__metrics" aria-live="polite" aria-atomic="true">
+			<?php if ( $show_lines ) : ?>
 			<div class="mp-scc-drawer-c__row mp-scc-drawer-c__row--lines">
 				<span class="mp-scc-drawer-c__label"><?php echo esc_html( OptionResolver::get_label( UiLabelsDefaults::KEY_TRISTATE_METRIC_LINES, __( 'Позиций', 'mp-sticky-custom-cart' ) ) ); ?></span>
 				<span class="mp-scc-cart-count mp-scc-drawer-c__value" data-mp-scc-cart-line-count><?php echo esc_html( (string) $line_count ); ?></span>
 			</div>
 			<hr class="mp-scc-tristate-metrics-hr" aria-hidden="true" />
+			<?php endif; ?>
 			<div class="mp-scc-drawer-c__row mp-scc-drawer-c__row--qty">
 				<span class="mp-scc-drawer-c__label"><?php echo esc_html( OptionResolver::get_label( UiLabelsDefaults::KEY_TRISTATE_METRIC_QTY, __( 'Товаров', 'mp-sticky-custom-cart' ) ) ); ?></span>
 				<span class="mp-scc-cart-qty-count mp-scc-drawer-c__value" data-mp-scc-cart-qty-count><?php echo esc_html( (string) (int) $qty_total ); ?></span>

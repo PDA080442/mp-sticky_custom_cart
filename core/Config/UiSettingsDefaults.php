@@ -60,6 +60,7 @@ final class UiSettingsDefaults {
 			'tristate_panel_b_padding_px',
 			'tristate_panel_b_border_radius_px',
 			'tristate_panel_b_actions_gap_px',
+			'tristate_metric_lines_visible',
 			'tristate_metrics_row_padding_y_px',
 			'tristate_metrics_hr_margin_y_panel_b_px',
 			'tristate_metrics_hr_margin_y_drawer_c_px',
@@ -271,6 +272,11 @@ final class UiSettingsDefaults {
 				'tristate_panel_b_border_radius_px'  => 12,
 				/** Gap between icon action buttons in panel B (px). */
 				'tristate_panel_b_actions_gap_px'    => 8,
+				/**
+				 * When false, hide the «Позиций» (cart line count) row in tri-state panel B and drawer C header.
+				 * FAB badge and AJAX still use line count; only the summary rows in B/C are omitted.
+				 */
+				'tristate_metric_lines_visible'      => true,
 				/** Panel B + drawer C metrics rows: vertical padding (px). */
 				'tristate_metrics_row_padding_y_px'           => 10,
 				'tristate_metrics_hr_margin_y_panel_b_px'     => 0,
