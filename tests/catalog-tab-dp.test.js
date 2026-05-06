@@ -34,6 +34,11 @@ assert.ok(defaults.includes('catalog_cart_icon_preset'), 'Defaults should define
 assert.ok(defaults.includes('catalog_cart_icon_stroke_width'), 'Defaults should define catalog_cart_icon_stroke_width');
 assert.ok(defaults.includes('catalog_cart_icon_bg_border_radius_px'), 'Defaults should define catalog_cart_icon_bg_border_radius_px');
 assert.ok(defaults.includes('catalog_cart_icon_inner_padding_px'), 'Defaults should define catalog_cart_icon_inner_padding_px');
+assert.ok(
+	defaults.includes('catalog_cart_icon_box_width_mobile_px') && defaults.includes('catalog_cart_icon_box_height_mobile_px'),
+	'Defaults should define combined mobile catalog cart icon box dimensions (bg + glyph)'
+);
+assert.ok(defaults.includes('catalog_more_info_label_visible'), 'Defaults should define catalog_more_info_label_visible');
 assert.ok(schema.includes('image_click_behavior') && schema.includes('theme_default'), 'Schema should allow image_click_behavior');
 assert.ok(schema.includes('catalog_add_surface') && schema.includes('cart_icon'), 'Schema should allow catalog_add_surface');
 assert.ok(schema.includes('catalog_cart_icon_desktop') && schema.includes('tap_reveal'), 'Schema should allow cart icon visibility keys');
@@ -41,6 +46,9 @@ assert.ok(
 	schema.includes('catalog_cart_icon_offset_left_px') &&
 		schema.includes('catalog_cart_icon_hit_size_px') &&
 		schema.includes('catalog_cart_icon_glyph_size_px') &&
+		schema.includes('catalog_cart_icon_box_width_mobile_px') &&
+		schema.includes('catalog_cart_icon_box_height_mobile_px') &&
+		schema.includes('catalog_more_info_label_visible') &&
 		schema.includes('catalog_cart_icon_transition_delay_ms') &&
 		schema.includes('catalog_cart_icon_stroke_width') &&
 		schema.includes('catalog_cart_icon_mobile_mode') &&
@@ -83,6 +91,10 @@ assert.ok(settings.includes('catalog_cart_icon_stroke_width'), 'Settings should 
 assert.ok(settings.includes('catalog_cart_icon_bg_border_radius_px'), 'Settings should expose catalog cart icon bg border radius');
 assert.ok(settings.includes('catalog_cart_icon_inner_padding_px'), 'Settings should expose catalog cart icon inner padding');
 assert.ok(settings.includes('field_catalog_cart_icon_preset_grid'), 'Settings should render cart icon preset grid');
+assert.ok(
+	settings.includes('catalog_more_info_label_visible') && settings.includes('catalog_cart_icon_box_width_mobile_px'),
+	'Settings should expose more-info label toggle + combined mobile cart icon box dimensions'
+);
 assert.ok(settings.includes('Поведение клика по миниатюре'), 'Settings should expose image click behavior control');
 assert.ok(flagResolver.includes('imageClickBehavior'), 'Localized catalog should pass imageClickBehavior');
 assert.ok(flagResolver.includes('catalogAddSurface'), 'Localized catalog should pass catalogAddSurface');
@@ -90,6 +102,12 @@ assert.ok(flagResolver.includes('catalogCartIconDesktop'), 'Localized catalog sh
 assert.ok(
 	flagResolver.includes('catalogCartIconOffsetTopPx') && flagResolver.includes('catalogCartIconMobileMode'),
 	'Localized catalog should pass cart icon geometry + mobile mode'
+);
+assert.ok(
+	flagResolver.includes('catalogCartIconBoxWidthMobilePx') &&
+		flagResolver.includes('catalogCartIconBoxHeightMobilePx') &&
+		flagResolver.includes('moreInfoLabelVisible'),
+	'Localized catalog should pass combined mobile cart icon box dims + more-info label toggle'
 );
 assert.ok(
 	flagResolver.includes('catalogCartIconPreset') && flagResolver.includes('catalogCartIconPresetInners'),
@@ -129,12 +147,22 @@ assert.ok(
 );
 assert.ok(js.includes('--mp-scc-catalog-cart-icon-inner-padding'), 'JS should stamp catalog cart icon inner padding');
 assert.ok(js.includes('applyCatalogCartIconCssVarsFromPayload'), 'JS should apply catalog cart icon CSS vars from payload');
+assert.ok(
+	js.includes('resolveCatalogCartIconHitLayoutSize') &&
+		js.includes('moreInfoLabelVisible') &&
+		js.includes('overlayBand'),
+	'JS should resolve mobile cart slot size, more-info label visibility, and overlay band height'
+);
 assert.ok(js.includes('stampOneCatalogCartIconButton'), 'JS should stamp cart icon button colors from payload');
 assert.ok(
 	js.includes('resolveCatalogImageFromClickTarget') && js.includes('cart_icon') && js.includes('return null'),
 	'JS should skip image resolution when cart_icon (defense in depth)'
 );
 assert.ok(css.includes('mp-scc-admin-catalog-preview'), 'Admin CSS should style catalog preview');
+assert.ok(
+	css.includes('mp-scc-catalog-overlay--no-label') && css.includes('pointer-events: none'),
+	'Admin preview CSS should collapse no-label overlay strip'
+);
 assert.ok(
 	css.includes('--mp-scc-catalog-cart-icon-color'),
 	'Admin catalog preview should use catalog cart icon color variable'
@@ -149,6 +177,16 @@ assert.ok(
 	cssContract.includes('catalog-cart-icon-inner-padding') &&
 		cssContract.includes('catalog_cart_icon_inner_padding_px'),
 	'CssVariablesContract should map inner padding to --mp-scc-catalog-cart-icon-inner-padding'
+);
+assert.ok(
+	cssContract.includes('catalog-cart-icon-box-w-mobile') &&
+		cssContract.includes('catalog_cart_icon_box_width_mobile_px'),
+	'CssVariablesContract should map combined mobile loop cart box width'
+);
+assert.ok(
+	storefrontCss.includes('--mp-scc-catalog-cart-icon-box-w-mobile') &&
+		storefrontCss.includes('mp-scc-catalog-overlay--no-label'),
+	'Storefront CSS should use combined mobile cart box vars and hide overlay label when flagged'
 );
 
 console.log('catalog-tab-dp: OK');

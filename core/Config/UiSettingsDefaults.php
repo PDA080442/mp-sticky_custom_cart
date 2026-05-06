@@ -151,6 +151,13 @@ final class UiSettingsDefaults {
 				'catalog_cart_icon_hit_size_px'      => 36,
 				/** SVG glyph size inside the button (px). */
 				'catalog_cart_icon_glyph_size_px'    => 20,
+				/**
+				 * Touch / narrow viewport (max-width 768px or pointer: coarse): button box size (bg + glyph together, px).
+				 * 0 = same as desktop hit-size above. If only one side is set, the button stays square.
+				 * Slot AND inner SVG glyph scale to the same value (so the icon visually fills the new bg).
+				 */
+				'catalog_cart_icon_box_width_mobile_px'   => 0,
+				'catalog_cart_icon_box_height_mobile_px'  => 0,
 				/** Built-in SVG cart path stroke width (1–3, default matches previous hard-coded look). */
 				'catalog_cart_icon_stroke_width'     => 1.75,
 				/** Delay before opacity/visibility transition starts (ms). */
@@ -196,6 +203,8 @@ final class UiSettingsDefaults {
 				'wrap_loop_item_add_to_cart'   => false,
 				/** Open «Подробнее» product URL in a new browser tab (adds target + rel). */
 				'more_info_new_tab'            => false,
+				/** Show the visible «Подробнее» caption on the catalog overlay strip (link/aria still work when off). */
+				'catalog_more_info_label_visible' => true,
 				/** Stacking: «Подробнее» overlay (keep below wishlist heart). */
 				'catalog_overlay_z_index'      => 4,
 			),

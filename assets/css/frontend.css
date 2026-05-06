@@ -1774,6 +1774,17 @@ body.mp-scc-wishlist-integration-on .mp-scc-catalog-cart-icon-slot {
 		visibility: visible !important;
 		pointer-events: auto !important;
 	}
+
+	/*
+	 * Mobile box override — это размер ВСЕЙ кнопки (фон + значок вместе).
+	 * Сам глиф SVG масштабируется JS пропорционально десктопному соотношению (resolveCatalogCartIconGlyphSvgSize)
+	 * и кладётся inline-стилем — поэтому здесь меняем только размер слота/фона.
+	 * 0 в админке = переменная не выводится, fallback — десктопные значения.
+	 */
+	.mp-scc-catalog-card--cart-icon .mp-scc-catalog-cart-icon-slot {
+		width: var(--mp-scc-catalog-cart-icon-box-w-mobile, var(--mp-scc-catalog-cart-icon-hit-size, 36px));
+		height: var(--mp-scc-catalog-cart-icon-box-h-mobile, var(--mp-scc-catalog-cart-icon-hit-size, 36px));
+	}
 }
 
 /*
@@ -1987,6 +1998,28 @@ ul.products li.product .mp-scc-catalog-overlay__label,
 	overflow: hidden;
 	text-overflow: ellipsis;
 	white-space: nowrap;
+}
+
+/* Подпись выключена: убираем саму полоску (раньше скрывали только текст — фон ссылки оставался). */
+ul.products li.product a.mp-scc-catalog-overlay--floating.mp-scc-catalog-overlay--no-label,
+ul.products div.product a.mp-scc-catalog-overlay--floating.mp-scc-catalog-overlay--no-label,
+.woocommerce .products li.product a.mp-scc-catalog-overlay--floating.mp-scc-catalog-overlay--no-label,
+.woocommerce .products div.product a.mp-scc-catalog-overlay--floating.mp-scc-catalog-overlay--no-label {
+	background: transparent !important;
+	box-shadow: none !important;
+	color: transparent !important;
+	height: 0 !important;
+	min-height: 0 !important;
+	padding: 0 !important;
+	padding-right: 0 !important;
+	overflow: hidden !important;
+	opacity: 0 !important;
+	pointer-events: none !important;
+	border-radius: 0 !important;
+}
+
+a.mp-scc-catalog-overlay--floating.mp-scc-catalog-overlay--no-label .mp-scc-catalog-overlay__label {
+	display: none !important;
 }
 
 /*

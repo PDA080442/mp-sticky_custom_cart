@@ -201,6 +201,20 @@
 	transform: none;
 }
 
+.mp-scc-admin-catalog-preview .mp-scc-catalog-overlay--floating.mp-scc-catalog-overlay--no-label {
+	background: transparent !important;
+	box-shadow: none !important;
+	color: transparent !important;
+	height: 0 !important;
+	min-height: 0 !important;
+	padding: 0 !important;
+	padding-right: 0 !important;
+	overflow: hidden !important;
+	opacity: 0 !important;
+	pointer-events: none !important;
+	border-radius: 0 !important;
+}
+
 .mp-scc-admin-drawer-empty-preview {
 	max-width: 420px;
 	margin: 12px 0 0;

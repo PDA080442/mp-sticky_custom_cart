@@ -1055,6 +1055,91 @@
 	}
 
 	/**
+	 * Loop cart icon slot size for syncCatalogCardLayouts:
+	 * on touch/narrow UI optional «box» (bg + glyph together) w/h override; desktop uses hit-size.
+	 *
+	 * @param {Record<string, unknown>} cat
+	 * @returns {{w:number,h:number}}
+	 */
+	function resolveCatalogCartIconHitLayoutSize(cat) {
+		var base = parseInt(cat.catalogCartIconHitSizePx, 10);
+		if (isNaN(base) || base < 28) {
+			base = 36;
+		}
+		if (base > 56) {
+			base = 56;
+		}
+		if (typeof isCatalogCartIconTouchUi !== 'function' || !isCatalogCartIconTouchUi()) {
+			return { w: base, h: base };
+		}
+		var mw = parseInt(cat.catalogCartIconBoxWidthMobilePx, 10);
+		var mh = parseInt(cat.catalogCartIconBoxHeightMobilePx, 10);
+		if (!isNaN(mw) && mw > 0 && !isNaN(mh) && mh > 0) {
+			return { w: Math.min(96, Math.max(1, mw)), h: Math.min(96, Math.max(1, mh)) };
+		}
+		if (!isNaN(mw) && mw > 0) {
+			var s = Math.min(96, Math.max(1, mw));
+			return { w: s, h: s };
+		}
+		if (!isNaN(mh) && mh > 0) {
+			var s2 = Math.min(96, Math.max(1, mh));
+			return { w: s2, h: s2 };
+		}
+		return { w: base, h: base };
+	}
+
+	/**
+	 * Built-in loop cart SVG dimensions on touch/narrow UI: масштабируем глиф ПРОПОРЦИОНАЛЬНО
+	 * десктопному соотношению glyph/hit (по умолчанию 20/36 ≈ 0.555), чтобы значок не «прилипал»
+	 * к краям фона при изменении общего размера кнопки.
+	 *
+	 * @param {Record<string, unknown>} cat
+	 * @returns {{w:number,h:number}}
+	 */
+	function resolveCatalogCartIconGlyphSvgSize(cat) {
+		var deskHit = parseInt(cat.catalogCartIconHitSizePx, 10);
+		if (isNaN(deskHit) || deskHit < 28) {
+			deskHit = 36;
+		}
+		if (deskHit > 56) {
+			deskHit = 56;
+		}
+		var deskGlyph = parseInt(cat.catalogCartIconGlyphSizePx, 10);
+		if (isNaN(deskGlyph) || deskGlyph < 14) {
+			deskGlyph = 20;
+		}
+		if (deskGlyph > 28) {
+			deskGlyph = 28;
+		}
+		if (typeof isCatalogCartIconTouchUi !== 'function' || !isCatalogCartIconTouchUi()) {
+			return { w: deskGlyph, h: deskGlyph };
+		}
+		var mw = parseInt(cat.catalogCartIconBoxWidthMobilePx, 10);
+		var mh = parseInt(cat.catalogCartIconBoxHeightMobilePx, 10);
+		var ratio = deskGlyph / deskHit;
+		if (!isFinite(ratio) || ratio <= 0) {
+			ratio = 20 / 36;
+		}
+		var hasW = !isNaN(mw) && mw > 0;
+		var hasH = !isNaN(mh) && mh > 0;
+		if (hasW && hasH) {
+			return {
+				w: Math.max(8, Math.min(96, Math.round(mw * ratio))),
+				h: Math.max(8, Math.min(96, Math.round(mh * ratio)))
+			};
+		}
+		if (hasW) {
+			var s = Math.max(8, Math.min(96, Math.round(mw * ratio)));
+			return { w: s, h: s };
+		}
+		if (hasH) {
+			var s2 = Math.max(8, Math.min(96, Math.round(mh * ratio)));
+			return { w: s2, h: s2 };
+		}
+		return { w: deskGlyph, h: deskGlyph };
+	}
+
+	/**
 	 * Positions «Подробнее» band + invisible add-to-cart hit layer from the first loop image geometry.
 	 * Band height matches the «Подробнее» strip (same formula as {@see syncCatalogCardLayouts} overlay block).
 	 *
@@ -1079,6 +1164,8 @@
 		var band = Math.max(40, Math.min(56, Math.round(ih * 0.26)));
 		var topRel = io.top - co.top;
 		var leftRel = io.left - co.left;
+		var showMoreInfoLabel = cat.moreInfoLabelVisible !== false;
+		var overlayBand = showMoreInfoLabel ? band : 0;
 
 		var offTop = parseInt(cat.catalogCartIconOffsetTopPx, 10);
 		if (isNaN(offTop) || offTop < 0) {
@@ -1088,10 +1175,9 @@
 		if (isNaN(offLeft) || offLeft < 0) {
 			offLeft = 8;
 		}
-		var hitSz = parseInt(cat.catalogCartIconHitSizePx, 10);
-		if (isNaN(hitSz) || hitSz < 28) {
-			hitSz = 36;
-		}
+		var hitDim = resolveCatalogCartIconHitLayoutSize(cat);
+		var hitW = hitDim.w;
+		var hitH = hitDim.h;
 		var delayMs = parseInt(cat.catalogCartIconTransitionDelayMs, 10);
 		if (isNaN(delayMs) || delayMs < 0) {
 			delayMs = 0;
@@ -1100,16 +1186,16 @@
 		var $overlay = $card.find('.mp-scc-catalog-overlay').first();
 		if ($overlay.length) {
 			$overlay.css({
-				top: topRel + ih - band,
+				top: topRel + ih - overlayBand,
 				left: leftRel,
 				width: iw,
-				height: band
+				height: overlayBand
 			});
 		}
 
 		var $hit = $card.find('.mp-scc-catalog-atc-hit').first();
 		if ($hit.length) {
-			var hitH = $overlay.length ? Math.max(0, ih - band) : ih;
+			var hitH = $overlay.length ? Math.max(0, ih - overlayBand) : ih;
 			$hit.css({
 				top: topRel,
 				left: leftRel,
@@ -1123,8 +1209,8 @@
 			$cartSlot.css({
 				top: topRel + offTop,
 				left: leftRel + offLeft,
-				width: hitSz,
-				height: hitSz,
+				width: hitW,
+				height: hitH,
 				transitionDelay: delayMs + 'ms'
 			});
 		}
@@ -1298,6 +1384,7 @@
 			motion = 'fade_slide';
 		}
 		var newTab = !!catalog.moreInfoNewTab;
+		var showMoreInfoLabel = catalog.moreInfoLabelVisible !== false;
 
 		$(cardSel).each(function () {
 			var $card = $(this);
@@ -1319,6 +1406,17 @@
 					$existing.attr('href', productHref);
 				}
 				applyMoreInfoLinkAttrs($existing, newTab);
+				$existing.toggleClass('mp-scc-catalog-overlay--no-label', !showMoreInfoLabel);
+				var $labEx = $existing.find('.mp-scc-catalog-overlay__label').first();
+				if (showMoreInfoLabel) {
+					if (!$labEx.length) {
+						$existing.append($('<span class="mp-scc-catalog-overlay__label" />').text(label));
+					} else {
+						$labEx.text(label);
+					}
+				} else {
+					$labEx.remove();
+				}
 				attachCatalogCardResizeSync($card);
 				return;
 			}
@@ -1332,6 +1430,9 @@
 			if (mobileAlways) {
 				cls += ' mp-scc-catalog-overlay--mobile-always';
 			}
+			if (!showMoreInfoLabel) {
+				cls += ' mp-scc-catalog-overlay--no-label';
+			}
 
 			var $ov = $('<a />', {
 				class: cls,
@@ -1342,7 +1443,9 @@
 			if (label) {
 				$ov.attr('aria-label', label);
 			}
-			$ov.append($('<span class="mp-scc-catalog-overlay__label" />').text(label));
+			if (showMoreInfoLabel) {
+				$ov.append($('<span class="mp-scc-catalog-overlay__label" />').text(label));
+			}
 			$card.append($ov);
 			attachCatalogCardResizeSync($card);
 		});
@@ -1529,13 +1632,9 @@
 		var desk = catalog.catalogCartIconDesktop || 'hover';
 		var touch = catalog.catalogCartIconTouch || 'always';
 
-		var glyphPx = parseInt(catalog.catalogCartIconGlyphSizePx, 10);
-		if (isNaN(glyphPx) || glyphPx < 14) {
-			glyphPx = 20;
-		}
-		if (glyphPx > 28) {
-			glyphPx = 28;
-		}
+		var glyphDim = resolveCatalogCartIconGlyphSvgSize(catalog);
+		var glyphW = glyphDim.w;
+		var glyphH = glyphDim.h;
 
 		var presetKey = String(catalog.catalogCartIconPreset || 'classic')
 			.trim()
@@ -1565,9 +1664,9 @@
 
 		var cartIconSvg =
 			'<svg class="mp-scc-catalog-cart-icon-btn__svg" xmlns="http://www.w3.org/2000/svg" width="' +
-			glyphPx +
+			glyphW +
 			'" height="' +
-			glyphPx +
+			glyphH +
 			'" viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false">' +
 			innerTpl +
 			'</svg>';
@@ -1617,7 +1716,8 @@
 			$btn.toggleClass('mp-scc-catalog-cart-icon-btn--custom-img', false);
 			var $svg = $btn.find('.mp-scc-catalog-cart-icon-btn__svg');
 			if ($svg.length) {
-				$svg.attr({ width: glyphPx, height: glyphPx });
+				$svg.attr({ width: glyphW, height: glyphH });
+				$svg.css({ width: glyphW + 'px', height: glyphH + 'px' });
 			}
 
 			var isPanelA = presetKey === 'tristate_panel_a';

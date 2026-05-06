@@ -389,6 +389,7 @@ final class SettingsPage {
 			$motion = 'fade_slide';
 		}
 		$mobile_always = ! empty( $c['hover_overlay_mobile_always'] );
+		$more_info_label = ! isset( $c['catalog_more_info_label_visible'] ) || ! empty( $c['catalog_more_info_label_visible'] );
 
 		$props   = CssVariablesContract::build_properties( $s );
 		$preview = array();
@@ -411,6 +412,9 @@ final class SettingsPage {
 		$cls = 'mp-scc-catalog-overlay mp-scc-catalog-overlay--floating mp-scc-catalog-overlay--motion-' . $motion;
 		if ( $mobile_always ) {
 			$cls .= ' mp-scc-catalog-overlay--mobile-always';
+		}
+		if ( ! $more_info_label ) {
+			$cls .= ' mp-scc-catalog-overlay--no-label';
 		}
 
 		echo '<h3>' . esc_html__( 'Предпросмотр кнопки на карточке', 'mp-sticky-custom-cart' ) . '</h3>';
@@ -439,7 +443,9 @@ final class SettingsPage {
 			'<a href="#" class="%s" onclick="return false;">',
 			esc_attr( $cls )
 		);
-		echo '<span class="mp-scc-catalog-overlay__label">' . esc_html( $label ) . '</span>';
+		if ( $more_info_label ) {
+			echo '<span class="mp-scc-catalog-overlay__label">' . esc_html( $label ) . '</span>';
+		}
 		echo '</a>';
 		echo '</div></div></div>';
 	}
@@ -605,6 +611,37 @@ final class SettingsPage {
 				$glyph_sz,
 				__( 'Ширина/высота SVG внутри кнопки (14–28).', 'mp-sticky-custom-cart' )
 			);
+			$box_w_m = isset( $c['catalog_cart_icon_box_width_mobile_px'] ) ? (int) $c['catalog_cart_icon_box_width_mobile_px'] : 0;
+			$box_h_m = isset( $c['catalog_cart_icon_box_height_mobile_px'] ) ? (int) $c['catalog_cart_icon_box_height_mobile_px'] : 0;
+			echo '<tr><td colspan="2"><p class="description"><strong>' . esc_html__( 'Мобильная витрина (тач / узкий экран)', 'mp-sticky-custom-cart' ) . '</strong> — ';
+			echo esc_html__( 'при max-width 768px или pointer: coarse. Размер кнопки целиком — фон + значок вместе. Нули = как на десктопе выше. Если задана только ширина или только высота — квадрат по этой стороне.', 'mp-sticky-custom-cart' );
+			echo '</p></td></tr>';
+			self::field_number(
+				$opt,
+				'catalog',
+				'catalog_cart_icon_box_width_mobile_px',
+				__( 'Ширина кнопки (фон + значок) на мобильных (px)', 'mp-sticky-custom-cart' ),
+				$box_w_m,
+				__( '0 = как на десктопе; иначе 1–96. Значок масштабируется пропорционально десктопному соотношению (значок/фон) — пропорции остаются как на десктопе.', 'mp-sticky-custom-cart' ),
+				array(
+					'min'  => 0,
+					'max'  => 96,
+					'step' => 1,
+				)
+			);
+			self::field_number(
+				$opt,
+				'catalog',
+				'catalog_cart_icon_box_height_mobile_px',
+				__( 'Высота кнопки (фон + значок) на мобильных (px)', 'mp-sticky-custom-cart' ),
+				$box_h_m,
+				__( '0 = как на десктопе; иначе 1–96.', 'mp-sticky-custom-cart' ),
+				array(
+					'min'  => 0,
+					'max'  => 96,
+					'step' => 1,
+				)
+			);
 			self::field_number(
 				$opt,
 				'catalog',
@@ -699,6 +736,14 @@ final class SettingsPage {
 		echo '<h3>' . esc_html__( 'Кнопка «Подробнее» и анимация hover', 'mp-sticky-custom-cart' ) . '</h3>';
 		echo '<table class="form-table" role="presentation"><tbody>';
 		self::field_checkbox( $opt, 'catalog', 'hover_overlay_mobile_always', __( 'Показывать кнопку «Подробнее» на мобильных всегда', 'mp-sticky-custom-cart' ), ! empty( $c['hover_overlay_mobile_always'] ) );
+		self::field_checkbox(
+			$opt,
+			'catalog',
+			'catalog_more_info_label_visible',
+			__( 'Показывать надпись «Подробнее» на полоске', 'mp-sticky-custom-cart' ),
+			! isset( $c['catalog_more_info_label_visible'] ) || ! empty( $c['catalog_more_info_label_visible'] ),
+			__( 'Если выключено, подпись и тёмная полоска скрыты; переход на товар — по ссылке на фото/заголовок в теме. Слой «Подробнее» не перехватывает клики.', 'mp-sticky-custom-cart' )
+		);
 		self::field_number( $opt, 'catalog', 'hover_animation_duration_ms', __( 'Длительность анимации hover (мс)', 'mp-sticky-custom-cart' ), isset( $c['hover_animation_duration_ms'] ) ? (int) $c['hover_animation_duration_ms'] : 220 );
 		self::field_text(
 			$opt,

@@ -60,6 +60,16 @@ final class SettingsValidationSchema {
 					'min'  => 14,
 					'max'  => 28,
 				),
+				'catalog_cart_icon_box_width_mobile_px'   => array(
+					'type' => 'integer',
+					'min'  => 0,
+					'max'  => 96,
+				),
+				'catalog_cart_icon_box_height_mobile_px'  => array(
+					'type' => 'integer',
+					'min'  => 0,
+					'max'  => 96,
+				),
 				'catalog_cart_icon_stroke_width'   => array(
 					'type' => 'float',
 					'min'  => 1,
@@ -100,6 +110,9 @@ final class SettingsValidationSchema {
 					'oneof' => CatalogCartIconPresets::IDS,
 				),
 				'hover_overlay_mobile_always' => array(
+					'type' => 'boolean',
+				),
+				'catalog_more_info_label_visible' => array(
 					'type' => 'boolean',
 				),
 				'hover_animation_duration_ms' => array(

@@ -75,6 +75,20 @@ final class CssVariablesContract {
 				'format' => 'unit',
 			),
 			array(
+				'name'           => self::PREFIX . 'catalog-cart-icon-box-w-mobile',
+				'path'           => 'catalog.catalog_cart_icon_box_width_mobile_px',
+				'suffix'         => 'px',
+				'format'         => 'unit',
+				'omit_if_zero'   => true,
+			),
+			array(
+				'name'           => self::PREFIX . 'catalog-cart-icon-box-h-mobile',
+				'path'           => 'catalog.catalog_cart_icon_box_height_mobile_px',
+				'suffix'         => 'px',
+				'format'         => 'unit',
+				'omit_if_zero'   => true,
+			),
+			array(
 				'name'   => self::PREFIX . 'catalog-cart-icon-transition-delay',
 				'path'   => 'catalog.catalog_cart_icon_transition_delay_ms',
 				'suffix' => 'ms',
