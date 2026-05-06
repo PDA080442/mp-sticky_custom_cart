@@ -9,6 +9,7 @@ namespace MpStickyCustomCart\Frontend;
 
 use MpStickyCustomCart\Core\CatalogCartIconPresets;
 use MpStickyCustomCart\Core\CheckoutQueryPreserve;
+use MpStickyCustomCart\Core\Config\CssVariablesContract;
 use MpStickyCustomCart\Core\Constants;
 use MpStickyCustomCart\Core\FeatureFlagProvider;
 use MpStickyCustomCart\Core\OptionResolver;
@@ -170,6 +171,12 @@ final class FrontendFlagResolver {
 		 */
 		$cart_icon_preset = (string) apply_filters( 'mp_sticky_custom_cart_catalog_cart_icon_preset', $cart_icon_preset );
 
+		$icon_geom = CssVariablesContract::resolve_catalog_cart_icon_geometry_px(
+			is_array( $catalog_settings ) ? $catalog_settings : array()
+		);
+
+		$catalog_more_info_show_label = ! isset( $catalog_settings['catalog_more_info_show_label'] ) || ! empty( $catalog_settings['catalog_more_info_show_label'] );
+
 		$catalog_js = array(
 			'catalogAddSurface'        => $catalog_add_surface,
 			'catalogCartIconDesktop'   => $catalog_cart_icon_desktop,
@@ -178,6 +185,8 @@ final class FrontendFlagResolver {
 			'catalogCartIconOffsetLeftPx' => $cart_icon_off_left,
 			'catalogCartIconHitSizePx'    => $cart_icon_hit,
 			'catalogCartIconGlyphSizePx'  => $cart_icon_glyph,
+			'catalogCartIconHitSizeTouchPx'   => (int) $icon_geom['hit_touch'],
+			'catalogCartIconGlyphSizeTouchPx' => (int) $icon_geom['glyph_touch'],
 			'catalogCartIconStrokeWidth'  => $cart_icon_stroke,
 			'catalogCartIconTransitionDelayMs' => $cart_icon_delay,
 			'catalogCartIconMobileMode'   => $cart_icon_mobile_mode,
@@ -194,6 +203,7 @@ final class FrontendFlagResolver {
 			'overlayHostSelectors'       => array_values( $overlay_host_selectors ),
 			'hoverMotionPreset'          => isset( $catalog_settings['hover_motion_preset'] ) ? (string) $catalog_settings['hover_motion_preset'] : 'fade_slide',
 			'moreInfoNewTab'             => ! empty( $catalog_settings['more_info_new_tab'] ),
+			'catalogMoreInfoShowLabel'  => $catalog_more_info_show_label,
 		);
 
 		$data = array(

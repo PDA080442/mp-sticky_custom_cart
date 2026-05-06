@@ -1774,6 +1774,18 @@ body.mp-scc-wishlist-integration-on .mp-scc-catalog-cart-icon-slot {
 		visibility: visible !important;
 		pointer-events: auto !important;
 	}
+
+	/* Card cart icon: optional larger/smaller hit + glyph on touch / narrow (see --mp-scc-catalog-cart-icon-*-touch). */
+	.mp-scc-catalog-cart-icon-slot {
+		width: var(--mp-scc-catalog-cart-icon-hit-size-touch, var(--mp-scc-catalog-cart-icon-hit-size, 36px));
+		height: var(--mp-scc-catalog-cart-icon-hit-size-touch, var(--mp-scc-catalog-cart-icon-hit-size, 36px));
+	}
+
+	button.mp-scc-catalog-cart-icon-btn .mp-scc-catalog-cart-icon-btn__svg,
+	button.mp-scc-catalog-cart-icon-btn .mp-scc-catalog-cart-icon-btn__img {
+		width: var(--mp-scc-catalog-cart-icon-glyph-size-touch, var(--mp-scc-catalog-cart-icon-glyph-size, 20px));
+		height: var(--mp-scc-catalog-cart-icon-glyph-size-touch, var(--mp-scc-catalog-cart-icon-glyph-size, 20px));
+	}
 }
 
 /*

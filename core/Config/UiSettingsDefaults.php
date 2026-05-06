@@ -151,6 +151,15 @@ final class UiSettingsDefaults {
 				'catalog_cart_icon_hit_size_px'      => 36,
 				/** SVG glyph size inside the button (px). */
 				'catalog_cart_icon_glyph_size_px'    => 20,
+				/**
+				 * Touch / narrow viewport (max-width 768px or pointer: coarse): outer hit size on the card.
+				 * 0 = same as catalog_cart_icon_hit_size_px.
+				 */
+				'catalog_cart_icon_hit_size_mobile_px'   => 0,
+				/**
+				 * Touch / narrow: glyph size inside the button. 0 = same as catalog_cart_icon_glyph_size_px.
+				 */
+				'catalog_cart_icon_glyph_size_mobile_px' => 0,
 				/** Built-in SVG cart path stroke width (1–3, default matches previous hard-coded look). */
 				'catalog_cart_icon_stroke_width'     => 1.75,
 				/** Delay before opacity/visibility transition starts (ms). */
@@ -196,6 +205,8 @@ final class UiSettingsDefaults {
 				'wrap_loop_item_add_to_cart'   => false,
 				/** Open «Подробнее» product URL in a new browser tab (adds target + rel). */
 				'more_info_new_tab'            => false,
+				/** When false, the visible «Подробнее» text on the card strip is hidden (link + aria-label stay). */
+				'catalog_more_info_show_label' => true,
 				/** Stacking: «Подробнее» overlay (keep below wishlist heart). */
 				'catalog_overlay_z_index'      => 4,
 			),

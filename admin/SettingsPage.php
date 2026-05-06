@@ -352,7 +352,7 @@ final class SettingsPage {
 		echo '<ul class="ul-disc">';
 		echo '<li>' . esc_html__( 'Режим «иконка корзины» / «клик по миниатюре»: выбор одного из встроенных SVG-значков, смещения и размеры, толщина линии; числа попадают в CSS-переменные и в расчёт позиции на витрине.', 'mp-sticky-custom-cart' ) . '</li>';
 		echo '<li>' . esc_html__( 'Поведение клика по миниатюре и селекторы задают, будет ли изображение добавлять simple-товар в корзину без перехода на страницу товара (только в режиме «по миниатюре»).', 'mp-sticky-custom-cart' ) . '</li>';
-		echo '<li>' . esc_html__( 'Блок «Подробнее» и анимация: длительность, easing и пресет попадают в CSS-переменные (--mp-scc-catalog-*) и управляют появлением полосы с текстом «Подробнее».', 'mp-sticky-custom-cart' ) . '</li>';
+		echo '<li>' . esc_html__( 'Блок «Подробнее» и анимация: длительность, easing и пресет попадают в CSS-переменные (--mp-scc-catalog-*) и управляют появлением полосы; видимый текст «Подробнее» можно отключить отдельно (полоса и aria-label остаются).', 'mp-sticky-custom-cart' ) . '</li>';
 		echo '<li>' . esc_html__( 'Тексты «Подробнее» и «Нет в наличии» подставляются в overlay и в тосты на карточке; пустые значения заменяются дефолтами плагина.', 'mp-sticky-custom-cart' ) . '</li>';
 		echo '<li>' . esc_html__( 'Остальные подписи в таблице ниже используются в sticky-корзине и на странице товара, а не только в каталоге.', 'mp-sticky-custom-cart' ) . '</li>';
 		echo '</ul></div>';
@@ -376,6 +376,10 @@ final class SettingsPage {
 		$icon_off_left = isset( $c['catalog_cart_icon_offset_left_px'] ) ? max( 0, min( 64, (int) $c['catalog_cart_icon_offset_left_px'] ) ) : 8;
 		$icon_hit = isset( $c['catalog_cart_icon_hit_size_px'] ) ? max( 28, min( 56, (int) $c['catalog_cart_icon_hit_size_px'] ) ) : 36;
 		$icon_glyph = isset( $c['catalog_cart_icon_glyph_size_px'] ) ? max( 14, min( 28, (int) $c['catalog_cart_icon_glyph_size_px'] ) ) : 20;
+		$geom_preview = CssVariablesContract::resolve_catalog_cart_icon_geometry_px( $c );
+		$icon_hit_touch   = (int) $geom_preview['hit_touch'];
+		$icon_glyph_touch = (int) $geom_preview['glyph_touch'];
+		$show_more_label  = ! isset( $c['catalog_more_info_show_label'] ) || ! empty( $c['catalog_more_info_show_label'] );
 		$icon_stroke_prev = isset( $c['catalog_cart_icon_stroke_width'] ) ? (float) $c['catalog_cart_icon_stroke_width'] : 1.75;
 		if ( $icon_stroke_prev < 1.0 || $icon_stroke_prev > 3.0 ) {
 			$icon_stroke_prev = 1.75;
@@ -414,7 +418,16 @@ final class SettingsPage {
 		}
 
 		echo '<h3>' . esc_html__( 'Предпросмотр кнопки на карточке', 'mp-sticky-custom-cart' ) . '</h3>';
-		echo '<p class="description">' . esc_html__( 'Упрощённый макет: на сайте вид зависит от темы и ширины колонки. Ниже — подпись «Подробнее», при режиме «иконка корзины» — квадрат зоны нажатия и значок в углу (по текущим отступам и размерам).', 'mp-sticky-custom-cart' ) . '</p>';
+		$prev_lead = __( 'Упрощённый макет: на сайте вид зависит от темы и ширины колонки. Ниже — подпись «Подробнее» (если включена), при режиме «иконка корзины» — квадрат зоны нажатия и значок в углу (десктоп по текущим отступам и размерам).', 'mp-sticky-custom-cart' );
+		if ( 'cart_icon' === $surface ) {
+			$prev_lead .= ' ' . sprintf(
+				/* translators: 1: hit size px, 2: glyph size px — touch/narrow viewport cart icon. */
+				__( 'На таче или узком экране (как на телефоне): зона %1$d×%1$d px, значок %2$d×%2$d px.', 'mp-sticky-custom-cart' ),
+				$icon_hit_touch,
+				$icon_glyph_touch
+			);
+		}
+		echo '<p class="description">' . esc_html( $prev_lead ) . '</p>';
 		echo '<div class="mp-scc-admin-catalog-preview" style="' . esc_attr( $style ) . '">';
 		echo '<div class="mp-scc-admin-catalog-preview__card" role="presentation">';
 		echo '<div class="mp-scc-admin-catalog-preview__thumb">';
@@ -439,7 +452,9 @@ final class SettingsPage {
 			'<a href="#" class="%s" onclick="return false;">',
 			esc_attr( $cls )
 		);
-		echo '<span class="mp-scc-catalog-overlay__label">' . esc_html( $label ) . '</span>';
+		if ( $show_more_label ) {
+			echo '<span class="mp-scc-catalog-overlay__label">' . esc_html( $label ) . '</span>';
+		}
 		echo '</a>';
 		echo '</div></div></div>';
 	}
@@ -605,6 +620,40 @@ final class SettingsPage {
 				$glyph_sz,
 				__( 'Ширина/высота SVG внутри кнопки (14–28).', 'mp-sticky-custom-cart' )
 			);
+			$hit_mob = isset( $c['catalog_cart_icon_hit_size_mobile_px'] ) ? (int) $c['catalog_cart_icon_hit_size_mobile_px'] : 0;
+			$glyph_mob = isset( $c['catalog_cart_icon_glyph_size_mobile_px'] ) ? (int) $c['catalog_cart_icon_glyph_size_mobile_px'] : 0;
+			if ( $hit_mob < 0 || $hit_mob > 56 ) {
+				$hit_mob = 0;
+			}
+			if ( $glyph_mob < 0 || $glyph_mob > 28 ) {
+				$glyph_mob = 0;
+			}
+			self::field_number(
+				$opt,
+				'catalog',
+				'catalog_cart_icon_hit_size_mobile_px',
+				__( 'Размер кликабельной зоны на таче (px)', 'mp-sticky-custom-cart' ),
+				$hit_mob,
+				__( 'Для max-width 768px и pointer: coarse. 0 — как «Размер кликабельной зоны» выше; иначе 28–56 px.', 'mp-sticky-custom-cart' ),
+				array(
+					'min'  => 0,
+					'max'  => 56,
+					'step' => 1,
+				)
+			);
+			self::field_number(
+				$opt,
+				'catalog',
+				'catalog_cart_icon_glyph_size_mobile_px',
+				__( 'Размер значка на таче (px)', 'mp-sticky-custom-cart' ),
+				$glyph_mob,
+				__( '0 — как «Размер значка корзины» выше; иначе 14–28 px.', 'mp-sticky-custom-cart' ),
+				array(
+					'min'  => 0,
+					'max'  => 28,
+					'step' => 1,
+				)
+			);
 			self::field_number(
 				$opt,
 				'catalog',
@@ -699,6 +748,13 @@ final class SettingsPage {
 		echo '<h3>' . esc_html__( 'Кнопка «Подробнее» и анимация hover', 'mp-sticky-custom-cart' ) . '</h3>';
 		echo '<table class="form-table" role="presentation"><tbody>';
 		self::field_checkbox( $opt, 'catalog', 'hover_overlay_mobile_always', __( 'Показывать кнопку «Подробнее» на мобильных всегда', 'mp-sticky-custom-cart' ), ! empty( $c['hover_overlay_mobile_always'] ) );
+		self::field_checkbox(
+			$opt,
+			'catalog',
+			'catalog_more_info_show_label',
+			__( 'Показывать надпись «Подробнее» на полосе', 'mp-sticky-custom-cart' ),
+			! isset( $c['catalog_more_info_show_label'] ) || ! empty( $c['catalog_more_info_show_label'] )
+		);
 		self::field_number( $opt, 'catalog', 'hover_animation_duration_ms', __( 'Длительность анимации hover (мс)', 'mp-sticky-custom-cart' ), isset( $c['hover_animation_duration_ms'] ) ? (int) $c['hover_animation_duration_ms'] : 220 );
 		self::field_text(
 			$opt,

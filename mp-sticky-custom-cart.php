@@ -17,7 +17,7 @@
 defined( 'ABSPATH' ) || exit;
 
 // Keep in sync with the Version header above.
-define( 'MP_STICKY_CUSTOM_CART_VERSION', '0.1.79' );
+define( 'MP_STICKY_CUSTOM_CART_VERSION', '0.1.80' );
 define( 'MP_STICKY_CUSTOM_CART_ASSET_VERSION', MP_STICKY_CUSTOM_CART_VERSION );
 
 define( 'MP_STICKY_CUSTOM_CART_FILE', __FILE__ );

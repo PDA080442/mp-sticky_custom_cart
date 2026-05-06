@@ -43,7 +43,9 @@ assert.ok(
 	'CssVariablesContract should map catalog hover settings to CSS variables'
 );
 assert.ok(
-	css.includes('--mp-scc-catalog-cart-icon-hit-size') &&
+	css.includes('--mp-scc-catalog-cart-icon-hit-size-touch') &&
+		css.includes('--mp-scc-catalog-cart-icon-glyph-size-touch') &&
+		css.includes('--mp-scc-catalog-cart-icon-hit-size') &&
 		css.includes('--mp-scc-catalog-cart-icon-glyph-size') &&
 		css.includes('--mp-scc-catalog-cart-icon-transition-delay') &&
 		css.includes('--mp-scc-catalog-cart-icon-color') &&
@@ -56,6 +58,8 @@ assert.ok(
 	'frontend.css should wire cart icon geometry vars + mobile mode'
 );
 assert.ok(
+		contract.includes('resolve_catalog_cart_icon_geometry_px') &&
+		contract.includes('catalog-cart-icon-hit-size-touch') &&
 		contract.includes('catalog.catalog_cart_icon_hit_size_px') &&
 		contract.includes('catalog.catalog_cart_icon_glyph_size_px') &&
 		contract.includes('catalog.catalog_cart_icon_transition_delay_ms') &&

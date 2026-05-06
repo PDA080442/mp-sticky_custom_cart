@@ -60,6 +60,18 @@ final class SettingsValidationSchema {
 					'min'  => 14,
 					'max'  => 28,
 				),
+				/** 0 = inherit desktop hit size on touch/narrow; otherwise px (same bounds as desktop). */
+				'catalog_cart_icon_hit_size_mobile_px' => array(
+					'type' => 'integer',
+					'min'  => 0,
+					'max'  => 56,
+				),
+				/** 0 = inherit desktop glyph size on touch/narrow; otherwise px (same bounds as desktop). */
+				'catalog_cart_icon_glyph_size_mobile_px' => array(
+					'type' => 'integer',
+					'min'  => 0,
+					'max'  => 28,
+				),
 				'catalog_cart_icon_stroke_width'   => array(
 					'type' => 'float',
 					'min'  => 1,
@@ -137,6 +149,9 @@ final class SettingsValidationSchema {
 					'type' => 'boolean',
 				),
 				'more_info_new_tab'         => array(
+					'type' => 'boolean',
+				),
+				'catalog_more_info_show_label' => array(
 					'type' => 'boolean',
 				),
 				'catalog_overlay_z_index'   => array(

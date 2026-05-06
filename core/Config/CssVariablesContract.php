@@ -790,6 +790,35 @@ final class CssVariablesContract {
 	}
 
 	/**
+	 * Clamp catalog loop cart icon sizes (desktop + resolved touch/narrow branch).
+	 *
+	 * Touch UI matches {@see assets/js/frontend.js} `isCatalogCartIconTouchUi()` (max-width 768px or pointer: coarse).
+	 * Mobile keys 0 mean «same as desktop».
+	 *
+	 * @param array<string, mixed> $catalog `catalog` branch of settings.
+	 * @return array<string, int> Keys: hit_desktop, hit_touch, glyph_desktop, glyph_touch.
+	 */
+	public static function resolve_catalog_cart_icon_geometry_px( array $catalog ) {
+		$hit_desk = isset( $catalog['catalog_cart_icon_hit_size_px'] ) ? (int) $catalog['catalog_cart_icon_hit_size_px'] : 36;
+		$hit_desk = max( 28, min( 56, $hit_desk ) );
+		$glyph_desk = isset( $catalog['catalog_cart_icon_glyph_size_px'] ) ? (int) $catalog['catalog_cart_icon_glyph_size_px'] : 20;
+		$glyph_desk = max( 14, min( 28, $glyph_desk ) );
+
+		$hit_m = isset( $catalog['catalog_cart_icon_hit_size_mobile_px'] ) ? (int) $catalog['catalog_cart_icon_hit_size_mobile_px'] : 0;
+		$glyph_m = isset( $catalog['catalog_cart_icon_glyph_size_mobile_px'] ) ? (int) $catalog['catalog_cart_icon_glyph_size_mobile_px'] : 0;
+
+		$hit_touch = ( $hit_m <= 0 ) ? $hit_desk : max( 28, min( 56, $hit_m ) );
+		$glyph_touch = ( $glyph_m <= 0 ) ? $glyph_desk : max( 14, min( 28, $glyph_m ) );
+
+		return array(
+			'hit_desktop'   => $hit_desk,
+			'hit_touch'     => $hit_touch,
+			'glyph_desktop' => $glyph_desk,
+			'glyph_touch'   => $glyph_touch,
+		);
+	}
+
+	/**
 	 * Build CSS custom property name => value for inline or file emission.
 	 *
 	 * @param array<string, mixed> $merged_settings Result of {@see OptionResolver::get_settings()}.
@@ -850,6 +879,14 @@ final class CssVariablesContract {
 			$b,
 			self::format_css_alpha_string( $hr_a )
 		);
+
+		$catalog_branch = OptionResolver::get_by_path( $merged_settings, 'catalog', array() );
+		if ( ! is_array( $catalog_branch ) ) {
+			$catalog_branch = array();
+		}
+		$geom = self::resolve_catalog_cart_icon_geometry_px( $catalog_branch );
+		$out[ self::PREFIX . 'catalog-cart-icon-hit-size-touch' ]   = (string) $geom['hit_touch'] . 'px';
+		$out[ self::PREFIX . 'catalog-cart-icon-glyph-size-touch' ] = (string) $geom['glyph_touch'] . 'px';
 
 		self::apply_catalog_cart_icon_appearance_tokens( $merged_settings, $out );
 
