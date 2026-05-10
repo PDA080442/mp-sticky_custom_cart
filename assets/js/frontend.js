@@ -128,6 +128,68 @@
 	}
 
 	/**
+	 * Whether the catalog cart icon preset is `tristate_panel_a` (same glyph as tri-state FAB
+	 * `.mp-scc-drawer-toggle-icon`).
+	 * @returns {boolean}
+	 */
+	function isCatalogCartIconPresetTristatePanelA() {
+		var cat = data().catalog || {};
+		var k = String(cat.catalogCartIconPreset || '')
+			.trim()
+			.replace(/[^a-z0-9_-]/gi, '');
+		return k === 'tristate_panel_a';
+	}
+
+	/**
+	 * Updates per-product qty badge on loop cart buttons when preset is `tristate_panel_a`
+	 * (mirrors FAB badge styling via CSS).
+	 * @param {Array<{ product_id?: number|string, quantity?: number|string }>} items
+	 * @param {boolean} empty
+	 */
+	window.mpScc.syncCatalogCartProductBadges = function (items, empty) {
+		if (!isCatalogCartIconPresetTristatePanelA()) {
+			return;
+		}
+		var map = {};
+		if (!empty && items && items.length) {
+			items.forEach(function (it) {
+				var pid =
+					typeof it.product_id === 'number'
+						? it.product_id
+						: parseInt(it.product_id, 10);
+				if (!pid || isNaN(pid) || pid < 1) {
+					return;
+				}
+				var q =
+					typeof it.quantity === 'number' ? it.quantity : parseInt(it.quantity, 10) || 0;
+				map[pid] = (map[pid] || 0) + q;
+			});
+		}
+		var nodes = document.querySelectorAll(
+			'.mp-scc-catalog-cart-icon-btn--panel-a[data-mp-scc-loop-product-id]'
+		);
+		var i;
+		for (i = 0; i < nodes.length; i++) {
+			var btn = nodes[i];
+			var pidN = parseInt(btn.getAttribute('data-mp-scc-loop-product-id'), 10);
+			var n = !isNaN(pidN) && pidN > 0 ? map[pidN] || 0 : 0;
+			var badge = btn.querySelector('[data-mp-scc-catalog-cart-badge]');
+			if (!badge) {
+				continue;
+			}
+			if (n > 0) {
+				badge.textContent = n > 99 ? '99+' : String(n);
+				badge.removeAttribute('hidden');
+				badge.style.display = '';
+			} else {
+				badge.textContent = '';
+				badge.setAttribute('hidden', 'hidden');
+				badge.style.display = 'none';
+			}
+		}
+	};
+
+	/**
 	 * @param {string} key Flag key from persisted flags / mpSccData.flags.
 	 * @returns {boolean}
 	 */
@@ -993,6 +1055,91 @@
 	}
 
 	/**
+	 * Loop cart icon slot size for syncCatalogCardLayouts:
+	 * on touch/narrow UI optional «box» (bg + glyph together) w/h override; desktop uses hit-size.
+	 *
+	 * @param {Record<string, unknown>} cat
+	 * @returns {{w:number,h:number}}
+	 */
+	function resolveCatalogCartIconHitLayoutSize(cat) {
+		var base = parseInt(cat.catalogCartIconHitSizePx, 10);
+		if (isNaN(base) || base < 28) {
+			base = 36;
+		}
+		if (base > 56) {
+			base = 56;
+		}
+		if (typeof isCatalogCartIconTouchUi !== 'function' || !isCatalogCartIconTouchUi()) {
+			return { w: base, h: base };
+		}
+		var mw = parseInt(cat.catalogCartIconBoxWidthMobilePx, 10);
+		var mh = parseInt(cat.catalogCartIconBoxHeightMobilePx, 10);
+		if (!isNaN(mw) && mw > 0 && !isNaN(mh) && mh > 0) {
+			return { w: Math.min(96, Math.max(1, mw)), h: Math.min(96, Math.max(1, mh)) };
+		}
+		if (!isNaN(mw) && mw > 0) {
+			var s = Math.min(96, Math.max(1, mw));
+			return { w: s, h: s };
+		}
+		if (!isNaN(mh) && mh > 0) {
+			var s2 = Math.min(96, Math.max(1, mh));
+			return { w: s2, h: s2 };
+		}
+		return { w: base, h: base };
+	}
+
+	/**
+	 * Built-in loop cart SVG dimensions on touch/narrow UI: масштабируем глиф ПРОПОРЦИОНАЛЬНО
+	 * десктопному соотношению glyph/hit (по умолчанию 20/36 ≈ 0.555), чтобы значок не «прилипал»
+	 * к краям фона при изменении общего размера кнопки.
+	 *
+	 * @param {Record<string, unknown>} cat
+	 * @returns {{w:number,h:number}}
+	 */
+	function resolveCatalogCartIconGlyphSvgSize(cat) {
+		var deskHit = parseInt(cat.catalogCartIconHitSizePx, 10);
+		if (isNaN(deskHit) || deskHit < 28) {
+			deskHit = 36;
+		}
+		if (deskHit > 56) {
+			deskHit = 56;
+		}
+		var deskGlyph = parseInt(cat.catalogCartIconGlyphSizePx, 10);
+		if (isNaN(deskGlyph) || deskGlyph < 14) {
+			deskGlyph = 20;
+		}
+		if (deskGlyph > 28) {
+			deskGlyph = 28;
+		}
+		if (typeof isCatalogCartIconTouchUi !== 'function' || !isCatalogCartIconTouchUi()) {
+			return { w: deskGlyph, h: deskGlyph };
+		}
+		var mw = parseInt(cat.catalogCartIconBoxWidthMobilePx, 10);
+		var mh = parseInt(cat.catalogCartIconBoxHeightMobilePx, 10);
+		var ratio = deskGlyph / deskHit;
+		if (!isFinite(ratio) || ratio <= 0) {
+			ratio = 20 / 36;
+		}
+		var hasW = !isNaN(mw) && mw > 0;
+		var hasH = !isNaN(mh) && mh > 0;
+		if (hasW && hasH) {
+			return {
+				w: Math.max(8, Math.min(96, Math.round(mw * ratio))),
+				h: Math.max(8, Math.min(96, Math.round(mh * ratio)))
+			};
+		}
+		if (hasW) {
+			var s = Math.max(8, Math.min(96, Math.round(mw * ratio)));
+			return { w: s, h: s };
+		}
+		if (hasH) {
+			var s2 = Math.max(8, Math.min(96, Math.round(mh * ratio)));
+			return { w: s2, h: s2 };
+		}
+		return { w: deskGlyph, h: deskGlyph };
+	}
+
+	/**
 	 * Positions «Подробнее» band + invisible add-to-cart hit layer from the first loop image geometry.
 	 * Band height matches the «Подробнее» strip (same formula as {@see syncCatalogCardLayouts} overlay block).
 	 *
@@ -1017,6 +1164,8 @@
 		var band = Math.max(40, Math.min(56, Math.round(ih * 0.26)));
 		var topRel = io.top - co.top;
 		var leftRel = io.left - co.left;
+		var showMoreInfoLabel = cat.moreInfoLabelVisible !== false;
+		var overlayBand = showMoreInfoLabel ? band : 0;
 
 		var offTop = parseInt(cat.catalogCartIconOffsetTopPx, 10);
 		if (isNaN(offTop) || offTop < 0) {
@@ -1026,10 +1175,9 @@
 		if (isNaN(offLeft) || offLeft < 0) {
 			offLeft = 8;
 		}
-		var hitSz = parseInt(cat.catalogCartIconHitSizePx, 10);
-		if (isNaN(hitSz) || hitSz < 28) {
-			hitSz = 36;
-		}
+		var hitDim = resolveCatalogCartIconHitLayoutSize(cat);
+		var hitW = hitDim.w;
+		var hitH = hitDim.h;
 		var delayMs = parseInt(cat.catalogCartIconTransitionDelayMs, 10);
 		if (isNaN(delayMs) || delayMs < 0) {
 			delayMs = 0;
@@ -1038,16 +1186,16 @@
 		var $overlay = $card.find('.mp-scc-catalog-overlay').first();
 		if ($overlay.length) {
 			$overlay.css({
-				top: topRel + ih - band,
+				top: topRel + ih - overlayBand,
 				left: leftRel,
 				width: iw,
-				height: band
+				height: overlayBand
 			});
 		}
 
 		var $hit = $card.find('.mp-scc-catalog-atc-hit').first();
 		if ($hit.length) {
-			var hitH = $overlay.length ? Math.max(0, ih - band) : ih;
+			var hitH = $overlay.length ? Math.max(0, ih - overlayBand) : ih;
 			$hit.css({
 				top: topRel,
 				left: leftRel,
@@ -1061,8 +1209,8 @@
 			$cartSlot.css({
 				top: topRel + offTop,
 				left: leftRel + offLeft,
-				width: hitSz,
-				height: hitSz,
+				width: hitW,
+				height: hitH,
 				transitionDelay: delayMs + 'ms'
 			});
 		}
@@ -1236,6 +1384,7 @@
 			motion = 'fade_slide';
 		}
 		var newTab = !!catalog.moreInfoNewTab;
+		var showMoreInfoLabel = catalog.moreInfoLabelVisible !== false;
 
 		$(cardSel).each(function () {
 			var $card = $(this);
@@ -1257,6 +1406,17 @@
 					$existing.attr('href', productHref);
 				}
 				applyMoreInfoLinkAttrs($existing, newTab);
+				$existing.toggleClass('mp-scc-catalog-overlay--no-label', !showMoreInfoLabel);
+				var $labEx = $existing.find('.mp-scc-catalog-overlay__label').first();
+				if (showMoreInfoLabel) {
+					if (!$labEx.length) {
+						$existing.append($('<span class="mp-scc-catalog-overlay__label" />').text(label));
+					} else {
+						$labEx.text(label);
+					}
+				} else {
+					$labEx.remove();
+				}
 				attachCatalogCardResizeSync($card);
 				return;
 			}
@@ -1270,6 +1430,9 @@
 			if (mobileAlways) {
 				cls += ' mp-scc-catalog-overlay--mobile-always';
 			}
+			if (!showMoreInfoLabel) {
+				cls += ' mp-scc-catalog-overlay--no-label';
+			}
 
 			var $ov = $('<a />', {
 				class: cls,
@@ -1280,7 +1443,9 @@
 			if (label) {
 				$ov.attr('aria-label', label);
 			}
-			$ov.append($('<span class="mp-scc-catalog-overlay__label" />').text(label));
+			if (showMoreInfoLabel) {
+				$ov.append($('<span class="mp-scc-catalog-overlay__label" />').text(label));
+			}
 			$card.append($ov);
 			attachCatalogCardResizeSync($card);
 		});
@@ -1316,6 +1481,354 @@
 				window.console.warn('[mp-scc] Multiple wishlist controls in one product card', this);
 			}
 		});
+	}
+
+	/**
+	 * Detect "in wishlist" robustly across YITH Free / Premium variants on metaphysica-parfums.com.
+	 *
+	 * Sources of truth (any one is enough):
+	 * - container `.yith-wcwl-add-to-wishlist.exists` (set by YITH after add);
+	 * - visible (`:not(.hide)`) browse / added blocks;
+	 * - hidden `.yith-wcwl-add-button.hide` while a browse block is present;
+	 * - container exists, but the actual `a.add_to_wishlist` anchor is GONE / hidden — typical YITH SSR
+	 *   for Premium, where `hide_add_button` is on and the loop ships only the browse link.
+	 *
+	 * @param {JQuery} $card
+	 */
+	function syncWishlistStateAttrOnCard($card) {
+		if (!$card || !$card.length) {
+			return;
+		}
+		var $wl = $card.find('.yith-wcwl-add-to-wishlist').first();
+		if (!$wl.length) {
+			$card.removeAttr('data-mp-scc-wishlist');
+			return;
+		}
+		var inList = false;
+		if ($wl.hasClass('exists')) {
+			inList = true;
+		} else if ($wl.find('.yith-wcwl-wishlistexistsbrowse').not('.hide').length) {
+			inList = true;
+		} else if ($wl.find('.yith-wcwl-wishlistaddedbrowse').not('.hide').length) {
+			inList = true;
+		} else if ($wl.find('.yith-wcwl-add-button.hide').length && $wl.find('.yith-wcwl-wishlistexistsbrowse, .yith-wcwl-wishlistaddedbrowse').length) {
+			inList = true;
+		} else {
+			var $addAnchors = $wl.find('a.add_to_wishlist').filter(function () {
+				return !$(this).closest('.hide').length && this.offsetParent !== null;
+			});
+			if (!$addAnchors.length) {
+				var hasAnyAnchor = $wl.find('a').filter(function () {
+					var h = (this.getAttribute('href') || '').toLowerCase();
+					return h.indexOf('add_to_wishlist=') === -1;
+				}).length > 0;
+				if (hasAnyAnchor) {
+					inList = true;
+				}
+			}
+		}
+		var v = inList ? 'in' : 'out';
+		$card.attr('data-mp-scc-wishlist', v);
+		// Mirror onto the YITH container so the CSS rule doesn't depend on the parent's selector.
+		$wl.attr('data-mp-scc-wishlist', v);
+		ensureSvgHeartInsideYithContainer($wl[0]);
+	}
+
+	var MP_SCC_WL_HEART_SVG =
+		'<svg class="mp-scc-wl-glyph" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" focusable="false" style="display:inline-block;width:16px;height:16px;vertical-align:middle;fill:currentColor;color:inherit;">' +
+		'<path d="M12.001 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54l-1.449 1.31z"/>' +
+		'</svg>';
+
+	function isAnchorVisible(a) {
+		if (!a) {
+			return false;
+		}
+		if (a.closest && a.closest('.hide')) {
+			return false;
+		}
+		return a.offsetParent !== null;
+	}
+
+	function ensureSvgHeartInsideYithContainer(wl) {
+		if (!wl || !wl.querySelectorAll) {
+			return;
+		}
+		var anchors = wl.querySelectorAll('a');
+		for (var i = 0; i < anchors.length; i++) {
+			var a = anchors[i];
+			if (!isAnchorVisible(a)) {
+				continue;
+			}
+			if (a.querySelector('svg.mp-scc-wl-glyph')) {
+				continue;
+			}
+			var tmp = document.createElement('span');
+			tmp.innerHTML = MP_SCC_WL_HEART_SVG;
+			var svg = tmp.firstChild;
+			if (svg) {
+				a.insertBefore(svg, a.firstChild);
+			}
+		}
+	}
+
+	/**
+	 * Watch each catalog card's wishlist container for mutations and rescan its state.
+	 * Fixes the "color did not change immediately after add" race with YITH's DOM updates.
+	 */
+	var __mpSccWishlistObservers = (typeof window.WeakSet === 'function') ? new window.WeakSet() : null;
+	function attachWishlistMutationObserverIfNeeded($card) {
+		if (typeof window.MutationObserver !== 'function' || !__mpSccWishlistObservers) {
+			return;
+		}
+		var card = $card[0];
+		if (!card || __mpSccWishlistObservers.has(card)) {
+			return;
+		}
+		var wl = card.querySelector('.yith-wcwl-add-to-wishlist');
+		if (!wl) {
+			return;
+		}
+		var rerun = function () {
+			syncWishlistStateAttrOnCard($card);
+		};
+		var obs = new window.MutationObserver(function () {
+			window.clearTimeout(card.__mpSccWishlistObsTimer);
+			card.__mpSccWishlistObsTimer = window.setTimeout(rerun, 30);
+		});
+		obs.observe(wl, { attributes: true, attributeFilter: ['class', 'style'], childList: true, subtree: true });
+		__mpSccWishlistObservers.add(card);
+	}
+
+	function scanWishlistStateOnAllCatalogCards() {
+		if (!window.mpScc.flagEnabled('wishlist_icon_integration_enabled')) {
+			return;
+		}
+		var cat = data().catalog || {};
+		$(catalogLoopCardSelector(cat)).each(function () {
+			var $c = $(this);
+			syncWishlistStateAttrOnCard($c);
+			attachWishlistMutationObserverIfNeeded($c);
+		});
+	}
+
+	/**
+	 * Resolve YITH product id across Free/Premium markup variants:
+	 * 1) `data-product-id` on the anchor or the inner `a.add_to_wishlist`;
+	 * 2) `data-product-id` on the `.yith-wcwl-add-to-wishlist` container;
+	 * 3) suffix of `add-to-wishlist-NNNN` class on the container (SSR shape on metaphysica-parfums.com);
+	 * 4) `?add_to_wishlist=NNN` in the anchor href;
+	 * 5) any descendant `[data-product-id]` inside the card.
+	 *
+	 * @param {JQuery} $card
+	 * @param {JQuery} $anchor
+	 * @returns {number}
+	 */
+	function resolveYithWishlistProductId($card, $anchor) {
+		function num(v) {
+			var n = parseInt(v, 10);
+			return !isNaN(n) && n > 0 ? n : 0;
+		}
+		var pid = num($anchor.attr('data-product-id'));
+		if (pid) {
+			return pid;
+		}
+		var $add = $card.find('.yith-wcwl-add-to-wishlist a.add_to_wishlist').first();
+		pid = num($add.attr('data-product-id'));
+		if (pid) {
+			return pid;
+		}
+		var $wl = $card.find('.yith-wcwl-add-to-wishlist').first();
+		pid = num($wl.attr('data-product-id'));
+		if (pid) {
+			return pid;
+		}
+		var cls = ($wl.attr('class') || '') + ' ';
+		var m = cls.match(/\badd-to-wishlist-(\d+)\b/);
+		if (m) {
+			pid = num(m[1]);
+			if (pid) {
+				return pid;
+			}
+		}
+		var href = $anchor.attr('href') || '';
+		m = href.match(/[?&]add_to_wishlist=(\d+)/);
+		if (m) {
+			pid = num(m[1]);
+			if (pid) {
+				return pid;
+			}
+		}
+		var found = 0;
+		$card.find('[data-product-id]').each(function () {
+			var p = num($(this).attr('data-product-id'));
+			if (p) {
+				found = p;
+				return false;
+			}
+		});
+		return found;
+	}
+
+	/**
+	 * YITH WCWL: цвет «в избранном», тосты, второй клик по ссылке на wishlist — удаление без ухода со страницы.
+	 */
+	function initYithWishlistCatalogBehavior() {
+		if (!window.mpScc.flagEnabled('wishlist_icon_integration_enabled')) {
+			return;
+		}
+		if (window.__mpSccYithWishlistCatalogInit) {
+			return;
+		}
+		window.__mpSccYithWishlistCatalogInit = true;
+
+		scanWishlistStateOnAllCatalogCards();
+		// YITH initialises browse/exists state asynchronously; rescan after their init + small delay (Premium).
+		$(document).on('yith_wcwl_init.mpSccWishlist yith-wcwl-init.mpSccWishlist', function () {
+			window.setTimeout(scanWishlistStateOnAllCatalogCards, 0);
+		});
+		window.setTimeout(scanWishlistStateOnAllCatalogCards, 250);
+		window.setTimeout(scanWishlistStateOnAllCatalogCards, 1200);
+
+		function rescanCardLater($card) {
+			[0, 80, 250, 700, 1500].forEach(function (ms) {
+				window.setTimeout(function () {
+					syncWishlistStateAttrOnCard($card);
+					attachWishlistMutationObserverIfNeeded($card);
+				}, ms);
+			});
+		}
+
+		$(document.body).on('added_to_wishlist.mpSccWishlist', function (e, $link, $container) {
+			var $wrap = $container && $container.jquery ? $container : $($container);
+			var $card = $wrap.closest(catalogLoopCardSelector(data().catalog || {}));
+			if (!$card.length) {
+				return;
+			}
+			rescanCardLater($card);
+			var msg =
+				typeof window.mpScc.label === 'function' ? window.mpScc.label('wishlist_toast_added') : '';
+			showCatalogToast($card, msg || 'Добавлено в избранное', {});
+		});
+
+		$(document.body).on('removed_from_wishlist.mpSccWishlist', function (e, $link, $container) {
+			var $wrap = $container && $container.jquery ? $container : $($container);
+			var $card = $wrap.closest(catalogLoopCardSelector(data().catalog || {}));
+			if (!$card.length) {
+				return;
+			}
+			rescanCardLater($card);
+			var msg =
+				typeof window.mpScc.label === 'function' ? window.mpScc.label('wishlist_toast_removed') : '';
+			showCatalogToast($card, msg || 'Удалено из избранного', {});
+		});
+
+		$(document.body).on('yith_wcwl_fragments_replaced.mpSccWishlist', function () {
+			window.setTimeout(scanWishlistStateOnAllCatalogCards, 0);
+		});
+
+		if (!window.__mpSccYithWishlistBrowseCapture) {
+			window.__mpSccYithWishlistBrowseCapture = true;
+			document.addEventListener(
+				'click',
+				function (e) {
+					if (!window.mpScc || !window.mpScc.flagEnabled('wishlist_icon_integration_enabled')) {
+						return;
+					}
+					var t = e.target;
+					if (!t || !t.closest) {
+						return;
+					}
+					var a = t.closest('a');
+					if (!a || !a.getAttribute) {
+						return;
+					}
+					var wl = a.closest('.yith-wcwl-add-to-wishlist');
+					if (!wl) {
+						return;
+					}
+					var card = a.closest(catalogLoopCardSelector(data().catalog || {}));
+					if (!card) {
+						return;
+					}
+					if (a.classList.contains('add_to_wishlist')) {
+						return;
+					}
+					var href = (a.getAttribute('href') || '').toLowerCase();
+					// Don't intercept the bare "add" links (?add_to_wishlist=NNN) — YITH handles those.
+					if (href.indexOf('add_to_wishlist=') !== -1) {
+						return;
+					}
+					// Heuristic: any non-add anchor inside YITH widget that points to a wishlist URL
+					// (catalogues commonly link to "/wishlist/", "/my-wishlist/", "/my-account/my-wishlist/", etc.).
+					if (href.indexOf('wishlist') === -1) {
+						return;
+					}
+					e.preventDefault();
+					e.stopPropagation();
+					if (typeof e.stopImmediatePropagation === 'function') {
+						e.stopImmediatePropagation();
+					}
+					var $card = $(card);
+					var $a = $(a);
+					var pid = resolveYithWishlistProductId($card, $a);
+					if (!pid) {
+						return;
+					}
+					window.mpScc
+						.postAjax('yithRemoveFromWishlist', { product_id: pid })
+						.done(function (resp) {
+							if (!resp || !resp.success || !resp.data) {
+								var bad =
+									typeof window.mpScc.label === 'function'
+										? window.mpScc.label('wishlist_remove_failed')
+										: '';
+								showCatalogToast($card, bad || 'Не удалось убрать из избранного', {
+									variant: 'error',
+									assertive: true
+								});
+								return;
+							}
+							var html = resp.data.fragment_html ? String(resp.data.fragment_html) : '';
+							var $wljq = $card.find('.yith-wcwl-add-to-wishlist').first();
+							if (html && $wljq.length) {
+								var $tmp = $('<div />').html(html);
+								var $rep = $tmp.find('.yith-wcwl-add-to-wishlist').first();
+								if ($rep.length) {
+									$wljq.replaceWith($rep);
+								} else {
+									$wljq.replaceWith(html);
+								}
+							} else if ($wljq.length) {
+								$wljq.removeClass('exists');
+								$wljq
+									.find('.yith-wcwl-wishlistexistsbrowse, .yith-wcwl-wishlistaddedbrowse')
+									.addClass('hide')
+									.css('display', 'none');
+								$wljq.find('.yith-wcwl-add-button').removeClass('hide').css('display', '');
+							}
+							syncWishlistStateAttrOnCard($card);
+							$(document).trigger('yith_wcwl_init');
+							$(document.body).trigger('removed_from_wishlist', [$a, $card.find('.yith-wcwl-add-to-wishlist').first()]);
+							var okMsg =
+								typeof window.mpScc.label === 'function'
+									? window.mpScc.label('wishlist_toast_removed')
+									: '';
+							showCatalogToast($card, okMsg || 'Удалено из избранного', {});
+						})
+						.fail(function () {
+							var bad =
+								typeof window.mpScc.label === 'function'
+									? window.mpScc.label('wishlist_remove_failed')
+									: '';
+							showCatalogToast($card, bad || 'Не удалось убрать из избранного', {
+								variant: 'error',
+								assertive: true
+							});
+						});
+				},
+				true
+			);
+		}
 	}
 
 	/**
@@ -1467,13 +1980,9 @@
 		var desk = catalog.catalogCartIconDesktop || 'hover';
 		var touch = catalog.catalogCartIconTouch || 'always';
 
-		var glyphPx = parseInt(catalog.catalogCartIconGlyphSizePx, 10);
-		if (isNaN(glyphPx) || glyphPx < 14) {
-			glyphPx = 20;
-		}
-		if (glyphPx > 28) {
-			glyphPx = 28;
-		}
+		var glyphDim = resolveCatalogCartIconGlyphSvgSize(catalog);
+		var glyphW = glyphDim.w;
+		var glyphH = glyphDim.h;
 
 		var presetKey = String(catalog.catalogCartIconPreset || 'classic')
 			.trim()
@@ -1503,9 +2012,9 @@
 
 		var cartIconSvg =
 			'<svg class="mp-scc-catalog-cart-icon-btn__svg" xmlns="http://www.w3.org/2000/svg" width="' +
-			glyphPx +
+			glyphW +
 			'" height="' +
-			glyphPx +
+			glyphH +
 			'" viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false">' +
 			innerTpl +
 			'</svg>';
@@ -1555,7 +2064,29 @@
 			$btn.toggleClass('mp-scc-catalog-cart-icon-btn--custom-img', false);
 			var $svg = $btn.find('.mp-scc-catalog-cart-icon-btn__svg');
 			if ($svg.length) {
-				$svg.attr({ width: glyphPx, height: glyphPx });
+				$svg.attr({ width: glyphW, height: glyphH });
+				$svg.css({ width: glyphW + 'px', height: glyphH + 'px' });
+			}
+
+			var isPanelA = presetKey === 'tristate_panel_a';
+			$btn.toggleClass('mp-scc-catalog-cart-icon-btn--panel-a', isPanelA);
+			if (isPanelA) {
+				if (pid) {
+					$btn.attr('data-mp-scc-loop-product-id', String(pid));
+				} else {
+					$btn.removeAttr('data-mp-scc-loop-product-id');
+				}
+				var $badge = $btn.find('[data-mp-scc-catalog-cart-badge]');
+				if (!$badge.length) {
+					$badge = $(
+						'<span class="mp-scc-catalog-cart-icon-btn__badge" data-mp-scc-catalog-cart-badge="1" hidden="hidden" aria-hidden="true"></span>'
+					);
+					$btn.append($badge);
+				}
+			} else {
+				$btn.removeClass('mp-scc-catalog-cart-icon-btn--panel-a');
+				$btn.removeAttr('data-mp-scc-loop-product-id');
+				$btn.find('[data-mp-scc-catalog-cart-badge]').remove();
 			}
 
 			var btnEl = $btn.get(0);
@@ -1569,6 +2100,14 @@
 		});
 
 		stampAllCatalogCartIconButtonsFromCssVars();
+
+		var stickyRef = window.mpScc && window.mpScc.sticky;
+		if (stickyRef && typeof window.mpScc.syncCatalogCartProductBadges === 'function') {
+			window.mpScc.syncCatalogCartProductBadges(
+				stickyRef._lastSnapshotItems || [],
+				!!stickyRef._lastSnapshotEmpty
+			);
+		}
 	}
 
 	function initCatalogCartIconHoverIntent() {
@@ -2466,6 +3005,9 @@
 		/** Last successful snapshot quantities per cart line key (for optimistic +/- rollback). */
 		this.serverQty = {};
 		this._mpSccDestroyed = false;
+		/** Last cart snapshot lines (for catalog FAB-style badges). */
+		this._lastSnapshotItems = [];
+		this._lastSnapshotEmpty = true;
 	}
 
 	StickyCartController.prototype.isDrawerOpen = function () {
@@ -2738,6 +3280,12 @@
 
 		this.$root.attr('data-mp-scc-cart-empty', empty ? '1' : '0');
 		this.$root.toggleClass('mp-scc-sticky--empty', !!empty);
+
+		this._lastSnapshotItems = items;
+		this._lastSnapshotEmpty = !!empty;
+		if (typeof window.mpScc.syncCatalogCartProductBadges === 'function') {
+			window.mpScc.syncCatalogCartProductBadges(items, !!empty);
+		}
 
 		this.syncStickyActions(empty);
 
@@ -3469,6 +4017,7 @@
 		initCatalogCartIconPaintHammer();
 		initClientDiagnostics();
 		initWishlistIntegrationBodyClass();
+		initYithWishlistCatalogBehavior();
 		applyCatalogCartIconMobileModeAttr();
 		initCatalogCartIconTouchReveal();
 		initCatalogCartIconHoverIntent();
@@ -3520,7 +4069,10 @@
 
 		$(document.body).on(
 			'wc_fragments_refreshed updated_wc_div etheme_ajax_loaded post-load',
-			scheduleCatalogChromeLayouts
+			function () {
+				scheduleCatalogChromeLayouts();
+				scanWishlistStateOnAllCatalogCards();
+			}
 		);
 
 		var catalogChromeResizeTimer = null;
@@ -3531,6 +4083,7 @@
 			catalogChromeResizeTimer = window.setTimeout(function () {
 				catalogChromeResizeTimer = null;
 				scheduleCatalogChromeLayouts();
+				scanWishlistStateOnAllCatalogCards();
 			}, 120);
 		});
 

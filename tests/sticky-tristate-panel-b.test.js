@@ -60,6 +60,13 @@ assert.ok(contract.includes('tristate-metrics-row-padding-y'), 'CssVariablesCont
 assert.ok(contract.includes('tristate-metrics-hr-border-color'), 'CssVariablesContract should emit metrics hr rgba');
 assert.ok(admin.includes('tristate_metrics_hr_opacity_percent'), 'Settings UI should expose metrics hr opacity');
 assert.ok(admin.includes('tristate_metric_lines'), 'Settings UI should expose tri-state metric line label');
+assert.ok(defaults.includes('tristate_metric_lines_visible'), 'Defaults should define tri-state metric lines visibility');
+assert.ok(schema.includes('tristate_metric_lines_visible'), 'Schema should validate tri-state metric lines visibility');
+assert.ok(admin.includes('tristate_metric_lines_visible'), 'Settings UI should expose tri-state metric lines visibility toggle');
+assert.ok(
+	renderer.includes('$show_tristate_metric_lines') && renderer.includes('tristate_drawer_c_metrics_markup'),
+	'Renderer should gate panel B/C lines row on tristate_metric_lines_visible'
+);
 assert.ok(css.includes('--mp-scc-tristate-panel-b-max-height'), 'CSS should consume B max-height token');
 assert.ok(css.includes('--mp-scc-tristate-panel-c-width'), 'CSS should consume drawer C width token');
 assert.ok(css.includes('--mp-scc-tristate-panel-c-height'), 'CSS should consume drawer C height token');
@@ -135,5 +142,28 @@ assert.ok(admin.includes('tristate_fab_badge_size_px'), 'Settings UI should expo
 assert.ok(admin.includes('tristate_fab_badge_bg_color'), 'Settings UI should expose FAB badge colors');
 assert.ok(admin.includes('tristate_actions_toolbar_padding_top_px'), 'Settings UI should expose tri-state toolbar padding');
 assert.ok(admin.includes('tristate_dismiss_hit_px'), 'Settings UI should expose tri-state dismiss styling');
+
+// 0.1.77: adaptive max-heights for panels B/C on mobile/tablet viewports.
+assert.ok(defaults.includes('tristate_panel_b_max_height_mobile_px'), 'Defaults should define panel B mobile max-height');
+assert.ok(defaults.includes('tristate_panel_b_max_height_tablet_px'), 'Defaults should define panel B tablet max-height');
+assert.ok(defaults.includes('tristate_panel_c_height_mobile_px'), 'Defaults should define panel C mobile height');
+assert.ok(defaults.includes('tristate_panel_c_height_tablet_px'), 'Defaults should define panel C tablet height');
+assert.ok(defaults.includes('tristate_tablet_breakpoint_max_px'), 'Defaults should define tablet breakpoint');
+assert.ok(schema.includes('tristate_panel_b_max_height_mobile_px'), 'Schema should validate panel B mobile max-height');
+assert.ok(schema.includes('tristate_panel_b_max_height_tablet_px'), 'Schema should validate panel B tablet max-height');
+assert.ok(schema.includes('tristate_panel_c_height_mobile_px'), 'Schema should validate panel C mobile height');
+assert.ok(schema.includes('tristate_panel_c_height_tablet_px'), 'Schema should validate panel C tablet height');
+assert.ok(schema.includes('tristate_tablet_breakpoint_max_px'), 'Schema should validate tablet breakpoint');
+assert.ok(admin.includes('tristate_panel_b_max_height_mobile_px'), 'Settings UI should expose panel B mobile max-height');
+assert.ok(admin.includes('tristate_panel_b_max_height_tablet_px'), 'Settings UI should expose panel B tablet max-height');
+assert.ok(admin.includes('tristate_panel_c_height_mobile_px'), 'Settings UI should expose panel C mobile height');
+assert.ok(admin.includes('tristate_panel_c_height_tablet_px'), 'Settings UI should expose panel C tablet height');
+assert.ok(admin.includes('tristate_tablet_breakpoint_max_px'), 'Settings UI should expose tablet breakpoint');
+assert.ok(dyn.includes('print_footer_tristate_adaptive_heights_css'), 'DynamicStylesProvider should print adaptive B/C heights CSS');
+assert.ok(dyn.includes('tristate_panel_b_max_height_mobile_px'), 'Adaptive heights CSS should read mobile B override');
+assert.ok(dyn.includes('tristate_panel_c_height_tablet_px'), 'Adaptive heights CSS should read tablet C override');
+assert.ok(dyn.includes('--mp-scc-tristate-panel-b-max-height:'), 'Adaptive CSS should redefine B max-height token inside @media');
+assert.ok(dyn.includes('--mp-scc-tristate-panel-c-height:'), 'Adaptive CSS should redefine C height token inside @media');
+assert.ok(dyn.includes('tristate-adaptive-heights'), 'Adaptive heights CSS should have its own <style> id');
 
 console.log('sticky-tristate-panel-b: OK');

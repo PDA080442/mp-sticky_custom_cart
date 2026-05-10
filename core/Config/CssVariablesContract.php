@@ -75,6 +75,20 @@ final class CssVariablesContract {
 				'format' => 'unit',
 			),
 			array(
+				'name'           => self::PREFIX . 'catalog-cart-icon-box-w-mobile',
+				'path'           => 'catalog.catalog_cart_icon_box_width_mobile_px',
+				'suffix'         => 'px',
+				'format'         => 'unit',
+				'omit_if_zero'   => true,
+			),
+			array(
+				'name'           => self::PREFIX . 'catalog-cart-icon-box-h-mobile',
+				'path'           => 'catalog.catalog_cart_icon_box_height_mobile_px',
+				'suffix'         => 'px',
+				'format'         => 'unit',
+				'omit_if_zero'   => true,
+			),
+			array(
 				'name'   => self::PREFIX . 'catalog-cart-icon-transition-delay',
 				'path'   => 'catalog.catalog_cart_icon_transition_delay_ms',
 				'suffix' => 'ms',
@@ -785,6 +799,54 @@ final class CssVariablesContract {
 				'path'   => 'wishlist_ui.heart_icon_z_index',
 				'suffix' => '',
 				'format' => 'integer',
+			),
+			array(
+				'name'   => self::PREFIX . 'wishlist-heart-bg',
+				'path'   => 'wishlist_ui.heart_idle_bg_color',
+				'suffix' => '',
+				'format' => 'color',
+			),
+			array(
+				'name'   => self::PREFIX . 'wishlist-heart-color',
+				'path'   => 'wishlist_ui.heart_idle_icon_color',
+				'suffix' => '',
+				'format' => 'color',
+			),
+			array(
+				'name'   => self::PREFIX . 'wishlist-heart-in-list-bg',
+				'path'   => 'wishlist_ui.heart_in_wishlist_bg_color',
+				'suffix' => '',
+				'format' => 'color',
+			),
+			array(
+				'name'   => self::PREFIX . 'wishlist-heart-in-list-color',
+				'path'   => 'wishlist_ui.heart_in_wishlist_icon_color',
+				'suffix' => '',
+				'format' => 'color',
+			),
+			array(
+				'name'   => self::PREFIX . 'wishlist-heart-bg-hover',
+				'path'   => 'wishlist_ui.heart_idle_hover_bg_color',
+				'suffix' => '',
+				'format' => 'color',
+			),
+			array(
+				'name'   => self::PREFIX . 'wishlist-heart-color-hover',
+				'path'   => 'wishlist_ui.heart_idle_hover_icon_color',
+				'suffix' => '',
+				'format' => 'color',
+			),
+			array(
+				'name'   => self::PREFIX . 'wishlist-heart-in-list-bg-hover',
+				'path'   => 'wishlist_ui.heart_in_wishlist_hover_bg_color',
+				'suffix' => '',
+				'format' => 'color',
+			),
+			array(
+				'name'   => self::PREFIX . 'wishlist-heart-in-list-color-hover',
+				'path'   => 'wishlist_ui.heart_in_wishlist_hover_icon_color',
+				'suffix' => '',
+				'format' => 'color',
 			),
 		);
 	}

@@ -49,7 +49,7 @@ This document fixes **expected behavior** for QA and migrations. Server: WooComm
 | `catalog_cart_icon_appearance_preset` | `black_cart_white_bg` (dark cart, light frosted button) or `white_cart_black_bg` (white cart, dark button). Drives `--mp-scc-catalog-cart-icon-color` and background vars (legacy `catalog_cart_icon_color` / bg keys are ignored for CSS). On `:hover`, face and glyph swap (solid `--mp-scc-catalog-cart-icon-background-hover` from glyph, `--mp-scc-catalog-cart-icon-color-hover` from face base), like the wishlist pill. |
 | `catalog_cart_icon_color` (legacy) | Ignored for storefront CSS when presets are used; kept for imports. |
 | `catalog_cart_icon_bg_*` (legacy) | Same. |
-| `catalog_cart_icon_preset` | One of the built-in SVG slugs from `CatalogCartIconPresets::IDS` (10 variants). Inner markup is passed to JS as `catalogCartIconPresetInners`; active id as `catalogCartIconPreset`. |
+| `catalog_cart_icon_preset` | One of the built-in SVG slugs from `CatalogCartIconPresets::IDS` (11 variants). Inner markup is passed to JS as `catalogCartIconPresetInners`; active id as `catalogCartIconPreset`. Use `tristate_panel_a` for the same filled-cart glyph as tri-state FAB `.mp-scc-drawer-toggle-icon` (pair with appearance «белая корзина на тёмном» for a black FAB-style face). |
 | `catalog_cart_icon_bg_border_radius_px` | Corner radius of the icon button face (px, 0–28); exposed as `--mp-scc-catalog-cart-icon-border-radius`. |
 | `catalog_cart_icon_inner_padding_px` | Symmetric padding between button edge and glyph (px, 0–12); `--mp-scc-catalog-cart-icon-inner-padding`. |
 

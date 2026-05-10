@@ -96,6 +96,11 @@ final class Constants {
 	public const AJAX_ACTION_REMOVE_CART_LINE = 'mp_scc_remove_cart_line';
 
 	/**
+	 * Logged-in only: remove product from YITH wishlist DB + return fresh add-to-wishlist markup.
+	 */
+	public const AJAX_ACTION_YITH_REMOVE_FROM_WISHLIST = 'mp_scc_yith_remove_from_wishlist';
+
+	/**
 	 * Admin-only: JSON list of {@see Constants::OPTION_ERROR_LOG} entries.
 	 */
 	public const AJAX_ACTION_ADMIN_GET_ERROR_LOGS = 'mp_scc_admin_get_error_logs';

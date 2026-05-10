@@ -31,6 +31,7 @@ final class AjaxEndpointsHooks {
 		add_action( 'wp_ajax_nopriv_' . Constants::AJAX_ACTION_CLEAR_CART, array( self::class, 'handle_clear_cart' ) );
 		add_action( 'wp_ajax_' . Constants::AJAX_ACTION_REMOVE_CART_LINE, array( self::class, 'handle_remove_cart_line' ) );
 		add_action( 'wp_ajax_nopriv_' . Constants::AJAX_ACTION_REMOVE_CART_LINE, array( self::class, 'handle_remove_cart_line' ) );
+		add_action( 'wp_ajax_' . Constants::AJAX_ACTION_YITH_REMOVE_FROM_WISHLIST, array( self::class, 'handle_yith_remove_from_wishlist' ) );
 
 		/**
 		 * Fires when AJAX endpoint hooks are registered — attach real handlers here.
@@ -895,6 +896,103 @@ final class AjaxEndpointsHooks {
 			}
 		}
 		return $out;
+	}
+
+	/**
+	 * Remove a product from the logged-in user's YITH wishlists (default table) and return fresh add-to-wishlist HTML.
+	 *
+	 * Used when the storefront intercepts the «browse wishlist» link on catalog cards.
+	 */
+	public static function handle_yith_remove_from_wishlist() {
+		self::verify_nonce();
+		$flags = OptionResolver::get_feature_flags();
+		if ( empty( $flags[ FeatureFlagsDefaults::KEY_WISHLIST_ICON_INTEGRATION_ENABLED ] ) ) {
+			wp_send_json_error(
+				array(
+					'message' => __( 'Интеграция избранного отключена.', 'mp-sticky-custom-cart' ),
+					'code'    => 'feature_disabled',
+				)
+			);
+		}
+		if ( ! is_user_logged_in() ) {
+			wp_send_json_error(
+				array(
+					'message' => __( 'Войдите в аккаунт.', 'mp-sticky-custom-cart' ),
+					'code'    => 'auth_required',
+				)
+			);
+		}
+		$product_id = isset( $_POST['product_id'] ) ? absint( wp_unslash( $_POST['product_id'] ) ) : 0;
+		if ( $product_id <= 0 ) {
+			wp_send_json_error(
+				array(
+					'message' => __( 'Не указан товар.', 'mp-sticky-custom-cart' ),
+					'code'    => 'bad_product',
+				)
+			);
+		}
+		$deleted     = 0;
+		$used_native = false;
+
+		// Prefer YITH's own remove API (Free/Premium) so transients and hooks fire correctly.
+		if ( function_exists( 'YITH_WCWL' ) ) {
+			try {
+				$yith = YITH_WCWL();
+				if ( is_object( $yith ) && method_exists( $yith, 'remove' ) ) {
+					$args = array(
+						'remove_from_wishlist' => $product_id,
+						'user_id'              => get_current_user_id(),
+					);
+					$yith->remove( $args );
+					$used_native = true;
+					$deleted     = 1;
+				}
+			} catch ( \Throwable $t ) { // phpcs:ignore PHPCompatibility.LanguageConstructs.NewLanguageConstructs.t_throwFound -- handled.
+				$used_native = false;
+			}
+		}
+
+		if ( ! $used_native ) {
+			global $wpdb;
+			$table = property_exists( $wpdb, 'yith_wcwl_items' ) && is_string( $wpdb->yith_wcwl_items ) && '' !== $wpdb->yith_wcwl_items
+				? $wpdb->yith_wcwl_items
+				: $wpdb->prefix . 'yith_wcwl_items';
+
+			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name is built from trusted prefix / YITH property only.
+			$table_exists = $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $table ) );
+			if ( $table_exists !== $table ) {
+				wp_send_json_error(
+					array(
+						'message' => __( 'Таблица YITH Wishlist не найдена.', 'mp-sticky-custom-cart' ),
+						'code'    => 'yith_table_missing',
+					)
+				);
+			}
+
+			$user_id = get_current_user_id();
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching -- YITH core uses the same table; no public API for loop-only remove.
+			$deleted = (int) $wpdb->query(
+				$wpdb->prepare(
+					"DELETE FROM {$table} WHERE user_id = %d AND prod_id = %d",
+					$user_id,
+					$product_id
+				)
+			);
+		}
+
+		$html = '';
+		if ( function_exists( 'wc_get_product' ) && wc_get_product( $product_id ) ) {
+			$html = (string) do_shortcode( '[yith_wcwl_add_to_wishlist product_id="' . (int) $product_id . '"]' );
+		}
+
+		wp_send_json_success(
+			array(
+				'product_id'    => $product_id,
+				'removed_rows'  => $deleted,
+				'used_native'   => $used_native,
+				'fragment_html' => $html,
+			)
+		);
 	}
 
 	/**

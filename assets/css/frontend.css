@@ -1774,6 +1774,17 @@ body.mp-scc-wishlist-integration-on .mp-scc-catalog-cart-icon-slot {
 		visibility: visible !important;
 		pointer-events: auto !important;
 	}
+
+	/*
+	 * Mobile box override — это размер ВСЕЙ кнопки (фон + значок вместе).
+	 * Сам глиф SVG масштабируется JS пропорционально десктопному соотношению (resolveCatalogCartIconGlyphSvgSize)
+	 * и кладётся inline-стилем — поэтому здесь меняем только размер слота/фона.
+	 * 0 в админке = переменная не выводится, fallback — десктопные значения.
+	 */
+	.mp-scc-catalog-card--cart-icon .mp-scc-catalog-cart-icon-slot {
+		width: var(--mp-scc-catalog-cart-icon-box-w-mobile, var(--mp-scc-catalog-cart-icon-hit-size, 36px));
+		height: var(--mp-scc-catalog-cart-icon-box-h-mobile, var(--mp-scc-catalog-cart-icon-hit-size, 36px));
+	}
 }
 
 /*
@@ -1838,6 +1849,41 @@ button.mp-scc-catalog-cart-icon-btn .mp-scc-catalog-cart-icon-btn__icon {
 	display: flex;
 	align-items: center;
 	justify-content: center;
+}
+
+/* Preset «Панель A»: overflow badge like tri-state FAB; vars match :root tri-state badge tokens when present. */
+.mp-scc-catalog-cart-icon-slot:has(.mp-scc-catalog-cart-icon-btn--panel-a) {
+	overflow: visible;
+}
+
+button.mp-scc-catalog-cart-icon-btn.mp-scc-catalog-cart-icon-btn--panel-a {
+	overflow: visible;
+}
+
+button.mp-scc-catalog-cart-icon-btn--panel-a .mp-scc-catalog-cart-icon-btn__badge {
+	position: absolute;
+	top: var(--mp-scc-tristate-fab-badge-offset-top, -8px);
+	right: var(--mp-scc-tristate-fab-badge-offset-right, -8px);
+	min-width: var(--mp-scc-tristate-fab-badge-size, 20px);
+	height: var(--mp-scc-tristate-fab-badge-size, 20px);
+	padding: 0 6px;
+	border-radius: 999px;
+	display: none;
+	align-items: center;
+	justify-content: center;
+	background: var(--mp-scc-tristate-fab-badge-bg, #e53935);
+	color: var(--mp-scc-tristate-fab-badge-text, #ffffff);
+	font-size: var(--mp-scc-tristate-fab-badge-font-size, 11px);
+	font-weight: 700;
+	line-height: 1;
+	font-variant-numeric: tabular-nums;
+	box-shadow: 0 2px 6px rgba(0, 0, 0, 0.28);
+	pointer-events: none;
+	z-index: 2;
+}
+
+button.mp-scc-catalog-cart-icon-btn--panel-a .mp-scc-catalog-cart-icon-btn__badge:not([hidden]) {
+	display: inline-flex;
 }
 
 button.mp-scc-catalog-cart-icon-btn .mp-scc-catalog-cart-icon-btn__img {
@@ -1954,6 +2000,28 @@ ul.products li.product .mp-scc-catalog-overlay__label,
 	white-space: nowrap;
 }
 
+/* Подпись выключена: убираем саму полоску (раньше скрывали только текст — фон ссылки оставался). */
+ul.products li.product a.mp-scc-catalog-overlay--floating.mp-scc-catalog-overlay--no-label,
+ul.products div.product a.mp-scc-catalog-overlay--floating.mp-scc-catalog-overlay--no-label,
+.woocommerce .products li.product a.mp-scc-catalog-overlay--floating.mp-scc-catalog-overlay--no-label,
+.woocommerce .products div.product a.mp-scc-catalog-overlay--floating.mp-scc-catalog-overlay--no-label {
+	background: transparent !important;
+	box-shadow: none !important;
+	color: transparent !important;
+	height: 0 !important;
+	min-height: 0 !important;
+	padding: 0 !important;
+	padding-right: 0 !important;
+	overflow: hidden !important;
+	opacity: 0 !important;
+	pointer-events: none !important;
+	border-radius: 0 !important;
+}
+
+a.mp-scc-catalog-overlay--floating.mp-scc-catalog-overlay--no-label .mp-scc-catalog-overlay__label {
+	display: none !important;
+}
+
 /*
  * Wishlist coexistence: raise third-party heart controls above «Подробнее» (lower z-index).
  * body.mp-scc-wishlist-integration-on is set in assets/js/frontend.js when the flag is on.
@@ -2004,26 +2072,29 @@ body.mp-scc-wishlist-integration-on .woocommerce .products li.product a.mp-scc-c
  *    `5em * 0 = 0` collapses the circle into a square — `50%` of width/height is stable.
  */
 body.mp-scc-wishlist-integration-on ul.products li.product .yith-wcwl-add-to-wishlist > a,
-body.mp-scc-wishlist-integration-on .woocommerce .products li.product .yith-wcwl-add-to-wishlist > a {
-	display: inline-flex;
-	align-items: center;
-	justify-content: center;
-	width: var(--mp-scc-wishlist-heart-size, 39px);
-	height: var(--mp-scc-wishlist-heart-size, 39px);
-	margin: 0;
-	padding: 0;
-	border: 0;
-	border-radius: 50%;
+body.mp-scc-wishlist-integration-on .woocommerce .products li.product .yith-wcwl-add-to-wishlist > a,
+body.mp-scc-wishlist-integration-on ul.products li.product .yith-wcwl-add-to-wishlist > div > a,
+body.mp-scc-wishlist-integration-on .woocommerce .products li.product .yith-wcwl-add-to-wishlist > div > a {
+	display: inline-flex !important;
+	align-items: center !important;
+	justify-content: center !important;
+	width: var(--mp-scc-wishlist-heart-size, 39px) !important;
+	height: var(--mp-scc-wishlist-heart-size, 39px) !important;
+	margin: 0 !important;
+	padding: 0 !important;
+	border: 0 !important;
+	border-radius: 50% !important;
+	/* Базовая палитра без !important — чтобы idle/in-list-правила ниже могли перебить через !important. */
 	background-color: var(--mp-scc-wishlist-heart-bg, #ffffff);
 	color: var(--mp-scc-wishlist-heart-color, #000000);
-	font-size: 0;
-	line-height: 0;
-	text-decoration: none;
-	text-indent: 0;
-	white-space: nowrap;
-	overflow: hidden;
-	transition: background-color 0.18s ease, color 0.18s ease, transform 0.18s ease;
-	box-shadow: var(--mp-scc-wishlist-heart-shadow, 0 2px 8px rgba(0, 0, 0, 0.08));
+	font-size: 0 !important;
+	line-height: 0 !important;
+	text-decoration: none !important;
+	text-indent: 0 !important;
+	white-space: nowrap !important;
+	overflow: hidden !important;
+	transition: background-color 0.18s ease, color 0.18s ease, transform 0.18s ease !important;
+	box-shadow: var(--mp-scc-wishlist-heart-shadow, 0 2px 8px rgba(0, 0, 0, 0.08)) !important;
 }
 
 /* 2. Case A — restore font-size on any FontAwesome <i> inside the anchor (some YITH builds
@@ -2063,12 +2134,120 @@ body.mp-scc-wishlist-integration-on .woocommerce .products li.product .yith-wcwl
 }
 
 /* 4. Hover / focus-visible: reuse the same flip the theme applies to the hydrated button. */
+/*
+ * Hover/focus для idle. Цвета БЕЗ !important — чтобы постоянное состояние «в избранном»
+ * (правила 4b ниже с !important) всегда перебивало hover для уже добавленных карточек.
+ */
 body.mp-scc-wishlist-integration-on ul.products li.product .yith-wcwl-add-to-wishlist > a:hover,
 body.mp-scc-wishlist-integration-on ul.products li.product .yith-wcwl-add-to-wishlist > a:focus-visible,
+body.mp-scc-wishlist-integration-on ul.products li.product .yith-wcwl-add-to-wishlist > div > a:hover,
+body.mp-scc-wishlist-integration-on ul.products li.product .yith-wcwl-add-to-wishlist > div > a:focus-visible,
 body.mp-scc-wishlist-integration-on .woocommerce .products li.product .yith-wcwl-add-to-wishlist > a:hover,
-body.mp-scc-wishlist-integration-on .woocommerce .products li.product .yith-wcwl-add-to-wishlist > a:focus-visible {
+body.mp-scc-wishlist-integration-on .woocommerce .products li.product .yith-wcwl-add-to-wishlist > a:focus-visible,
+body.mp-scc-wishlist-integration-on .woocommerce .products li.product .yith-wcwl-add-to-wishlist > div > a:hover,
+body.mp-scc-wishlist-integration-on .woocommerce .products li.product .yith-wcwl-add-to-wishlist > div > a:focus-visible {
 	background-color: var(--mp-scc-wishlist-heart-bg-hover, #111111);
 	color: var(--mp-scc-wishlist-heart-color-hover, #ffffff);
+}
+
+/*
+ * 4b. В избранном (YITH .exists + data-mp-scc-wishlist=in).
+ *
+ * Подход: атрибут проставлен и на `.yith-wcwl-add-to-wishlist`, и на корне карточки.
+ * Это позволяет применять стиль независимо от того, оборачивает ли тема карточку в `li.product`,
+ * `div.product` и т.п. (Hub/Liquid: `li.lqd-prod-item.product`).
+ */
+/* Idle (после remove или впервые отображённая карточка вне избранного). */
+body.mp-scc-wishlist-integration-on .yith-wcwl-add-to-wishlist[data-mp-scc-wishlist='out'] a {
+	background-color: var(--mp-scc-wishlist-heart-bg, #ffffff) !important;
+	color: var(--mp-scc-wishlist-heart-color, #000000) !important;
+}
+body.mp-scc-wishlist-integration-on .yith-wcwl-add-to-wishlist[data-mp-scc-wishlist='out'] a:hover,
+body.mp-scc-wishlist-integration-on .yith-wcwl-add-to-wishlist[data-mp-scc-wishlist='out'] a:focus-visible {
+	background-color: var(--mp-scc-wishlist-heart-bg-hover, #111111) !important;
+	color: var(--mp-scc-wishlist-heart-color-hover, #ffffff) !important;
+}
+/* В избранном. */
+body.mp-scc-wishlist-integration-on .yith-wcwl-add-to-wishlist[data-mp-scc-wishlist='in'] a {
+	background-color: var(--mp-scc-wishlist-heart-in-list-bg, #111111) !important;
+	color: var(--mp-scc-wishlist-heart-in-list-color, #ffffff) !important;
+}
+body.mp-scc-wishlist-integration-on .yith-wcwl-add-to-wishlist[data-mp-scc-wishlist='in'] a:hover,
+body.mp-scc-wishlist-integration-on .yith-wcwl-add-to-wishlist[data-mp-scc-wishlist='in'] a:focus-visible {
+	background-color: var(--mp-scc-wishlist-heart-in-list-bg-hover, #333333) !important;
+	color: var(--mp-scc-wishlist-heart-in-list-color-hover, #ffffff) !important;
+}
+
+/*
+ * 4c. Микро-анимация круга на hover/focus — единая для idle и in-list. Лёгкий scale + усиленная тень
+ * сигнализируют интерактивность. Уважаем `prefers-reduced-motion: reduce` — там анимаций не будет.
+ */
+body.mp-scc-wishlist-integration-on .yith-wcwl-add-to-wishlist > a:hover,
+body.mp-scc-wishlist-integration-on .yith-wcwl-add-to-wishlist > a:focus-visible,
+body.mp-scc-wishlist-integration-on .yith-wcwl-add-to-wishlist > div > a:hover,
+body.mp-scc-wishlist-integration-on .yith-wcwl-add-to-wishlist > div > a:focus-visible {
+	transform: scale(1.08);
+	box-shadow: var(--mp-scc-wishlist-heart-shadow-hover, 0 4px 14px rgba(0, 0, 0, 0.18)) !important;
+}
+body.mp-scc-wishlist-integration-on .yith-wcwl-add-to-wishlist > a:active,
+body.mp-scc-wishlist-integration-on .yith-wcwl-add-to-wishlist > div > a:active {
+	transform: scale(0.94);
+	transition-duration: 0.08s !important;
+}
+@media (prefers-reduced-motion: reduce) {
+	body.mp-scc-wishlist-integration-on .yith-wcwl-add-to-wishlist > a,
+	body.mp-scc-wishlist-integration-on .yith-wcwl-add-to-wishlist > div > a {
+		transition: background-color 0.18s ease, color 0.18s ease !important;
+	}
+	body.mp-scc-wishlist-integration-on .yith-wcwl-add-to-wishlist > a:hover,
+	body.mp-scc-wishlist-integration-on .yith-wcwl-add-to-wishlist > a:focus-visible,
+	body.mp-scc-wishlist-integration-on .yith-wcwl-add-to-wishlist > div > a:hover,
+	body.mp-scc-wishlist-integration-on .yith-wcwl-add-to-wishlist > div > a:focus-visible,
+	body.mp-scc-wishlist-integration-on .yith-wcwl-add-to-wishlist > a:active,
+	body.mp-scc-wishlist-integration-on .yith-wcwl-add-to-wishlist > div > a:active {
+		transform: none !important;
+	}
+}
+
+/*
+ * 4c. SVG-сердечко: гарантированный значок без зависимости от FontAwesome темы.
+ *
+ * YITH Premium часто оставляет в ссылке пустой/декоративный `<i>` (FA не подмаплен) —
+ * круг рисуется, а сердечка нет. Поэтому JS вставляет inline-SVG `mp-scc-wl-glyph`.
+ * Тут — максимально жёсткая защита размеров SVG (тема может ставить font-size:0,
+ * флекс с min-width:0, transform — что угодно) и подавление прочих потомков ссылки.
+ *
+ * Селектор берёт SVG ВЕЗДЕ внутри `.yith-wcwl-add-to-wishlist`, чтобы значок появлялся
+ * даже если по каким-то причинам `data-mp-scc-wishlist` не успел проставиться.
+ */
+body.mp-scc-wishlist-integration-on .yith-wcwl-add-to-wishlist svg.mp-scc-wl-glyph,
+body.mp-scc-wishlist-integration-on svg.mp-scc-wl-glyph {
+	display: inline-block !important;
+	width: 16px !important;
+	height: 16px !important;
+	min-width: 16px !important;
+	min-height: 16px !important;
+	max-width: 16px !important;
+	max-height: 16px !important;
+	flex: 0 0 auto !important;
+	color: inherit !important;
+	fill: currentColor !important;
+	stroke: none !important;
+	vertical-align: middle !important;
+	pointer-events: none !important;
+	opacity: 1 !important;
+	visibility: visible !important;
+	transform: none !important;
+	clip-path: none !important;
+	overflow: visible !important;
+}
+/* В ссылках, куда мы вставили SVG — прячем всех прочих потомков (текст-метки, пустые <i>),
+ * чтобы значок не перекрывался. `:has()` поддерживается во всех современных браузерах (Chrome 105+, Safari 15.4+, Firefox 121+). */
+body.mp-scc-wishlist-integration-on .yith-wcwl-add-to-wishlist a:has(> svg.mp-scc-wl-glyph) > i,
+body.mp-scc-wishlist-integration-on .yith-wcwl-add-to-wishlist a:has(> svg.mp-scc-wl-glyph) > span,
+body.mp-scc-wishlist-integration-on .yith-wcwl-add-to-wishlist a:has(> svg.mp-scc-wl-glyph) > em,
+body.mp-scc-wishlist-integration-on .yith-wcwl-add-to-wishlist a:has(> svg.mp-scc-wl-glyph) > strong {
+	display: none !important;
 }
 
 /*
@@ -2221,34 +2400,54 @@ body.mp-scc-wishlist-integration-on .woocommerce .products li.product .yith-wcwl
 	}
 }
 
+/*
+ * Card snackbar (toast) — общий контейнер для подсказок «Добавлено в корзину/избранное», «Нет в наличии» и т.п.
+ * Перешёл на серую палитру (как в Material Snackbar) — крупнее, контрастнее на белых карточках.
+ * Цвета и габариты заданы через CSS-переменные, чтобы тему можно было допиливать без правки CSS.
+ */
 .mp-scc-card__toast {
 	position: absolute;
 	left: 50%;
-	bottom: 10px;
+	bottom: 14px;
 	transform: translateX(-50%);
 	z-index: 3;
-	max-width: 92%;
-	padding: 8px 12px;
-	border-radius: 8px;
-	background: rgba(20, 20, 20, 0.92);
-	color: #fff;
-	font-size: 13px;
-	line-height: 1.35;
+	max-width: 96%;
+	min-width: 200px;
+	padding: var(--mp-scc-card-toast-padding-y, 12px) var(--mp-scc-card-toast-padding-x, 18px);
+	border-radius: var(--mp-scc-card-toast-radius, 10px);
+	background: var(--mp-scc-card-toast-bg, rgba(80, 80, 80, 0.95));
+	color: var(--mp-scc-card-toast-color, #ffffff);
+	font-size: var(--mp-scc-card-toast-font-size, 15px);
+	font-weight: 500;
+	line-height: 1.4;
 	text-align: center;
-	box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+	letter-spacing: 0.01em;
+	box-shadow: 0 6px 22px rgba(0, 0, 0, 0.22);
 	pointer-events: none;
 }
 
 .mp-scc-card__toast--stock {
-	background: rgba(120, 40, 40, 0.94);
+	background: var(--mp-scc-card-toast-stock-bg, rgba(110, 110, 110, 0.96));
 	color: #fff;
-	border: 1px solid rgba(255, 255, 255, 0.12);
+	border: 1px solid rgba(255, 255, 255, 0.16);
 }
 
 .mp-scc-card__toast--error {
-	background: rgba(35, 35, 40, 0.94);
+	background: var(--mp-scc-card-toast-error-bg, rgba(70, 70, 70, 0.96));
 	color: #fff;
-	border: 1px solid rgba(255, 80, 80, 0.35);
+	border: 1px solid rgba(255, 100, 100, 0.45);
+}
+
+/*
+ * На узких экранах оставим тост чуть компактнее, чтобы не вылезал за пределы карточки и
+ * не перекрывал нижние кнопки (мобильная карточка обычно ~160–180px шириной).
+ */
+@media (max-width: 480px) {
+	.mp-scc-card__toast {
+		min-width: 0;
+		padding: var(--mp-scc-card-toast-padding-y-mobile, 10px) var(--mp-scc-card-toast-padding-x-mobile, 14px);
+		font-size: var(--mp-scc-card-toast-font-size-mobile, 14px);
+	}
 }
 
 /*

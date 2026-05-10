@@ -146,6 +146,14 @@ final class FrontendFlagResolver {
 		if ( $cart_icon_glyph < 14 || $cart_icon_glyph > 28 ) {
 			$cart_icon_glyph = 20;
 		}
+		$cart_icon_box_w_mobile = isset( $catalog_settings['catalog_cart_icon_box_width_mobile_px'] ) ? (int) $catalog_settings['catalog_cart_icon_box_width_mobile_px'] : 0;
+		if ( $cart_icon_box_w_mobile < 0 || $cart_icon_box_w_mobile > 96 ) {
+			$cart_icon_box_w_mobile = 0;
+		}
+		$cart_icon_box_h_mobile = isset( $catalog_settings['catalog_cart_icon_box_height_mobile_px'] ) ? (int) $catalog_settings['catalog_cart_icon_box_height_mobile_px'] : 0;
+		if ( $cart_icon_box_h_mobile < 0 || $cart_icon_box_h_mobile > 96 ) {
+			$cart_icon_box_h_mobile = 0;
+		}
 		$cart_icon_stroke = isset( $catalog_settings['catalog_cart_icon_stroke_width'] ) ? (float) $catalog_settings['catalog_cart_icon_stroke_width'] : 1.75;
 		if ( $cart_icon_stroke < 1.0 || $cart_icon_stroke > 3.0 ) {
 			$cart_icon_stroke = 1.75;
@@ -178,6 +186,8 @@ final class FrontendFlagResolver {
 			'catalogCartIconOffsetLeftPx' => $cart_icon_off_left,
 			'catalogCartIconHitSizePx'    => $cart_icon_hit,
 			'catalogCartIconGlyphSizePx'  => $cart_icon_glyph,
+			'catalogCartIconBoxWidthMobilePx'   => $cart_icon_box_w_mobile,
+			'catalogCartIconBoxHeightMobilePx'  => $cart_icon_box_h_mobile,
 			'catalogCartIconStrokeWidth'  => $cart_icon_stroke,
 			'catalogCartIconTransitionDelayMs' => $cart_icon_delay,
 			'catalogCartIconMobileMode'   => $cart_icon_mobile_mode,
@@ -194,6 +204,7 @@ final class FrontendFlagResolver {
 			'overlayHostSelectors'       => array_values( $overlay_host_selectors ),
 			'hoverMotionPreset'          => isset( $catalog_settings['hover_motion_preset'] ) ? (string) $catalog_settings['hover_motion_preset'] : 'fade_slide',
 			'moreInfoNewTab'             => ! empty( $catalog_settings['more_info_new_tab'] ),
+			'moreInfoLabelVisible'       => ! isset( $catalog_settings['catalog_more_info_label_visible'] ) || ! empty( $catalog_settings['catalog_more_info_label_visible'] ),
 		);
 
 		$data = array(
@@ -210,6 +221,7 @@ final class FrontendFlagResolver {
 				'clearCart'         => Constants::AJAX_ACTION_CLEAR_CART,
 				'removeCartLine'    => Constants::AJAX_ACTION_REMOVE_CART_LINE,
 				'logClientEvent'    => Constants::AJAX_ACTION_LOG_CLIENT_EVENT,
+				'yithRemoveFromWishlist' => Constants::AJAX_ACTION_YITH_REMOVE_FROM_WISHLIST,
 			),
 			'flags'    => $provider->for_js(),
 			'labels'   => OptionResolver::get_labels(),

@@ -53,11 +53,14 @@ final class UiSettingsDefaults {
 			'drawer_line_price_font_size_px',
 			'drawer_line_price_font_weight',
 			'tristate_panel_b_max_height_px',
+			'tristate_panel_b_max_height_mobile_px',
+			'tristate_panel_b_max_height_tablet_px',
 			'tristate_panel_b_width_px',
 			'tristate_panel_b_gap_bottom_px',
 			'tristate_panel_b_padding_px',
 			'tristate_panel_b_border_radius_px',
 			'tristate_panel_b_actions_gap_px',
+			'tristate_metric_lines_visible',
 			'tristate_metrics_row_padding_y_px',
 			'tristate_metrics_hr_margin_y_panel_b_px',
 			'tristate_metrics_hr_margin_y_drawer_c_px',
@@ -91,6 +94,8 @@ final class UiSettingsDefaults {
 			'tristate_action_icon_glyph_px',
 			'tristate_panel_c_width_px',
 			'tristate_panel_c_height_px',
+			'tristate_panel_c_height_mobile_px',
+			'tristate_panel_c_height_tablet_px',
 			'tristate_state_a_dock_inset_top_px',
 			'tristate_state_a_dock_inset_right_px',
 			'tristate_state_a_dock_inset_bottom_px',
@@ -104,6 +109,7 @@ final class UiSettingsDefaults {
 			'tristate_column_shadow_offset_y_px',
 			'tristate_column_shadow_opacity_percent',
 			'tristate_mobile_breakpoint_max_px',
+			'tristate_tablet_breakpoint_max_px',
 			'tristate_mobile_layout_preset',
 			'tristate_fab_badge_size_px',
 			'tristate_fab_badge_offset_top_px',
@@ -145,6 +151,13 @@ final class UiSettingsDefaults {
 				'catalog_cart_icon_hit_size_px'      => 36,
 				/** SVG glyph size inside the button (px). */
 				'catalog_cart_icon_glyph_size_px'    => 20,
+				/**
+				 * Touch / narrow viewport (max-width 768px or pointer: coarse): button box size (bg + glyph together, px).
+				 * 0 = same as desktop hit-size above. If only one side is set, the button stays square.
+				 * Slot AND inner SVG glyph scale to the same value (so the icon visually fills the new bg).
+				 */
+				'catalog_cart_icon_box_width_mobile_px'   => 0,
+				'catalog_cart_icon_box_height_mobile_px'  => 0,
 				/** Built-in SVG cart path stroke width (1–3, default matches previous hard-coded look). */
 				'catalog_cart_icon_stroke_width'     => 1.75,
 				/** Delay before opacity/visibility transition starts (ms). */
@@ -190,6 +203,8 @@ final class UiSettingsDefaults {
 				'wrap_loop_item_add_to_cart'   => false,
 				/** Open «Подробнее» product URL in a new browser tab (adds target + rel). */
 				'more_info_new_tab'            => false,
+				/** Show the visible «Подробнее» caption on the catalog overlay strip (link/aria still work when off). */
+				'catalog_more_info_label_visible' => true,
 				/** Stacking: «Подробнее» overlay (keep below wishlist heart). */
 				'catalog_overlay_z_index'      => 4,
 			),
@@ -246,6 +261,16 @@ final class UiSettingsDefaults {
 				'sticky_inner_gap_desktop_col_px' => 24,
 				/** Max height of tri-state summary panel B (px); typical content should fit without inner scroll. */
 				'tristate_panel_b_max_height_px'     => 368,
+				/**
+				 * Mobile override for panel B max-height (px); 0 = inherit desktop.
+				 * Applies when viewport width ≤ `tristate_mobile_breakpoint_max_px`.
+				 */
+				'tristate_panel_b_max_height_mobile_px' => 0,
+				/**
+				 * Tablet override for panel B max-height (px); 0 = inherit desktop.
+				 * Applies between `tristate_mobile_breakpoint_max_px + 1` and `tristate_tablet_breakpoint_max_px`.
+				 */
+				'tristate_panel_b_max_height_tablet_px' => 0,
 				/** Width of panel B (px). */
 				'tristate_panel_b_width_px'          => 280,
 				/** Gap between FAB and bottom edge of panel B (px). */
@@ -256,6 +281,11 @@ final class UiSettingsDefaults {
 				'tristate_panel_b_border_radius_px'  => 12,
 				/** Gap between icon action buttons in panel B (px). */
 				'tristate_panel_b_actions_gap_px'    => 8,
+				/**
+				 * When false, hide the «Позиций» (cart line count) row in tri-state panel B and drawer C header.
+				 * FAB badge and AJAX still use line count; only the summary rows in B/C are omitted.
+				 */
+				'tristate_metric_lines_visible'      => true,
 				/** Panel B + drawer C metrics rows: vertical padding (px). */
 				'tristate_metrics_row_padding_y_px'           => 10,
 				'tristate_metrics_hr_margin_y_panel_b_px'     => 0,
@@ -296,6 +326,16 @@ final class UiSettingsDefaults {
 				'tristate_panel_c_width_px'          => 600,
 				/** Drawer C fixed height (px). */
 				'tristate_panel_c_height_px'         => 368,
+				/**
+				 * Mobile override for drawer C fixed height (px); 0 = inherit desktop.
+				 * Applies when viewport width ≤ `tristate_mobile_breakpoint_max_px`.
+				 */
+				'tristate_panel_c_height_mobile_px'  => 0,
+				/**
+				 * Tablet override for drawer C fixed height (px); 0 = inherit desktop.
+				 * Applies between `tristate_mobile_breakpoint_max_px + 1` and `tristate_tablet_breakpoint_max_px`.
+				 */
+				'tristate_panel_c_height_tablet_px'  => 0,
 				/** State A (FAB only): top inset from viewport (px). */
 				'tristate_state_a_dock_inset_top_px'    => 0,
 				/** State A: right inset (px). */
@@ -322,6 +362,11 @@ final class UiSettingsDefaults {
 				'tristate_column_shadow_opacity_percent' => 12,
 				/** Viewport max-width (px) for mobile preset rules (admin + injected @media). */
 				'tristate_mobile_breakpoint_max_px'  => 782,
+				/**
+				 * Viewport max-width (px) for the tablet adaptive range (mobile_bp, tablet_bp].
+				 * Used by the panel B/C adaptive height overrides below.
+				 */
+				'tristate_tablet_breakpoint_max_px'  => 1024,
 				/** Cart count badge on FAB (state A): circle size in px. */
 				'tristate_fab_badge_size_px'         => 20,
 				/** FAB badge offset from top edge (negative lifts outside button). */
@@ -364,6 +409,25 @@ final class UiSettingsDefaults {
 				'overlay_clearance_heart_px' => 8,
 				/** Stacking: wishlist control above catalog overlay. */
 				'heart_icon_z_index'         => 6,
+				/** YITH heart circle on catalog: idle (not in wishlist). */
+				'heart_idle_bg_color'        => '#ffffff',
+				'heart_idle_icon_color'      => '#000000',
+				/** After product is in wishlist (matches typical filled look). */
+				'heart_in_wishlist_bg_color'   => '#111111',
+				'heart_in_wishlist_icon_color' => '#ffffff',
+				/**
+				 * Hover/focus поверх idle — типичный паттерн «превью in-state» (чёрный круг, белая иконка).
+				 * Меняйте, если хотите, чтобы при наведении сердечко становилось другим цветом.
+				 */
+				'heart_idle_hover_bg_color'        => '#111111',
+				'heart_idle_hover_icon_color'      => '#ffffff',
+				/**
+				 * Hover/focus для уже добавленного товара. По умолчанию слегка осветлён — намёк, что
+				 * клик активный (удалит из избранного). Сделайте красным (#e53935), если хотите чёткий
+				 * сигнал «удалить».
+				 */
+				'heart_in_wishlist_hover_bg_color'   => '#333333',
+				'heart_in_wishlist_hover_icon_color' => '#ffffff',
 			),
 			'styles'      => array(
 				'color_text_primary'        => '#1a1a1a',

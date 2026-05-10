@@ -69,6 +69,8 @@ final class DynamicStylesProvider implements DynamicStylesProviderInterface {
 		add_action( 'wp_footer', array( $this, 'print_footer_tristate_custom_css' ), 997 );
 		/** Tri-state mobile preset (phase 17.6 / 20): breakpoint is numeric → safe injected @media. */
 		add_action( 'wp_footer', array( $this, 'print_footer_tristate_responsive_layer_css' ), 998 );
+		/** Adaptive max-heights for tri-state panels B/C on mobile/tablet viewports. */
+		add_action( 'wp_footer', array( $this, 'print_footer_tristate_adaptive_heights_css' ), 998 );
 		/** Last-resort :root + rules at end of body (after theme CSS / late bundles). */
 		add_action( 'wp_footer', array( $this, 'print_footer_catalog_cart_icon_late_style' ), 999 );
 	}
@@ -109,6 +111,84 @@ final class DynamicStylesProvider implements DynamicStylesProviderInterface {
 		echo '<style id="mp-scc-tristate-responsive" type="text/css">' . "\n";
 		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- numeric breakpoint + fixed selectors.
 		echo $css;
+		echo '</style>' . "\n";
+	}
+
+	/**
+	 * Adaptive max-heights for tri-state panels B (summary) and C (drawer) on mobile/tablet.
+	 *
+	 * Reads:
+	 *   sticky_cart.tristate_panel_b_max_height_mobile_px (0 = inherit desktop)
+	 *   sticky_cart.tristate_panel_b_max_height_tablet_px (0 = inherit desktop)
+	 *   sticky_cart.tristate_panel_c_height_mobile_px     (0 = inherit desktop)
+	 *   sticky_cart.tristate_panel_c_height_tablet_px     (0 = inherit desktop)
+	 *   sticky_cart.tristate_mobile_breakpoint_max_px     (mobile upper bound, px)
+	 *   sticky_cart.tristate_tablet_breakpoint_max_px     (tablet upper bound, px)
+	 *
+	 * Emits `:root { --mp-scc-tristate-panel-b-max-height: …; --mp-scc-tristate-panel-c-height: …; }`
+	 * inside @media blocks, so the existing CSS — which consumes these tokens for
+	 * `height/min-height/max-height` on `.mp-scc-shell-panel-b` and the drawer C surface —
+	 * picks up the override automatically on the matching viewport.
+	 *
+	 * Applies to any preset (right_docked / full_bottom) and independently of tri-state enabled flag,
+	 * because the tokens are no-ops when tri-state markup is absent.
+	 */
+	public function print_footer_tristate_adaptive_heights_css() {
+		if ( is_admin() || wp_doing_ajax() ) {
+			return;
+		}
+		if ( ! wp_style_is( FrontendAssetsHooks::HANDLE_STYLE, 'enqueued' ) && ! wp_style_is( FrontendAssetsHooks::HANDLE_STYLE, 'done' ) ) {
+			return;
+		}
+
+		$settings = OptionResolver::get_settings();
+
+		$b_mobile = (int) OptionResolver::get_by_path( $settings, 'sticky_cart.tristate_panel_b_max_height_mobile_px', 0 );
+		$b_tablet = (int) OptionResolver::get_by_path( $settings, 'sticky_cart.tristate_panel_b_max_height_tablet_px', 0 );
+		$c_mobile = (int) OptionResolver::get_by_path( $settings, 'sticky_cart.tristate_panel_c_height_mobile_px', 0 );
+		$c_tablet = (int) OptionResolver::get_by_path( $settings, 'sticky_cart.tristate_panel_c_height_tablet_px', 0 );
+
+		$mobile_bp = (int) OptionResolver::get_by_path( $settings, 'sticky_cart.tristate_mobile_breakpoint_max_px', 782 );
+		$tablet_bp = (int) OptionResolver::get_by_path( $settings, 'sticky_cart.tristate_tablet_breakpoint_max_px', 1024 );
+		$mobile_bp = max( 480, min( 900, $mobile_bp ) );
+		$tablet_bp = max( 768, min( 1440, $tablet_bp ) );
+		if ( $tablet_bp <= $mobile_bp ) {
+			$tablet_bp = $mobile_bp + 1;
+		}
+
+		$has_mobile = ( $b_mobile > 0 ) || ( $c_mobile > 0 );
+		$has_tablet = ( $b_tablet > 0 ) || ( $c_tablet > 0 );
+		if ( ! $has_mobile && ! $has_tablet ) {
+			return;
+		}
+
+		$blocks = '';
+
+		if ( $has_mobile ) {
+			$decls = '';
+			if ( $b_mobile > 0 ) {
+				$decls .= '--mp-scc-tristate-panel-b-max-height:' . (int) $b_mobile . 'px;';
+			}
+			if ( $c_mobile > 0 ) {
+				$decls .= '--mp-scc-tristate-panel-c-height:' . (int) $c_mobile . 'px;';
+			}
+			$blocks .= '@media (max-width: ' . (int) $mobile_bp . 'px){:root{' . $decls . '}}' . "\n";
+		}
+
+		if ( $has_tablet ) {
+			$decls = '';
+			if ( $b_tablet > 0 ) {
+				$decls .= '--mp-scc-tristate-panel-b-max-height:' . (int) $b_tablet . 'px;';
+			}
+			if ( $c_tablet > 0 ) {
+				$decls .= '--mp-scc-tristate-panel-c-height:' . (int) $c_tablet . 'px;';
+			}
+			$blocks .= '@media (min-width: ' . ( (int) $mobile_bp + 1 ) . 'px) and (max-width: ' . (int) $tablet_bp . 'px){:root{' . $decls . '}}' . "\n";
+		}
+
+		echo '<style id="mp-scc-tristate-adaptive-heights" type="text/css">' . "\n";
+		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- numeric breakpoints + fixed declarations.
+		echo $blocks;
 		echo '</style>' . "\n";
 	}
 

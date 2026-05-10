@@ -37,6 +37,8 @@ final class CatalogCartIconPresets {
 		'soft_round',
 		'angular',
 		'retail',
+		/** Same filled-cart geometry as tri-state FAB `.mp-scc-drawer-toggle-icon` (Material-style mask path). */
+		'tristate_panel_a',
 	);
 
 	/**
@@ -72,6 +74,7 @@ final class CatalogCartIconPresets {
 			'soft_round'    => __( 'Плавная', 'mp-sticky-custom-cart' ),
 			'angular'       => __( 'Угловатая', 'mp-sticky-custom-cart' ),
 			'retail'        => __( 'Витрина', 'mp-sticky-custom-cart' ),
+			'tristate_panel_a' => __( 'Панель A (как FAB)', 'mp-sticky-custom-cart' ),
 		);
 	}
 
@@ -100,6 +103,8 @@ final class CatalogCartIconPresets {
 			'soft_round'   => '<g fill="none" stroke="currentColor" stroke-width="' . $w . '" stroke-linecap="round" stroke-linejoin="round"><path d="M3 4h2l1.2 10.2a2.2 2.2 0 0 0 2.18 1.8h8.24a2.1 2.1 0 0 0 2.08-1.7L21 8H7"/><circle cx="9.5" cy="20" r="1.35" fill="currentColor"/><circle cx="17" cy="20" r="1.35" fill="currentColor"/></g>',
 			'angular'      => '<g fill="none" stroke="currentColor" stroke-width="' . $w . '" stroke-linecap="round" stroke-linejoin="miter"><path d="M2 3h3l3 14h11l3-10H8"/><path d="M2 3v1"/><circle cx="10" cy="21" r="1" fill="currentColor"/><circle cx="18" cy="21" r="1" fill="currentColor"/></g>',
 			'retail'       => '<g fill="none" stroke="currentColor" stroke-width="' . $w . '" stroke-linecap="round" stroke-linejoin="round"><path d="M1 2h3l1.5 13a2 2 0 0 0 2 1.75h9a2 2 0 0 0 2-1.65L21 7H6"/><path d="M5.5 2 7 7"/><circle cx="9.5" cy="21" r="1.5" fill="currentColor"/><circle cx="17" cy="21" r="1.5" fill="currentColor"/></g>',
+			// Filled cart: matches `assets/css/frontend.css` mask on `.mp-scc-drawer-toggle--fab .mp-scc-drawer-toggle-icon` (stroke width setting is ignored).
+			'tristate_panel_a' => '<path fill="currentColor" d="M7 18c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zM1 2v2h2l3.6 7.59-1.35 2.45c-.15.28-.25.61-.25.96 0 1.1.9 2 2 2h12v-2H7.42c-.14 0-.25-.11-.25-.25l.03-.12L8.1 13h7.45c.75 0 1.41-.41 1.75-1.03L21.7 4H5.21l-.94-2H1zm16 16c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/>',
 		);
 	}
 
