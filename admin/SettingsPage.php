@@ -1081,30 +1081,54 @@ final class SettingsPage {
 			isset( $c['heart_icon_z_index'] ) ? (int) $c['heart_icon_z_index'] : 6,
 			__( 'Должен быть выше z-index overlay «Подробнее» на вкладке «Каталог», иначе сердечко уйдёт под слой.', 'mp-sticky-custom-cart' )
 		);
-		echo '<tr><td colspan="2"><p class="description"><strong>' . esc_html__( 'Цвета сердечка в каталоге (YITH)', 'mp-sticky-custom-cart' ) . '</strong> — ';
-		echo esc_html__( 'при включённой интеграции heart-иконки на витрине WooCommerce. «В избранном» — после добавления товара в wishlist.', 'mp-sticky-custom-cart' );
-		echo '</p></td></tr>';
+		echo '</tbody></table>';
+
+		echo '<h3>' . esc_html__( 'Цвета сердечка в каталоге (YITH)', 'mp-sticky-custom-cart' ) . '</h3>';
+		echo '<p class="description">' . esc_html__( 'При включённой интеграции heart-иконки на витрине WooCommerce. «В избранном» — после добавления товара в wishlist. Hover/focus — при наведении курсора или клавиатурном фокусе.', 'mp-sticky-custom-cart' ) . '</p>';
+
+		echo '<h4 style="margin:1em 0 .25em">' . esc_html__( 'Не в избранном (idle)', 'mp-sticky-custom-cart' ) . '</h4>';
+		echo '<table class="form-table" role="presentation"><tbody>';
 		self::field_color(
 			$opt,
 			'wishlist_ui',
 			'heart_idle_bg_color',
-			__( 'Фон кнопки (не в избранном)', 'mp-sticky-custom-cart' ),
+			__( 'Фон кнопки', 'mp-sticky-custom-cart' ),
 			isset( $c['heart_idle_bg_color'] ) ? (string) $c['heart_idle_bg_color'] : '#ffffff',
-			__( 'Круг под иконкой YITH в лупе.', 'mp-sticky-custom-cart' )
+			__( 'Круг под иконкой YITH в лупе (обычное состояние).', 'mp-sticky-custom-cart' )
 		);
 		self::field_color(
 			$opt,
 			'wishlist_ui',
 			'heart_idle_icon_color',
-			__( 'Цвет значка (не в избранном)', 'mp-sticky-custom-cart' ),
+			__( 'Цвет значка', 'mp-sticky-custom-cart' ),
 			isset( $c['heart_idle_icon_color'] ) ? (string) $c['heart_idle_icon_color'] : '#000000',
 			__( 'Сердце / иконка Font Awesome.', 'mp-sticky-custom-cart' )
 		);
 		self::field_color(
 			$opt,
 			'wishlist_ui',
+			'heart_idle_hover_bg_color',
+			__( 'Фон при наведении', 'mp-sticky-custom-cart' ),
+			isset( $c['heart_idle_hover_bg_color'] ) ? (string) $c['heart_idle_hover_bg_color'] : '#111111',
+			__( 'Срабатывает на hover/focus (клавиатура).', 'mp-sticky-custom-cart' )
+		);
+		self::field_color(
+			$opt,
+			'wishlist_ui',
+			'heart_idle_hover_icon_color',
+			__( 'Цвет значка при наведении', 'mp-sticky-custom-cart' ),
+			isset( $c['heart_idle_hover_icon_color'] ) ? (string) $c['heart_idle_hover_icon_color'] : '#ffffff',
+			''
+		);
+		echo '</tbody></table>';
+
+		echo '<h4 style="margin:1em 0 .25em">' . esc_html__( 'В избранном', 'mp-sticky-custom-cart' ) . '</h4>';
+		echo '<table class="form-table" role="presentation"><tbody>';
+		self::field_color(
+			$opt,
+			'wishlist_ui',
 			'heart_in_wishlist_bg_color',
-			__( 'Фон кнопки (в избранном)', 'mp-sticky-custom-cart' ),
+			__( 'Фон кнопки', 'mp-sticky-custom-cart' ),
 			isset( $c['heart_in_wishlist_bg_color'] ) ? (string) $c['heart_in_wishlist_bg_color'] : '#111111',
 			__( 'Постоянное состояние после добавления.', 'mp-sticky-custom-cart' )
 		);
@@ -1112,8 +1136,24 @@ final class SettingsPage {
 			$opt,
 			'wishlist_ui',
 			'heart_in_wishlist_icon_color',
-			__( 'Цвет значка (в избранном)', 'mp-sticky-custom-cart' ),
+			__( 'Цвет значка', 'mp-sticky-custom-cart' ),
 			isset( $c['heart_in_wishlist_icon_color'] ) ? (string) $c['heart_in_wishlist_icon_color'] : '#ffffff',
+			''
+		);
+		self::field_color(
+			$opt,
+			'wishlist_ui',
+			'heart_in_wishlist_hover_bg_color',
+			__( 'Фон при наведении', 'mp-sticky-custom-cart' ),
+			isset( $c['heart_in_wishlist_hover_bg_color'] ) ? (string) $c['heart_in_wishlist_hover_bg_color'] : '#333333',
+			__( 'Намёк на действие удаления. Часто ставят красный (#e53935).', 'mp-sticky-custom-cart' )
+		);
+		self::field_color(
+			$opt,
+			'wishlist_ui',
+			'heart_in_wishlist_hover_icon_color',
+			__( 'Цвет значка при наведении', 'mp-sticky-custom-cart' ),
+			isset( $c['heart_in_wishlist_hover_icon_color'] ) ? (string) $c['heart_in_wishlist_hover_icon_color'] : '#ffffff',
 			''
 		);
 		echo '</tbody></table>';

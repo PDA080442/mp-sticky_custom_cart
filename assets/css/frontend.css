@@ -2174,8 +2174,39 @@ body.mp-scc-wishlist-integration-on .yith-wcwl-add-to-wishlist[data-mp-scc-wishl
 }
 body.mp-scc-wishlist-integration-on .yith-wcwl-add-to-wishlist[data-mp-scc-wishlist='in'] a:hover,
 body.mp-scc-wishlist-integration-on .yith-wcwl-add-to-wishlist[data-mp-scc-wishlist='in'] a:focus-visible {
-	background-color: var(--mp-scc-wishlist-heart-in-list-bg, #111111) !important;
-	color: var(--mp-scc-wishlist-heart-in-list-color, #ffffff) !important;
+	background-color: var(--mp-scc-wishlist-heart-in-list-bg-hover, #333333) !important;
+	color: var(--mp-scc-wishlist-heart-in-list-color-hover, #ffffff) !important;
+}
+
+/*
+ * 4c. Микро-анимация круга на hover/focus — единая для idle и in-list. Лёгкий scale + усиленная тень
+ * сигнализируют интерактивность. Уважаем `prefers-reduced-motion: reduce` — там анимаций не будет.
+ */
+body.mp-scc-wishlist-integration-on .yith-wcwl-add-to-wishlist > a:hover,
+body.mp-scc-wishlist-integration-on .yith-wcwl-add-to-wishlist > a:focus-visible,
+body.mp-scc-wishlist-integration-on .yith-wcwl-add-to-wishlist > div > a:hover,
+body.mp-scc-wishlist-integration-on .yith-wcwl-add-to-wishlist > div > a:focus-visible {
+	transform: scale(1.08);
+	box-shadow: var(--mp-scc-wishlist-heart-shadow-hover, 0 4px 14px rgba(0, 0, 0, 0.18)) !important;
+}
+body.mp-scc-wishlist-integration-on .yith-wcwl-add-to-wishlist > a:active,
+body.mp-scc-wishlist-integration-on .yith-wcwl-add-to-wishlist > div > a:active {
+	transform: scale(0.94);
+	transition-duration: 0.08s !important;
+}
+@media (prefers-reduced-motion: reduce) {
+	body.mp-scc-wishlist-integration-on .yith-wcwl-add-to-wishlist > a,
+	body.mp-scc-wishlist-integration-on .yith-wcwl-add-to-wishlist > div > a {
+		transition: background-color 0.18s ease, color 0.18s ease !important;
+	}
+	body.mp-scc-wishlist-integration-on .yith-wcwl-add-to-wishlist > a:hover,
+	body.mp-scc-wishlist-integration-on .yith-wcwl-add-to-wishlist > a:focus-visible,
+	body.mp-scc-wishlist-integration-on .yith-wcwl-add-to-wishlist > div > a:hover,
+	body.mp-scc-wishlist-integration-on .yith-wcwl-add-to-wishlist > div > a:focus-visible,
+	body.mp-scc-wishlist-integration-on .yith-wcwl-add-to-wishlist > a:active,
+	body.mp-scc-wishlist-integration-on .yith-wcwl-add-to-wishlist > div > a:active {
+		transform: none !important;
+	}
 }
 
 /*

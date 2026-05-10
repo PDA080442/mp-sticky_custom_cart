@@ -305,6 +305,10 @@ final class SettingsValidationSchema {
 				'heart_idle_icon_color'        => array( 'type' => 'color' ),
 				'heart_in_wishlist_bg_color'   => array( 'type' => 'color' ),
 				'heart_in_wishlist_icon_color' => array( 'type' => 'color' ),
+				'heart_idle_hover_bg_color'        => array( 'type' => 'color' ),
+				'heart_idle_hover_icon_color'      => array( 'type' => 'color' ),
+				'heart_in_wishlist_hover_bg_color' => array( 'type' => 'color' ),
+				'heart_in_wishlist_hover_icon_color' => array( 'type' => 'color' ),
 			),
 			'styles'      => array(
 				'color_text_primary'        => array( 'type' => 'color' ),

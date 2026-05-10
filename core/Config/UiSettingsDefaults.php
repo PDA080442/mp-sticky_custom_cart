@@ -415,6 +415,19 @@ final class UiSettingsDefaults {
 				/** After product is in wishlist (matches typical filled look). */
 				'heart_in_wishlist_bg_color'   => '#111111',
 				'heart_in_wishlist_icon_color' => '#ffffff',
+				/**
+				 * Hover/focus поверх idle — типичный паттерн «превью in-state» (чёрный круг, белая иконка).
+				 * Меняйте, если хотите, чтобы при наведении сердечко становилось другим цветом.
+				 */
+				'heart_idle_hover_bg_color'        => '#111111',
+				'heart_idle_hover_icon_color'      => '#ffffff',
+				/**
+				 * Hover/focus для уже добавленного товара. По умолчанию слегка осветлён — намёк, что
+				 * клик активный (удалит из избранного). Сделайте красным (#e53935), если хотите чёткий
+				 * сигнал «удалить».
+				 */
+				'heart_in_wishlist_hover_bg_color'   => '#333333',
+				'heart_in_wishlist_hover_icon_color' => '#ffffff',
 			),
 			'styles'      => array(
 				'color_text_primary'        => '#1a1a1a',

@@ -101,6 +101,33 @@ assert.ok(
 		contract.includes('wishlist_ui.heart_in_wishlist_icon_color'),
 	'CssVariablesContract should map wishlist_ui in-list colors to CSS custom properties'
 );
+
+// Hover/focus tokens for both states (Phase 6.x: configurable hover palette in admin).
+assert.ok(
+	contract.includes('wishlist_ui.heart_idle_hover_bg_color') &&
+		contract.includes('wishlist_ui.heart_idle_hover_icon_color') &&
+		contract.includes('wishlist_ui.heart_in_wishlist_hover_bg_color') &&
+		contract.includes('wishlist_ui.heart_in_wishlist_hover_icon_color'),
+	'CssVariablesContract should map wishlist_ui hover colors (idle + in-list) to CSS custom properties'
+);
+assert.ok(
+	css.includes('--mp-scc-wishlist-heart-bg-hover') &&
+		css.includes('--mp-scc-wishlist-heart-color-hover') &&
+		css.includes('--mp-scc-wishlist-heart-in-list-bg-hover') &&
+		css.includes('--mp-scc-wishlist-heart-in-list-color-hover'),
+	'CSS should consume hover CSS vars for both idle and in-list wishlist heart states'
+);
+// In-list :hover MUST use the in-list hover var (not the static in-list var) — that was the bug
+// before this phase: idle hover worked, but hover on already-added card never changed colors.
+assert.ok(
+	/data-mp-scc-wishlist=['"]in['"]\][^{}]*a:hover[^{}]*\{[^{}]*--mp-scc-wishlist-heart-in-list-bg-hover/.test(css),
+	'in-list hover rule must reference --mp-scc-wishlist-heart-in-list-bg-hover (not the static in-list var)'
+);
+// Reduced-motion users should not see the scale animation on hover.
+assert.ok(
+	/@media\s*\(prefers-reduced-motion:\s*reduce\)[^{}]*\{[\s\S]*?yith-wcwl-add-to-wishlist[\s\S]*?transform:\s*none/.test(css),
+	'wishlist heart should disable hover scale under prefers-reduced-motion: reduce'
+);
 assert.ok(
 	js.includes('initYithWishlistCatalogBehavior') &&
 		js.includes('syncWishlistStateAttrOnCard') &&

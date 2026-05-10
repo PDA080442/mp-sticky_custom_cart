@@ -824,6 +824,30 @@ final class CssVariablesContract {
 				'suffix' => '',
 				'format' => 'color',
 			),
+			array(
+				'name'   => self::PREFIX . 'wishlist-heart-bg-hover',
+				'path'   => 'wishlist_ui.heart_idle_hover_bg_color',
+				'suffix' => '',
+				'format' => 'color',
+			),
+			array(
+				'name'   => self::PREFIX . 'wishlist-heart-color-hover',
+				'path'   => 'wishlist_ui.heart_idle_hover_icon_color',
+				'suffix' => '',
+				'format' => 'color',
+			),
+			array(
+				'name'   => self::PREFIX . 'wishlist-heart-in-list-bg-hover',
+				'path'   => 'wishlist_ui.heart_in_wishlist_hover_bg_color',
+				'suffix' => '',
+				'format' => 'color',
+			),
+			array(
+				'name'   => self::PREFIX . 'wishlist-heart-in-list-color-hover',
+				'path'   => 'wishlist_ui.heart_in_wishlist_hover_icon_color',
+				'suffix' => '',
+				'format' => 'color',
+			),
 		);
 	}
 
