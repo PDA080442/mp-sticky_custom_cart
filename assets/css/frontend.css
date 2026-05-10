@@ -2400,34 +2400,54 @@ body.mp-scc-wishlist-integration-on .yith-wcwl-add-to-wishlist a:has(> svg.mp-sc
 	}
 }
 
+/*
+ * Card snackbar (toast) — общий контейнер для подсказок «Добавлено в корзину/избранное», «Нет в наличии» и т.п.
+ * Перешёл на серую палитру (как в Material Snackbar) — крупнее, контрастнее на белых карточках.
+ * Цвета и габариты заданы через CSS-переменные, чтобы тему можно было допиливать без правки CSS.
+ */
 .mp-scc-card__toast {
 	position: absolute;
 	left: 50%;
-	bottom: 10px;
+	bottom: 14px;
 	transform: translateX(-50%);
 	z-index: 3;
-	max-width: 92%;
-	padding: 8px 12px;
-	border-radius: 8px;
-	background: rgba(20, 20, 20, 0.92);
-	color: #fff;
-	font-size: 13px;
-	line-height: 1.35;
+	max-width: 96%;
+	min-width: 200px;
+	padding: var(--mp-scc-card-toast-padding-y, 12px) var(--mp-scc-card-toast-padding-x, 18px);
+	border-radius: var(--mp-scc-card-toast-radius, 10px);
+	background: var(--mp-scc-card-toast-bg, rgba(80, 80, 80, 0.95));
+	color: var(--mp-scc-card-toast-color, #ffffff);
+	font-size: var(--mp-scc-card-toast-font-size, 15px);
+	font-weight: 500;
+	line-height: 1.4;
 	text-align: center;
-	box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+	letter-spacing: 0.01em;
+	box-shadow: 0 6px 22px rgba(0, 0, 0, 0.22);
 	pointer-events: none;
 }
 
 .mp-scc-card__toast--stock {
-	background: rgba(120, 40, 40, 0.94);
+	background: var(--mp-scc-card-toast-stock-bg, rgba(110, 110, 110, 0.96));
 	color: #fff;
-	border: 1px solid rgba(255, 255, 255, 0.12);
+	border: 1px solid rgba(255, 255, 255, 0.16);
 }
 
 .mp-scc-card__toast--error {
-	background: rgba(35, 35, 40, 0.94);
+	background: var(--mp-scc-card-toast-error-bg, rgba(70, 70, 70, 0.96));
 	color: #fff;
-	border: 1px solid rgba(255, 80, 80, 0.35);
+	border: 1px solid rgba(255, 100, 100, 0.45);
+}
+
+/*
+ * На узких экранах оставим тост чуть компактнее, чтобы не вылезал за пределы карточки и
+ * не перекрывал нижние кнопки (мобильная карточка обычно ~160–180px шириной).
+ */
+@media (max-width: 480px) {
+	.mp-scc-card__toast {
+		min-width: 0;
+		padding: var(--mp-scc-card-toast-padding-y-mobile, 10px) var(--mp-scc-card-toast-padding-x-mobile, 14px);
+		font-size: var(--mp-scc-card-toast-font-size-mobile, 14px);
+	}
 }
 
 /*
