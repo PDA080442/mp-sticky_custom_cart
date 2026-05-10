@@ -13,6 +13,8 @@ var root = path.join(__dirname, '..');
 var css = fs.readFileSync(path.join(root, 'assets', 'css', 'frontend.css'), 'utf8');
 var js = fs.readFileSync(path.join(root, 'assets', 'js', 'frontend.js'), 'utf8');
 var contract = fs.readFileSync(path.join(root, 'core', 'Config', 'CssVariablesContract.php'), 'utf8');
+var ajaxHooks = fs.readFileSync(path.join(root, 'frontend', 'AjaxEndpointsHooks.php'), 'utf8');
+var constants = fs.readFileSync(path.join(root, 'core', 'Constants.php'), 'utf8');
 
 assert.ok(css.includes('--mp-scc-catalog-overlay-z-index'), 'overlay should use CSS var for z-index');
 assert.ok(css.includes('--mp-scc-wishlist-icon-z-index'), 'wishlist layer should use CSS var');
@@ -85,6 +87,44 @@ assert.ok(
 		css.includes('display: flex !important') &&
 		/@media \(max-width: 768px\), \(pointer: coarse\)/.test(css),
 	'mobile wishlist fix should force .ld-sp-btns visible under coarse pointer / narrow viewport'
+);
+
+// YITH catalog UX: in-list colors + card state marker + JS toggle + server remove endpoint.
+assert.ok(
+	css.includes('data-mp-scc-wishlist') &&
+		css.includes('--mp-scc-wishlist-heart-in-list-bg') &&
+		css.includes('--mp-scc-wishlist-heart-in-list-color'),
+	'CSS should style in-wishlist heart via data-mp-scc-wishlist and in-list CSS vars'
+);
+assert.ok(
+	contract.includes('wishlist_ui.heart_in_wishlist_bg_color') &&
+		contract.includes('wishlist_ui.heart_in_wishlist_icon_color'),
+	'CssVariablesContract should map wishlist_ui in-list colors to CSS custom properties'
+);
+assert.ok(
+	js.includes('initYithWishlistCatalogBehavior') &&
+		js.includes('syncWishlistStateAttrOnCard') &&
+		js.includes('scanWishlistStateOnAllCatalogCards') &&
+		js.includes('.postAjax(\'yithRemoveFromWishlist\''),
+	'frontend.js should implement YITH catalog state sync and remove AJAX'
+);
+assert.ok(
+	js.includes('ensureSvgHeartInsideYithContainer') && js.includes('mp-scc-wl-glyph'),
+	'frontend.js should inject inline-SVG heart into managed YITH anchors'
+);
+assert.ok(
+	/svg\.mp-scc-wl-glyph/.test(css),
+	'CSS should style the JS-injected SVG heart (mp-scc-wl-glyph)'
+);
+assert.ok(
+	constants.includes('AJAX_ACTION_YITH_REMOVE_FROM_WISHLIST') &&
+		constants.includes('mp_scc_yith_remove_from_wishlist'),
+	'Constants should declare YITH remove AJAX action name'
+);
+assert.ok(
+	ajaxHooks.includes('handle_yith_remove_from_wishlist') &&
+		ajaxHooks.includes('yith_wcwl_items'),
+	'AjaxEndpointsHooks should register YITH table remove handler'
 );
 
 console.log('wishlist-coexistence: OK');

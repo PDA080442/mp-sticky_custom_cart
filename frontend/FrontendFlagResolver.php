@@ -221,6 +221,7 @@ final class FrontendFlagResolver {
 				'clearCart'         => Constants::AJAX_ACTION_CLEAR_CART,
 				'removeCartLine'    => Constants::AJAX_ACTION_REMOVE_CART_LINE,
 				'logClientEvent'    => Constants::AJAX_ACTION_LOG_CLIENT_EVENT,
+				'yithRemoveFromWishlist' => Constants::AJAX_ACTION_YITH_REMOVE_FROM_WISHLIST,
 			),
 			'flags'    => $provider->for_js(),
 			'labels'   => OptionResolver::get_labels(),

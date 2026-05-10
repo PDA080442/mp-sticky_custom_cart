@@ -800,6 +800,30 @@ final class CssVariablesContract {
 				'suffix' => '',
 				'format' => 'integer',
 			),
+			array(
+				'name'   => self::PREFIX . 'wishlist-heart-bg',
+				'path'   => 'wishlist_ui.heart_idle_bg_color',
+				'suffix' => '',
+				'format' => 'color',
+			),
+			array(
+				'name'   => self::PREFIX . 'wishlist-heart-color',
+				'path'   => 'wishlist_ui.heart_idle_icon_color',
+				'suffix' => '',
+				'format' => 'color',
+			),
+			array(
+				'name'   => self::PREFIX . 'wishlist-heart-in-list-bg',
+				'path'   => 'wishlist_ui.heart_in_wishlist_bg_color',
+				'suffix' => '',
+				'format' => 'color',
+			),
+			array(
+				'name'   => self::PREFIX . 'wishlist-heart-in-list-color',
+				'path'   => 'wishlist_ui.heart_in_wishlist_icon_color',
+				'suffix' => '',
+				'format' => 'color',
+			),
 		);
 	}
 

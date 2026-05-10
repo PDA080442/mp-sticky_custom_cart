@@ -37,6 +37,10 @@ final class UiLabelsDefaults {
 	public const KEY_TRISTATE_METRIC_QTY   = 'tristate_metric_qty';
 	/** Tri-state: subtotal row label. */
 	public const KEY_TRISTATE_METRIC_TOTAL = 'tristate_metric_total';
+	/** Catalog YITH wishlist toasts (sticky cart integration). */
+	public const KEY_WISHLIST_TOAST_ADDED   = 'wishlist_toast_added';
+	public const KEY_WISHLIST_TOAST_REMOVED = 'wishlist_toast_removed';
+	public const KEY_WISHLIST_REMOVE_FAILED = 'wishlist_remove_failed';
 
 	/**
 	 * @return array<string, string>
@@ -59,6 +63,9 @@ final class UiLabelsDefaults {
 			self::KEY_TRISTATE_METRIC_LINES => __( 'Позиций', 'mp-sticky-custom-cart' ),
 			self::KEY_TRISTATE_METRIC_QTY   => __( 'Товаров', 'mp-sticky-custom-cart' ),
 			self::KEY_TRISTATE_METRIC_TOTAL => __( 'Сумма', 'mp-sticky-custom-cart' ),
+			self::KEY_WISHLIST_TOAST_ADDED   => __( 'Добавлено в избранное', 'mp-sticky-custom-cart' ),
+			self::KEY_WISHLIST_TOAST_REMOVED => __( 'Удалено из избранного', 'mp-sticky-custom-cart' ),
+			self::KEY_WISHLIST_REMOVE_FAILED => __( 'Не удалось убрать из избранного', 'mp-sticky-custom-cart' ),
 		);
 	}
 
@@ -85,6 +92,9 @@ final class UiLabelsDefaults {
 			self::KEY_TRISTATE_METRIC_LINES => 'Позиций',
 			self::KEY_TRISTATE_METRIC_QTY   => 'Товаров',
 			self::KEY_TRISTATE_METRIC_TOTAL => 'Сумма',
+			self::KEY_WISHLIST_TOAST_ADDED   => 'Добавлено в избранное',
+			self::KEY_WISHLIST_TOAST_REMOVED => 'Удалено из избранного',
+			self::KEY_WISHLIST_REMOVE_FAILED => 'Не удалось убрать из избранного',
 		);
 	}
 

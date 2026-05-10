@@ -301,6 +301,10 @@ final class SettingsValidationSchema {
 				'heart_reserve_right_px'     => array( 'type' => 'integer', 'min' => 0, 'max' => 200 ),
 				'overlay_clearance_heart_px'   => array( 'type' => 'integer', 'min' => 0, 'max' => 200 ),
 				'heart_icon_z_index'           => array( 'type' => 'integer', 'min' => 0, 'max' => 100 ),
+				'heart_idle_bg_color'          => array( 'type' => 'color' ),
+				'heart_idle_icon_color'        => array( 'type' => 'color' ),
+				'heart_in_wishlist_bg_color'   => array( 'type' => 'color' ),
+				'heart_in_wishlist_icon_color' => array( 'type' => 'color' ),
 			),
 			'styles'      => array(
 				'color_text_primary'        => array( 'type' => 'color' ),
@@ -358,6 +362,9 @@ final class SettingsValidationSchema {
 				'tristate_metric_lines' => array( 'type' => 'text', 'max_length' => 120 ),
 				'tristate_metric_qty'   => array( 'type' => 'text', 'max_length' => 120 ),
 				'tristate_metric_total' => array( 'type' => 'text', 'max_length' => 120 ),
+				'wishlist_toast_added'   => array( 'type' => 'text', 'max_length' => 500 ),
+				'wishlist_toast_removed' => array( 'type' => 'text', 'max_length' => 500 ),
+				'wishlist_remove_failed' => array( 'type' => 'text', 'max_length' => 500 ),
 			),
 		);
 	}

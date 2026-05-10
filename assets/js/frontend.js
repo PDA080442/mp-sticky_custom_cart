@@ -1484,6 +1484,354 @@
 	}
 
 	/**
+	 * Detect "in wishlist" robustly across YITH Free / Premium variants on metaphysica-parfums.com.
+	 *
+	 * Sources of truth (any one is enough):
+	 * - container `.yith-wcwl-add-to-wishlist.exists` (set by YITH after add);
+	 * - visible (`:not(.hide)`) browse / added blocks;
+	 * - hidden `.yith-wcwl-add-button.hide` while a browse block is present;
+	 * - container exists, but the actual `a.add_to_wishlist` anchor is GONE / hidden — typical YITH SSR
+	 *   for Premium, where `hide_add_button` is on and the loop ships only the browse link.
+	 *
+	 * @param {JQuery} $card
+	 */
+	function syncWishlistStateAttrOnCard($card) {
+		if (!$card || !$card.length) {
+			return;
+		}
+		var $wl = $card.find('.yith-wcwl-add-to-wishlist').first();
+		if (!$wl.length) {
+			$card.removeAttr('data-mp-scc-wishlist');
+			return;
+		}
+		var inList = false;
+		if ($wl.hasClass('exists')) {
+			inList = true;
+		} else if ($wl.find('.yith-wcwl-wishlistexistsbrowse').not('.hide').length) {
+			inList = true;
+		} else if ($wl.find('.yith-wcwl-wishlistaddedbrowse').not('.hide').length) {
+			inList = true;
+		} else if ($wl.find('.yith-wcwl-add-button.hide').length && $wl.find('.yith-wcwl-wishlistexistsbrowse, .yith-wcwl-wishlistaddedbrowse').length) {
+			inList = true;
+		} else {
+			var $addAnchors = $wl.find('a.add_to_wishlist').filter(function () {
+				return !$(this).closest('.hide').length && this.offsetParent !== null;
+			});
+			if (!$addAnchors.length) {
+				var hasAnyAnchor = $wl.find('a').filter(function () {
+					var h = (this.getAttribute('href') || '').toLowerCase();
+					return h.indexOf('add_to_wishlist=') === -1;
+				}).length > 0;
+				if (hasAnyAnchor) {
+					inList = true;
+				}
+			}
+		}
+		var v = inList ? 'in' : 'out';
+		$card.attr('data-mp-scc-wishlist', v);
+		// Mirror onto the YITH container so the CSS rule doesn't depend on the parent's selector.
+		$wl.attr('data-mp-scc-wishlist', v);
+		ensureSvgHeartInsideYithContainer($wl[0]);
+	}
+
+	var MP_SCC_WL_HEART_SVG =
+		'<svg class="mp-scc-wl-glyph" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" focusable="false" style="display:inline-block;width:16px;height:16px;vertical-align:middle;fill:currentColor;color:inherit;">' +
+		'<path d="M12.001 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54l-1.449 1.31z"/>' +
+		'</svg>';
+
+	function isAnchorVisible(a) {
+		if (!a) {
+			return false;
+		}
+		if (a.closest && a.closest('.hide')) {
+			return false;
+		}
+		return a.offsetParent !== null;
+	}
+
+	function ensureSvgHeartInsideYithContainer(wl) {
+		if (!wl || !wl.querySelectorAll) {
+			return;
+		}
+		var anchors = wl.querySelectorAll('a');
+		for (var i = 0; i < anchors.length; i++) {
+			var a = anchors[i];
+			if (!isAnchorVisible(a)) {
+				continue;
+			}
+			if (a.querySelector('svg.mp-scc-wl-glyph')) {
+				continue;
+			}
+			var tmp = document.createElement('span');
+			tmp.innerHTML = MP_SCC_WL_HEART_SVG;
+			var svg = tmp.firstChild;
+			if (svg) {
+				a.insertBefore(svg, a.firstChild);
+			}
+		}
+	}
+
+	/**
+	 * Watch each catalog card's wishlist container for mutations and rescan its state.
+	 * Fixes the "color did not change immediately after add" race with YITH's DOM updates.
+	 */
+	var __mpSccWishlistObservers = (typeof window.WeakSet === 'function') ? new window.WeakSet() : null;
+	function attachWishlistMutationObserverIfNeeded($card) {
+		if (typeof window.MutationObserver !== 'function' || !__mpSccWishlistObservers) {
+			return;
+		}
+		var card = $card[0];
+		if (!card || __mpSccWishlistObservers.has(card)) {
+			return;
+		}
+		var wl = card.querySelector('.yith-wcwl-add-to-wishlist');
+		if (!wl) {
+			return;
+		}
+		var rerun = function () {
+			syncWishlistStateAttrOnCard($card);
+		};
+		var obs = new window.MutationObserver(function () {
+			window.clearTimeout(card.__mpSccWishlistObsTimer);
+			card.__mpSccWishlistObsTimer = window.setTimeout(rerun, 30);
+		});
+		obs.observe(wl, { attributes: true, attributeFilter: ['class', 'style'], childList: true, subtree: true });
+		__mpSccWishlistObservers.add(card);
+	}
+
+	function scanWishlistStateOnAllCatalogCards() {
+		if (!window.mpScc.flagEnabled('wishlist_icon_integration_enabled')) {
+			return;
+		}
+		var cat = data().catalog || {};
+		$(catalogLoopCardSelector(cat)).each(function () {
+			var $c = $(this);
+			syncWishlistStateAttrOnCard($c);
+			attachWishlistMutationObserverIfNeeded($c);
+		});
+	}
+
+	/**
+	 * Resolve YITH product id across Free/Premium markup variants:
+	 * 1) `data-product-id` on the anchor or the inner `a.add_to_wishlist`;
+	 * 2) `data-product-id` on the `.yith-wcwl-add-to-wishlist` container;
+	 * 3) suffix of `add-to-wishlist-NNNN` class on the container (SSR shape on metaphysica-parfums.com);
+	 * 4) `?add_to_wishlist=NNN` in the anchor href;
+	 * 5) any descendant `[data-product-id]` inside the card.
+	 *
+	 * @param {JQuery} $card
+	 * @param {JQuery} $anchor
+	 * @returns {number}
+	 */
+	function resolveYithWishlistProductId($card, $anchor) {
+		function num(v) {
+			var n = parseInt(v, 10);
+			return !isNaN(n) && n > 0 ? n : 0;
+		}
+		var pid = num($anchor.attr('data-product-id'));
+		if (pid) {
+			return pid;
+		}
+		var $add = $card.find('.yith-wcwl-add-to-wishlist a.add_to_wishlist').first();
+		pid = num($add.attr('data-product-id'));
+		if (pid) {
+			return pid;
+		}
+		var $wl = $card.find('.yith-wcwl-add-to-wishlist').first();
+		pid = num($wl.attr('data-product-id'));
+		if (pid) {
+			return pid;
+		}
+		var cls = ($wl.attr('class') || '') + ' ';
+		var m = cls.match(/\badd-to-wishlist-(\d+)\b/);
+		if (m) {
+			pid = num(m[1]);
+			if (pid) {
+				return pid;
+			}
+		}
+		var href = $anchor.attr('href') || '';
+		m = href.match(/[?&]add_to_wishlist=(\d+)/);
+		if (m) {
+			pid = num(m[1]);
+			if (pid) {
+				return pid;
+			}
+		}
+		var found = 0;
+		$card.find('[data-product-id]').each(function () {
+			var p = num($(this).attr('data-product-id'));
+			if (p) {
+				found = p;
+				return false;
+			}
+		});
+		return found;
+	}
+
+	/**
+	 * YITH WCWL: цвет «в избранном», тосты, второй клик по ссылке на wishlist — удаление без ухода со страницы.
+	 */
+	function initYithWishlistCatalogBehavior() {
+		if (!window.mpScc.flagEnabled('wishlist_icon_integration_enabled')) {
+			return;
+		}
+		if (window.__mpSccYithWishlistCatalogInit) {
+			return;
+		}
+		window.__mpSccYithWishlistCatalogInit = true;
+
+		scanWishlistStateOnAllCatalogCards();
+		// YITH initialises browse/exists state asynchronously; rescan after their init + small delay (Premium).
+		$(document).on('yith_wcwl_init.mpSccWishlist yith-wcwl-init.mpSccWishlist', function () {
+			window.setTimeout(scanWishlistStateOnAllCatalogCards, 0);
+		});
+		window.setTimeout(scanWishlistStateOnAllCatalogCards, 250);
+		window.setTimeout(scanWishlistStateOnAllCatalogCards, 1200);
+
+		function rescanCardLater($card) {
+			[0, 80, 250, 700, 1500].forEach(function (ms) {
+				window.setTimeout(function () {
+					syncWishlistStateAttrOnCard($card);
+					attachWishlistMutationObserverIfNeeded($card);
+				}, ms);
+			});
+		}
+
+		$(document.body).on('added_to_wishlist.mpSccWishlist', function (e, $link, $container) {
+			var $wrap = $container && $container.jquery ? $container : $($container);
+			var $card = $wrap.closest(catalogLoopCardSelector(data().catalog || {}));
+			if (!$card.length) {
+				return;
+			}
+			rescanCardLater($card);
+			var msg =
+				typeof window.mpScc.label === 'function' ? window.mpScc.label('wishlist_toast_added') : '';
+			showCatalogToast($card, msg || 'Добавлено в избранное', {});
+		});
+
+		$(document.body).on('removed_from_wishlist.mpSccWishlist', function (e, $link, $container) {
+			var $wrap = $container && $container.jquery ? $container : $($container);
+			var $card = $wrap.closest(catalogLoopCardSelector(data().catalog || {}));
+			if (!$card.length) {
+				return;
+			}
+			rescanCardLater($card);
+			var msg =
+				typeof window.mpScc.label === 'function' ? window.mpScc.label('wishlist_toast_removed') : '';
+			showCatalogToast($card, msg || 'Удалено из избранного', {});
+		});
+
+		$(document.body).on('yith_wcwl_fragments_replaced.mpSccWishlist', function () {
+			window.setTimeout(scanWishlistStateOnAllCatalogCards, 0);
+		});
+
+		if (!window.__mpSccYithWishlistBrowseCapture) {
+			window.__mpSccYithWishlistBrowseCapture = true;
+			document.addEventListener(
+				'click',
+				function (e) {
+					if (!window.mpScc || !window.mpScc.flagEnabled('wishlist_icon_integration_enabled')) {
+						return;
+					}
+					var t = e.target;
+					if (!t || !t.closest) {
+						return;
+					}
+					var a = t.closest('a');
+					if (!a || !a.getAttribute) {
+						return;
+					}
+					var wl = a.closest('.yith-wcwl-add-to-wishlist');
+					if (!wl) {
+						return;
+					}
+					var card = a.closest(catalogLoopCardSelector(data().catalog || {}));
+					if (!card) {
+						return;
+					}
+					if (a.classList.contains('add_to_wishlist')) {
+						return;
+					}
+					var href = (a.getAttribute('href') || '').toLowerCase();
+					// Don't intercept the bare "add" links (?add_to_wishlist=NNN) — YITH handles those.
+					if (href.indexOf('add_to_wishlist=') !== -1) {
+						return;
+					}
+					// Heuristic: any non-add anchor inside YITH widget that points to a wishlist URL
+					// (catalogues commonly link to "/wishlist/", "/my-wishlist/", "/my-account/my-wishlist/", etc.).
+					if (href.indexOf('wishlist') === -1) {
+						return;
+					}
+					e.preventDefault();
+					e.stopPropagation();
+					if (typeof e.stopImmediatePropagation === 'function') {
+						e.stopImmediatePropagation();
+					}
+					var $card = $(card);
+					var $a = $(a);
+					var pid = resolveYithWishlistProductId($card, $a);
+					if (!pid) {
+						return;
+					}
+					window.mpScc
+						.postAjax('yithRemoveFromWishlist', { product_id: pid })
+						.done(function (resp) {
+							if (!resp || !resp.success || !resp.data) {
+								var bad =
+									typeof window.mpScc.label === 'function'
+										? window.mpScc.label('wishlist_remove_failed')
+										: '';
+								showCatalogToast($card, bad || 'Не удалось убрать из избранного', {
+									variant: 'error',
+									assertive: true
+								});
+								return;
+							}
+							var html = resp.data.fragment_html ? String(resp.data.fragment_html) : '';
+							var $wljq = $card.find('.yith-wcwl-add-to-wishlist').first();
+							if (html && $wljq.length) {
+								var $tmp = $('<div />').html(html);
+								var $rep = $tmp.find('.yith-wcwl-add-to-wishlist').first();
+								if ($rep.length) {
+									$wljq.replaceWith($rep);
+								} else {
+									$wljq.replaceWith(html);
+								}
+							} else if ($wljq.length) {
+								$wljq.removeClass('exists');
+								$wljq
+									.find('.yith-wcwl-wishlistexistsbrowse, .yith-wcwl-wishlistaddedbrowse')
+									.addClass('hide')
+									.css('display', 'none');
+								$wljq.find('.yith-wcwl-add-button').removeClass('hide').css('display', '');
+							}
+							syncWishlistStateAttrOnCard($card);
+							$(document).trigger('yith_wcwl_init');
+							$(document.body).trigger('removed_from_wishlist', [$a, $card.find('.yith-wcwl-add-to-wishlist').first()]);
+							var okMsg =
+								typeof window.mpScc.label === 'function'
+									? window.mpScc.label('wishlist_toast_removed')
+									: '';
+							showCatalogToast($card, okMsg || 'Удалено из избранного', {});
+						})
+						.fail(function () {
+							var bad =
+								typeof window.mpScc.label === 'function'
+									? window.mpScc.label('wishlist_remove_failed')
+									: '';
+							showCatalogToast($card, bad || 'Не удалось убрать из избранного', {
+								variant: 'error',
+								assertive: true
+							});
+						});
+				},
+				true
+			);
+		}
+	}
+
+	/**
 	 * Coarse pointer / narrow viewport — touch UI rules for catalog cart icon.
 	 *
 	 * @returns {boolean}
@@ -3669,6 +4017,7 @@
 		initCatalogCartIconPaintHammer();
 		initClientDiagnostics();
 		initWishlistIntegrationBodyClass();
+		initYithWishlistCatalogBehavior();
 		applyCatalogCartIconMobileModeAttr();
 		initCatalogCartIconTouchReveal();
 		initCatalogCartIconHoverIntent();
@@ -3720,7 +4069,10 @@
 
 		$(document.body).on(
 			'wc_fragments_refreshed updated_wc_div etheme_ajax_loaded post-load',
-			scheduleCatalogChromeLayouts
+			function () {
+				scheduleCatalogChromeLayouts();
+				scanWishlistStateOnAllCatalogCards();
+			}
 		);
 
 		var catalogChromeResizeTimer = null;
@@ -3731,6 +4083,7 @@
 			catalogChromeResizeTimer = window.setTimeout(function () {
 				catalogChromeResizeTimer = null;
 				scheduleCatalogChromeLayouts();
+				scanWishlistStateOnAllCatalogCards();
 			}, 120);
 		});
 

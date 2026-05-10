@@ -1067,6 +1067,7 @@ final class SettingsPage {
 	 */
 	private static function render_wishlist_tab( array $s, $opt ) {
 		$c = isset( $s['wishlist_ui'] ) && is_array( $s['wishlist_ui'] ) ? $s['wishlist_ui'] : array();
+		$l = isset( $s['labels'] ) && is_array( $s['labels'] ) ? $s['labels'] : array();
 		echo '<h2>' . esc_html__( 'Избранное (UI)', 'mp-sticky-custom-cart' ) . '</h2>';
 		echo '<table class="form-table" role="presentation"><tbody>';
 		self::field_number( $opt, 'wishlist_ui', 'heart_reserve_top_px', __( 'Отступ сердечка сверху (px)', 'mp-sticky-custom-cart' ), isset( $c['heart_reserve_top_px'] ) ? (int) $c['heart_reserve_top_px'] : 10 );
@@ -1080,8 +1081,75 @@ final class SettingsPage {
 			isset( $c['heart_icon_z_index'] ) ? (int) $c['heart_icon_z_index'] : 6,
 			__( 'Должен быть выше z-index overlay «Подробнее» на вкладке «Каталог», иначе сердечко уйдёт под слой.', 'mp-sticky-custom-cart' )
 		);
+		echo '<tr><td colspan="2"><p class="description"><strong>' . esc_html__( 'Цвета сердечка в каталоге (YITH)', 'mp-sticky-custom-cart' ) . '</strong> — ';
+		echo esc_html__( 'при включённой интеграции heart-иконки на витрине WooCommerce. «В избранном» — после добавления товара в wishlist.', 'mp-sticky-custom-cart' );
+		echo '</p></td></tr>';
+		self::field_color(
+			$opt,
+			'wishlist_ui',
+			'heart_idle_bg_color',
+			__( 'Фон кнопки (не в избранном)', 'mp-sticky-custom-cart' ),
+			isset( $c['heart_idle_bg_color'] ) ? (string) $c['heart_idle_bg_color'] : '#ffffff',
+			__( 'Круг под иконкой YITH в лупе.', 'mp-sticky-custom-cart' )
+		);
+		self::field_color(
+			$opt,
+			'wishlist_ui',
+			'heart_idle_icon_color',
+			__( 'Цвет значка (не в избранном)', 'mp-sticky-custom-cart' ),
+			isset( $c['heart_idle_icon_color'] ) ? (string) $c['heart_idle_icon_color'] : '#000000',
+			__( 'Сердце / иконка Font Awesome.', 'mp-sticky-custom-cart' )
+		);
+		self::field_color(
+			$opt,
+			'wishlist_ui',
+			'heart_in_wishlist_bg_color',
+			__( 'Фон кнопки (в избранном)', 'mp-sticky-custom-cart' ),
+			isset( $c['heart_in_wishlist_bg_color'] ) ? (string) $c['heart_in_wishlist_bg_color'] : '#111111',
+			__( 'Постоянное состояние после добавления.', 'mp-sticky-custom-cart' )
+		);
+		self::field_color(
+			$opt,
+			'wishlist_ui',
+			'heart_in_wishlist_icon_color',
+			__( 'Цвет значка (в избранном)', 'mp-sticky-custom-cart' ),
+			isset( $c['heart_in_wishlist_icon_color'] ) ? (string) $c['heart_in_wishlist_icon_color'] : '#ffffff',
+			''
+		);
 		echo '</tbody></table>';
 		echo '<p class="description">' . esc_html__( 'Рекомендуется: z-index избранного больше, чем у overlay «Подробнее». Подробности — docs/wishlist-integration.md в каталоге плагина.', 'mp-sticky-custom-cart' ) . '</p>';
+
+		echo '<h3>' . esc_html__( 'Тосты избранного в каталоге', 'mp-sticky-custom-cart' ) . '</h3>';
+		echo '<p class="description">' . esc_html__( 'Короткие подсказки на карточке при добавлении и удалении из wishlist (YITH). Пустое поле — стандартная фраза плагина.', 'mp-sticky-custom-cart' ) . '</p>';
+		echo '<table class="form-table" role="presentation"><tbody>';
+		self::field_text(
+			$opt,
+			'labels',
+			'wishlist_toast_added',
+			__( 'Сообщение: добавлено в избранное', 'mp-sticky-custom-cart' ),
+			isset( $l['wishlist_toast_added'] ) ? (string) $l['wishlist_toast_added'] : '',
+			'',
+			array( 'maxlength' => 500 )
+		);
+		self::field_text(
+			$opt,
+			'labels',
+			'wishlist_toast_removed',
+			__( 'Сообщение: удалено из избранного', 'mp-sticky-custom-cart' ),
+			isset( $l['wishlist_toast_removed'] ) ? (string) $l['wishlist_toast_removed'] : '',
+			'',
+			array( 'maxlength' => 500 )
+		);
+		self::field_text(
+			$opt,
+			'labels',
+			'wishlist_remove_failed',
+			__( 'Сообщение: ошибка удаления', 'mp-sticky-custom-cart' ),
+			isset( $l['wishlist_remove_failed'] ) ? (string) $l['wishlist_remove_failed'] : '',
+			'',
+			array( 'maxlength' => 500 )
+		);
+		echo '</tbody></table>';
 	}
 
 	/**

@@ -409,6 +409,12 @@ final class UiSettingsDefaults {
 				'overlay_clearance_heart_px' => 8,
 				/** Stacking: wishlist control above catalog overlay. */
 				'heart_icon_z_index'         => 6,
+				/** YITH heart circle on catalog: idle (not in wishlist). */
+				'heart_idle_bg_color'        => '#ffffff',
+				'heart_idle_icon_color'      => '#000000',
+				/** After product is in wishlist (matches typical filled look). */
+				'heart_in_wishlist_bg_color'   => '#111111',
+				'heart_in_wishlist_icon_color' => '#ffffff',
 			),
 			'styles'      => array(
 				'color_text_primary'        => '#1a1a1a',
